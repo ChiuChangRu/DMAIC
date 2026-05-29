@@ -112,6 +112,69 @@ tr:hover td{background:#F9FAFB}
 .tab-c{display:none}.tab-c.show{display:block}
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.dmaic-flow{flex-direction:column}.phase-arrow{display:none}}
 </style>
+
+<style id="edu-styles">
+.edu-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 16px;background:#F9FAFB;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;cursor:pointer;color:#374151;font-family:inherit;transition:background .15s;margin-bottom:.5rem}
+.edu-btn:hover{background:#F3F4F6}
+.edu-panel{display:none;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.edu-panel.open{display:block}
+.edu-hdr{background:#1D3B8A;color:#fff;padding:12px 18px;display:flex;align-items:center;gap:10px}
+.edu-hdr h3{font-size:14px;font-weight:500;margin:0}
+.edu-hdr p{font-size:11px;opacity:.75;margin:2px 0 0}
+.edu-body{padding:1rem 1.25rem;background:#fff}
+.edu-sec{margin-bottom:1rem}
+.edu-sec:last-child{margin-bottom:0}
+.edu-stitle{font-size:11px;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem;display:flex;align-items:center;gap:6px}
+.edu-stitle::before{content:'';display:inline-block;width:3px;height:12px;border-radius:2px;background:#6B7280}
+.edu-stitle.when::before{background:#0891B2}
+.edu-stitle.step::before{background:#059669}
+.edu-stitle.form::before{background:#7C3AED}
+.edu-stitle.tip::before{background:#D97706}
+.edu-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.5rem}
+.edu-chip{font-size:12px;padding:3px 10px;border-radius:20px;background:#F3F4F6;border:0.5px solid #E5E7EB;color:#374151}
+.edu-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
+.edu-steps li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#374151;line-height:1.5}
+.edu-snum{background:#1D3B8A;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px}
+.edu-fbox{background:#F5F3FF;border-radius:8px;padding:.8rem 1rem;margin-bottom:.65rem;border-left:3px solid #7C3AED}
+.edu-fname{font-size:12px;font-weight:600;color:#7C3AED;margin-bottom:.3rem}
+.edu-feq{font-size:13px;font-family:'Courier New',monospace;color:#1a1a2e;margin-bottom:.3rem;letter-spacing:.02em}
+.edu-fexp{font-size:12px;color:#4B5563;line-height:1.65}
+.edu-fexp strong{color:#1a1a2e;font-weight:500}
+.edu-tip{background:#FFFBEB;border:0.5px solid #FDE68A;border-radius:8px;padding:.7rem 1rem;font-size:12px;color:#92400E;line-height:1.7}
+.edu-plain{font-size:13px;color:#4B5563;line-height:1.65;margin-top:.4rem}
+</style>
+
+<style id="record-print-styles">
+/* === GPT enhancement: records, storage, print/PDF === */
+.topbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.tb-btn{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.tb-btn:hover{background:rgba(255,255,255,.16)}
+.tb-status{font-size:11px;color:rgba(255,255,255,.42);white-space:nowrap}
+.record-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
+.record-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.record-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.record-note{font-family:'Microsoft JhengHei',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;min-height:72px}
+.workflow-box{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.15rem 1.4rem;margin:1.2rem 0 2rem;box-shadow:0 2px 12px rgba(15,32,68,.05)}
+.workflow-title{font-size:17px;font-weight:700;color:#1B3A5C;margin-bottom:.6rem}
+.workflow-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-top:.8rem}
+.workflow-step{background:#F8FAFC;border:1px solid #E5E7EB;border-radius:9px;padding:.75rem;font-size:12px;line-height:1.55;color:#374151}
+.workflow-step strong{display:block;color:#1D3B8A;font-size:13px;margin-bottom:2px}
+.print-only{display:none}
+@media(max-width:720px){.record-grid,.record-grid-2{grid-template-columns:1fr}.topbar{height:auto;min-height:56px;padding:.6rem 1rem}.topbar-actions{width:100%;justify-content:flex-start}}
+@media print{
+  @page{size:A4;margin:12mm}
+  body{background:#fff!important;color:#111!important;font-size:11pt}
+  .topbar,.home-hero,.dmaic-flow,.tools-grid,.btn-row,.tab-bar,.edu-btn,.edu-panel,.workflow-box button,.tb-btn{display:none!important}
+  .page{display:none!important}.page.active{display:block!important}
+  .tool-page,.home-main{max-width:none!important;margin:0!important;padding:0!important}
+  .card,.tp-header,.workflow-box{box-shadow:none!important;border:1px solid #999!important;break-inside:avoid;background:#fff!important}
+  .print-only{display:block!important;margin-bottom:8px;font-size:10pt;color:#333}
+  canvas{max-width:100%!important;height:auto!important}
+  textarea,input,select{border:1px solid #bbb!important;background:#fff!important;color:#111!important}
+  .alert{border:1px solid #999!important;color:#111!important;background:#fff!important}
+}
+</style>
+
 </head>
 <body>
 
@@ -124,203 +187,317 @@ tr:hover td{background:#F9FAFB}
     </div>
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
-  <div class="topbar-right">Offline · Free · Pure JS</div>
+  <div class="topbar-right topbar-actions">
+    <button class="tb-btn" onclick="dmaicSaveCurrent()">💾 儲存</button>
+    <button class="tb-btn" onclick="dmaicExportJSON()">⬇ JSON</button>
+    <button class="tb-btn" onclick="dmaicPrintPDF()">🖨 匯出 PDF</button>
+    <button class="tb-btn" onclick="dmaicClearCurrent()">清除本頁</button>
+    <span class="tb-status" id="dmaic-save-status">Offline · Free · Pure JS</span>
+  </div>
 </div>
 
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
 <div id="page-home" class="page active">
 
-  <div class="home-hero">
-    <h2>Six Sigma DMAIC 工具平台</h2>
-    <p>完全離線運行・純 JavaScript 計算・無需帳號・點選工具直接使用</p>
+<!-- ══ 封面導覽列 ══ -->
+<div style="background:#1B3A5C;padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+  <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.02em">
+    醫療器材品質管理工具
+    <span style="color:#7EC8E3;margin-left:8px;font-weight:400;font-size:13px">Medical Device Quality</span>
   </div>
+  <div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase">DMAIC Platform</div>
+</div>
 
-  <div class="home-main">
-
-    <!-- DMAIC 流程軸 -->
-    <div class="dmaic-flow">
-      <div class="phase-header" style="background:linear-gradient(135deg,#1D4ED8,#2563EB)" onclick="scrollToPhase('D')">
-        <div class="ph-inner">
-          <div class="ph-letter" style="color:#fff">D</div>
-          <div class="ph-word" style="color:rgba(255,255,255,.9)">DEFINE</div>
-          <div class="ph-zh" style="color:rgba(255,255,255,.7)">定義</div>
-        </div>
-        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #2563EB"></div>
-      </div>
-      <div class="phase-header" style="background:linear-gradient(135deg,#0E7490,#0891B2)" onclick="scrollToPhase('M')">
-        <div class="ph-inner">
-          <div class="ph-letter" style="color:#fff">M</div>
-          <div class="ph-word" style="color:rgba(255,255,255,.9)">MEASURE</div>
-          <div class="ph-zh" style="color:rgba(255,255,255,.7)">量測</div>
-        </div>
-        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #0891B2"></div>
-      </div>
-      <div class="phase-header" style="background:linear-gradient(135deg,#047857,#059669)" onclick="scrollToPhase('A')">
-        <div class="ph-inner">
-          <div class="ph-letter" style="color:#fff">A</div>
-          <div class="ph-word" style="color:rgba(255,255,255,.9)">ANALYZE</div>
-          <div class="ph-zh" style="color:rgba(255,255,255,.7)">分析</div>
-        </div>
-        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #059669"></div>
-      </div>
-      <div class="phase-header" style="background:linear-gradient(135deg,#B45309,#D97706)" onclick="scrollToPhase('I')">
-        <div class="ph-inner">
-          <div class="ph-letter" style="color:#fff">I</div>
-          <div class="ph-word" style="color:rgba(255,255,255,.9)">IMPROVE</div>
-          <div class="ph-zh" style="color:rgba(255,255,255,.7)">改善</div>
-        </div>
-        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #D97706"></div>
-      </div>
-      <div class="phase-header" style="background:linear-gradient(135deg,#5B21B6,#7C3AED)" onclick="scrollToPhase('C')">
-        <div class="ph-inner">
-          <div class="ph-letter" style="color:#fff">C</div>
-          <div class="ph-word" style="color:rgba(255,255,255,.9)">CONTROL</div>
-          <div class="ph-zh" style="color:rgba(255,255,255,.7)">管制</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- D 工具 -->
-    <div id="phase-D" class="tools-section">
-      <div class="tools-section-title" style="color:var(--D)">D — Define 定義階段</div>
-      <div class="tools-grid">
-        <div class="tool-card" style="--tc:var(--D)" data-goto="pareto" onclick="goTool('pareto')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--D);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--D)">DEFINE</div>
-          <div class="tc-name">柏拉圖 Pareto</div>
-          <div class="tc-desc">80/20 法則・找出關鍵少數問題</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-        <div class="tool-card" data-goto="fishbone" onclick="goTool('fishbone')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--D);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--D)">DEFINE</div>
-          <div class="tc-name">魚骨圖（石川圖）</div>
-          <div class="tc-desc">系統化找出根本原因 6M</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-        <div class="tool-card" data-goto="sipoc" onclick="goTool('sipoc')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--D);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--D)">DEFINE</div>
-          <div class="tc-name">SIPOC 圖</div>
-          <div class="tc-desc">定義製程範疇・供需關係</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- M 工具 -->
-    <div id="phase-M" class="tools-section">
-      <div class="tools-section-title" style="color:var(--M)">M — Measure 量測階段</div>
-      <div class="tools-grid">
-        <div class="tool-card" data-goto="spc" onclick="goTool('spc')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--M);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--M)">MEASURE</div>
-          <div class="tc-name">SPC 管制圖</div>
-          <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
-          <span class="tc-tag tag-done">完成</span>
-        </div>
-        <div class="tool-card" data-goto="histogram" onclick="goTool('histogram')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--M);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--M)">MEASURE</div>
-          <div class="tc-name">直方圖 + 常態檢定</div>
-          <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-        <div class="tool-card" data-goto="boxplot" onclick="goTool('boxplot')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--M);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--M)">MEASURE</div>
-          <div class="tc-name">箱型圖 Box Plot</div>
-          <div class="tc-desc">分組比較・離群值偵測</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- A 工具 -->
-    <div id="phase-A" class="tools-section">
-      <div class="tools-section-title" style="color:var(--A)">A — Analyze 分析階段</div>
-      <div class="tools-grid">
-        <div class="tool-card" data-goto="scatter" onclick="goTool('scatter')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--A);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--A)">ANALYZE</div>
-          <div class="tc-name">相關性 + 散佈圖</div>
-          <div class="tc-desc">Pearson r・線性迴歸・R²</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-        <div class="tool-card" data-goto="hypothesis" onclick="goTool('hypothesis')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--A);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--A)">ANALYZE</div>
-          <div class="tc-name">假設檢定</div>
-          <div class="tc-desc">t-test・F-test・卡方檢定</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-        <div class="tool-card" data-goto="fishbone" onclick="goTool('fishbone')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--A);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--A)">ANALYZE</div>
-          <div class="tc-name">魚骨圖 / 5 Why</div>
-          <div class="tc-desc">根本原因分析・多層追溯</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- I 工具 -->
-    <div id="phase-I" class="tools-section">
-      <div class="tools-section-title" style="color:var(--I)">I — Improve 改善階段</div>
-      <div class="tools-grid">
-        <div class="tool-card" data-goto="doe" onclick="goTool('doe')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--I);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--I)">IMPROVE</div>
-          <div class="tc-name">DOE 實驗設計</div>
-          <div class="tc-desc">全因子・部分因子・Yates 分析</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-        <div class="tool-card" style="opacity:.6;cursor:not-allowed">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--I);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--I)">IMPROVE</div>
-          <div class="tc-name">田口方法 Taguchi</div>
-          <div class="tc-desc">L9・L18 直交表・S/N 比</div>
-          <span class="tc-tag tag-soon">開發中</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- C 工具 -->
-    <div id="phase-C" class="tools-section">
-      <div class="tools-section-title" style="color:var(--C)">C — Control 管制階段</div>
-      <div class="tools-grid">
-        <div class="tool-card" data-goto="spc" onclick="goTool('spc')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--C);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--C)">CONTROL</div>
-          <div class="tc-name">SPC 管制圖</div>
-          <div class="tc-desc">持續監控・Nelson 8 條規則</div>
-          <span class="tc-tag tag-done">完成</span>
-        </div>
-        <div class="tool-card" data-goto="cusum" onclick="goTool('cusum')">
-          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--C);border-radius:3px 0 0 3px"></div>
-          <div class="tc-phase" style="color:var(--C)">CONTROL</div>
-          <div class="tc-name">CUSUM / EWMA</div>
-          <div class="tc-desc">小偏移敏感偵測・累積和圖</div>
-          <span class="tc-tag tag-new">可用</span>
-        </div>
-      </div>
-    </div>
-
+<!-- ══ Hero ══ -->
+<div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
+  <div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;font-size:11px;padding:4px 16px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:1.25rem">Six Sigma · DMAIC · 品質工程</div>
+  <h2 style="font-size:28px;font-weight:600;line-height:1.4;margin-bottom:.5rem;letter-spacing:-.01em;color:#fff">
+    六標準差 <span style="color:#A8D8EA">DMAIC</span><br>分析工具平台
+  </h2>
+  <div style="font-size:12px;color:rgba(255,255,255,.38);margin-bottom:1.5rem;letter-spacing:.04em">Edit by Chiu Chang Ru &nbsp;/&nbsp; Claude</div>
+  <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">完整 DMAIC 五階段工具・純離線運行・無需帳號<br>從定義問題到持續管制，協助製程持續改善</p>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+    <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
+    <button onclick="scrollToPhase('M')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📋 工具總覽</button>
   </div>
 </div>
 
-<!-- ══════════════ 子頁面：SPC ══════════════ -->
+<!-- ══ 統計列 ══ -->
+<div style="background:#1B3A5C;padding:1rem 2rem;display:flex;justify-content:center;flex-wrap:wrap">
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">10</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">分析工具</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">5</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">DMAIC 階段</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">8</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">Nelson 規則</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center"><div style="font-size:22px;font-weight:600;color:#7EC8E3">100%</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">離線運行</div></div>
+</div>
+
+<!-- ══ 主內容 ══ -->
+<div class="home-main">
+
+  <!-- DMAIC 流程軸 -->
+  <div id="phase-D" style="margin-bottom:.75rem">
+    <div style="font-size:11px;font-weight:600;color:#2A5278;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:.4rem">工具架構</div>
+    <div style="font-size:18px;font-weight:600;color:#1B3A5C;text-align:center;margin-bottom:.3rem">DMAIC 五階段流程</div>
+    <div style="font-size:13px;color:#9CA3AF;text-align:center;margin-bottom:1.25rem">點選工具卡片直接進入</div>
+  </div>
+
+  <div class="dmaic-flow">
+    <div class="phase-header" style="background:linear-gradient(135deg,#2563EB,#3B82F6)" onclick="scrollToPhase('D')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">D</div><div class="ph-word" style="color:rgba(255,255,255,.9)">DEFINE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">定義</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #3B82F6"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#0E7490,#1A9CB0)" onclick="scrollToPhase('M')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">M</div><div class="ph-word" style="color:rgba(255,255,255,.9)">MEASURE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">量測</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #1A9CB0"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#047857,#1A9E75)" onclick="scrollToPhase('A')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">A</div><div class="ph-word" style="color:rgba(255,255,255,.9)">ANALYZE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">分析</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #1A9E75"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#B45309,#D4850A)" onclick="scrollToPhase('I')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">I</div><div class="ph-word" style="color:rgba(255,255,255,.9)">IMPROVE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">改善</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #D4850A"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#5B21B6,#7252C8)" onclick="scrollToPhase('C')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">C</div><div class="ph-word" style="color:rgba(255,255,255,.9)">CONTROL</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">管制</div></div>
+    </div>
+  </div>
+
+  <!-- D 工具 -->
+  <div id="phase-D" class="tools-section">
+    <div class="tools-section-title" style="color:#3B7DD8">D — Define 定義階段</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="goTool('pareto')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📊</div><div class="tc-name">柏拉圖 Pareto</div>
+        <div class="tc-desc">80/20 法則・找出關鍵少數問題</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('fishbone')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🐟</div><div class="tc-name">魚骨圖（石川圖）</div>
+        <div class="tc-desc">系統化找出根本原因 6M</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('sipoc')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🗺️</div><div class="tc-name">SIPOC 圖</div>
+        <div class="tc-desc">定義製程範疇・供需關係</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- M 工具 -->
+  <div id="phase-M" class="tools-section">
+    <div class="tools-section-title" style="color:#1A9CB0">M — Measure 量測階段</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="goTool('spc')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
+        <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
+        <span class="tc-tag tag-done">完成</span>
+      </div>
+      <div class="tool-card" onclick="goTool('histogram')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📉</div><div class="tc-name">直方圖 + 常態檢定</div>
+        <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('boxplot')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📦</div><div class="tc-name">箱型圖 Box Plot</div>
+        <div class="tc-desc">分組比較・離群值偵測</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- A 工具 -->
+  <div id="phase-A" class="tools-section">
+    <div class="tools-section-title" style="color:#1A9E75">A — Analyze 分析階段</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="goTool('scatter')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🔗</div><div class="tc-name">相關性 + 散佈圖</div>
+        <div class="tc-desc">Pearson r・線性迴歸・R²</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('hypothesis')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🔬</div><div class="tc-name">假設檢定</div>
+        <div class="tc-desc">t-test・F-test・卡方檢定</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('fishbone')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
+        <div class="tc-name">魚骨圖 / 5 Why</div>
+        <div class="tc-desc">根本原因分析・多層追溯</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('msa')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
+        <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- I 工具 -->
+  <div id="phase-I" class="tools-section">
+    <div class="tools-section-title" style="color:#D4850A">I — Improve 改善階段</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="goTool('doe')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#D4850A">IMPROVE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🧪</div><div class="tc-name">DOE 實驗設計</div>
+        <div class="tc-desc">全因子・部分因子・Yates 分析</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#D4850A">IMPROVE</div>
+        <div class="tc-name">田口方法 Taguchi</div>
+        <div class="tc-desc">L9・L18 直交表・S/N 比</div>
+        <span class="tc-tag tag-soon">開發中</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- C 工具 -->
+  <div id="phase-C" class="tools-section">
+    <div class="tools-section-title" style="color:#7252C8">C — Control 管制階段</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="goTool('spc')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#7252C8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#7252C8">CONTROL</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
+        <div class="tc-desc">持續監控・Nelson 8 條規則</div>
+        <span class="tc-tag tag-done">完成</span>
+      </div>
+      <div class="tool-card" onclick="goTool('cusum')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#7252C8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#7252C8">CONTROL</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🎯</div><div class="tc-name">CUSUM / EWMA</div>
+        <div class="tc-desc">小偏移敏感偵測・累積和圖</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+              <div class="tc-phase" style="color:#7252C8">CONTROL</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
+        <div class="tc-desc">量具穩定性監控・Stability Chart</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="workflow-box">
+    <div class="workflow-title">建議使用流程：從統計分析到品質紀錄</div>
+    <div style="font-size:13px;color:#6B7280;line-height:1.8">此平台建議作為醫療器材製程分析、設計驗證、異常調查與改善追蹤的前端工具。分析完成後，請填寫紀錄欄位並匯出 PDF / JSON，保留於專案資料夾、PLM 或品質紀錄系統。</div>
+    <div class="workflow-steps">
+      <div class="workflow-step"><strong>1. 選工具</strong>依 DMAIC 階段選擇 SPC、MSA、DOE、Pareto 等工具。</div>
+      <div class="workflow-step"><strong>2. 輸入資料</strong>貼上原始數據，確認單位、批號與規格上下限。</div>
+      <div class="workflow-step"><strong>3. 執行分析</strong>產生圖表、統計摘要、異常點與製程能力結果。</div>
+      <div class="workflow-step"><strong>4. 填寫結論</strong>補上 PASS/FAIL、異常原因、處置與備註。</div>
+      <div class="workflow-step"><strong>5. 匯出保存</strong>列印成 PDF，或匯出 JSON 作為可再編輯紀錄。</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Footer -->
+<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
+  <div>醫療器材品質管理工具・Six Sigma DMAIC 平台</div>
+  <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(126,200,227,.12);border:1px solid rgba(126,200,227,.3);border-radius:20px;padding:3px 12px;font-size:11px;color:#7EC8E3">
+    <div style="width:6px;height:6px;border-radius:50%;background:#4ADE80;flex-shrink:0"></div>完全離線・免費使用
+  </div>
+  <div>Edit by Chiu Chang Ru / Claude</div>
+</div>
+
+</div>
+
 <div id="page-spc" class="page">
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--M)"></div>
     <div>
-      <div class="tp-title">SPC 統計製程管制</div>
+      <div class="tp-title">📈 SPC 統計製程管制</div>
       <div class="tp-subtitle">Statistical Process Control — 自動判斷圖型・Nelson 8 條規則・製程能力</div>
     </div>
   </div>
-  <div class="card">
+  
+<div style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:12px;padding:.85rem 1.25rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:14px">
+  <div style="flex-shrink:0;width:54px;height:54px;border-radius:50%;border:3px solid #16A34A;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#fff">
+    <div style="font-size:10px;font-weight:700;color:#16A34A;letter-spacing:.05em">PASS</div>
+    <div style="font-size:16px;line-height:1">✅</div>
+  </div>
+  <div>
+    <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:.25rem">SPC 統計製程管制 — 驗效通過</div>
+    <div style="font-size:12px;color:#166534;line-height:1.7">
+      所有統計公式已依據 <strong>Montgomery《Introduction to Statistical Quality Control》8th Ed.</strong> 驗效通過。<br>
+      涵蓋：Xbar-R UCL/LCL・R Chart・σ̂（R̄/d₂）・Cp・Cpk・np Chart・I-MR Chart
+    </div>
+    <div style="font-size:11px;color:#4ADE80;margin-top:.3rem;font-style:italic">驗效日期：2026-05-29　驗效人員：Chiu Chang Ru / Claude　依據：Montgomery 8th Ed.</div>
+  </div>
+</div>
+<div class="card">
     <div class="card-title" style="--cc:var(--M)"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+
+
+<button class="edu-btn" onclick="toggleEdu('spc')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-spc">
+  <div class="edu-hdr">
+    <span style="font-size:22px">📊</span>
+    <div><h3>SPC 統計製程管制</h3><p>Statistical Process Control｜Measure & Control 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">📦 生產過程持續監控</span><span class="edu-chip">⚠️ 早期發現製程異常</span><span class="edu-chip">📉 製程是否穩定</span><span class="edu-chip">🔧 改善前後比較</span></div>
+      <div class="edu-plain">就像每天量血壓記錄趨勢，SPC 幫製程「量血壓」，超出正常範圍就發出警告。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>每列一筆觀測，同列多值 = 子組</li><li><span class="edu-snum">2</span>系統依資料型態自動選出最適合的管制圖</li><li><span class="edu-snum">3</span>計算中心線 CL、上界限 UCL、下界限 LCL</li><li><span class="edu-snum">4</span>紅點 = 超出界限的異常點，需立即調查</li><li><span class="edu-snum">5</span>輸入 LSL/USL 後自動計算 Cp、Cpk</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">① 組平均值 X̄</div>
+          <div class="edu-feq">X̄ = (X₁ + X₂ + … + Xₙ) ÷ n</div>
+          <div class="edu-fexp">例：(25.1+25.3)÷2 = <strong>25.2</strong></div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">② 全距 R</div>
+          <div class="edu-feq">R = 最大值 − 最小值</div>
+          <div class="edu-fexp">例：25.3−25.1 = <strong>0.2</strong></div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">③ 管制界限</div>
+          <div class="edu-feq">UCL = X̄̄ + A₂×R̄　　LCL = X̄̄ − A₂×R̄</div>
+          <div class="edu-fexp"><strong>A₂</strong>：查表常數（n=2→1.880，n=5→0.577）。白話：中心 ± 3個標準差，超出就是異常。</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">④ 製程能力 Cpk</div>
+          <div class="edu-feq">Cpk = min[ (USL−X̄̄)÷(3σ),  (X̄̄−LSL)÷(3σ) ]</div>
+          <div class="edu-fexp"><strong>≥1.67</strong> 優秀　<strong>≥1.33</strong> 良好　<strong>&lt;1.00</strong> 需改善</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 Nelson 8 條規則：連續 9 點在中心線同側，雖未超出界限也代表製程可能漂移，需注意！</div>
+    </div>
+  </div>
+</div>
+
     <div class="g2">
       <div class="field"><label>檢驗項目</label><input type="text" id="spc-item" value="內徑"></div>
       <div class="field"><label>管制圖選擇</label>
@@ -403,10 +580,43 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">柏拉圖 Pareto Chart</div><div class="tp-subtitle">80/20 法則・找出關鍵少數・累積百分比曲線</div></div>
+    <div><div class="tp-title">📊 柏拉圖 Pareto Chart</div><div class="tp-subtitle">80/20 法則・找出關鍵少數・累積百分比曲線</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+
+<button class="edu-btn" onclick="toggleEdu('pareto')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-pareto">
+  <div class="edu-hdr">
+    <span style="font-size:22px">📊</span>
+    <div><h3>柏拉圖 Pareto Chart</h3><p>80/20 法則・找出關鍵少數｜Define 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">🎯 找出最重要的問題</span><span class="edu-chip">📋 資源有限時決定優先順序</span><span class="edu-chip">📈 改善前後比較</span></div>
+      <div class="edu-plain">80% 的問題來自 20% 的原因。柏拉圖幫你找出那 20%，集中火力解決最重要的問題。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>列出所有問題類別與發生次數</li><li><span class="edu-snum">2</span>系統自動由大到小排序</li><li><span class="edu-snum">3</span>找到累積百分比達 80% 的切點</li><li><span class="edu-snum">4</span>80% 切點以左 = 關鍵少數，優先解決</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">柏拉圖原則</div>
+          <div class="edu-feq">累積比例 = 前N項總和 ÷ 全部總和 × 100%</div>
+          <div class="edu-fexp">將問題由大到小排列，累積到 80% 的項目就是「關鍵少數」，通常只佔所有類別的 20%。</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 柏拉圖改善後要再畫一次！確認關鍵項目下降，以及是否有新問題浮現。</div>
+    </div>
+  </div>
+</div>
+
     <div class="g2">
       <div class="field"><label>圖表標題</label><input type="text" id="pa-title" value="不良原因分析"></div>
       <div class="field"><label>Y 軸單位</label><input type="text" id="pa-unit" value="件數"></div>
@@ -440,31 +650,63 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・Man・Machine・Material・Method・Measurement・Mother Nature</div></div>
+    <div><div class="tp-title">🐟 魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
   </div>
   <div class="card">
-    <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>輸入設定</div>
-    <div class="g2">
-      <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" value="產品不良率偏高"></div>
+    <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>輸入格式說明</div>
+
+<button class="edu-btn" onclick="toggleEdu('fishbone')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-fishbone">
+  <div class="edu-hdr">
+    <span style="font-size:22px">🐟</span>
+    <div><h3>魚骨圖（石川圖）</h3><p>6M 根本原因分析｜Define & Analyze 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">🔍 找出問題的根本原因</span><span class="edu-chip">👥 團隊腦力激盪</span><span class="edu-chip">📋 整理複雜的因果關係</span></div>
+      <div class="edu-plain">魚骨圖像一條魚，魚頭是問題，魚骨是各類原因。透過 6M 分類，系統化找出所有可能的根因。</div>
     </div>
-    <div id="fb-causes-wrap">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="field"><label style="color:#1D4ED8">人員 (Man)</label><textarea id="fb-man" rows="3" placeholder="每行一個原因">操作技能不足&#10;疲勞作業&#10;SOP 未遵循</textarea></div>
-        <div class="field"><label style="color:#0891B2">機器 (Machine)</label><textarea id="fb-machine" rows="3" placeholder="每行一個原因">設備老化&#10;精度不足&#10;未定期保養</textarea></div>
-        <div class="field"><label style="color:#059669">材料 (Material)</label><textarea id="fb-material" rows="3" placeholder="每行一個原因">原料品質不穩&#10;供應商變更&#10;儲存不當</textarea></div>
-        <div class="field"><label style="color:#D97706">方法 (Method)</label><textarea id="fb-method" rows="3" placeholder="每行一個原因">製程參數偏移&#10;作業標準不明&#10;換線程序不當</textarea></div>
-        <div class="field"><label style="color:#7C3AED">量測 (Measurement)</label><textarea id="fb-measure" rows="3" placeholder="每行一個原因">量具精度不夠&#10;校正頻率不足&#10;量測方法不一</textarea></div>
-        <div class="field"><label style="color:#BE185D">環境 (Mother Nature)</label><textarea id="fb-env" rows="3" placeholder="每行一個原因">溫濕度變化&#10;粉塵污染&#10;振動干擾</textarea></div>
-      </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>清楚定義要分析的問題（魚頭）</li><li><span class="edu-snum">2</span>6M 分類填入原因：人員/機器/材料/方法/量測/環境</li><li><span class="edu-snum">3</span>效應強度 1～5（5=影響最大，靠近魚頭）</li><li><span class="edu-snum">4</span>視覺化後聚焦強度高的關鍵原因</li></ul>
     </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">6M 分類</div>
+          <div class="edu-feq">Man / Machine / Material / Method / Measurement / Mother Nature</div>
+          <div class="edu-fexp">每個 M 代表一個可能造成問題的大類。<strong>中骨越靠近魚頭，代表效應強度越大。</strong></div>
+        </div>
     </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 建議跨部門一起討論，每個人從自己的角度填入原因，找出的根因會更完整！</div>
+    </div>
+  </div>
+</div>
+
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.85rem 1rem;font-size:13px;margin-bottom:1rem;line-height:2;color:#1E40AF">
+      <strong>每行格式：</strong><code style="background:#DBEAFE;padding:1px 6px;border-radius:4px;font-size:12px">原因名稱, 效應強度</code>　　<strong>效應強度：</strong>1～5（越大越靠近魚頭）<br>
+      <strong>範例：</strong><code style="background:#DBEAFE;padding:1px 6px;border-radius:4px;font-size:12px">操作技能不足, 4</code>　<span style="color:#6B7280;font-size:12px">（省略強度預設 3）</span>
+    </div>
+    <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" value="產品不良率偏高"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+      <div class="field"><label style="color:#1D4ED8">人員 (Man)</label><textarea id="fb-man" rows="4" placeholder="原因, 強度(1-5)">操作技能不足, 4&#10;疲勞作業, 2&#10;SOP 未遵循, 5</textarea></div>
+      <div class="field"><label style="color:#0891B2">機器 (Machine)</label><textarea id="fb-machine" rows="4" placeholder="原因, 強度(1-5)">設備老化, 5&#10;精度不足, 4&#10;未定期保養, 3</textarea></div>
+      <div class="field"><label style="color:#059669">材料 (Material)</label><textarea id="fb-material" rows="4" placeholder="原因, 強度(1-5)">原料品質不穩, 5&#10;供應商變更, 3&#10;儲存不當, 2</textarea></div>
+      <div class="field"><label style="color:#D97706">方法 (Method)</label><textarea id="fb-method" rows="4" placeholder="原因, 強度(1-5)">製程參數偏移, 5&#10;作業標準不明, 3&#10;換線程序不當, 2</textarea></div>
+      <div class="field"><label style="color:#7C3AED">量測 (Measurement)</label><textarea id="fb-measure" rows="4" placeholder="原因, 強度(1-5)">量具精度不夠, 4&#10;校正頻率不足, 3&#10;量測方法不一, 2</textarea></div>
+      <div class="field"><label style="color:#BE185D">環境 (Mother Nature)</label><textarea id="fb-env" rows="4" placeholder="原因, 強度(1-5)">溫濕度變化, 3&#10;粉塵污染, 4&#10;振動干擾, 2</textarea></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button></div>
   </div>
   <div id="fb-out" style="display:none">
     <div class="card">
-      <div style="background:#FAFAFA;border-radius:8px;padding:.5rem;overflow-x:auto">
-        <canvas id="fb-canvas" height="420"></canvas>
+      <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
+      <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
+        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（1～5）
       </div>
     </div>
   </div>
@@ -476,10 +718,51 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--M)"></div>
-    <div><div class="tp-title">直方圖 + 常態檢定</div><div class="tp-subtitle">分佈形態分析・Shapiro-Wilk 常態性檢定・偏態/峰態</div></div>
+    <div><div class="tp-title">📉 直方圖 + 常態檢定</div><div class="tp-subtitle">分佈形態分析・Shapiro-Wilk 常態性檢定・偏態/峰態</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+
+<button class="edu-btn" onclick="toggleEdu('histogram')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-histogram">
+  <div class="edu-hdr">
+    <span style="font-size:22px">📊</span>
+    <div><h3>直方圖 + 常態檢定</h3><p>分佈形態分析・Shapiro-Wilk｜Measure 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">📏 了解數據的分佈形狀</span><span class="edu-chip">🔔 確認是否符合常態分佈</span><span class="edu-chip">📐 偏態與峰態分析</span></div>
+      <div class="edu-plain">直方圖把數據分成區間，顯示每個區間有多少資料，讓你一眼看出數據的「長相」。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>輸入數據（空格或逗號分隔）</li><li><span class="edu-snum">2</span>設定組距數（建議 8～15 組）</li><li><span class="edu-snum">3</span>看直方圖形狀：鐘形=常態，偏斜=不對稱，雙峰=可能混合兩群</li><li><span class="edu-snum">4</span>看常態檢定：p > α = 符合常態，p ≤ α = 不符合常態</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">① 偏態係數</div>
+          <div class="edu-feq">Sk = Σ[(Xᵢ−X̄)³] ÷ (n × σ³)</div>
+          <div class="edu-fexp"><strong>Sk≈0</strong> 對稱　<strong>Sk>0</strong> 右偏（長尾在右）　<strong>Sk&lt;0</strong> 左偏（長尾在左）</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">② 峰態係數</div>
+          <div class="edu-feq">Ku = Σ[(Xᵢ−X̄)⁴] ÷ (n × σ⁴) − 3</div>
+          <div class="edu-fexp"><strong>Ku≈0</strong> 常態峰　<strong>Ku>0</strong> 尖峰（數據集中）　<strong>Ku&lt;0</strong> 平峰（數據分散）</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">③ Shapiro-Wilk 檢定</div>
+          <div class="edu-feq">H₀：數據來自常態分佈</div>
+          <div class="edu-fexp">p > 0.05 → 可視為常態；p ≤ 0.05 → <strong>不符合常態</strong>，需用非參數方法</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 很多統計方法（如 t 檢定）假設常態分佈，因此在假設檢定前建議先跑常態性檢定！</div>
+    </div>
+  </div>
+</div>
+
     <div class="g3">
       <div class="field"><label>項目名稱</label><input type="text" id="hi-item" value="量測值"></div>
       <div class="field"><label>組距數（Bins）</label><input type="number" id="hi-bins" value="10" min="3" max="30"></div>
@@ -508,10 +791,51 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--I)"></div>
-    <div><div class="tp-title">DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
+    <div><div class="tp-title">🧪 DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>因子設定</div>
+
+<button class="edu-btn" onclick="toggleEdu('doe')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-doe">
+  <div class="edu-hdr">
+    <span style="font-size:22px">🧪</span>
+    <div><h3>DOE 實驗設計</h3><p>全因子實驗・主效應・交互作用｜Improve 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">🔬 同時測試多個因子的影響</span><span class="edu-chip">💡 找出最佳製程參數</span><span class="edu-chip">⚡ 比一次改一個變數更有效率</span></div>
+      <div class="edu-plain">傳統「一次改一個變數」效率很低。DOE 讓你同時測試多個因子，用最少實驗次數找出最佳組合。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>設定因子與水準（高/低兩個水準）</li><li><span class="edu-snum">2</span>系統產生實驗矩陣（3因子→8次實驗）</li><li><span class="edu-snum">3</span>執行實驗並填入結果</li><li><span class="edu-snum">4</span>分析主效應：哪個因子影響最大？</li><li><span class="edu-snum">5</span>分析交互作用：兩個因子合在一起有特別影響？</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">① 主效應</div>
+          <div class="edu-feq">效應值 = (高水準平均) − (低水準平均)</div>
+          <div class="edu-fexp"><strong>效應值越大</strong>，影響越大。正值=調高有益，負值=調低有益。</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">② 效應平方和 SS</div>
+          <div class="edu-feq">SS = 效應值² × (總實驗次數 ÷ 4)</div>
+          <div class="edu-fexp">SS 越大 = 貢獻率越高，是最重要的因子。</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">③ 交互作用</div>
+          <div class="edu-feq">AB效應 = (A⁺B⁺均值) − (A⁺B⁻均值) − (A⁻B⁺均值) + (A⁻B⁻均值)</div>
+          <div class="edu-fexp">交互作用圖：<strong>兩線平行 = 無交互作用；交叉 = 有顯著交互作用</strong>，需同時考慮。</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 DOE 結果告訴你哪些因子最重要，但最佳參數組合還需要反應曲面法（RSM）進一步確認！</div>
+    </div>
+  </div>
+</div>
+
     <div class="g3">
       <div class="field"><label>因子數量</label>
         <select id="doe-nf" onchange="doeUpdateFactors()">
@@ -556,10 +880,43 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">SIPOC 圖</div><div class="tp-subtitle">Supplier · Input · Process · Output · Customer — 製程範疇定義</div></div>
+    <div><div class="tp-title">🗺️ SIPOC 圖</div><div class="tp-subtitle">Supplier · Input · Process · Output · Customer — 製程範疇定義</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>SIPOC 內容輸入</div>
+
+<button class="edu-btn" onclick="toggleEdu('sipoc')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-sipoc">
+  <div class="edu-hdr">
+    <span style="font-size:22px">📋</span>
+    <div><h3>SIPOC 圖</h3><p>製程範疇定義・供需關係｜Define 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">🗺️ 定義專案範疇</span><span class="edu-chip">👥 識別利害關係人</span><span class="edu-chip">📦 釐清投入與產出</span></div>
+      <div class="edu-plain">在深入分析之前，先把製程全貌畫清楚，確保團隊對範疇有共同理解。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>從 Process 開始，寫出核心製程步驟（3～7步）</li><li><span class="edu-snum">2</span>往左填 Input 和 Supplier（資源從哪裡來）</li><li><span class="edu-snum">3</span>往右填 Output 和 Customer（產出給誰用）</li><li><span class="edu-snum">4</span>確認範疇：SIPOC 保持高層次，不是細節流程圖</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">SIPOC 五大欄位</div>
+          <div class="edu-feq">S → I → P → O → C</div>
+          <div class="edu-fexp"><strong>S</strong>upplier 供應商<br><strong>I</strong>nput 輸入<br><strong>P</strong>rocess 製程步驟<br><strong>O</strong>utput 輸出<br><strong>C</strong>ustomer 客戶（接收輸出的對象）</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 SIPOC 沒有統計公式，價值在於「讓所有人對製程有相同認知」，是 Six Sigma 專案啟動的第一步。</div>
+    </div>
+  </div>
+</div>
+
     <div class="g2" style="margin-bottom:0">
       <div class="field"><label style="color:#1D4ED8">Supplier 供應商</label><textarea id="si-s" rows="4" placeholder="每行一項">原料供應商A&#10;設備商B&#10;IT系統部門</textarea></div>
       <div class="field"><label style="color:#0891B2">Input 輸入</label><textarea id="si-i" rows="4" placeholder="每行一項">原料規格書&#10;設備參數&#10;生產工單</textarea></div>
@@ -582,10 +939,47 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--C)"></div>
-    <div><div class="tp-title">CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
+    <div><div class="tp-title">🎯 CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--C);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料與參數</div>
+
+<button class="edu-btn" onclick="toggleEdu('cusum')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-cusum">
+  <div class="edu-hdr">
+    <span style="font-size:22px">📈</span>
+    <div><h3>CUSUM / EWMA 管制圖</h3><p>小偏移高敏感偵測｜Control 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">🔍 偵測微小但持續的製程偏移</span><span class="edu-chip">⚡ 比傳統 Xbar-R 更靈敏</span><span class="edu-chip">📉 長期趨勢監控</span></div>
+      <div class="edu-plain">傳統 SPC 需要數據超出 3σ 才發警報。CUSUM/EWMA 會記住過去數據，即使每次偏移很小，累積起來也能早期發現。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>設定目標均值 μ₀ 和製程標準差 σ</li><li><span class="edu-snum">2</span>CUSUM：設定 k（偏移允許量）和 h（決策界限）</li><li><span class="edu-snum">3</span>EWMA：設定 λ（平滑係數，越小對小偏移越敏感）</li><li><span class="edu-snum">4</span>超出界限 = 製程均值已發生偏移，需調查</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">① CUSUM 累積和</div>
+          <div class="edu-feq">C⁺ᵢ = max[0,  (Xᵢ−μ₀)/σ − k + C⁺ᵢ₋₁]</div>
+          <div class="edu-fexp">持續累加超過目標的偏移，超過 h 就發出警示。<strong>能偵測持續向上偏移。</strong></div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">② EWMA 指數加權</div>
+          <div class="edu-feq">Zᵢ = λ×Xᵢ + (1−λ)×Zᵢ₋₁</div>
+          <div class="edu-fexp"><strong>λ 越小</strong>：記憶越長，對小偏移越敏感。管制界限 = μ₀ ± 3σ√[λ÷(2−λ)]</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 CUSUM/EWMA 和傳統 SPC 搭配使用效果最好：傳統 SPC 抓大異常，CUSUM/EWMA 抓小偏移。</div>
+    </div>
+  </div>
+</div>
+
     <div class="g3">
       <div class="field"><label>圖型選擇</label><select id="ce-type"><option value="cusum">CUSUM</option><option value="ewma">EWMA</option><option value="both">兩者並列</option></select></div>
       <div class="field"><label>目標均值 μ₀</label><input type="text" id="ce-mu" value="25.0"></div>
@@ -620,10 +1014,51 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--A)"></div>
-    <div><div class="tp-title">相關性分析 + 散佈圖</div><div class="tp-subtitle">Pearson r・線性迴歸・決定係數 R²・顯著性檢定</div></div>
+    <div><div class="tp-title">🔗 相關性分析 + 散佈圖</div><div class="tp-subtitle">Pearson r・線性迴歸・決定係數 R²・顯著性檢定</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+
+<button class="edu-btn" onclick="toggleEdu('scatter')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-scatter">
+  <div class="edu-hdr">
+    <span style="font-size:22px">📉</span>
+    <div><h3>相關性分析 + 散佈圖</h3><p>Pearson r・線性迴歸・R²｜Analyze 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">🔗 探索兩個變數的關係</span><span class="edu-chip">📐 量化關聯強度</span><span class="edu-chip">📊 建立預測方程式</span></div>
+      <div class="edu-plain">散佈圖把兩個變數畫在 X-Y 軸，每個點代表一筆數據。點群呈現趨勢代表兩變數有關聯。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>輸入 X（可能原因）和 Y（結果）數值</li><li><span class="edu-snum">2</span>看散佈圖：向右上=正相關，向右下=負相關，散亂=無相關</li><li><span class="edu-snum">3</span>看 Pearson r：接近±1=強相關，接近0=弱相關</li><li><span class="edu-snum">4</span>p < 0.05 = 相關性顯著，不是隨機產生的</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">① Pearson r</div>
+          <div class="edu-feq">r = Σ[(Xᵢ−X̄)(Yᵢ−Ȳ)] ÷ √[Σ(Xᵢ−X̄)² × Σ(Yᵢ−Ȳ)²]</div>
+          <div class="edu-fexp"><strong>|r|≥0.9</strong> 極強　<strong>|r|≥0.7</strong> 強　<strong>|r|≥0.5</strong> 中等　<strong>|r|&lt;0.3</strong> 弱</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">② 決定係數 R²</div>
+          <div class="edu-feq">R² = r²</div>
+          <div class="edu-fexp">R²=0.81 代表 X 解釋了 Y 81% 的變異。<strong>R² 越高，解釋力越強。</strong></div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">③ 線性迴歸</div>
+          <div class="edu-feq">Y = b₀ + b₁×X，其中 b₁ = Σ[(Xᵢ−X̄)(Yᵢ−Ȳ)] ÷ Σ(Xᵢ−X̄)²</div>
+          <div class="edu-fexp">b₁=斜率，b₀=截距。可用 X 預測 Y 的值。</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 相關不等於因果！X 和 Y 有強相關，不代表 X 造成 Y。需結合製程知識和實驗設計確認因果。</div>
+    </div>
+  </div>
+</div>
+
     <div class="g3">
       <div class="field"><label>X 軸變數名稱</label><input type="text" id="sc-xname" value="溫度 (°C)"></div>
       <div class="field"><label>Y 軸變數名稱</label><input type="text" id="sc-yname" value="良率 (%)"></div>
@@ -653,10 +1088,51 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--A)"></div>
-    <div><div class="tp-title">假設檢定</div><div class="tp-subtitle">單樣本 t・雙樣本 t・配對 t・F 檢定・卡方適合度</div></div>
+    <div><div class="tp-title">🔬 假設檢定</div><div class="tp-subtitle">單樣本 t・雙樣本 t・配對 t・F 檢定・卡方適合度</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>選擇檢定類型</div>
+
+<button class="edu-btn" onclick="toggleEdu('hypothesis')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-hypothesis">
+  <div class="edu-hdr">
+    <span style="font-size:22px">🔬</span>
+    <div><h3>假設檢定</h3><p>t-test・F-test・顯著性判斷｜Analyze 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">📊 比較改善前後是否顯著差異</span><span class="edu-chip">🏭 比較兩台機台表現</span><span class="edu-chip">🎯 確認改善效果不是隨機的</span></div>
+      <div class="edu-plain">假設檢定用「反證法」：先假設沒有差異（H₀），如果數據強烈反對（p < α），就說有顯著差異。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>選擇檢定方法：單樣本t / 雙樣本t / 配對t / F檢定</li><li><span class="edu-snum">2</span>設定顯著水準 α（常用 0.05）</li><li><span class="edu-snum">3</span>輸入數據，系統計算 t 統計量和 p-value</li><li><span class="edu-snum">4</span>p < α → 差異顯著；p ≥ α → 無顯著差異</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">① t 統計量（雙樣本）</div>
+          <div class="edu-feq">t = (X̄₁ − X̄₂) ÷ √(s₁²/n₁ + s₂²/n₂)</div>
+          <div class="edu-fexp">t 越大（絕對值），差異越大。自由度由 Welch 公式計算。</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">② p-value 白話</div>
+          <div class="edu-feq">p = 如果真的沒差異，觀察到這結果的機率</div>
+          <div class="edu-fexp">p=0.03 → 只有 3% 機率看到這種差異，很可疑，拒絕 H₀。<strong>p &lt; 0.05 視為顯著。</strong></div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">③ F 檢定</div>
+          <div class="edu-feq">F = s₁² ÷ s₂²</div>
+          <div class="edu-fexp">比較兩組分散程度。<strong>p &lt; 0.05 = 兩組變異數有顯著差異。</strong></div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 統計顯著 ≠ 實務有意義！差異很小但樣本數大時也可能顯著。需結合效果量（Effect Size）判斷。</div>
+    </div>
+  </div>
+</div>
+
     <div class="g2">
       <div class="field"><label>檢定方法</label>
         <select id="hy-type" onchange="hyUpdateUI()">
@@ -687,10 +1163,51 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--M)"></div>
-    <div><div class="tp-title">箱型圖 Box Plot</div><div class="tp-subtitle">多組分佈比較・Q1/Q2/Q3・IQR・離群值偵測</div></div>
+    <div><div class="tp-title">📦 箱型圖 Box Plot</div><div class="tp-subtitle">多組分佈比較・Q1/Q2/Q3・IQR・離群值偵測</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+
+<button class="edu-btn" onclick="toggleEdu('boxplot')">
+  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
+</button>
+<div class="edu-panel" id="edu-boxplot">
+  <div class="edu-hdr">
+    <span style="font-size:22px">📦</span>
+    <div><h3>箱型圖 Box Plot</h3><p>多組分佈比較・IQR・離群值｜Measure 階段</p></div>
+  </div>
+  <div class="edu-body">
+    <div class="edu-sec">
+      <div class="edu-stitle when">什麼時候用？</div>
+      <div class="edu-chips"><span class="edu-chip">📊 一次比較多組數據分佈</span><span class="edu-chip">🎯 偵測離群值</span><span class="edu-chip">📏 了解中位數和四分位數</span></div>
+      <div class="edu-plain">箱型圖把數據的中間 50% 畫成箱子，讓你一眼比較多組數據的差異，就像比較不同班級的成績分佈。</div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle step">使用步驟</div>
+      <ul class="edu-steps"><li><span class="edu-snum">1</span>輸入分組數據（格式：組名: 數值1, 數值2, ...）</li><li><span class="edu-snum">2</span>看箱子位置：箱子越高 = 中位數越大</li><li><span class="edu-snum">3</span>看箱子寬度：越寬（IQR越大）= 數據越分散</li><li><span class="edu-snum">4</span>超出鬚線的點 = 離群值，需調查原因</li></ul>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-stitle form">統計公式</div>
+      <div class="edu-fbox">
+          <div class="edu-fname">① 四分位數</div>
+          <div class="edu-feq">Q1=第25百分位　Q2=中位數　Q3=第75百分位</div>
+          <div class="edu-fexp">把數據由小到大排列，Q1是前25%的分界，Q3是前75%的分界。</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">② IQR 四分位距</div>
+          <div class="edu-feq">IQR = Q3 − Q1</div>
+          <div class="edu-fexp">IQR 越大 = 數據越分散。<strong>不受離群值影響</strong>，比標準差更穩健。</div>
+        </div><div class="edu-fbox">
+          <div class="edu-fname">③ 離群值判斷</div>
+          <div class="edu-feq">X < Q1 − 1.5×IQR　或　X > Q3 + 1.5×IQR</div>
+          <div class="edu-fexp">超出鬚線的點用圓圈標示。代表<strong>不尋常的觀測值</strong>，需確認是量測錯誤還是真實異常。</div>
+        </div>
+    </div>
+    <div class="edu-sec">
+      <div class="edu-tip">💡 箱型圖只顯示統計摘要，看不到個別數據細節。搭配直方圖一起用效果最好！</div>
+    </div>
+  </div>
+</div>
+
     <div class="field"><label>Y 軸項目名稱</label><input type="text" id="bp-yname" value="量測值"></div>
     <div class="field"><label>分組數據 <span style="font-size:11px;font-weight:400;color:var(--faint)">（格式：組名: 數值1, 數值2, ...）</span></label>
       <textarea id="bp-data" rows="8">機台A: 25.1, 24.9, 25.2, 25.4, 24.8, 25.1, 25.6, 24.7, 25.0, 25.3
@@ -711,12 +1228,260 @@ tr:hover td{background:#F9FAFB}
 </div>
 </div>
 
+<!-- ══════════════ 子頁面：MSA ══════════════ -->
+<div id="page-msa" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--M)"></div>
+    <div>
+      <div class="tp-title">📐 MSA 量測系統分析</div>
+      <div class="tp-subtitle">Measurement System Analysis・Gage R&R・Bias・Linearity・Stability</div>
+    </div>
+  </div>
+
+  <!-- 決策樹 -->
+  
+<div style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:12px;padding:.85rem 1.25rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:14px">
+  <div style="flex-shrink:0;width:54px;height:54px;border-radius:50%;border:3px solid #16A34A;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#fff">
+    <div style="font-size:10px;font-weight:700;color:#16A34A;letter-spacing:.05em">PASS</div>
+    <div style="font-size:16px;line-height:1">✅</div>
+  </div>
+  <div>
+    <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:.25rem">MSA 量測系統分析 — 驗效通過</div>
+    <div style="font-size:12px;color:#166534;line-height:1.7">
+      所有統計公式已依據 <strong>AIAG MSA 4th Edition</strong> 驗效通過。<br>
+      涵蓋：GRR ANOVA（SS/df/MS/Var Components/%GRR/ndc）・Bias t-test・Linearity 迴歸・Attribute MSA Kappa・Stability Xbar-R
+    </div>
+    <div style="font-size:11px;color:#4ADE80;margin-top:.3rem;font-style:italic">驗效日期：2026-05-29　驗效人員：Chiu Chang Ru / Claude　依據：AIAG MSA 4th Ed.</div>
+  </div>
+</div>
+<div class="card" id="msa-decision-card">
+    <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Step 1：選擇分析方法</div>
+
+    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.85rem 1rem;font-size:13px;margin-bottom:1rem;line-height:1.9;color:#1E40AF">
+      <strong>回答以下問題，系統自動推薦適合的 MSA 方法</strong>
+    </div>
+
+    <div class="field">
+      <label>① 量具輸出類型？</label>
+      <select id="msa-q1" onchange="msaDecide()">
+        <option value="">— 請選擇 —</option>
+        <option value="continuous">計量型（連續數值，如長度、重量、溫度）</option>
+        <option value="attribute">計數型（通過/失敗、目視判斷、等級）</option>
+      </select>
+    </div>
+    <div class="field" id="msa-q2-wrap" style="display:none">
+      <label>② 分析目的？</label>
+      <select id="msa-q2" onchange="msaDecide()">
+        <option value="">— 請選擇 —</option>
+        <option value="grr">多操作員 / 多零件評估量具一致性</option>
+        <option value="bias">新量具導入・確認量具是否有偏差</option>
+        <option value="linearity">確認量具在不同量測範圍的偏差是否一致</option>
+        <option value="stability">長期監控量具是否隨時間漂移</option>
+      </select>
+    </div>
+    <div class="field" id="msa-q3-wrap" style="display:none">
+      <label>③ 需要完整分析還是快速評估？</label>
+      <select id="msa-q3" onchange="msaDecide()">
+        <option value="">— 請選擇 —</option>
+        <option value="anova">完整分析（ANOVA 法，含交互作用）</option>
+        <option value="xbarr">快速評估（平均全距法，較簡單）</option>
+      </select>
+    </div>
+
+    <div id="msa-recommend" style="display:none;margin-top:.75rem"></div>
+  </div>
+
+  <!-- MSA 分析區 -->
+  <div id="msa-tool-area" style="display:none">
+
+    <!-- Gage R&R -->
+    <div id="msa-grr-area" style="display:none">
+      <div class="card">
+        <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Gage R&R 數據輸入</div>
+        <div class="g3">
+          <div class="field"><label>操作員數</label>
+            <select id="grr-nop"><option value="2">2 位</option><option value="3" selected>3 位</option></select>
+          </div>
+          <div class="field"><label>零件數</label>
+            <select id="grr-npart"><option value="5">5 件</option><option value="10" selected>10 件</option></select>
+          </div>
+          <div class="field"><label>重複量測次數</label>
+            <select id="grr-nrep"><option value="2" selected>2 次</option><option value="3">3 次</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <label>量測數據
+            <span style="font-size:11px;font-weight:400;color:var(--faint)">（格式：每列 = 操作員,零件,重複1,重複2,... ）</span>
+          </label>
+          <textarea id="grr-data" rows="12" style="font-size:11px">1,1,2.7,2.5
+1,2,5.1,4.8
+1,3,5.8,5.7
+1,4,4.0,4.2
+1,5,3.8,3.1
+1,6,2.6,2.4
+1,7,2.6,2.7
+1,8,7.6,7.8
+1,9,4.6,4.7
+1,10,3.4,3.2
+2,1,2.8,3.1
+2,2,5.3,5.0
+2,3,5.5,5.7
+2,4,4.1,3.8
+2,5,3.6,3.4
+2,6,2.5,2.4
+2,7,2.9,2.4
+2,8,7.4,7.9
+2,9,4.7,4.8
+2,10,3.1,3.4
+3,1,2.8,2.4
+3,2,5.0,4.9
+3,3,5.8,5.5
+3,4,3.8,4.0
+3,5,3.6,3.3
+3,6,2.4,2.1
+3,7,2.7,2.5
+3,8,7.5,7.7
+3,9,4.6,4.5
+3,10,3.3,3.2</textarea>
+        </div>
+        <div class="g2">
+          <div class="field"><label>規格公差（USL - LSL，選填）</label><input type="text" id="grr-tol" placeholder="例：8.0"></div>
+          <div class="field"><label>分析方法</label>
+            <select id="grr-method">
+              <option value="anova">ANOVA 法（完整）</option>
+              <option value="xbarr">平均全距法（快速）</option>
+            </select>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="grrAnalyze()">▶ 執行 Gage R&R 分析</button>
+          <button class="btn btn-sec" onclick="grrLoadEx()">載入範例</button>
+        </div>
+      </div>
+      <div id="grr-out" style="display:none">
+        <div class="card">
+          <div class="tab-bar">
+            <div class="tab active" onclick="grrSw('summary')">變異來源摘要</div>
+            <div class="tab" onclick="grrSw('bar')">GRR 長條圖</div>
+            <div class="tab" onclick="grrSw('xbarr')">Xbar-R 管制圖</div>
+            <div class="tab" onclick="grrSw('anova')">ANOVA 表</div>
+          </div>
+          <div id="grr-tab-summary" class="tab-c show"><div id="grr-summary-content"></div></div>
+          <div id="grr-tab-bar" class="tab-c"><div class="canvas-wrap"><canvas id="grr-bar-canvas" height="320"></canvas></div></div>
+          <div id="grr-tab-xbarr" class="tab-c">
+            <div class="canvas-wrap"><canvas id="grr-xbar-canvas"></canvas></div>
+            <div class="canvas-wrap" style="margin-top:.75rem"><canvas id="grr-r-canvas"></canvas></div>
+          </div>
+          <div id="grr-tab-anova" class="tab-c"><div id="grr-anova-content"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bias -->
+    <div id="msa-bias-area" style="display:none">
+      <div class="card">
+        <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Bias 偏差分析輸入</div>
+        <div class="g2">
+          <div class="field"><label>參考值（基準值 / 標準件）</label><input type="text" id="bias-ref" value="10.0"></div>
+          <div class="field"><label>顯著水準 α</label><select id="bias-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option></select></div>
+        </div>
+        <div class="field"><label>重複量測值（空格或逗號分隔）</label>
+          <textarea id="bias-data" rows="3">10.1 10.0 10.2 9.9 10.1 10.3 10.0 10.1 9.8 10.2 10.1 10.0 10.2 10.1 10.3</textarea>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="biasAnalyze()">▶ 執行 Bias 分析</button></div>
+      </div>
+      <div id="bias-out" style="display:none"><div class="card" id="bias-result"></div></div>
+    </div>
+
+    <!-- Linearity -->
+    <div id="msa-lin-area" style="display:none">
+      <div class="card">
+        <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Linearity 線性分析輸入</div>
+        <div class="alert info" style="margin-bottom:.75rem;font-size:12px">每列：基準值, 量測值1, 量測值2, ...（至少 5 個不同基準值）</div>
+        <div class="field"><label>規格公差（USL - LSL，用於計算 %Linearity）</label><input type="text" id="lin-tol" value="10.0"></div>
+        <div class="field"><label>數據</label>
+          <textarea id="lin-data" rows="6">2.0, 2.1, 1.9, 2.0
+4.0, 3.9, 4.1, 4.0
+6.0, 6.2, 6.1, 5.9
+8.0, 8.1, 7.9, 8.2
+10.0, 10.1, 9.9, 10.0</textarea>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="linAnalyze()">▶ 執行 Linearity 分析</button></div>
+      </div>
+      <div id="lin-out" style="display:none">
+        <div class="card">
+          <div class="stat-grid" id="lin-stats"></div>
+          <div class="canvas-wrap"><canvas id="lin-canvas" height="280"></canvas></div>
+          <div id="lin-result" style="margin-top:.75rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stability -->
+    <div id="msa-stab-area" style="display:none">
+      <div class="card">
+        <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Stability 穩定性分析輸入</div>
+        <div class="alert info" style="margin-bottom:.75rem;font-size:12px">每列 = 一個時間點的重複量測值（建議每期量 3～5 次）</div>
+        <div class="g2">
+          <div class="field"><label>標準件參考值（選填）</label><input type="text" id="stab-ref" placeholder="例：10.0"></div>
+          <div class="field"><label>時間單位標籤</label><input type="text" id="stab-unit" value="週"></div>
+        </div>
+        <div class="field"><label>各時間點量測數據</label>
+          <textarea id="stab-data" rows="7">10.1, 10.0, 10.2
+10.0, 10.1, 9.9
+10.2, 10.1, 10.3
+10.0, 10.2, 10.1
+9.9, 10.1, 10.0
+10.1, 10.3, 10.2
+10.0, 10.1, 10.2</textarea>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="stabAnalyze()">▶ 執行 Stability 分析</button></div>
+      </div>
+      <div id="stab-out" style="display:none">
+        <div class="card">
+          <div class="canvas-wrap"><canvas id="stab-xbar-canvas"></canvas></div>
+          <div class="canvas-wrap" style="margin-top:.75rem"><canvas id="stab-r-canvas"></canvas></div>
+          <div id="stab-result" style="margin-top:.75rem"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attribute MSA -->
+    <div id="msa-attr-area" style="display:none">
+      <div class="card">
+        <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Attribute MSA 輸入</div>
+        <div class="alert info" style="margin-bottom:.75rem;font-size:12px">格式：每列 = 樣本#, 標準答案(0/1), 評估員1第1次, 評估員1第2次, 評估員2第1次, 評估員2第2次, ...</div>
+        <div class="field"><label>評估員數</label><select id="attr-nop"><option value="2" selected>2 位</option><option value="3">3 位</option></select></div>
+        <div class="field"><label>數據</label>
+          <textarea id="attr-data" rows="8">1,0,0,0,0,0
+2,1,1,1,1,1
+3,0,0,0,0,1
+4,1,1,1,1,1
+5,0,0,0,0,0
+6,1,1,0,1,1
+7,0,0,0,0,0
+8,1,1,1,1,1
+9,0,0,0,1,0
+10,1,1,1,1,1</textarea>
+        </div>
+        <div class="btn-row"><button class="btn btn-primary" onclick="attrAnalyze()">▶ 執行 Attribute MSA</button></div>
+      </div>
+      <div id="attr-out" style="display:none"><div class="card" id="attr-result"></div></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+
+
 <script>
 // ════════════════════════════════════════════
 // 路由系統
 // ════════════════════════════════════════════
 const PHASE_COLORS={spc:'var(--M)',pareto:'var(--D)',fishbone:'var(--D)',sipoc:'var(--D)',histogram:'var(--M)',boxplot:'var(--M)',scatter:'var(--A)',hypothesis:'var(--A)',doe:'var(--I)',cusum:'var(--C)'};
-const TOOL_NAMES={spc:'SPC 管制圖',pareto:'柏拉圖',fishbone:'魚骨圖',sipoc:'SIPOC 圖',histogram:'直方圖+常態檢定',boxplot:'箱型圖',scatter:'相關性分析',hypothesis:'假設檢定',doe:'DOE 實驗設計',cusum:'CUSUM/EWMA'};
+const TOOL_NAMES={msa:'MSA 量測系統分析',spc:'SPC 管制圖',pareto:'柏拉圖',fishbone:'魚骨圖',sipoc:'SIPOC 圖',histogram:'直方圖+常態檢定',boxplot:'箱型圖',scatter:'相關性分析',hypothesis:'假設檢定',doe:'DOE 實驗設計',cusum:'CUSUM/EWMA'};
 
 function goHome(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -810,6 +1575,7 @@ const A3={2:2.659,3:1.954,4:1.628,5:1.427,6:1.287,7:1.182,8:1.099,9:1.032,10:0.9
 const B4={2:3.267,3:2.568,4:2.266,5:2.089,6:1.970,7:1.882,8:1.815,9:1.761,10:1.716};
 const B3={2:0,3:0,4:0,5:0,6:0.030,7:0.118,8:0.185,9:0.239,10:0.284};
 let SR={};
+let R={}; // shared result store for MSA modules (Gage R&R, Attribute MSA, etc.)
 
 function spcLoadEx(t){
   if(t==='xbarr'){document.getElementById('spc-raw').value='25.1, 25.3\n24.9, 25.1\n25.2, 25.0\n25.4, 25.2\n24.8, 25.0\n25.1, 25.3\n25.6, 25.4\n24.7, 24.9\n25.0, 25.2\n25.3, 25.1\n25.1, 25.5\n24.6, 24.8\n25.2, 25.3\n25.0, 24.9\n25.4, 25.2';document.getElementById('spc-item').value='內徑';document.getElementById('spc-lsl').value='24.5';document.getElementById('spc-usl').value='25.5';document.getElementById('spc-tgt').value='25.0';}
@@ -1033,50 +1799,87 @@ function paretoAnalyze(){
 // 魚骨圖工具
 // ════════════════════════════════════════════
 function fishboneDraw(){
-  const problem=document.getElementById('fb-problem').value||'問題';
-  const cats=[
-    {id:'fb-man',label:'人員 Man',color:'#1D4ED8'},
-    {id:'fb-machine',label:'機器 Machine',color:'#0891B2'},
-    {id:'fb-material',label:'材料 Material',color:'#059669'},
-    {id:'fb-method',label:'方法 Method',color:'#D97706'},
-    {id:'fb-measure',label:'量測 Measurement',color:'#7C3AED'},
-    {id:'fb-env',label:'環境 Environment',color:'#BE185D'},
+  const problem = document.getElementById('fb-problem').value || '問題';
+  const cats = [
+    {id:'fb-man',     label:'人員 Man',        color:'#1D4ED8'},
+    {id:'fb-machine', label:'機器 Machine',     color:'#0891B2'},
+    {id:'fb-material',label:'材料 Material',   color:'#059669'},
+    {id:'fb-method',  label:'方法 Method',      color:'#D97706'},
+    {id:'fb-measure', label:'量測 Measurement', color:'#7C3AED'},
+    {id:'fb-env',     label:'環境 Environment', color:'#BE185D'},
   ];
-  const data=cats.map(c=>({label:c.label,color:c.color,causes:document.getElementById(c.id).value.trim().split('\n').filter(s=>s.trim())}));
-  const canvas=document.getElementById('fb-canvas');canvas.width=canvas.parentElement.offsetWidth||720;canvas.height=420;
-  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
-  const W=canvas.width,H=canvas.height,cx=W*0.82,cy=H/2;
-  // 主骨
-  ctx.beginPath();ctx.moveTo(60,cy);ctx.lineTo(cx,cy);ctx.strokeStyle='#1a1a2e';ctx.lineWidth=3;ctx.stroke();
-  // 魚頭（問題方塊）
-  ctx.fillStyle='#1D3B8A';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(cx,cy-28,W-cx-10,56,8);else ctx.rect(cx,cy-28,W-cx-10,56);ctx.fill();
-  ctx.fillStyle='#fff';ctx.font='bold 13px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-  const plines=problem.length>8?[problem.slice(0,8),problem.slice(8)]:[ problem];
-  plines.forEach((l,i)=>ctx.fillText(l,cx+(W-cx-10)/2,cy+(i-(plines.length-1)/2)*18));
-  // 6 根主刺（上3下3）
-  const topY=[H*0.15,H*0.15,H*0.15],botY=[H*0.85,H*0.85,H*0.85];
-  const mainXs=[W*0.22,W*0.44,W*0.66];
-  const topData=[data[0],data[2],data[4]],botData=[data[1],data[3],data[5]];
-  function drawBone(startX,startY,endX,endY,cat){
-    ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(endX,endY);ctx.strokeStyle=cat.color;ctx.lineWidth=2;ctx.stroke();
-    // 標籤
-    ctx.fillStyle=cat.color;ctx.font='bold 12px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(cat.label,startX,startY+(startY<cy?-16:16));
-    // 小刺
-    const dx=(endX-startX),dy=(endY-startY),len=Math.sqrt(dx*dx+dy*dy);
-    const nx=-dy/len,ny=dx/len;
-    cat.causes.forEach((cause,i)=>{
-      const t=0.25+(i*0.18);const bx=startX+dx*t,by=startY+dy*t;
-      const sl=60,sign=startY<cy?1:-1;
-      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+sl*0.7,by+sl*sign*0.5);ctx.strokeStyle=cat.color;ctx.lineWidth=1.2;ctx.stroke();
-      ctx.fillStyle='#374151';ctx.font='11px -apple-system,sans-serif';ctx.textAlign=startX<cx?'left':'left';ctx.textBaseline='middle';
-      ctx.fillText(cause,bx+sl*0.7+4,by+sl*sign*0.5);
+
+  function parseCauses(text){
+    return text.trim().split('\n').filter(s=>s.trim()).map(line=>{
+      const parts = line.split(',').map(s=>s.trim());
+      return {name: parts[0]||''};
     });
   }
-  mainXs.forEach((mx,i)=>{
-    drawBone(mx,topY[0],cx-20,cy,topData[i]);
-    drawBone(mx,botY[0],cx-20,cy,botData[i]);
+
+  const data = cats.map(c=>({
+    label:c.label, color:c.color,
+    causes: parseCauses(document.getElementById(c.id).value)
+  }));
+
+  const VW=700, VH=500;
+  const spineY=250;
+  const spineEndX=575;
+  const BONE_DX=75, BONE_DY=130;  // 固定60°，長150px
+  const CAUSE_LEN=30;              // 中骨長度（原來60的一半）
+  const joints=[160,330,500];
+  const topCats=[data[0],data[2],data[4]];
+  const botCats=[data[1],data[3],data[5]];
+
+  let s=[];
+  s.push(`<defs><marker id="fb-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 2L8 5L1 8" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`);
+
+  // 脊骨
+  s.push(`<line x1="40" y1="${spineY}" x2="${spineEndX}" y2="${spineY}" stroke="#1a1a2e" stroke-width="3"/>`);
+
+  // 魚頭 — 最大字體
+  const hw=96, hh=60;
+  const plines=problem.length>6?[problem.slice(0,6),problem.slice(6)]:[problem];
+  s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="8" fill="#1D3B8A"/>`);
+  plines.forEach((l,i)=>{
+    const ty=spineY+(i-(plines.length-1)/2)*20;
+    s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="16" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
   });
+
+  function renderBone(jx, endY, cat, isTop){
+    // 大骨（無箭頭）
+    s.push(`<line x1="${jx-BONE_DX}" y1="${endY}" x2="${jx}" y2="${spineY}" stroke="${cat.color}" stroke-width="2.5"/>`);
+
+    // 要因標籤 — 稍大字體 14px
+    const lblW=Math.max(cat.label.length*8+20,108);
+    const lblH=28;
+    const lblX=(jx-BONE_DX)-lblW/2;
+    const lblY=isTop ? endY-lblH-6 : endY+6;
+    s.push(`<rect x="${lblX}" y="${lblY}" width="${lblW}" height="${lblH}" rx="5" fill="none" stroke="${cat.color}" stroke-width="1.5"/>`);
+    s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="${cat.color}" font-size="14" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
+
+    // 中骨等間距（t=0.25, 0.50, 0.75）
+    const ddx=BONE_DX, ddy=isTop?BONE_DY:-BONE_DY;
+    const ts=cat.causes.length<=1?[0.5]:cat.causes.length===2?[0.28,0.68]:
+             cat.causes.length===3?[0.25,0.50,0.75]:
+             cat.causes.length===4?[0.20,0.40,0.60,0.80]:
+             [0.16,0.32,0.50,0.66,0.82];
+    cat.causes.forEach((cause,ci)=>{
+      const t=ts[Math.min(ci,ts.length-1)];
+      const bx=(jx-BONE_DX)+ddx*t;
+      const by=endY+ddy*t;
+      // 中骨：從 bx-CAUSE_LEN 到 bx，箭頭在右端
+      s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${cat.color}" stroke-width="1.4" marker-end="url(#fb-ar)"/>`);
+      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="#374151" font-size="11" font-family="-apple-system,sans-serif">${cause.name}</text>`);
+    });
+  }
+
+  joints.forEach((jx,gi)=>{
+    renderBone(jx, spineY-BONE_DY, topCats[gi], true);
+    renderBone(jx, spineY+BONE_DY, botCats[gi], false);
+  });
+
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
+  document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
 }
 
@@ -1432,6 +2235,573 @@ doeUpdateFactors();
 hyUpdateUI();
 
 // ── 綁定到 window 讓 onclick 能找到 ──
+
+
+// ════════════════════════════════════════════
+// MSA 量測系統分析
+// ════════════════════════════════════════════
+
+// ── 決策樹 ──
+function msaDecide(){
+  var q1=document.getElementById('msa-q1').value;
+  var q2w=document.getElementById('msa-q2-wrap');
+  var q3w=document.getElementById('msa-q3-wrap');
+  var rec=document.getElementById('msa-recommend');
+  var area=document.getElementById('msa-tool-area');
+
+  q2w.style.display=q1?'block':'none';
+  if(!q1){rec.style.display='none';area.style.display='none';return;}
+
+  var q2=document.getElementById('msa-q2').value;
+  if(!q2){rec.style.display='none';area.style.display='none';return;}
+
+  q3w.style.display=(q1==='continuous'&&q2==='grr')?'block':'none';
+  var q3=document.getElementById('msa-q3').value;
+  if(q1==='continuous'&&q2==='grr'&&!q3){rec.style.display='none';area.style.display='none';return;}
+
+  // 推薦
+  var methods={
+    grr:'Gage R&R 分析（評估量具的重複性與再現性）',
+    bias:'Bias 偏差分析（確認量具是否有系統性偏差）',
+    linearity:'Linearity 線性分析（確認量具偏差是否隨量測範圍變化）',
+    stability:'Stability 穩定性分析（長期監控量具是否漂移）',
+    attribute:'Attribute MSA（計數型量具一致性 Kappa 分析）'
+  };
+  var key=q1==='attribute'?'attribute':q2;
+  var methodName=methods[key]||'';
+  var methodDetail=q2==='grr'?(q3==='anova'?'　方法：ANOVA 法（完整，含操作員×零件交互作用）':'　方法：平均全距法（快速評估）'):'';
+
+  rec.style.display='block';
+  rec.innerHTML='<div class="alert success"><strong>推薦分析方法：</strong>'+methodName+methodDetail+'</div>';
+
+  // 顯示對應工具區
+  area.style.display='block';
+  var areas=['grr','bias','lin','stab','attr'];
+  areas.forEach(function(a){document.getElementById('msa-'+a+'-area').style.display='none';});
+  if(key==='grr')document.getElementById('msa-grr-area').style.display='block';
+  else if(key==='bias')document.getElementById('msa-bias-area').style.display='block';
+  else if(key==='linearity')document.getElementById('msa-lin-area').style.display='block';
+  else if(key==='stability')document.getElementById('msa-stab-area').style.display='block';
+  else if(key==='attribute')document.getElementById('msa-attr-area').style.display='block';
+
+  if(key==='grr'&&q3)document.getElementById('grr-method').value=q3;
+}
+
+// ── Gage R&R ──
+function grrLoadEx(){
+  document.getElementById('grr-nop').value='3';
+  document.getElementById('grr-npart').value='10';
+  document.getElementById('grr-nrep').value='2';
+  document.getElementById('grr-tol').value='8.0';
+}
+
+function grrAnalyze(){
+  var raw=document.getElementById('grr-data').value.trim().split('\n').filter(function(l){return l.trim();});
+  var nopExpected=parseInt(document.getElementById('grr-nop').value);
+  var npartExpected=parseInt(document.getElementById('grr-npart').value);
+  var nrepExpected=parseInt(document.getElementById('grr-nrep').value);
+  var tol=parseFloat(document.getElementById('grr-tol').value)||null;
+  var method=document.getElementById('grr-method').value;
+
+  var records=[];
+  raw.forEach(function(line,idx){
+    var p=line.split(',').map(function(s){return s.trim();});
+    var op=parseInt(p[0]),part=parseInt(p[1]);
+    var reps=p.slice(2).map(Number).filter(function(v){return !isNaN(v);});
+    if(op&&part&&reps.length)records.push({op:op,part:part,reps:reps,line:idx+1});
+  });
+  if(!records.length){alert('請填入有效數據');return;}
+
+  var data={};
+  records.forEach(function(r){
+    if(!data[r.op])data[r.op]={};
+    data[r.op][r.part]=r.reps;
+  });
+  var ops=Object.keys(data).map(Number).sort(function(a,b){return a-b;});
+  var parts=[];
+  ops.forEach(function(op){Object.keys(data[op]).forEach(function(p){var pt=parseInt(p);if(parts.indexOf(pt)<0)parts.push(pt);});});
+  parts.sort(function(a,b){return a-b;});
+  var k=ops.length,n=parts.length;
+  var firstReps=(data[ops[0]]&&data[ops[0]][parts[0]])?data[ops[0]][parts[0]].length:0;
+  var r=firstReps;
+  var warnings=[];
+
+  if(k!==nopExpected)warnings.push('操作員數與下拉選單不一致：偵測到 '+k+' 位，選單為 '+nopExpected+' 位。計算以實際資料為準。');
+  if(n!==npartExpected)warnings.push('零件數與下拉選單不一致：偵測到 '+n+' 件，選單為 '+npartExpected+' 件。計算以實際資料為準。');
+  if(r!==nrepExpected)warnings.push('重複次數與下拉選單不一致：偵測到 '+r+' 次，選單為 '+nrepExpected+' 次。計算以實際資料為準。');
+  if(k<2||n<2||r<2){alert('Gage R&R 至少需要 2 位操作員、2 件零件、每組至少 2 次重複量測。');return;}
+
+  for(var oi=0;oi<ops.length;oi++){
+    for(var pi=0;pi<parts.length;pi++){
+      var reps=data[ops[oi]]&&data[ops[oi]][parts[pi]];
+      if(!reps){alert('資料不完整：缺少 操作員 '+ops[oi]+' / 零件 '+parts[pi]+' 的資料。');return;}
+      if(reps.length!==r){alert('資料不平衡：操作員 '+ops[oi]+' / 零件 '+parts[pi]+' 的重複次數為 '+reps.length+'，應為 '+r+'。');return;}
+    }
+  }
+
+  function avg(a){return a.reduce(function(s,v){return s+v;},0)/a.length;}
+  function sq(x){return x*x;}
+  function stdv(v){return Math.sqrt(Math.max(0,v));}
+  var studyVar=5.15;
+
+  var allVals=[];
+  ops.forEach(function(op){parts.forEach(function(pt){data[op][pt].forEach(function(v){allVals.push({op:op,pt:pt,v:v});});});});
+  var grandMean=avg(allVals.map(function(d){return d.v;}));
+  var opMean={},partMean={},opPartMean={};
+  ops.forEach(function(op){opMean[op]=avg(allVals.filter(function(d){return d.op===op;}).map(function(d){return d.v;}));});
+  parts.forEach(function(pt){partMean[pt]=avg(allVals.filter(function(d){return d.pt===pt;}).map(function(d){return d.v;}));});
+  ops.forEach(function(op){opPartMean[op]={};parts.forEach(function(pt){opPartMean[op][pt]=avg(data[op][pt]);});});
+
+  var SSop=n*r*ops.reduce(function(s,op){return s+sq(opMean[op]-grandMean);},0);
+  var SSpart=k*r*parts.reduce(function(s,pt){return s+sq(partMean[pt]-grandMean);},0);
+  var SSoppart=r*ops.reduce(function(s,op){return s+parts.reduce(function(s2,pt){return s2+sq(opPartMean[op][pt]-opMean[op]-partMean[pt]+grandMean);},0);},0);
+  var SSerr=ops.reduce(function(s,op){return s+parts.reduce(function(s2,pt){var m=opPartMean[op][pt];return s2+data[op][pt].reduce(function(s3,v){return s3+sq(v-m);},0);},0);},0);
+  var SStotal=allVals.reduce(function(s,d){return s+sq(d.v-grandMean);},0);
+  var dfop=k-1,dfpart=n-1,dfoppart=(k-1)*(n-1),dferr=k*n*(r-1),dftotal=k*n*r-1;
+  var MSop=SSop/dfop,MSpart=SSpart/dfpart,MSoppart=SSoppart/dfoppart,MSerr=SSerr/dferr;
+
+  var VarRepeat=Math.max(0,MSerr);
+  var VarOpPart=Math.max(0,(MSoppart-MSerr)/r);
+  var VarOp=Math.max(0,(MSop-MSoppart)/(n*r));
+  var VarPart=Math.max(0,(MSpart-MSoppart)/(k*r));
+  var VarReprod=VarOp+VarOpPart;
+  var VarGRR=VarRepeat+VarReprod;
+  var VarTotal=VarGRR+VarPart;
+
+  var EV=studyVar*stdv(VarRepeat),AV=studyVar*stdv(VarReprod),GRR_sv=studyVar*stdv(VarGRR),PV=studyVar*stdv(VarPart),TV=studyVar*stdv(VarTotal);
+  var methodLabel='ANOVA 法';
+
+  if(method==='xbarr'){
+    var d2={2:1.128,3:1.693,4:2.059,5:2.326};
+    var K1={2:4.56,3:3.05,4:2.50,5:2.21};
+    var K2={2:3.65,3:2.70};
+    var K3={2:3.65,3:2.70,4:2.30,5:2.08,6:1.93,7:1.82,8:1.74,9:1.67,10:1.62};
+    var ranges=[],cellMeans=[];
+    ops.forEach(function(op){parts.forEach(function(pt){var reps=data[op][pt];ranges.push(Math.max.apply(null,reps)-Math.min.apply(null,reps));cellMeans.push(avg(reps));});});
+    var Rbarbar=avg(ranges);
+    EV=Rbarbar*(K1[r]||studyVar/(d2[r]||1.128));
+    var opMeans=ops.map(function(op){return avg(parts.map(function(pt){return avg(data[op][pt]);}));});
+    var Xdiff=Math.max.apply(null,opMeans)-Math.min.apply(null,opMeans);
+    var av2=sq(Xdiff*(K2[k]||studyVar/(d2[k]||1.128)))-sq(EV)/(n*r);
+    AV=Math.sqrt(Math.max(0,av2));
+    var partMeans=parts.map(function(pt){return avg(ops.map(function(op){return avg(data[op][pt]);}));});
+    var Rp=Math.max.apply(null,partMeans)-Math.min.apply(null,partMeans);
+    PV=Rp*(K3[n]||studyVar/(d2[n]||1.128));
+    GRR_sv=Math.sqrt(sq(EV)+sq(AV));
+    TV=Math.sqrt(sq(GRR_sv)+sq(PV));
+    VarRepeat=sq(EV/studyVar);VarReprod=sq(AV/studyVar);VarOp=VarReprod;VarOpPart=0;VarGRR=sq(GRR_sv/studyVar);VarPart=sq(PV/studyVar);VarTotal=sq(TV/studyVar);
+    methodLabel='平均全距法（Xbar-R）';
+    if(!K1[r])warnings.push('平均全距法常用常數主要支援 2~5 次重複量測；目前使用 d2 近似。');
+    if(!K2[k])warnings.push('平均全距法常用 K2 表主要支援 2~3 位操作員；目前使用 d2 近似。');
+    if(!K3[n])warnings.push('平均全距法常用 K3 表主要支援 2~10 件零件；目前使用 d2 近似。');
+  }
+
+  var pctEV=TV>0?EV/TV*100:0;
+  var pctAV=TV>0?AV/TV*100:0;
+  var pctGRR=TV>0?GRR_sv/TV*100:0;
+  var pctPV=TV>0?PV/TV*100:0;
+  var pctTolEV=tol?EV/tol*100:null;
+  var pctTolGRR=tol?GRR_sv/tol*100:null;
+  var ndc=VarGRR>0?Math.floor(1.41*PV/GRR_sv):999;
+  var ndcOk=ndc>=5;
+  var grrStatus=pctGRR<10?'success':pctGRR<30?'warn':'danger';
+  var grrLabel=pctGRR<10?'✅ 優良 — 量測系統可接受':pctGRR<30?'⚠️ 條件接受 — 建議改善':'❌ 不合格 — 必須改善量測系統';
+
+  R.grrResult={
+    method:method,methodLabel:methodLabel,warnings:warnings,
+    VarRepeat:VarRepeat,VarReprod:VarReprod,VarOp:VarOp,VarOpPart:VarOpPart,VarPart:VarPart,VarGRR:VarGRR,VarTotal:VarTotal,
+    EV:EV,AV:AV,GRR_sv:GRR_sv,PV:PV,TV:TV,
+    pctEV:pctEV,pctAV:pctAV,pctGRR:pctGRR,pctPV:pctPV,
+    pctTolEV:pctTolEV,pctTolGRR:pctTolGRR,ndc:ndc,ndcOk:ndcOk,grrStatus:grrStatus,grrLabel:grrLabel,
+    SSop:SSop,SSpart:SSpart,SSoppart:SSoppart,SSerr:SSerr,SStotal:SStotal,
+    dfop:dfop,dfpart:dfpart,dfoppart:dfoppart,dferr:dferr,dftotal:dftotal,
+    MSop:MSop,MSpart:MSpart,MSoppart:MSoppart,MSerr:MSerr,
+    ops:ops,parts:parts,data:data,opMean:opMean,partMean:partMean,r4:function(v){return (v===null||v===undefined||isNaN(v)||!isFinite(v))?'—':parseFloat(v.toFixed(4));}
+  };
+
+  document.getElementById('grr-out').style.display='block';
+  renderGRRSummary();
+  grrSw('summary');
+  setTimeout(function(){drawGRRBar();drawGRRCharts();},80);
+}
+
+function renderGRRSummary(){
+  var g=R.grrResult;
+  var r4=g.r4;
+
+  var rows=[
+    ['Repeatability（EV）','機台/量具重複量測變異',r4(g.EV),r4(g.pctEV)+'%',g.pctTolEV?r4(g.pctTolEV)+'%':'—'],
+    ['Reproducibility（AV）','操作員之間差異',r4(g.AV),r4(g.pctAV)+'%','—'],
+    ['Total GRR','量測系統總變異',r4(g.GRR_sv),r4(g.pctGRR)+'%',g.pctTolGRR?r4(g.pctTolGRR)+'%':'—'],
+    ['Part-to-Part（PV）','零件本身變異',r4(g.PV),r4(g.pctPV)+'%','—'],
+    ['Total Variation（TV）','總變異',r4(g.TV),'100%','—'],
+  ];
+
+  var html='<div class="stat-grid" style="margin-bottom:1rem">';
+  html+='<div class="sc"><div class="v">'+r4(g.pctGRR)+'%</div><div class="l">GRR %Study</div></div>';
+  html+='<div class="sc"><div class="v">'+r4(g.pctPV)+'%</div><div class="l">Part-to-Part %</div></div>';
+  html+='<div class="sc"><div class="v">'+g.ndc+'</div><div class="l">ndc 鑑別力</div></div>';
+  html+='<div class="sc"><div class="v">'+r4(g.EV)+'</div><div class="l">EV (5.15σ)</div></div>';
+  html+='<div class="sc"><div class="v">'+r4(g.AV)+'</div><div class="l">AV (5.15σ)</div></div>';
+  html+='</div>';
+
+  html+='<div class="alert info" style="margin-bottom:.75rem"><strong>計算方法：</strong>'+((g.methodLabel)||'ANOVA 法')+'。%Study Var 以 Study Variation / Total Variation 計算，非以變異數百分比計算。</div>';
+  html+='<div class="alert '+g.grrStatus+'" style="margin-bottom:.75rem"><strong>判斷結果：</strong>'+g.grrLabel+'</div>';
+  if(g.warnings&&g.warnings.length)html+='<div class="alert warn" style="margin-bottom:.75rem">⚠️ '+g.warnings.join('<br>⚠️ ')+'</div>';
+  if(!g.ndcOk)html+='<div class="alert warn" style="margin-bottom:.75rem">⚠️ ndc = '+g.ndc+'（需 ≥ 5），量具鑑別力不足，無法有效區分零件差異。</div>';
+
+  html+='<div style="overflow-x:auto"><table><thead><tr><th>變異來源</th><th>說明</th><th>Study Var (5.15σ)</th><th>%Study Var</th><th>%Tolerance</th></tr></thead><tbody>';
+  rows.forEach(function(row){
+    var isGRR=row[0].includes('GRR');
+    html+='<tr style="'+(isGRR?'font-weight:700;background:#F9FAFB':'')+'"><td>'+row[0]+'</td><td style="color:#6B7280;font-size:12px">'+row[1]+'</td><td>'+row[2]+'</td><td>'+row[3]+'</td><td>'+row[4]+'</td></tr>';
+  });
+  html+='</tbody></table></div>';
+  html+='<div class="alert info" style="margin-top:.75rem;font-size:12px">判斷標準（AIAG MSA 第四版）：GRR% &lt; 10% 優良 ｜ 10%~30% 條件接受 ｜ &gt; 30% 不合格</div>';
+  document.getElementById('grr-summary-content').innerHTML=html;
+}
+
+function drawGRRBar(){
+  var g=R.grrResult;
+  var canvas=document.getElementById('grr-bar-canvas');
+  if(!canvas)return;
+  canvas.width=canvas.parentElement.offsetWidth||640;
+  destroyCharts();
+
+  var labels=['Repeatability\n(EV)','Reproducibility\n(AV)','Total GRR','Part-to-Part\n(PV)'];
+  var pcts=[g.pctEV,g.pctAV,g.pctGRR,g.pctPV];
+  var colors=[
+    g.pctEV>30?'#EF4444':g.pctEV>10?'#F59E0B':'#22C55E',
+    g.pctAV>30?'#EF4444':g.pctAV>10?'#F59E0B':'#22C55E',
+    g.pctGRR>30?'#EF4444':g.pctGRR>10?'#F59E0B':'#22C55E',
+    '#3B82F6'
+  ];
+
+  var inst=new Chart(canvas.getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:['Repeatability (EV)','Reproducibility (AV)','Total GRR','Part-to-Part (PV)'],
+      datasets:[{
+        label:'% of Total Variation',
+        data:pcts.map(function(v){return parseFloat(v.toFixed(2));}),
+        backgroundColor:colors,
+        borderWidth:0,
+        borderRadius:6,
+      }]
+    },
+    options:{
+      responsive:false,
+      animation:false,
+      indexAxis:'y',
+      plugins:{
+        title:{display:true,text:'Gage R&R 變異來源分解（% of Total Variation = 100%）',font:{size:13,weight:'600'},padding:{bottom:8}},
+        legend:{display:false},
+        tooltip:{callbacks:{label:function(c){return c.parsed.x.toFixed(2)+'%';}}}
+      },
+      scales:{
+        x:{min:0,max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:function(v){return v+'%';},font:{size:11}},title:{display:true,text:'% of Total Variation'}},
+        y:{grid:{display:false},ticks:{font:{size:12}}}
+      }
+    }
+  });
+  chartInst.push(inst);
+
+  // 在長條圖旁邊標示參考線 10% 和 30%
+}
+
+function drawGRRCharts(){
+  var g=R.grrResult;
+  var ops=g.ops,parts=g.parts,data=g.data;
+
+  // Xbar chart by operator
+  var xbarByOp={};
+  ops.forEach(function(op){
+    xbarByOp[op]=parts.map(function(pt){
+      var reps=data[op]&&data[op][pt]?data[op][pt]:[];
+      return reps.length?reps.reduce(function(s,v){return s+v;},0)/reps.length:null;
+    });
+  });
+  var allXbar=ops.reduce(function(a,op){return a.concat(xbarByOp[op].filter(function(v){return v!==null;}));},[] );
+  var grandXbar=allXbar.reduce(function(s,v){return s+v;},0)/allXbar.length;
+
+  // Range by operator
+  var rangeByOp={};
+  ops.forEach(function(op){
+    rangeByOp[op]=parts.map(function(pt){
+      var reps=data[op]&&data[op][pt]?data[op][pt]:[];
+      return reps.length>=2?Math.max.apply(null,reps)-Math.min.apply(null,reps):null;
+    });
+  });
+  var allR=ops.reduce(function(a,op){return a.concat(rangeByOp[op].filter(function(v){return v!==null;}));},[] );
+  var Rbar2=allR.reduce(function(s,v){return s+v;},0)/allR.length;
+  var n=g.parts.length;
+  var d2_2=1.128,D4_2=3.267;
+  var sigma_xbar=Rbar2/(d2_2*Math.sqrt(2));
+  var UCL_xbar=grandXbar+3*sigma_xbar;
+  var LCL_xbar=grandXbar-3*sigma_xbar;
+  var UCL_r=D4_2*Rbar2;
+
+  var colors_op=['#1D3B8A','#059669','#D97706'];
+  var labels=parts.map(function(pt){return 'P'+pt;});
+
+  var c1=document.getElementById('grr-xbar-canvas');
+  if(c1){
+    c1.width=c1.parentElement.offsetWidth||640;c1.height=220;
+    var datasets=[
+      {label:'UCL='+parseFloat(UCL_xbar.toFixed(4)),data:Array(n).fill(parseFloat(UCL_xbar.toFixed(4))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0,type:'line'},
+      {label:'CL='+parseFloat(grandXbar.toFixed(4)),data:Array(n).fill(parseFloat(grandXbar.toFixed(4))),borderColor:'#16A34A',borderWidth:1.5,pointRadius:0,fill:false,tension:0,type:'line'},
+      {label:'LCL='+parseFloat(LCL_xbar.toFixed(4)),data:Array(n).fill(parseFloat(LCL_xbar.toFixed(4))),borderColor:'#2563EB',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0,type:'line'},
+    ];
+    ops.forEach(function(op,i){
+      datasets.push({label:'操作員'+op,data:xbarByOp[op],borderColor:colors_op[i%3],borderWidth:1.5,pointRadius:4,fill:false,tension:0.1,type:'line'});
+    });
+    var inst1=new Chart(c1.getContext('2d'),{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:false,animation:false,plugins:{title:{display:true,text:'Xbar Chart by Operator',font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11},boxWidth:14}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+    chartInst.push(inst1);
+  }
+
+  var c2=document.getElementById('grr-r-canvas');
+  if(c2){
+    c2.width=c2.parentElement.offsetWidth||640;c2.height=200;
+    var ds2=[
+      {label:'UCL='+parseFloat(UCL_r.toFixed(4)),data:Array(n).fill(parseFloat(UCL_r.toFixed(4))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0,type:'line'},
+      {label:'CL='+parseFloat(Rbar2.toFixed(4)),data:Array(n).fill(parseFloat(Rbar2.toFixed(4))),borderColor:'#16A34A',borderWidth:1.5,pointRadius:0,fill:false,tension:0,type:'line'},
+    ];
+    ops.forEach(function(op,i){
+      ds2.push({label:'操作員'+op,data:rangeByOp[op],borderColor:colors_op[i%3],borderWidth:1.5,pointRadius:4,fill:false,tension:0.1,type:'line'});
+    });
+    var inst2=new Chart(c2.getContext('2d'),{type:'line',data:{labels:labels,datasets:ds2},options:{responsive:false,animation:false,plugins:{title:{display:true,text:'R Chart by Operator',font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11},boxWidth:14}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{min:0,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+    chartInst.push(inst2);
+  }
+
+  // ANOVA 表
+  var g2=R.grrResult;
+  var r4=g2.r4;
+  document.getElementById('grr-anova-content').innerHTML=
+    '<div style="overflow-x:auto"><table><thead><tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F 值</th><th>說明</th></tr></thead><tbody>'+
+    '<tr><td>操作員 (Operator)</td><td>'+r4(g2.SSop)+'</td><td>'+g2.dfop+'</td><td>'+r4(g2.MSop)+'</td><td>'+r4(g2.MSop/g2.MSoppart)+'</td><td style="font-size:12px;color:#6B7280">操作員主效應</td></tr>'+
+    '<tr><td>零件 (Part)</td><td>'+r4(g2.SSpart)+'</td><td>'+g2.dfpart+'</td><td>'+r4(g2.MSpart)+'</td><td>'+r4(g2.MSpart/g2.MSoppart)+'</td><td style="font-size:12px;color:#6B7280">零件主效應</td></tr>'+
+    '<tr><td>Operator × Part</td><td>'+r4(g2.SSoppart)+'</td><td>'+g2.dfoppart+'</td><td>'+r4(g2.MSoppart)+'</td><td>'+r4(g2.MSoppart/g2.MSerr)+'</td><td style="font-size:12px;color:#6B7280">交互作用</td></tr>'+
+    '<tr><td>誤差 (Repeatability)</td><td>'+r4(g2.SSerr)+'</td><td>'+g2.dferr+'</td><td>'+r4(g2.MSerr)+'</td><td>—</td><td style="font-size:12px;color:#6B7280">重複量測誤差</td></tr>'+
+    '<tr style="font-weight:700;background:#F9FAFB"><td>總計</td><td>'+r4(g2.SStotal)+'</td><td>'+g2.dftotal+'</td><td>—</td><td>—</td><td></td></tr>'+
+    '</tbody></table></div>'+
+    '<div class="alert info" style="margin-top:.75rem;font-size:12px">Operator×Part 交互作用顯著（F 值大）代表不同操作員對不同零件的量測偏差不一致，需加強訓練。</div>';
+}
+
+function grrSw(name){
+  var tabs=['summary','bar','xbarr','anova'];
+  document.querySelectorAll('#page-msa .tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
+  tabs.forEach(function(t){document.getElementById('grr-tab-'+t).classList.remove('show');});
+  document.getElementById('grr-tab-'+name).classList.add('show');
+  if(name==='bar')setTimeout(function(){drawGRRBar();},50);
+  if(name==='xbarr')setTimeout(function(){drawGRRCharts();},50);
+}
+
+// ── Bias 分析 ──
+function biasAnalyze(){
+  var ref=parseFloat(document.getElementById('bias-ref').value);
+  var alpha=parseFloat(document.getElementById('bias-alpha').value)||0.05;
+  var data=document.getElementById('bias-data').value.trim().split(/[\s,]+/).map(Number).filter(function(v){return !isNaN(v);});
+  if(!data.length||isNaN(ref)){alert('請填入參考值和數據');return;}
+
+  var n=data.length;
+  var xbar=data.reduce(function(s,v){return s+v;},0)/n;
+  var bias=xbar-ref;
+  var s=Math.sqrt(data.reduce(function(s2,v){return s2+Math.pow(v-xbar,2);},0)/(n-1));
+  var se=s/Math.sqrt(n);
+  var t=bias/se;
+  var df=n-1;
+  var pval=2*(1-normalCDF(Math.abs(t)));
+  var sig=pval<alpha;
+
+  document.getElementById('bias-out').style.display='block';
+  document.getElementById('bias-result').innerHTML=
+    '<div class="stat-grid" style="margin-bottom:.75rem">'+
+    '<div class="sc"><div class="v">'+ref+'</div><div class="l">參考值</div></div>'+
+    '<div class="sc"><div class="v">'+xbar.toFixed(4)+'</div><div class="l">量測均值</div></div>'+
+    '<div class="sc"><div class="v">'+bias.toFixed(4)+'</div><div class="l">Bias</div></div>'+
+    '<div class="sc"><div class="v">'+t.toFixed(4)+'</div><div class="l">t 統計量</div></div>'+
+    '<div class="sc"><div class="v">'+pval.toFixed(4)+'</div><div class="l">p-value</div></div>'+
+    '</div>'+
+    '<div class="alert '+(sig?'danger':'success')+'">'+
+    '<strong>Bias 分析結果：</strong>Bias = '+bias.toFixed(4)+'，t = '+t.toFixed(4)+'，p = '+pval.toFixed(4)+'（α = '+alpha+'）<br>'+
+    '<strong>結論：</strong>'+(sig?'⚠️ Bias 顯著（p < α），量具有系統性偏差，需校正。':'✅ Bias 不顯著（p ≥ α），量具無明顯系統性偏差。')+
+    '</div>';
+}
+
+// ── Linearity 分析 ──
+function linAnalyze(){
+  var tol=parseFloat(document.getElementById('lin-tol').value)||null;
+  var lines=document.getElementById('lin-data').value.trim().split('\n').filter(function(l){return l.trim();});
+  var refVals=[],biasVals=[],allPoints=[];
+  lines.forEach(function(line){
+    var p=line.split(',').map(function(s){return parseFloat(s.trim());}).filter(function(v){return !isNaN(v);});
+    if(p.length<2)return;
+    var ref=p[0],meas=p.slice(1);
+    var mBar=meas.reduce(function(s,v){return s+v;},0)/meas.length;
+    var bias=mBar-ref;
+    refVals.push(ref);biasVals.push(bias);
+    meas.forEach(function(m){allPoints.push({ref,bias:m-ref});});
+  });
+  if(!refVals.length){alert('請填入數據');return;}
+
+  // 線性迴歸 bias vs ref
+  var n=allPoints.length;
+  var xm=allPoints.reduce(function(s,d){return s+d.ref;},0)/n;
+  var ym=allPoints.reduce(function(s,d){return s+d.bias;},0)/n;
+  var sxy=allPoints.reduce(function(s,d){return s+(d.ref-xm)*(d.bias-ym);},0);
+  var sxx=allPoints.reduce(function(s,d){return s+Math.pow(d.ref-xm,2);},0);
+  var b1=sxy/sxx,b0=ym-b1*xm;
+  var r=sxy/Math.sqrt(sxx*allPoints.reduce(function(s,d){return s+Math.pow(d.bias-ym,2);},0));
+  var linearity=Math.abs(b1)*(Math.max.apply(null,refVals)-Math.min.apply(null,refVals));
+  var pctLin=tol?linearity/tol*100:null;
+
+  document.getElementById('lin-stats').innerHTML=
+    '<div class="sc"><div class="v">'+linearity.toFixed(4)+'</div><div class="l">Linearity</div></div>'+
+    (pctLin?'<div class="sc"><div class="v">'+pctLin.toFixed(2)+'%</div><div class="l">%Linearity</div></div>':'')+
+    '<div class="sc"><div class="v">'+b1.toFixed(4)+'</div><div class="l">斜率 b₁</div></div>'+
+    '<div class="sc"><div class="v">'+r.toFixed(4)+'</div><div class="l">相關係數 r</div></div>';
+
+  destroyCharts();
+  var canvas=document.getElementById('lin-canvas');
+  if(canvas){
+    canvas.width=canvas.parentElement.offsetWidth||640;
+    var xMin=Math.min.apply(null,refVals),xMax=Math.max.apply(null,refVals);
+    var inst=new Chart(canvas.getContext('2d'),{
+      type:'scatter',
+      data:{datasets:[
+        {label:'Bias',data:allPoints.map(function(d){return{x:d.ref,y:d.bias};}),backgroundColor:'#1D3B8A',pointRadius:5},
+        {label:'迴歸線 y='+b0.toFixed(3)+'+'+b1.toFixed(3)+'x',data:[{x:xMin,y:b0+b1*xMin},{x:xMax,y:b0+b1*xMax}],type:'line',borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false},
+        {label:'Bias=0',data:[{x:xMin,y:0},{x:xMax,y:0}],type:'line',borderColor:'#16A34A',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
+      ]},
+      options:{responsive:false,animation:false,plugins:{title:{display:true,text:'Linearity 分析：Bias vs 參考值',font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{title:{display:true,text:'參考值'},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{title:{display:true,text:'Bias'},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}
+    });
+    chartInst.push(inst);
+  }
+  document.getElementById('lin-result').innerHTML=
+    '<div class="alert '+(Math.abs(b1)<0.1?'success':'warn')+'">'+
+    '<strong>結論：</strong>斜率 b₁ = '+b1.toFixed(4)+'（接近 0 表示偏差不隨量測範圍變化）。'+
+    (pctLin?'%Linearity = '+pctLin.toFixed(2)+'%（< 10% 為優良）。':'')+'</div>';
+  document.getElementById('lin-out').style.display='block';
+}
+
+// ── Stability 分析 ──
+function stabAnalyze(){
+  var lines=document.getElementById('stab-data').value.trim().split('\n').filter(function(l){return l.trim();});
+  var groups=lines.map(function(l){return l.split(',').map(Number).filter(function(v){return !isNaN(v);});}).filter(function(g){return g.length>0;});
+  if(!groups.length){alert('請填入數據');return;}
+  var unit=document.getElementById('stab-unit').value||'期';
+  var ref=parseFloat(document.getElementById('stab-ref').value)||null;
+
+  var xbars=groups.map(function(g){return g.reduce(function(s,v){return s+v;},0)/g.length;});
+  var ranges=groups.map(function(g){return g.length>1?Math.max.apply(null,g)-Math.min.apply(null,g):0;});
+  var grandXbar=xbars.reduce(function(s,v){return s+v;},0)/xbars.length;
+  var Rbar=ranges.reduce(function(s,v){return s+v;},0)/ranges.length;
+  var n=groups[0].length;
+  var A2t={2:1.880,3:1.023,4:0.729,5:0.577}[n]||1.023;
+  var D4t={2:3.267,3:2.574,4:2.282,5:2.114}[n]||2.574;
+  var UCL_x=grandXbar+A2t*Rbar,LCL_x=grandXbar-A2t*Rbar,UCL_r=D4t*Rbar;
+
+  var labels=groups.map(function(_,i){return '第'+(i+1)+unit;});
+  destroyCharts();
+
+  function mkStabChart(id,title,vals,ucl,cl,lcl,lc){
+    var c=document.getElementById(id);if(!c)return;
+    c.width=c.parentElement.offsetWidth||640;c.height=200;
+    var anomSet=new Set(vals.map(function(v,i){return v>ucl||v<lcl?i:null;}).filter(function(i){return i!==null;}));
+    var inst=new Chart(c.getContext('2d'),{type:'line',data:{labels:labels,datasets:[
+      {label:'UCL='+parseFloat(ucl.toFixed(4)),data:Array(vals.length).fill(parseFloat(ucl.toFixed(4))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+      {label:'CL='+parseFloat(cl.toFixed(4)),data:Array(vals.length).fill(parseFloat(cl.toFixed(4))),borderColor:'#16A34A',borderWidth:1.5,pointRadius:0,fill:false,tension:0},
+      {label:'LCL='+parseFloat(Math.max(0,lcl).toFixed(4)),data:Array(vals.length).fill(parseFloat(Math.max(0,lcl).toFixed(4))),borderColor:'#2563EB',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+      {label:'數值',data:vals.map(function(v){return parseFloat(v.toFixed(4));}),borderColor:lc,borderWidth:1.8,pointBackgroundColor:vals.map(function(v,i){return anomSet.has(i)?'#DC2626':lc;}),pointRadius:vals.map(function(v,i){return anomSet.has(i)?6:4;}),fill:false,tension:0.1},
+      ref?{label:'參考值='+ref,data:Array(vals.length).fill(ref),borderColor:'#D97706',borderWidth:1.5,borderDash:[3,3],pointRadius:0,fill:false}:null
+    ].filter(Boolean)},options:{responsive:false,animation:false,plugins:{title:{display:true,text:title,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11},boxWidth:14}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+    chartInst.push(inst);
+  }
+
+  mkStabChart('stab-xbar-canvas','Xbar Chart（穩定性監控）',xbars,UCL_x,grandXbar,LCL_x,'#1D3B8A');
+  mkStabChart('stab-r-canvas','R Chart（穩定性監控）',ranges,UCL_r,Rbar,0,'#B45309');
+
+  var anomCount=xbars.filter(function(v){return v>UCL_x||v<LCL_x;}).length;
+  document.getElementById('stab-result').innerHTML=
+    '<div class="alert '+(anomCount===0?'success':'danger')+'">'+
+    '<strong>穩定性分析結果：</strong>共 '+groups.length+' 個時間點，'+
+    (anomCount===0?'✅ 無異常點，量具穩定':'⚠️ 發現 '+anomCount+' 個異常點，量具可能已漂移，建議重新校正')+
+    '</div>';
+  document.getElementById('stab-out').style.display='block';
+}
+
+// ── Attribute MSA ──
+function attrAnalyze(){
+  var nop=parseInt(document.getElementById('attr-nop').value)||2;
+  var lines=document.getElementById('attr-data').value.trim().split('\n').filter(function(l){return l.trim();});
+  var records=lines.map(function(l){return l.split(',').map(function(s){return parseInt(s.trim());}).filter(function(v){return !isNaN(v);});}).filter(function(r){return r.length>=3;});
+  if(!records.length){alert('請填入數據');return;}
+
+  var n=records.length;
+  var standards=records.map(function(r){return r[1];});
+  var allMatch=0,opMatch=[];
+  for(var op=0;op<nop;op++){
+    var matchRef=0,matchSelf=0;
+    records.forEach(function(r){
+      var r1=r[2+op*2],r2=r[2+op*2+1];
+      if(r1===r[1]&&r2===r[1])matchRef++;
+      if(r1===r2)matchSelf++;
+    });
+    opMatch.push({op:op+1,matchRef,matchSelf,pctRef:(matchRef/n*100),pctSelf:(matchSelf/n*100)});
+    allMatch+=matchRef;
+  }
+
+  // Cohen's Kappa（所有評估員 vs 標準）
+  var totalDecisions=nop*n*2;
+  var correctDecisions=records.reduce(function(s,r){
+    var cnt=0;
+    for(var op=0;op<nop;op++){cnt+=(r[2+op*2]===r[1]?1:0)+(r[2+op*2+1]===r[1]?1:0);}
+    return s+cnt;
+  },0);
+  var po=correctDecisions/totalDecisions;
+  var stdOnes=standards.filter(function(v){return v===1;}).length;
+  var raterOnes=records.reduce(function(s,r){
+    var cnt=0;
+    for(var op=0;op<nop;op++){cnt+=(r[2+op*2]===1?1:0)+(r[2+op*2+1]===1?1:0);}
+    return s+cnt;
+  },0);
+  var pStd1=stdOnes/n, pStd0=1-pStd1;
+  var pRater1=raterOnes/totalDecisions, pRater0=1-pRater1;
+  var pe=pStd1*pRater1+pStd0*pRater0;
+  var kappa=(1-pe)!==0?(po-pe)/(1-pe):0;
+
+  var kappaStatus=kappa>=0.9?'success':kappa>=0.7?'warn':'danger';
+  var kappaLabel=kappa>=0.9?'✅ 優良（≥0.90）':kappa>=0.7?'⚠️ 條件接受（0.70~0.89）':'❌ 不合格（< 0.70），需重新訓練';
+
+  document.getElementById('attr-out').style.display='block';
+  document.getElementById('attr-result').innerHTML=
+    '<div class="stat-grid" style="margin-bottom:.75rem">'+
+    '<div class="sc"><div class="v">'+kappa.toFixed(4)+'</div><div class="l">Cohen\'s Kappa</div></div>'+
+    '<div class="sc"><div class="v">'+(po*100).toFixed(1)+'%</div><div class="l">整體一致率</div></div>'+
+    '<div class="sc"><div class="v">'+n+'</div><div class="l">樣本數</div></div>'+
+    '</div>'+
+    '<div class="alert '+kappaStatus+'" style="margin-bottom:.75rem"><strong>Kappa = '+kappa.toFixed(4)+'：</strong>'+kappaLabel+'</div>'+
+    '<div style="overflow-x:auto"><table><thead><tr><th>操作員</th><th>與標準一致次數</th><th>與標準一致率%</th><th>自我一致率%</th><th>判斷</th></tr></thead><tbody>'+
+    opMatch.map(function(op){
+      var ok=op.pctRef>=90&&op.pctSelf>=90;
+      return '<tr><td>操作員'+op.op+'</td><td>'+op.matchRef+'/'+n+'</td><td>'+op.pctRef.toFixed(1)+'%</td><td>'+op.pctSelf.toFixed(1)+'%</td><td>'+(ok?'<span class="badge-r green">通過</span>':'<span class="badge-r red">需改善</span>')+'</td></tr>';
+    }).join('')+
+    '</tbody></table></div>'+
+    '<div class="alert info" style="margin-top:.75rem;font-size:12px">判斷標準：Kappa ≥ 0.90 優良 ｜ 0.70~0.89 條件接受 ｜ &lt; 0.70 不合格。Kappa 期望一致率已依標準答案比例與評估員判定比例計算。</div>';
+}
+
+
+window.msaDecide=msaDecide;window.grrAnalyze=grrAnalyze;window.grrLoadEx=grrLoadEx;window.grrSw=grrSw;window.biasAnalyze=biasAnalyze;window.linAnalyze=linAnalyze;window.stabAnalyze=stabAnalyze;window.attrAnalyze=attrAnalyze;
+window.toggleEdu=function(id){
+  var p=document.getElementById('edu-'+id);
+  if(!p)return;
+  p.classList.toggle('open');
+  var btns=p.parentElement.querySelectorAll('.edu-btn');
+  btns.forEach(function(b){
+    b.innerHTML=p.classList.contains('open')
+      ?'<span style="font-size:15px">📖</span> 收起說明'
+      :'<span style="font-size:15px">📖</span> 工具說明 / 教育訓練';
+  });
+};
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
 window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
 window.paretoAnalyze=paretoAnalyze;window.paretoLoadEx=paretoLoadEx;
@@ -1456,5 +2826,111 @@ document.addEventListener('click', function(e) {
   }
 });
 </script>
+
+<script id="dmaic-record-enhancements">
+(function(){
+  'use strict';
+  var APP_VER='dmaic-v2-records';
+  function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
+  function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='Offline · Auto-save enabled';},2200);}}
+  function today(){return new Date().toISOString().slice(0,10);}
+  function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
+
+  window.dmaicEnhanceRecords=function(){
+    document.querySelectorAll('.tool-page').forEach(function(tp){
+      if(tp.querySelector('[data-quality-record]')) return;
+      var page=tp.closest('.page');
+      var pid=page?page.id.replace('page-','tool'):'tool';
+      var header=tp.querySelector('.tp-header');
+      var card=document.createElement('div');
+      card.className='card quality-record';
+      card.setAttribute('data-quality-record','1');
+      card.innerHTML=''+
+        '<div class="card-title"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>分析紀錄 / Note / 報告輸出</div>'+ 
+        '<div class="print-only">DMAIC 工具平台分析報告 - '+(document.title||'')+'</div>'+ 
+        '<div class="record-grid">'+
+          '<div class="field"><label>專案 / 產品</label><input id="'+pid+'-record-project" type="text" placeholder="例：檢體針組 / 親水塗層 / 包裝確效"></div>'+ 
+          '<div class="field"><label>批號 / Lot / 樣品</label><input id="'+pid+'-record-lot" type="text" placeholder="例：P3-001 / Lot A"></div>'+ 
+          '<div class="field"><label>分析日期</label><input id="'+pid+'-record-date" type="date" value="'+today()+'"></div>'+ 
+        '</div>'+ 
+        '<div class="record-grid-2">'+
+          '<div class="field"><label>分析者</label><input id="'+pid+'-record-owner" type="text" placeholder="分析者 / 部門"></div>'+ 
+          '<div class="field"><label>結論</label><select id="'+pid+'-record-result"><option value="未判定">未判定</option><option value="PASS">PASS</option><option value="FAIL">FAIL</option><option value="需調查">需調查</option><option value="僅供參考">僅供參考</option></select></div>'+ 
+        '</div>'+ 
+        '<div class="field"><label>分析目的</label><textarea class="record-note" id="'+pid+'-record-purpose" rows="2" placeholder="本次分析要回答的問題，例如：確認製程是否穩定、比較改善前後是否有差異、確認量測系統是否可接受。"></textarea></div>'+ 
+        '<div class="field"><label>判讀 / Note / 後續處置</label><textarea class="record-note" id="'+pid+'-record-note" rows="3" placeholder="記錄異常點、可能原因、改善措施、CAPA/變更單編號、是否需重測。"></textarea></div>'+ 
+        '<div class="record-actions"><button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存本頁</button><button class="btn btn-sec" onclick="dmaicPrintPDF()">🖨 匯出 PDF</button><button class="btn btn-sec" onclick="dmaicExportJSON()">⬇ 匯出 JSON</button></div>';
+      if(header) header.insertAdjacentElement('afterend',card); else tp.insertBefore(card,tp.firstChild);
+    });
+  };
+
+  function fieldsIn(page){return Array.prototype.slice.call(page.querySelectorAll('input[id],select[id],textarea[id]'));}
+  function collectPage(){var p=activePage();var data={app:APP_VER,page:pageKey(),savedAt:new Date().toISOString(),fields:{}};fieldsIn(p).forEach(function(el){data.fields[el.id]=el.value;});return data;}
+  function applyData(data){if(!data||!data.fields)return;Object.keys(data.fields).forEach(function(id){var el=document.getElementById(id);if(el){el.value=data.fields[id];el.dispatchEvent(new Event('change'));}});}
+  window.dmaicSaveCurrent=function(){try{localStorage.setItem(APP_VER+'::'+pageKey(),JSON.stringify(collectPage()));status('已儲存本頁：'+new Date().toLocaleTimeString());}catch(e){alert('儲存失敗：'+e.message);}};
+  window.dmaicRestoreCurrent=function(){try{var raw=localStorage.getItem(APP_VER+'::'+pageKey());if(raw)applyData(JSON.parse(raw));}catch(e){console.warn(e);}};
+  window.dmaicClearCurrent=function(){if(!confirm('確定清除本頁已儲存資料？'))return;try{localStorage.removeItem(APP_VER+'::'+pageKey());status('已清除本頁儲存資料');}catch(e){} };
+  window.dmaicExportJSON=function(){var data=collectPage();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(pageKey()+'_'+(data.fields[pageKey().replace('page-','tool')+'-record-project']||'record'))+'.json';a.click();URL.revokeObjectURL(a.href);status('JSON 已產生');};
+  window.dmaicPrintPDF=function(){
+    var p=activePage();
+    var title=p.querySelector('.tp-title')?.textContent || 'DMAIC 工具平台';
+    document.title=safeName(title+'_分析報告_'+today());
+    window.print();
+  };
+
+  // auto-save, restore on navigation
+  var oldGoTool=window.goTool, oldGoHome=window.goHome;
+  if(typeof oldGoTool==='function') window.goTool=function(id){ oldGoTool(id); window.dmaicEnhanceRecords(); window.dmaicRestoreCurrent(); };
+  if(typeof oldGoHome==='function') window.goHome=function(){ oldGoHome(); window.dmaicRestoreCurrent(); };
+  document.addEventListener('input',function(e){if(e.target && e.target.id){clearTimeout(window.__dmaicSaveTimer);window.__dmaicSaveTimer=setTimeout(window.dmaicSaveCurrent,700);}},true);
+  document.addEventListener('change',function(e){if(e.target && e.target.id) window.dmaicSaveCurrent();},true);
+
+  // SPC validation + interpretation
+  window.dmaicSpcConclusion=function(){
+    try{
+      if(typeof SR==='undefined' || !SR || !SR.chartType) return;
+      var host=document.getElementById('spc-auto-conclusion');
+      if(!host){host=document.createElement('div');host.id='spc-auto-conclusion';var out=document.querySelector('#spc-out .card');if(out)out.insertBefore(host,out.firstChild);}
+      var msgs=[],level='success';
+      if(SR.nelson){var r1=(SR.nelson.r1||[]).length,r2=(SR.nelson.r2||[]).length,r3=(SR.nelson.r3||[]).length;if(r1||r2||r3){level='danger';msgs.push('Nelson 規則已觸發，製程可能不在統計管制狀態，需先調查特殊原因。');}else msgs.push('未偵測到 Nelson Rule 1-3 訊號，初步可視為統計管制狀態。');}
+      if(['XBARR','XBARS','IMR'].indexOf(SR.chartType)>=0 && SR.lsl!=null && SR.usl!=null){
+        var cp=(SR.usl-SR.lsl)/(6*SR.sigma);var cpu=(SR.usl-SR.grandMean)/(3*SR.sigma);var cpl=(SR.grandMean-SR.lsl)/(3*SR.sigma);var cpk=Math.min(cpu,cpl);
+        if(cpk>=1.67) msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力優秀。');
+        else if(cpk>=1.33) msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力良好。');
+        else if(cpk>=1.00){level=level==='danger'?'danger':'warn';msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力僅尚可，建議監控中心值與變異。');}
+        else {level='danger';msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力不足，需改善或重估規格/製程變異來源。');}
+        if(cp>=1.33 && cpk<1.33) msgs.push('Cp 可接受但 Cpk 偏低，代表製程中心可能偏移。');
+      } else if(['NP','P','C','U'].indexOf(SR.chartType)>=0) msgs.push('此為計數型管制圖，不適用 Cp/Cpk；請以管制界限與異常規則判讀。');
+      host.innerHTML='<div class="alert '+level+'"><strong>SPC 自動判讀：</strong><br>'+msgs.map(function(m){return '• '+m;}).join('<br>')+'<br><span style="font-size:12px;color:#6B7280">註：自動判讀僅供工程判斷輔助；正式結論仍需結合抽樣計畫、量測系統、製程變更與原始紀錄。</span></div>';
+    }catch(e){console.warn(e);}
+  };
+  var oldSpc=window.spcAnalyze;
+  if(typeof oldSpc==='function') window.spcAnalyze=function(){
+    var lsl=parseFloat(document.getElementById('spc-lsl')?.value), usl=parseFloat(document.getElementById('spc-usl')?.value);
+    if(!isNaN(lsl)&&!isNaN(usl)&&usl<=lsl){alert('規格輸入錯誤：USL 必須大於 LSL。');return;}
+    var rows=(document.getElementById('spc-raw')?.value||'').trim().split('\n').filter(Boolean).length;
+    if(rows>0 && rows<5){if(!confirm('資料列數少於 5，統計判讀可靠度不足。仍要分析？'))return;}
+    oldSpc();
+    setTimeout(window.dmaicSpcConclusion,120);
+    window.dmaicSaveCurrent();
+  };
+
+  window.dmaicEnhanceRecords();
+  window.dmaicRestoreCurrent();
+  status('Offline · Auto-save enabled');
+})();
+</script>
+
+<section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
+  <div class="card" style="background:#F8FAFC;border-left:4px solid var(--gold);font-size:12px;line-height:1.8;color:#374151">
+    <div class="card-title"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>方法來源與驗算聲明</div>
+    <p><strong>定位：</strong>本工具為內部工程分析與教育訓練輔助工具，不等同第三方軟體認證或法規驗證系統。</p>
+    <p><strong>SPC：</strong>Xbar-R、I-MR、np chart、Cp/Cpk 等公式依 Montgomery《Introduction to Statistical Quality Control》與常用 SPC 手冊公式設計，已以範例資料做初步驗算。</p>
+    <p><strong>MSA：</strong>Gage R&amp;R 支援 ANOVA 法與平均全距法；判斷門檻採常見 AIAG MSA 判讀：%GRR &lt; 10% 優良、10%~30% 條件接受、&gt;30% 不合格，ndc 建議 ≥ 5。正式使用前仍應以公司核准樣本資料與既有統計軟體交叉確認。</p>
+    <p><strong>報告責任：</strong>輸出 PDF/JSON 可作為紀錄草稿，正式品質紀錄仍需依公司文件管制、審查與批准流程執行。</p>
+  </div>
+</section>
+
 </body>
 </html>
