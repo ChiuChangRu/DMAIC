@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Six Sigma DMAIC 工具平台</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#0F2044;--navy2:#1D3B8A;--navy3:#2E5FCF;
+  --teal:#0E6E6B;--teal2:#1A9E9A;
+  --gold:#B8860B;--gold2:#DAA520;
+  --bg:#F0F2F7;--card:#fff;--border:#DDE2EC;
+  --text:#1a1a2e;--muted:#6B7280;--faint:#9CA3AF;
+  --D:#2563EB;--M:#0891B2;--A:#059669;--I:#D97706;--C:#7C3AED;
+  --Dl:#EFF6FF;--Ml:#ECFEFF;--Al:#ECFDF5;--Il:#FFFBEB;--Cl:#F5F3FF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+
+/* ── 頂欄 ── */
+.topbar{background:var(--navy);color:#fff;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-badge{background:var(--gold2);color:var(--navy);font-weight:800;font-size:13px;padding:3px 10px;border-radius:4px;letter-spacing:.05em}
+.logo-title{font-size:16px;font-weight:600;letter-spacing:.02em;color:#fff}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,.55)}
+.breadcrumb span{color:rgba(255,255,255,.9)}
+.breadcrumb .sep{color:rgba(255,255,255,.3)}
+.topbar-right{font-size:12px;color:rgba(255,255,255,.4)}
+
+/* ── 頁面容器 ── */
+.page{display:none}.page.active{display:block}
+
+/* ══ HOME 母頁面 ══ */
+.home-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,#1a4ba0 100%);color:#fff;padding:3rem 2rem 2.5rem;text-align:center}
+.home-hero h2{font-size:28px;font-weight:700;letter-spacing:.01em;margin-bottom:.5rem}
+.home-hero p{font-size:14px;color:rgba(255,255,255,.65);max-width:520px;margin:0 auto}
+.home-main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+
+/* DMAIC 流程軸 */
+.dmaic-flow{display:flex;align-items:stretch;gap:0;margin-bottom:2.5rem;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(15,32,68,.12)}
+.phase-header{flex:1;cursor:pointer;transition:transform .15s,box-shadow .15s;position:relative}
+.phase-header:hover{transform:translateY(-2px);z-index:2;box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.phase-header.active-phase{transform:translateY(-2px);z-index:2;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+.ph-inner{padding:1.1rem .9rem;text-align:center;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.ph-letter{font-size:26px;font-weight:800;letter-spacing:-.01em;line-height:1}
+.ph-word{font-size:13px;font-weight:600;letter-spacing:.03em}
+.ph-zh{font-size:11px;opacity:.8}
+.phase-arrow{width:0;height:0;border-style:solid;position:absolute;right:-14px;top:50%;transform:translateY(-50%);z-index:3}
+
+/* 工具卡片區 */
+.tools-section{margin-bottom:2rem}
+.tools-section-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.9rem;display:flex;align-items:center;gap:8px}
+.tools-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;cursor:pointer;transition:border-color .18s,transform .18s,box-shadow .18s;position:relative;overflow:hidden}
+.tool-card:hover{border-color:var(--navy3);transform:translateY(-2px);box-shadow:0 4px 16px rgba(29,59,138,.12)}
+.tool-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.tool-card .tc-phase{font-size:10px;font-weight:700;letter-spacing:.06em;margin-bottom:.35rem}
+.tool-card .tc-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:.3rem;line-height:1.3}
+.tool-card .tc-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.tool-card .tc-tag{position:absolute;top:.6rem;right:.7rem;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+.tag-done{background:#DCFCE7;color:#166534}
+.tag-new{background:#EFF6FF;color:#1D4ED8}
+.tag-soon{background:#F3F4F6;color:#6B7280}
+
+/* ══ 子頁面通用 ══ */
+.tool-page{max-width:1000px;margin:0 auto;padding:1.5rem}
+.tp-header{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:14px}
+.tp-phase-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.tp-title{font-size:18px;font-weight:700;color:var(--text)}
+.tp-subtitle{font-size:13px;color:var(--muted);margin-top:2px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+.card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.85rem;display:flex;align-items:center;gap:7px}
+.card-title::before{content:'';width:3px;height:13px;border-radius:2px;display:inline-block}
+label{font-size:13px;color:#4B5563;display:block;margin-bottom:4px;font-weight:500}
+input,select,textarea{width:100%;padding:7px 11px;border:1px solid #D1D5DB;border-radius:8px;font-size:13px;font-family:inherit;background:#fff;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--navy2);box-shadow:0 0 0 3px rgba(29,59,138,.09)}
+textarea{resize:vertical;font-family:'Courier New',monospace;font-size:12px;line-height:1.55}
+.btn{border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,transform .1s;font-family:inherit}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--navy2);color:#fff}.btn-primary:hover{background:#162d6e}
+.btn-sec{background:#fff;color:#374151;border:1px solid #D1D5DB}.btn-sec:hover{background:#F9FAFB}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:11px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:11px}
+.field{margin-bottom:11px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:9px;margin:.65rem 0}
+.sc{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:9px;padding:.8rem;text-align:center}
+.sc .v{font-size:19px;font-weight:700;color:var(--navy2)}.sc .l{font-size:11px;color:var(--muted);margin-top:2px}
+.alert{border-radius:8px;padding:.7rem 1rem;font-size:13px;margin:.4rem 0;line-height:1.6;border:1px solid transparent}
+.alert.info{background:#EFF6FF;color:#1E40AF;border-color:#BFDBFE}
+.alert.warn{background:#FFFBEB;color:#92400E;border-color:#FDE68A}
+.alert.danger{background:#FEF2F2;color:#991B1B;border-color:#FECACA}
+.alert.success{background:#F0FDF4;color:#166534;border-color:#BBF7D0}
+.canvas-wrap{background:#FAFAFA;border-radius:8px;padding:.5rem;margin:.65rem 0;overflow-x:auto}
+canvas{display:block;max-width:100%}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{background:#F3F4F6;padding:6px 9px;text-align:left;font-weight:600;border-bottom:1px solid #E5E7EB;color:#374151}
+td{padding:5px 9px;border-bottom:1px solid #F3F4F6;color:#4B5563}
+tr:hover td{background:#F9FAFB}
+.badge-r{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600}
+.badge-r.red{background:#FEF2F2;color:#991B1B}
+.badge-r.green{background:#F0FDF4;color:#166534}
+.badge-r.amber{background:#FFFBEB;color:#92400E}
+.badge-r.blue{background:#EFF6FF;color:#1E40AF}
+.tab-bar{display:flex;border-bottom:2px solid #E5E7EB;margin-bottom:1rem;overflow-x:auto}
+.tab{padding:8px 14px;font-size:13px;cursor:pointer;border-bottom:2.5px solid transparent;color:var(--muted);white-space:nowrap;margin-bottom:-2px;font-weight:500;transition:color .2s,border-color .2s}
+.tab.active{color:var(--navy2);border-bottom-color:var(--navy2);font-weight:600}
+.tab-c{display:none}.tab-c.show{display:block}
+@media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.dmaic-flow{flex-direction:column}.phase-arrow{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ── 頂欄 ── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo" data-goto="home" onclick="goHome()">
+      <div class="logo-badge">6σ</div>
+      <div class="logo-title">DMAIC 工具平台</div>
+    </div>
+    <div class="breadcrumb" id="breadcrumb"></div>
+  </div>
+  <div class="topbar-right">Offline · Free · Pure JS</div>
+</div>
+
+<!-- ══════════════ 母頁面 HOME ══════════════ -->
+<div id="page-home" class="page active">
+
+  <div class="home-hero">
+    <h2>Six Sigma DMAIC 工具平台</h2>
+    <p>完全離線運行・純 JavaScript 計算・無需帳號・點選工具直接使用</p>
+  </div>
+
+  <div class="home-main">
+
+    <!-- DMAIC 流程軸 -->
+    <div class="dmaic-flow">
+      <div class="phase-header" style="background:linear-gradient(135deg,#1D4ED8,#2563EB)" onclick="scrollToPhase('D')">
+        <div class="ph-inner">
+          <div class="ph-letter" style="color:#fff">D</div>
+          <div class="ph-word" style="color:rgba(255,255,255,.9)">DEFINE</div>
+          <div class="ph-zh" style="color:rgba(255,255,255,.7)">定義</div>
+        </div>
+        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #2563EB"></div>
+      </div>
+      <div class="phase-header" style="background:linear-gradient(135deg,#0E7490,#0891B2)" onclick="scrollToPhase('M')">
+        <div class="ph-inner">
+          <div class="ph-letter" style="color:#fff">M</div>
+          <div class="ph-word" style="color:rgba(255,255,255,.9)">MEASURE</div>
+          <div class="ph-zh" style="color:rgba(255,255,255,.7)">量測</div>
+        </div>
+        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #0891B2"></div>
+      </div>
+      <div class="phase-header" style="background:linear-gradient(135deg,#047857,#059669)" onclick="scrollToPhase('A')">
+        <div class="ph-inner">
+          <div class="ph-letter" style="color:#fff">A</div>
+          <div class="ph-word" style="color:rgba(255,255,255,.9)">ANALYZE</div>
+          <div class="ph-zh" style="color:rgba(255,255,255,.7)">分析</div>
+        </div>
+        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #059669"></div>
+      </div>
+      <div class="phase-header" style="background:linear-gradient(135deg,#B45309,#D97706)" onclick="scrollToPhase('I')">
+        <div class="ph-inner">
+          <div class="ph-letter" style="color:#fff">I</div>
+          <div class="ph-word" style="color:rgba(255,255,255,.9)">IMPROVE</div>
+          <div class="ph-zh" style="color:rgba(255,255,255,.7)">改善</div>
+        </div>
+        <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #D97706"></div>
+      </div>
+      <div class="phase-header" style="background:linear-gradient(135deg,#5B21B6,#7C3AED)" onclick="scrollToPhase('C')">
+        <div class="ph-inner">
+          <div class="ph-letter" style="color:#fff">C</div>
+          <div class="ph-word" style="color:rgba(255,255,255,.9)">CONTROL</div>
+          <div class="ph-zh" style="color:rgba(255,255,255,.7)">管制</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- D 工具 -->
+    <div id="phase-D" class="tools-section">
+      <div class="tools-section-title" style="color:var(--D)">D — Define 定義階段</div>
+      <div class="tools-grid">
+        <div class="tool-card" style="--tc:var(--D)" data-goto="pareto" onclick="goTool('pareto')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--D);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--D)">DEFINE</div>
+          <div class="tc-name">柏拉圖 Pareto</div>
+          <div class="tc-desc">80/20 法則・找出關鍵少數問題</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+        <div class="tool-card" data-goto="fishbone" onclick="goTool('fishbone')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--D);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--D)">DEFINE</div>
+          <div class="tc-name">魚骨圖（石川圖）</div>
+          <div class="tc-desc">系統化找出根本原因 6M</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+        <div class="tool-card" data-goto="sipoc" onclick="goTool('sipoc')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--D);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--D)">DEFINE</div>
+          <div class="tc-name">SIPOC 圖</div>
+          <div class="tc-desc">定義製程範疇・供需關係</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- M 工具 -->
+    <div id="phase-M" class="tools-section">
+      <div class="tools-section-title" style="color:var(--M)">M — Measure 量測階段</div>
+      <div class="tools-grid">
+        <div class="tool-card" data-goto="spc" onclick="goTool('spc')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--M);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--M)">MEASURE</div>
+          <div class="tc-name">SPC 管制圖</div>
+          <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
+          <span class="tc-tag tag-done">完成</span>
+        </div>
+        <div class="tool-card" data-goto="histogram" onclick="goTool('histogram')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--M);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--M)">MEASURE</div>
+          <div class="tc-name">直方圖 + 常態檢定</div>
+          <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+        <div class="tool-card" data-goto="boxplot" onclick="goTool('boxplot')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--M);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--M)">MEASURE</div>
+          <div class="tc-name">箱型圖 Box Plot</div>
+          <div class="tc-desc">分組比較・離群值偵測</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- A 工具 -->
+    <div id="phase-A" class="tools-section">
+      <div class="tools-section-title" style="color:var(--A)">A — Analyze 分析階段</div>
+      <div class="tools-grid">
+        <div class="tool-card" data-goto="scatter" onclick="goTool('scatter')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--A);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--A)">ANALYZE</div>
+          <div class="tc-name">相關性 + 散佈圖</div>
+          <div class="tc-desc">Pearson r・線性迴歸・R²</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+        <div class="tool-card" data-goto="hypothesis" onclick="goTool('hypothesis')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--A);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--A)">ANALYZE</div>
+          <div class="tc-name">假設檢定</div>
+          <div class="tc-desc">t-test・F-test・卡方檢定</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+        <div class="tool-card" data-goto="fishbone" onclick="goTool('fishbone')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--A);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--A)">ANALYZE</div>
+          <div class="tc-name">魚骨圖 / 5 Why</div>
+          <div class="tc-desc">根本原因分析・多層追溯</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- I 工具 -->
+    <div id="phase-I" class="tools-section">
+      <div class="tools-section-title" style="color:var(--I)">I — Improve 改善階段</div>
+      <div class="tools-grid">
+        <div class="tool-card" data-goto="doe" onclick="goTool('doe')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--I);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--I)">IMPROVE</div>
+          <div class="tc-name">DOE 實驗設計</div>
+          <div class="tc-desc">全因子・部分因子・Yates 分析</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+        <div class="tool-card" style="opacity:.6;cursor:not-allowed">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--I);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--I)">IMPROVE</div>
+          <div class="tc-name">田口方法 Taguchi</div>
+          <div class="tc-desc">L9・L18 直交表・S/N 比</div>
+          <span class="tc-tag tag-soon">開發中</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- C 工具 -->
+    <div id="phase-C" class="tools-section">
+      <div class="tools-section-title" style="color:var(--C)">C — Control 管制階段</div>
+      <div class="tools-grid">
+        <div class="tool-card" data-goto="spc" onclick="goTool('spc')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--C);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--C)">CONTROL</div>
+          <div class="tc-name">SPC 管制圖</div>
+          <div class="tc-desc">持續監控・Nelson 8 條規則</div>
+          <span class="tc-tag tag-done">完成</span>
+        </div>
+        <div class="tool-card" data-goto="cusum" onclick="goTool('cusum')">
+          <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--C);border-radius:3px 0 0 3px"></div>
+          <div class="tc-phase" style="color:var(--C)">CONTROL</div>
+          <div class="tc-name">CUSUM / EWMA</div>
+          <div class="tc-desc">小偏移敏感偵測・累積和圖</div>
+          <span class="tc-tag tag-new">可用</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════ 子頁面：SPC ══════════════ -->
+<div id="page-spc" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--M)"></div>
+    <div>
+      <div class="tp-title">SPC 統計製程管制</div>
+      <div class="tp-subtitle">Statistical Process Control — 自動判斷圖型・Nelson 8 條規則・製程能力</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="--cc:var(--M)"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+    <div class="g2">
+      <div class="field"><label>檢驗項目</label><input type="text" id="spc-item" value="內徑"></div>
+      <div class="field"><label>管制圖選擇</label>
+        <select id="spc-chart">
+          <option value="auto">自動判斷</option>
+          <option value="XBARR">Xbar-R（n=2~10）</option>
+          <option value="IMR">I-MR（單筆）</option>
+          <option value="XBARS">Xbar-S（n≥11）</option>
+          <option value="NP">np Chart</option>
+          <option value="P">p Chart</option>
+          <option value="C">c Chart</option>
+          <option value="U">u Chart</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>原始數據 <span style="font-size:11px;font-weight:400;color:var(--faint)">（每列一筆；同列多值=子組）</span></label>
+      <textarea id="spc-raw" rows="8">25.1, 25.3
+24.9, 25.1
+25.2, 25.0
+25.4, 25.2
+24.8, 25.0
+25.1, 25.3
+25.6, 25.4
+24.7, 24.9
+25.0, 25.2
+25.3, 25.1
+25.1, 25.5
+24.6, 24.8
+25.2, 25.3
+25.0, 24.9
+25.4, 25.2</textarea>
+    </div>
+    <div class="g4">
+      <div class="field"><label>LSL</label><input type="text" id="spc-lsl" value="24.5"></div>
+      <div class="field"><label>Target</label><input type="text" id="spc-tgt" value="25.0"></div>
+      <div class="field"><label>USL</label><input type="text" id="spc-usl" value="25.5"></div>
+      <div class="field"><label>樣本數 n</label><input type="text" id="spc-n" value="100"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="spcAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-sec" onclick="spcLoadEx('xbarr')">範例 Xbar-R</button>
+      <button class="btn btn-sec" onclick="spcLoadEx('imr')">範例 I-MR</button>
+      <button class="btn btn-sec" onclick="spcLoadEx('np')">範例 np</button>
+    </div>
+  </div>
+  <div id="spc-out" style="display:none">
+    <div class="card">
+      <div class="tab-bar">
+        <div class="tab active" onclick="spcSw('tree')">決策樹</div>
+        <div class="tab" onclick="spcSw('stats')">統計摘要</div>
+        <div class="tab" onclick="spcSw('chart')">管制圖</div>
+        <div class="tab" onclick="spcSw('cap')">製程能力</div>
+        <div class="tab" onclick="spcSw('nelson')">Nelson 規則</div>
+      </div>
+      <div id="spc-tab-tree" class="tab-c show">
+        <div style="background:#FAFAFA;border-radius:8px;padding:.5rem;overflow-x:auto"><canvas id="spc-tree-canvas"></canvas></div>
+        <div style="margin-top:.75rem" id="spc-path-div"></div>
+      </div>
+      <div id="spc-tab-stats" class="tab-c">
+        <div class="stat-grid" id="spc-stat-grid"></div>
+        <div style="margin-top:.8rem"><div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>管制界限</div><div style="overflow-x:auto"><table id="spc-lim-table"></table></div></div>
+        <div style="margin-top:.8rem"><div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>分組資料</div><div style="overflow-x:auto;max-height:240px;overflow-y:auto"><table id="spc-data-table"></table></div></div>
+      </div>
+      <div id="spc-tab-chart" class="tab-c">
+        <div id="spc-chart-info" class="alert info" style="margin-bottom:.75rem"></div>
+        <div class="canvas-wrap"><canvas id="spc-c1"></canvas></div>
+        <div class="canvas-wrap" style="margin-top:.75rem"><canvas id="spc-c2"></canvas></div>
+        <div style="margin-top:.75rem"><div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>異常點</div><div id="spc-anom"></div></div>
+      </div>
+      <div id="spc-tab-cap" class="tab-c"><div id="spc-cap"></div></div>
+      <div id="spc-tab-nelson" class="tab-c"><div id="spc-nelson"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：Pareto ══════════════ -->
+<div id="page-pareto" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--D)"></div>
+    <div><div class="tp-title">柏拉圖 Pareto Chart</div><div class="tp-subtitle">80/20 法則・找出關鍵少數・累積百分比曲線</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+    <div class="g2">
+      <div class="field"><label>圖表標題</label><input type="text" id="pa-title" value="不良原因分析"></div>
+      <div class="field"><label>Y 軸單位</label><input type="text" id="pa-unit" value="件數"></div>
+    </div>
+    <div class="field">
+      <label>類別與數值 <span style="font-size:11px;font-weight:400;color:var(--faint)">（每列：類別名稱, 數值）</span></label>
+      <textarea id="pa-data" rows="8">尺寸超差, 45
+外觀刮傷, 32
+焊接不良, 18
+組裝錯誤, 12
+材料缺陷, 8
+其他, 5</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="paretoAnalyze()">▶ 產生柏拉圖</button>
+      <button class="btn btn-sec" onclick="paretoLoadEx()">載入範例</button>
+    </div>
+  </div>
+  <div id="pa-out" style="display:none">
+    <div class="card">
+      <div id="pa-info" class="alert info" style="margin-bottom:.75rem"></div>
+      <div class="canvas-wrap"><canvas id="pa-canvas" height="320"></canvas></div>
+      <div style="margin-top:.75rem;overflow-x:auto"><table id="pa-table"></table></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：Fishbone ══════════════ -->
+<div id="page-fishbone" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--D)"></div>
+    <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・Man・Machine・Material・Method・Measurement・Mother Nature</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>輸入設定</div>
+    <div class="g2">
+      <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" value="產品不良率偏高"></div>
+    </div>
+    <div id="fb-causes-wrap">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="field"><label style="color:#1D4ED8">人員 (Man)</label><textarea id="fb-man" rows="3" placeholder="每行一個原因">操作技能不足&#10;疲勞作業&#10;SOP 未遵循</textarea></div>
+        <div class="field"><label style="color:#0891B2">機器 (Machine)</label><textarea id="fb-machine" rows="3" placeholder="每行一個原因">設備老化&#10;精度不足&#10;未定期保養</textarea></div>
+        <div class="field"><label style="color:#059669">材料 (Material)</label><textarea id="fb-material" rows="3" placeholder="每行一個原因">原料品質不穩&#10;供應商變更&#10;儲存不當</textarea></div>
+        <div class="field"><label style="color:#D97706">方法 (Method)</label><textarea id="fb-method" rows="3" placeholder="每行一個原因">製程參數偏移&#10;作業標準不明&#10;換線程序不當</textarea></div>
+        <div class="field"><label style="color:#7C3AED">量測 (Measurement)</label><textarea id="fb-measure" rows="3" placeholder="每行一個原因">量具精度不夠&#10;校正頻率不足&#10;量測方法不一</textarea></div>
+        <div class="field"><label style="color:#BE185D">環境 (Mother Nature)</label><textarea id="fb-env" rows="3" placeholder="每行一個原因">溫濕度變化&#10;粉塵污染&#10;振動干擾</textarea></div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button>
+    </div>
+  </div>
+  <div id="fb-out" style="display:none">
+    <div class="card">
+      <div style="background:#FAFAFA;border-radius:8px;padding:.5rem;overflow-x:auto">
+        <canvas id="fb-canvas" height="420"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：Histogram ══════════════ -->
+<div id="page-histogram" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--M)"></div>
+    <div><div class="tp-title">直方圖 + 常態檢定</div><div class="tp-subtitle">分佈形態分析・Shapiro-Wilk 常態性檢定・偏態/峰態</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+    <div class="g3">
+      <div class="field"><label>項目名稱</label><input type="text" id="hi-item" value="量測值"></div>
+      <div class="field"><label>組距數（Bins）</label><input type="number" id="hi-bins" value="10" min="3" max="30"></div>
+      <div class="field"><label>顯著水準 α</label><select id="hi-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option><option value="0.10">0.10</option></select></div>
+    </div>
+    <div class="field"><label>數據 <span style="font-size:11px;font-weight:400;color:var(--faint)">（空格或逗號分隔）</span></label>
+      <textarea id="hi-data" rows="5">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.1 24.6 25.2 25.0 25.4 24.9 25.3 25.5 24.8 25.2 25.0 24.7 25.1 25.3 24.9 25.4 25.2 24.8 25.1 25.0</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="histAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-sec" onclick="histLoadEx()">載入範例</button>
+    </div>
+  </div>
+  <div id="hi-out" style="display:none">
+    <div class="card">
+      <div class="stat-grid" id="hi-stats"></div>
+      <div class="canvas-wrap"><canvas id="hi-canvas" height="280"></canvas></div>
+      <div id="hi-test" style="margin-top:.75rem"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：DOE ══════════════ -->
+<div id="page-doe" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--I)"></div>
+    <div><div class="tp-title">DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>因子設定</div>
+    <div class="g3">
+      <div class="field"><label>因子數量</label>
+        <select id="doe-nf" onchange="doeUpdateFactors()">
+          <option value="2">2 個因子（4 次實驗）</option>
+          <option value="3" selected>3 個因子（8 次實驗）</option>
+          <option value="4">4 個因子（16 次實驗）</option>
+        </select>
+      </div>
+      <div class="field"><label>重複次數</label>
+        <select id="doe-rep"><option value="1">1（不重複）</option><option value="2" selected>2</option><option value="3">3</option></select>
+      </div>
+      <div class="field"><label>反應變數名稱</label><input type="text" id="doe-yname" value="良率 (%)"></div>
+    </div>
+    <div id="doe-factors-wrap" style="margin-bottom:11px"></div>
+    <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>實驗矩陣與結果輸入</div>
+    <div id="doe-matrix-wrap" style="overflow-x:auto;margin-bottom:10px"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="doeAnalyze()">▶ 分析效應</button>
+      <button class="btn btn-sec" onclick="doeLoadEx()">載入範例數據</button>
+      <button class="btn btn-sec" onclick="doeUpdateFactors()">重新產生矩陣</button>
+    </div>
+  </div>
+  <div id="doe-out" style="display:none">
+    <div class="card">
+      <div class="tab-bar">
+        <div class="tab active" onclick="doeSw('effects')">效應分析</div>
+        <div class="tab" onclick="doeSw('pareto')">效應柏拉圖</div>
+        <div class="tab" onclick="doeSw('interaction')">交互作用圖</div>
+        <div class="tab" onclick="doeSw('anova')">ANOVA 表</div>
+      </div>
+      <div id="doe-tab-effects" class="tab-c show"><div id="doe-effects-content"></div></div>
+      <div id="doe-tab-pareto" class="tab-c"><div class="canvas-wrap"><canvas id="doe-pareto-canvas" height="300"></canvas></div></div>
+      <div id="doe-tab-interaction" class="tab-c"><div id="doe-interaction-content"></div></div>
+      <div id="doe-tab-anova" class="tab-c"><div id="doe-anova-content"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：SIPOC ══════════════ -->
+<div id="page-sipoc" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--D)"></div>
+    <div><div class="tp-title">SIPOC 圖</div><div class="tp-subtitle">Supplier · Input · Process · Output · Customer — 製程範疇定義</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>SIPOC 內容輸入</div>
+    <div class="g2" style="margin-bottom:0">
+      <div class="field"><label style="color:#1D4ED8">Supplier 供應商</label><textarea id="si-s" rows="4" placeholder="每行一項">原料供應商A&#10;設備商B&#10;IT系統部門</textarea></div>
+      <div class="field"><label style="color:#0891B2">Input 輸入</label><textarea id="si-i" rows="4" placeholder="每行一項">原料規格書&#10;設備參數&#10;生產工單</textarea></div>
+    </div>
+    <div class="field"><label style="color:#059669">Process 製程步驟</label><textarea id="si-p" rows="3" placeholder="每行一個步驟">來料檢驗 → 備料 → 加工 → 品檢 → 包裝 → 出貨</textarea></div>
+    <div class="g2">
+      <div class="field"><label style="color:#D97706">Output 輸出</label><textarea id="si-o" rows="4" placeholder="每行一項">成品&#10;品檢報告&#10;出貨單</textarea></div>
+      <div class="field"><label style="color:#7C3AED">Customer 客戶</label><textarea id="si-c" rows="4" placeholder="每行一項">終端客戶&#10;下製程&#10;業務部門</textarea></div>
+    </div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="sipocDraw()">▶ 產生 SIPOC 圖</button></div>
+  </div>
+  <div id="si-out" style="display:none">
+    <div class="card"><div style="overflow-x:auto"><canvas id="si-canvas" height="380"></canvas></div></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：CUSUM ══════════════ -->
+<div id="page-cusum" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--C)"></div>
+    <div><div class="tp-title">CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--C);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料與參數</div>
+    <div class="g3">
+      <div class="field"><label>圖型選擇</label><select id="ce-type"><option value="cusum">CUSUM</option><option value="ewma">EWMA</option><option value="both">兩者並列</option></select></div>
+      <div class="field"><label>目標均值 μ₀</label><input type="text" id="ce-mu" value="25.0"></div>
+      <div class="field"><label>製程標準差 σ</label><input type="text" id="ce-sigma" value="0.15"></div>
+    </div>
+    <div class="g3">
+      <div class="field"><label>CUSUM k（允許偏移）</label><input type="text" id="ce-k" value="0.5"></div>
+      <div class="field"><label>CUSUM h（決策界限）</label><input type="text" id="ce-h" value="4"></div>
+      <div class="field"><label>EWMA λ（平滑係數）</label><input type="text" id="ce-lambda" value="0.2"></div>
+    </div>
+    <div class="field"><label>數據 <span style="font-size:11px;font-weight:400;color:var(--faint)">（空格或逗號分隔）</span></label>
+      <textarea id="ce-data" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.5 25.4 25.6 25.7 25.5 25.8 25.6 25.9 25.7 25.8</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="cusumAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-sec" onclick="cusumLoadEx()">載入範例</button>
+    </div>
+  </div>
+  <div id="ce-out" style="display:none">
+    <div class="card">
+      <div class="stat-grid" id="ce-stats"></div>
+      <div class="canvas-wrap"><canvas id="ce-c1"></canvas></div>
+      <div class="canvas-wrap" id="ce-c2-wrap" style="margin-top:.75rem"><canvas id="ce-c2"></canvas></div>
+      <div id="ce-result" style="margin-top:.75rem"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：Scatter ══════════════ -->
+<div id="page-scatter" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--A)"></div>
+    <div><div class="tp-title">相關性分析 + 散佈圖</div><div class="tp-subtitle">Pearson r・線性迴歸・決定係數 R²・顯著性檢定</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+    <div class="g3">
+      <div class="field"><label>X 軸變數名稱</label><input type="text" id="sc-xname" value="溫度 (°C)"></div>
+      <div class="field"><label>Y 軸變數名稱</label><input type="text" id="sc-yname" value="良率 (%)"></div>
+      <div class="field"><label>顯著水準 α</label><select id="sc-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option></select></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>X 數值</label><textarea id="sc-x" rows="5">180 185 190 195 200 205 210 215 220 225 230 235</textarea></div>
+      <div class="field"><label>Y 數值</label><textarea id="sc-y" rows="5">92 91 93 94 95 95 96 94 93 91 89 87</textarea></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="scatterAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-sec" onclick="scatterLoadEx()">載入範例</button>
+    </div>
+  </div>
+  <div id="sc-out" style="display:none">
+    <div class="card">
+      <div class="stat-grid" id="sc-stats"></div>
+      <div class="canvas-wrap"><canvas id="sc-canvas" height="300"></canvas></div>
+      <div id="sc-result" style="margin-top:.75rem"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：Hypothesis ══════════════ -->
+<div id="page-hypothesis" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--A)"></div>
+    <div><div class="tp-title">假設檢定</div><div class="tp-subtitle">單樣本 t・雙樣本 t・配對 t・F 檢定・卡方適合度</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>選擇檢定類型</div>
+    <div class="g2">
+      <div class="field"><label>檢定方法</label>
+        <select id="hy-type" onchange="hyUpdateUI()">
+          <option value="1t">單樣本 t 檢定</option>
+          <option value="2t">獨立雙樣本 t 檢定</option>
+          <option value="pair">配對樣本 t 檢定</option>
+          <option value="f">F 檢定（變異數比較）</option>
+        </select>
+      </div>
+      <div class="field"><label>顯著水準 α</label>
+        <select id="hy-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option><option value="0.10">0.10</option></select>
+      </div>
+    </div>
+    <div id="hy-input-wrap"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="hyAnalyze()">▶ 執行檢定</button>
+      <button class="btn btn-sec" onclick="hyLoadEx()">載入範例</button>
+    </div>
+  </div>
+  <div id="hy-out" style="display:none">
+    <div class="card" id="hy-result"></div>
+  </div>
+</div>
+</div>
+
+<!-- ══════════════ 子頁面：Box Plot ══════════════ -->
+<div id="page-boxplot" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--M)"></div>
+    <div><div class="tp-title">箱型圖 Box Plot</div><div class="tp-subtitle">多組分佈比較・Q1/Q2/Q3・IQR・離群值偵測</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
+    <div class="field"><label>Y 軸項目名稱</label><input type="text" id="bp-yname" value="量測值"></div>
+    <div class="field"><label>分組數據 <span style="font-size:11px;font-weight:400;color:var(--faint)">（格式：組名: 數值1, 數值2, ...）</span></label>
+      <textarea id="bp-data" rows="8">機台A: 25.1, 24.9, 25.2, 25.4, 24.8, 25.1, 25.6, 24.7, 25.0, 25.3
+機台B: 24.8, 25.3, 25.5, 24.6, 25.1, 24.9, 25.4, 25.2, 24.7, 25.0
+機台C: 25.4, 25.6, 25.8, 25.2, 25.5, 25.7, 25.3, 25.9, 25.1, 25.6</textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="boxplotAnalyze()">▶ 產生箱型圖</button>
+    </div>
+  </div>
+  <div id="bp-out" style="display:none">
+    <div class="card">
+      <div class="stat-grid" id="bp-stats"></div>
+      <div class="canvas-wrap"><canvas id="bp-canvas" height="320"></canvas></div>
+      <div style="margin-top:.75rem;overflow-x:auto"><table id="bp-table"></table></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// 路由系統
+// ════════════════════════════════════════════
+const PHASE_COLORS={spc:'var(--M)',pareto:'var(--D)',fishbone:'var(--D)',sipoc:'var(--D)',histogram:'var(--M)',boxplot:'var(--M)',scatter:'var(--A)',hypothesis:'var(--A)',doe:'var(--I)',cusum:'var(--C)'};
+const TOOL_NAMES={spc:'SPC 管制圖',pareto:'柏拉圖',fishbone:'魚骨圖',sipoc:'SIPOC 圖',histogram:'直方圖+常態檢定',boxplot:'箱型圖',scatter:'相關性分析',hypothesis:'假設檢定',doe:'DOE 實驗設計',cusum:'CUSUM/EWMA'};
+
+function goHome(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-home').classList.add('active');
+  document.getElementById('breadcrumb').innerHTML='';
+}
+
+function goTool(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('breadcrumb').innerHTML=`<span class="sep">›</span><span>${TOOL_NAMES[id]||id}</span>`;
+  if(id==='doe')doeUpdateFactors();
+  if(id==='hypothesis')hyUpdateUI();
+  try{window.scrollTo(0,0);}catch(e){}
+}
+
+function scrollToPhase(ph){
+  const el=document.getElementById('phase-'+ph);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ════════════════════════════════════════════
+// 通用數學工具
+// ════════════════════════════════════════════
+const mean=a=>a.reduce((s,v)=>s+v,0)/a.length;
+const sum=a=>a.reduce((s,v)=>s+v,0);
+function std(a){const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/a.length);}
+function stdS(a){const m=mean(a);return Math.sqrt(a.reduce((s,v)=>s+(v-m)**2,0)/(a.length-1));}
+const r4=v=>v==null||isNaN(v)?'—':parseFloat(v.toFixed(4));
+const r2=v=>v==null||isNaN(v)?'—':parseFloat(v.toFixed(2));
+function parseNums(s){return s.trim().split(/[\s,\n]+/).map(Number).filter(n=>!isNaN(n));}
+function tDist(t,df){
+  // 近似 p-value（雙尾），使用 incomplete beta
+  const x=df/(df+t*t);
+  return ibeta(x,df/2,0.5);
+}
+function ibeta(x,a,b){
+  // 簡單近似
+  if(x<=0)return 0;if(x>=1)return 1;
+  let bt=Math.exp(lgamma(a+b)-lgamma(a)-lgamma(b)+a*Math.log(x)+b*Math.log(1-x));
+  if(x<(a+1)/(a+b+2))return bt*betacf(x,a,b)/a;
+  return 1-bt*betacf(1-x,b,a)/b;
+}
+function betacf(x,a,b){
+  const MAXIT=100,EPS=3e-7;
+  let qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;
+  if(Math.abs(d)<1e-30)d=1e-30;d=1/d;let h=d;
+  for(let m=1;m<=MAXIT;m++){
+    let m2=2*m,aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;let del=d*c;h*=del;
+    if(Math.abs(del-1)<EPS)break;
+  }
+  return h;
+}
+function lgamma(z){
+  const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=z,x=z,tmp=x+5.5;tmp-=(x+0.5)*Math.log(tmp);let ser=1.000000000190015;
+  for(let j=0;j<6;j++)ser+=c[j]/++y;
+  return -tmp+Math.log(2.5066282746310005*ser/x);
+}
+function fDist(f,d1,d2){
+  const x=d2/(d2+d1*f);
+  return ibeta(x,d2/2,d1/2);
+}
+function chiDist(chi,df){
+  return 1-gammaInc(chi/2,df/2);
+}
+function gammaInc(x,a){
+  if(x<0||a<=0)return 0;
+  if(x===0)return 0;
+  let gln=lgamma(a);
+  if(x<a+1){let ap=a,del=1/a,sum2=del;for(let n=1;n<=100;n++){ap++;del*=x/ap;sum2+=del;if(Math.abs(del)<Math.abs(sum2)*3e-7)break;}return sum2*Math.exp(-x+a*Math.log(x)-gln);}
+  let b=x+1-a,c=1/1e-30,d=1/b,h=d;
+  for(let i=1;i<=100;i++){let an=-i*(i-a),bi=x+2*i+1-a;d=an*d+bi;if(Math.abs(d)<1e-30)d=1e-30;c=bi+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;let del=d*c;h*=del;if(Math.abs(del-1)<3e-7)break;}
+  return 1-(Math.exp(-x+a*Math.log(x)-gln)*h);
+}
+
+let chartInst=[];
+function destroyCharts(){chartInst.forEach(c=>{try{c.destroy();}catch(e){}});chartInst=[];}
+
+// ════════════════════════════════════════════
+// SPC 工具（完整版）
+// ════════════════════════════════════════════
+const A2={2:1.880,3:1.023,4:0.729,5:0.577,6:0.483,7:0.419,8:0.373,9:0.337,10:0.308};
+const D4={2:3.267,3:2.574,4:2.282,5:2.114,6:2.004,7:1.924,8:1.864,9:1.816,10:1.777};
+const D3={2:0,3:0,4:0,5:0,6:0,7:0.076,8:0.136,9:0.184,10:0.223};
+const d2={2:1.128,3:1.693,4:2.059,5:2.326,6:2.534,7:2.704,8:2.847,9:2.970,10:3.078};
+const A3={2:2.659,3:1.954,4:1.628,5:1.427,6:1.287,7:1.182,8:1.099,9:1.032,10:0.975};
+const B4={2:3.267,3:2.568,4:2.266,5:2.089,6:1.970,7:1.882,8:1.815,9:1.761,10:1.716};
+const B3={2:0,3:0,4:0,5:0,6:0.030,7:0.118,8:0.185,9:0.239,10:0.284};
+let SR={};
+
+function spcLoadEx(t){
+  if(t==='xbarr'){document.getElementById('spc-raw').value='25.1, 25.3\n24.9, 25.1\n25.2, 25.0\n25.4, 25.2\n24.8, 25.0\n25.1, 25.3\n25.6, 25.4\n24.7, 24.9\n25.0, 25.2\n25.3, 25.1\n25.1, 25.5\n24.6, 24.8\n25.2, 25.3\n25.0, 24.9\n25.4, 25.2';document.getElementById('spc-item').value='內徑';document.getElementById('spc-lsl').value='24.5';document.getElementById('spc-usl').value='25.5';document.getElementById('spc-tgt').value='25.0';}
+  else if(t==='imr'){document.getElementById('spc-raw').value='12.3\n12.1\n12.5\n12.2\n12.8\n12.4\n12.0\n12.6\n13.1\n12.3\n12.5\n12.7\n12.2\n12.4\n12.9';document.getElementById('spc-item').value='重量';document.getElementById('spc-lsl').value='11.5';document.getElementById('spc-usl').value='13.5';document.getElementById('spc-tgt').value='12.5';}
+  else{document.getElementById('spc-raw').value='2\n1\n3\n0\n4\n2\n1\n5\n1\n2\n0\n3\n2\n1\n4';document.getElementById('spc-item').value='不良品數';document.getElementById('spc-lsl').value='';document.getElementById('spc-usl').value='';document.getElementById('spc-tgt').value='';document.getElementById('spc-chart').value='NP';}
+}
+
+function spcAnalyze(){
+  const raw=document.getElementById('spc-raw').value.trim();
+  if(!raw)return alert('請輸入數據');
+  const data=raw.split('\n').map(l=>l.split(/[,\s]+/).map(s=>s.trim()).filter(s=>s).map(Number).filter(n=>!isNaN(n))).filter(r=>r.length>0);
+  const chartType=document.getElementById('spc-chart').value==='auto'?autoSPC(data):document.getElementById('spc-chart').value;
+  const lsl=parseFloat(document.getElementById('spc-lsl').value),usl=parseFloat(document.getElementById('spc-usl').value);
+  const tgt=parseFloat(document.getElementById('spc-tgt').value),sN=parseInt(document.getElementById('spc-n').value)||100;
+  SR={data,chartType,item:document.getElementById('spc-item').value||'量測值',lsl:isNaN(lsl)?null:lsl,usl:isNaN(usl)?null:usl,tgt:isNaN(tgt)?null:tgt,sampleN:sN};
+  if(['XBARR','XBARS'].includes(chartType))calcSPCXbar();
+  else if(chartType==='IMR')calcSPCIMR();
+  else if(chartType==='NP')calcSPCNP();
+  else if(chartType==='P')calcSPCP();
+  else if(chartType==='C')calcSPCC();
+  else if(chartType==='U')calcSPCU();
+  calcSPCNelson();
+  document.getElementById('spc-out').style.display='block';
+  renderSPCStats();renderSPCCap();renderSPCNelson();
+  spcSw('tree');setTimeout(()=>{spcDrawTree();spcDrawCharts();},80);
+}
+function autoSPC(data){
+  const flat=data.flat(),n=data[0].length;
+  if(flat.every(v=>Number.isInteger(v))&&Math.max(...flat)<flat.length*2)return'NP';
+  if(n===1)return'IMR';if(n<=10)return'XBARR';return'XBARS';
+}
+function calcSPCXbar(){
+  const{data,chartType}=SR,n=data[0].length;SR.n=n;
+  SR.xbars=data.map(g=>mean(g));SR.ranges=data.map(g=>Math.max(...g)-Math.min(...g));SR.stds=data.map(g=>std(g));
+  SR.Xdbar=mean(SR.xbars);SR.Rbar=mean(SR.ranges);SR.Sbar=mean(SR.stds);
+  if(chartType==='XBARR'){SR.UCL_main=SR.Xdbar+A2[n]*SR.Rbar;SR.LCL_main=SR.Xdbar-A2[n]*SR.Rbar;SR.CL_main=SR.Xdbar;SR.UCL2=D4[n]*SR.Rbar;SR.LCL2=D3[n]*SR.Rbar;SR.CL2=SR.Rbar;SR.sigma=SR.Rbar/(d2[n]||1.128);SR.chartName='Xbar-R Chart';SR.sub2label='R Chart';SR.sub2Vals=SR.ranges;}
+  else{SR.UCL_main=SR.Xdbar+A3[n]*SR.Sbar;SR.LCL_main=SR.Xdbar-A3[n]*SR.Sbar;SR.CL_main=SR.Xdbar;SR.UCL2=B4[n]*SR.Sbar;SR.LCL2=B3[n]*SR.Sbar;SR.CL2=SR.Sbar;SR.sigma=SR.Sbar/(0.9400);SR.chartName='Xbar-S Chart';SR.sub2label='S Chart';SR.sub2Vals=SR.stds;}
+  SR.mainVals=SR.xbars;SR.grandMean=SR.Xdbar;SR.allVals=SR.data.flat();SR.sigmaOverall=std(SR.allVals);SR.mainLabel=chartType==='XBARR'?'Xbar Chart':'Xbar Chart';
+}
+function calcSPCIMR(){
+  SR.individuals=SR.data.map(g=>g[0]);SR.mR=SR.individuals.slice(1).map((v,i)=>Math.abs(v-SR.individuals[i]));
+  SR.Xbar=mean(SR.individuals);SR.mRbar=mean(SR.mR);
+  SR.UCL_main=SR.Xbar+2.66*SR.mRbar;SR.LCL_main=SR.Xbar-2.66*SR.mRbar;SR.CL_main=SR.Xbar;
+  SR.UCL2=3.267*SR.mRbar;SR.LCL2=0;SR.CL2=SR.mRbar;SR.sigma=SR.mRbar/1.128;
+  SR.grandMean=SR.Xbar;SR.allVals=SR.individuals;SR.sigmaOverall=std(SR.individuals);
+  SR.mainVals=SR.individuals;SR.sub2Vals=[null,...SR.mR];SR.chartName='I-MR Chart';SR.mainLabel='I Chart';SR.sub2label='mR Chart';SR.n=1;
+}
+function calcSPCNP(){
+  SR.counts=SR.data.map(g=>g[0]);SR.npbar=mean(SR.counts);SR.pbar=SR.npbar/SR.sampleN;
+  SR.UCL_main=SR.npbar+3*Math.sqrt(SR.npbar*(1-SR.pbar));SR.LCL_main=Math.max(0,SR.npbar-3*Math.sqrt(SR.npbar*(1-SR.pbar)));SR.CL_main=SR.npbar;
+  SR.mainVals=SR.counts;SR.chartName='np Chart';SR.mainLabel='np Chart';SR.sub2Vals=null;
+}
+function calcSPCP(){
+  SR.counts=SR.data.map(g=>g[0]);SR.pbar=mean(SR.counts)/SR.sampleN;
+  SR.UCL_main=SR.pbar+3*Math.sqrt(SR.pbar*(1-SR.pbar)/SR.sampleN);SR.LCL_main=Math.max(0,SR.pbar-3*Math.sqrt(SR.pbar*(1-SR.pbar)/SR.sampleN));SR.CL_main=SR.pbar;
+  SR.mainVals=SR.counts.map(c=>c/SR.sampleN);SR.chartName='p Chart';SR.mainLabel='p Chart';SR.sub2Vals=null;
+}
+function calcSPCC(){
+  SR.counts=SR.data.map(g=>g[0]);SR.cbar=mean(SR.counts);
+  SR.UCL_main=SR.cbar+3*Math.sqrt(SR.cbar);SR.LCL_main=Math.max(0,SR.cbar-3*Math.sqrt(SR.cbar));SR.CL_main=SR.cbar;
+  SR.mainVals=SR.counts;SR.chartName='c Chart';SR.mainLabel='c Chart';SR.sub2Vals=null;
+}
+function calcSPCU(){
+  SR.counts=SR.data.map(g=>g[0]);SR.ubar=mean(SR.counts)/SR.sampleN;
+  SR.UCL_main=SR.ubar+3*Math.sqrt(SR.ubar/SR.sampleN);SR.LCL_main=Math.max(0,SR.ubar-3*Math.sqrt(SR.ubar/SR.sampleN));SR.CL_main=SR.ubar;
+  SR.mainVals=SR.counts.map(c=>c/SR.sampleN);SR.chartName='u Chart';SR.mainLabel='u Chart';SR.sub2Vals=null;
+}
+function calcSPCNelson(){
+  const vals=SR.mainVals;if(!vals)return;
+  const cl=SR.CL_main,s=SR.sigma||SR.sigmaOverall||std(vals);
+  SR.nelson={r1:[],r2:[],r3:[],r4:[],r5:[],r6:[],r7:[],r8:[]};
+  vals.forEach((v,i)=>{if(v>SR.UCL_main||v<SR.LCL_main)SR.nelson.r1.push(i+1);});
+  for(let i=0;i<=vals.length-9;i++){const side=vals[i]>cl?1:-1;if(vals.slice(i,i+9).every(v=>(v>cl?1:-1)===side))for(let j=i;j<i+9;j++)if(!SR.nelson.r2.includes(j+1))SR.nelson.r2.push(j+1);}
+  for(let i=0;i<=vals.length-6;i++){const up=vals.slice(i,i+6).every((v,j,a)=>j===0||v>a[j-1]);const dn=vals.slice(i,i+6).every((v,j,a)=>j===0||v<a[j-1]);if(up||dn)for(let j=i;j<i+6;j++)if(!SR.nelson.r3.includes(j+1))SR.nelson.r3.push(j+1);}
+}
+function renderSPCStats(){
+  const{chartType,grandMean,sigma,sigmaOverall,UCL_main,LCL_main,CL_main,UCL2,LCL2,CL2,sub2label,data,n,Rbar,mRbar,Sbar}=SR;
+  const cards=(['XBARR','XBARS','IMR'].includes(chartType))?[{v:data.length,l:'組數 k'},{v:n,l:'子組大小 n'},{v:r4(grandMean),l:'總平均值'},{v:r4(Rbar||mRbar||Sbar),l:chartType==='IMR'?'平均mR':'平均全距'},{v:r4(sigma),l:'組內σ'},{v:r4(sigmaOverall),l:'總體σ'}]:[{v:data.length,l:'批數'},{v:r4(UCL_main),l:'UCL'},{v:r4(CL_main),l:'CL'},{v:r4(LCL_main),l:'LCL'}];
+  document.getElementById('spc-stat-grid').innerHTML=cards.map(c=>`<div class="sc"><div class="v">${c.v}</div><div class="l">${c.l}</div></div>`).join('');
+  document.getElementById('spc-chart-info').innerHTML=`<strong>管制圖：</strong>${SR.chartName} ｜ <strong>項目：</strong>${SR.item}`;
+  document.getElementById('spc-lim-table').innerHTML=`<thead><tr><th>圖型</th><th style="color:#DC2626">UCL</th><th style="color:#16A34A">CL</th><th style="color:#2563EB">LCL</th></tr></thead><tbody><tr><td>${SR.mainLabel}</td><td style="color:#DC2626;font-weight:700">${r4(UCL_main)}</td><td style="color:#16A34A;font-weight:700">${r4(CL_main)}</td><td style="color:#2563EB;font-weight:700">${r4(LCL_main)}</td></tr>${SR.sub2Vals?`<tr><td>${sub2label}</td><td style="color:#DC2626;font-weight:700">${r4(UCL2)}</td><td style="color:#16A34A;font-weight:700">${r4(CL2)}</td><td style="color:#2563EB;font-weight:700">${r4(LCL2)}</td></tr>`:''}</tbody>`;
+  const groups=SR.data,maxV=Math.max(...groups.map(g=>g.length));
+  let th=`<thead><tr><th>組#</th>${Array.from({length:maxV},(_,i)=>`<th>X${i+1}</th>`).join('')}${SR.xbars?'<th>X̄</th><th>R/S</th>':''}</tr></thead><tbody>`;
+  document.getElementById('spc-data-table').innerHTML=th+groups.map((g,i)=>{const xb=SR.xbars?.[i],rv=(SR.chartType==='XBARS'?SR.stds:SR.ranges)?.[i];const outX=xb!=null&&(xb>UCL_main||xb<LCL_main);return`<tr><td>${i+1}</td>${g.map(v=>`<td>${v}</td>`).join('')}${xb!=null?`<td style="${outX?'color:#DC2626;font-weight:700':''}">${r4(xb)}</td><td>${r4(rv)}</td>`:''}</tr>`;}).join('')+'</tbody>';
+  const anoms=[];SR.mainVals?.forEach((v,i)=>{if(v>UCL_main||v<LCL_main)anoms.push({g:i+1,v:r4(v)});});
+  document.getElementById('spc-anom').innerHTML=anoms.length?anoms.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F3F4F6;font-size:13px"><span class="badge-r red">組 ${a.g}</span>值 = ${a.v}，超出管制界限</div>`).join(''):'<div class="alert success">✅ 無異常點，製程穩定</div>';
+}
+function renderSPCCap(){
+  const{lsl,usl,tgt,sigma,sigmaOverall,grandMean,chartType}=SR,el=document.getElementById('spc-cap');
+  if(['NP','P','C','U'].includes(chartType)){el.innerHTML='<div class="alert info">計數型不適用 Cp/Cpk</div>';return;}
+  if(lsl==null&&usl==null){el.innerHTML='<div class="alert warn">未提供 LSL / USL，不計算製程能力指標。</div>';return;}
+  const mu=grandMean,sw=sigma,so=sigmaOverall;
+  let Cp=null,Cpk=null,Pp=null,Ppk=null;
+  if(lsl!=null&&usl!=null){Cp=(usl-lsl)/(6*sw);Pp=(usl-lsl)/(6*so);}
+  const CPU_w=usl!=null?(usl-mu)/(3*sw):null,CPL_w=lsl!=null?(mu-lsl)/(3*sw):null;
+  if(CPU_w!=null&&CPL_w!=null)Cpk=Math.min(CPU_w,CPL_w);else Cpk=CPU_w??CPL_w;
+  const CPU_o=usl!=null?(usl-mu)/(3*so):null,CPL_o=lsl!=null?(mu-lsl)/(3*so):null;
+  if(CPU_o!=null&&CPL_o!=null)Ppk=Math.min(CPU_o,CPL_o);else Ppk=CPU_o??CPL_o;
+  function badge(v){if(v==null)return'<span class="badge-r blue">N/A</span>';if(v>=1.67)return`<span class="badge-r green">${v.toFixed(3)} 優秀</span>`;if(v>=1.33)return`<span class="badge-r green">${v.toFixed(3)} 良好</span>`;if(v>=1.0)return`<span class="badge-r amber">${v.toFixed(3)} 尚可</span>`;return`<span class="badge-r red">${v.toFixed(3)} 不足</span>`;}
+  el.innerHTML=`<div class="stat-grid">${lsl!=null?`<div class="sc"><div class="v" style="font-size:16px">${lsl}</div><div class="l">LSL</div></div>`:''}<div class="sc"><div class="v" style="font-size:16px">${r4(mu)}</div><div class="l">均值</div></div>${usl!=null?`<div class="sc"><div class="v" style="font-size:16px">${usl}</div><div class="l">USL</div></div>`:''}<div class="sc"><div class="v" style="font-size:16px">${r4(sw)}</div><div class="l">組內σ</div></div></div><div style="overflow-x:auto"><table><thead><tr><th>指標</th><th>值</th><th>評級</th></tr></thead><tbody>${[['Cp',Cp],['Cpk',Cpk],['Pp',Pp],['Ppk',Ppk]].map(([n,v])=>`<tr><td style="font-weight:700">${n}</td><td>${v?.toFixed(3)??'—'}</td><td>${badge(v)}</td></tr>`).join('')}</tbody></table></div><div class="alert info" style="margin-top:.5rem;font-size:12px">≥1.67 優秀｜≥1.33 良好｜≥1.00 尚可｜&lt;1.00 不足</div>`;
+}
+function renderSPCNelson(){
+  const n=SR.nelson,el=document.getElementById('spc-nelson');if(!n){el.innerHTML='';return;}
+  const rules=[{k:'r1',name:'Rule 1',desc:'超出 3σ 界限'},{k:'r2',name:'Rule 2',desc:'連續 9 點同側'},{k:'r3',name:'Rule 3',desc:'連續 6 點趨勢'}];
+  const stable=rules.every(r=>!n[r.k]?.length);
+  el.innerHTML=`<div class="alert ${stable?'success':'danger'}" style="margin-bottom:.75rem"><strong>製程狀態：</strong>${stable?'✅ 穩定':'⚠️ 不穩定 — 需調查'}</div><table><thead><tr><th>規則</th><th>說明</th><th>觸發點</th><th>狀態</th></tr></thead><tbody>${rules.map(r=>`<tr><td style="font-weight:700">${r.name}</td><td style="font-size:12px;color:var(--muted)">${r.desc}</td><td style="font-size:12px">${(n[r.k]||[]).join(', ')||'—'}</td><td>${(n[r.k]||[]).length?'<span class="badge-r red">觸發</span>':'<span class="badge-r green">正常</span>'}</td></tr>`).join('')}</tbody></table>`;
+}
+function spcSw(name){
+  const tabs=['tree','stats','chart','cap','nelson'];
+  document.querySelectorAll('#page-spc .tab').forEach((t,i)=>t.classList.toggle('active',tabs[i]===name));
+  tabs.forEach(t=>document.getElementById('spc-tab-'+t).classList.remove('show'));
+  document.getElementById('spc-tab-'+name).classList.add('show');
+  if(name==='chart')setTimeout(()=>spcDrawCharts(),50);
+  if(name==='tree')setTimeout(()=>spcDrawTree(),50);
+}
+function spcDrawCharts(){
+  destroyCharts();
+  const{mainVals,sub2Vals,UCL_main,LCL_main,CL_main,UCL2,LCL2,CL2,mainLabel,sub2label,nelson}=SR;
+  if(!mainVals)return;
+  const labels=mainVals.map((_,i)=>`${i+1}`);
+  const anomSet=new Set((nelson?.r1||[]).map(i=>i-1));
+  const mkChart=(id,title,data,ucl,cl,lcl,aset,lc)=>{
+    const c=document.getElementById(id);if(!c)return;
+    c.width=c.parentElement.offsetWidth||640;c.height=210;
+    const ptBg=data.map((_,i)=>aset.has(i)?'#DC2626':lc);
+    const inst=new Chart(c.getContext('2d'),{type:'line',data:{labels,datasets:[
+      {label:`UCL=${r4(ucl)}`,data:Array(data.length).fill(parseFloat(r4(ucl))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+      {label:`CL=${r4(cl)}`,data:Array(data.length).fill(parseFloat(r4(cl))),borderColor:'#16A34A',borderWidth:2,pointRadius:0,fill:false,tension:0},
+      {label:`LCL=${r4(Math.max(0,lcl))}`,data:Array(data.length).fill(parseFloat(r4(Math.max(0,lcl)))),borderColor:'#2563EB',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+      {label:'數值',data:data.map(v=>v!=null?parseFloat(r4(v)):null),borderColor:lc,borderWidth:1.8,pointBackgroundColor:ptBg,pointBorderColor:ptBg,pointRadius:ptBg.map((_,i)=>aset.has(i)?6:4),fill:false,tension:0.1,spanGaps:true}
+    ]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:title,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11},boxWidth:14}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+    chartInst.push(inst);
+  }
+  mkChart('spc-c1',mainLabel,mainVals,UCL_main,CL_main,LCL_main,anomSet,'#1D3B8A');
+  if(sub2Vals){const s2=sub2Vals;const aset2=new Set(s2.map((v,i)=>v!=null&&v>UCL2?i:null).filter(i=>i!==null));mkChart('spc-c2',sub2label,s2,UCL2,CL2,LCL2,aset2,'#B45309');document.getElementById('spc-c2').style.display='block';}
+  else document.getElementById('spc-c2').style.display='none';
+}
+function spcDrawTree(){
+  const canvas=document.getElementById('spc-tree-canvas');if(!canvas)return;
+  const W=Math.min(canvas.parentElement.offsetWidth-16,720),H=520;
+  canvas.width=W;canvas.height=H;
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,W,H);
+  const act=new Set(['start','dtype']);
+  const{chartType}=SR;
+  if(['XBARR','XBARS','IMR'].includes(chartType)){act.add('cont');act.add('subg');if(chartType==='IMR')act.add('imr');else{act.add('nsz');act.add(chartType==='XBARR'?'xbarr':'xbars');}}
+  else{act.add('count');act.add('focus');if(['NP','P'].includes(chartType)){act.add('nprate');act.add('fixn');act.add(chartType==='NP'?'np':'p');}else{act.add('defect');act.add('fixu');act.add(chartType==='C'?'c':'u');}}
+  const RED='#C0392B',RED_F='#E74C3C',BLUE='var(--navy2)',TEAL_F='#E1F5EE',WHITE='#fff';
+  const ns={start:{x:316,y:20,w:88,h:30,lbl:'開始',sh:'rect',color:'gray'},dtype:{x:270,y:74,w:180,h:44,lbl:'資料型態？',sh:'dia',color:'blue'},cont:{x:60,y:152,w:140,h:32,lbl:'連續型量測值',sh:'rect',color:'blue'},subg:{x:64,y:218,w:132,h:44,lbl:'有子組？',sh:'dia',color:'blue'},imr:{x:20,y:306,w:96,h:44,lbl:'I-MR',sh:'leaf',sub:'個別值-移動全距',color:'teal'},nsz:{x:128,y:306,w:132,h:44,lbl:'子組大小 n？',sh:'dia',color:'blue'},xbarr:{x:100,y:400,w:96,h:44,lbl:'Xbar-R',sh:'leaf',sub:'n = 2~10',color:'teal'},xbars:{x:210,y:400,w:96,h:44,lbl:'Xbar-S',sh:'leaf',sub:'n ≥ 11',color:'teal'},count:{x:520,y:152,w:140,h:32,lbl:'計數型/屬性',sh:'rect',color:'blue'},focus:{x:524,y:218,w:132,h:44,lbl:'關心的是？',sh:'dia',color:'blue'},nprate:{x:430,y:306,w:110,h:32,lbl:'不良品/率',sh:'rect',color:'blue'},defect:{x:560,y:306,w:100,h:32,lbl:'缺點數',sh:'rect',color:'blue'},fixn:{x:388,y:382,w:130,h:44,lbl:'樣本數固定？',sh:'dia',color:'blue'},fixu:{x:548,y:382,w:120,h:44,lbl:'單位固定？',sh:'dia',color:'blue'},np:{x:348,y:476,w:84,h:36,lbl:'np Chart',sh:'leaf',sub:'不良品數',color:'coral'},p:{x:446,y:476,w:84,h:36,lbl:'p Chart',sh:'leaf',sub:'不良率',color:'coral'},c:{x:544,y:476,w:84,h:36,lbl:'c Chart',sh:'leaf',sub:'缺點數',color:'coral'},u:{x:642,y:476,w:84,h:36,lbl:'u Chart',sh:'leaf',sub:'單位缺點數',color:'coral'}};
+  const COLS={blue:{f:'#E6F1FB',s:'#185FA5',t:'#0C447C',af:RED_F,as:RED,at:WHITE},teal:{f:'#E1F5EE',s:'#0F6E56',t:'#085041',af:RED_F,as:RED,at:WHITE},coral:{f:'#FAECE7',s:'#993C1D',t:'#712B13',af:RED_F,as:RED,at:WHITE},gray:{f:'#F1EFE8',s:'#5F5E5A',t:'#444441',af:'#1D3B8A',as:'#1D3B8A',at:WHITE}};
+  function lArr(x1,y1,x2,y2,lbl,active){
+    const c=active?RED:'#185FA5';ctx.save();ctx.strokeStyle=c;ctx.lineWidth=active?2:1;ctx.setLineDash(active?[]:[4,3]);
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);
+    const dir=y2>y1?1:-1,al=7;ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-5,y2-al*dir);ctx.lineTo(x2+5,y2-al*dir);ctx.closePath();ctx.fill();
+    if(lbl){ctx.font='11px -apple-system,sans-serif';ctx.fillStyle=active?RED:'#6B7280';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(lbl,(x1+x2)/2,y1-9);}ctx.restore();
+  }
+  function vArr(x,y1,y2,lbl,active){
+    const c=active?RED:'#185FA5';ctx.save();ctx.strokeStyle=c;ctx.lineWidth=active?2:1;ctx.setLineDash(active?[]:[4,3]);
+    ctx.beginPath();ctx.moveTo(x,y1);ctx.lineTo(x,y2);ctx.stroke();ctx.setLineDash([]);
+    const dir=y2>y1?1:-1,al=7;ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(x,y2);ctx.lineTo(x-5,y2-al*dir);ctx.lineTo(x+5,y2-al*dir);ctx.closePath();ctx.fill();
+    if(lbl){ctx.font='11px -apple-system,sans-serif';ctx.fillStyle=active?RED:'#6B7280';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lbl,x+6,(y1+y2)/2);}ctx.restore();
+  }
+  function drawN(id){
+    const n=ns[id];if(!n)return;const active=act.has(id);const col=COLS[n.color];const cx=n.x+n.w/2,cy=n.y+n.h/2;
+    ctx.save();
+    if(n.sh==='dia'){ctx.beginPath();ctx.moveTo(cx,n.y);ctx.lineTo(n.x+n.w,cy);ctx.lineTo(cx,n.y+n.h);ctx.lineTo(n.x,cy);ctx.closePath();}
+    else{ctx.beginPath();if(ctx.roundRect)ctx.roundRect(n.x,n.y,n.w,n.h,5);else ctx.rect(n.x,n.y,n.w,n.h);ctx.closePath();}
+    ctx.fillStyle=active?col.af:col.f;ctx.fill();ctx.strokeStyle=active?col.as:col.s;ctx.lineWidth=active?2.5:1;ctx.stroke();
+    ctx.fillStyle=active?col.at:col.t;ctx.font=`600 ${n.sub?'11px':'12px'} -apple-system,sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(n.lbl,cx,cy+(n.sub?-6:0));
+    if(n.sub){ctx.font='10px -apple-system,sans-serif';ctx.fillStyle=active?'rgba(255,255,255,.8)':(n.color==='teal'?'#0F6E56':n.color==='coral'?'#993C1D':'#185FA5');ctx.fillText(n.sub,cx,cy+8);}ctx.restore();
+  }
+  const ac=id=>act.has(id),gn=id=>ns[id];
+  const bx=id=>gn(id).x,by=id=>gn(id).y,bw=id=>gn(id).w,bh=id=>gn(id).h;
+  const cx=id=>bx(id)+bw(id)/2,cy_=id=>by(id)+bh(id)/2,bot=id=>by(id)+bh(id),lft=id=>bx(id),rgt=id=>bx(id)+bw(id);
+  vArr(cx('start'),bot('start'),by('dtype'),'',ac('start')&&ac('dtype'));
+  lArr(lft('dtype'),cy_('dtype'),cx('cont'),by('cont'),'連續型',ac('dtype')&&ac('cont'));
+  lArr(rgt('dtype'),cy_('dtype'),cx('count'),by('count'),'計數型',ac('dtype')&&ac('count'));
+  vArr(cx('cont'),bot('cont'),by('subg'),'',ac('cont')&&ac('subg'));
+  lArr(lft('subg'),cy_('subg'),cx('imr'),by('imr'),'否',ac('subg')&&ac('imr'));
+  lArr(rgt('subg'),cy_('subg'),cx('nsz'),by('nsz'),'是',ac('subg')&&ac('nsz'));
+  lArr(lft('nsz'),cy_('nsz'),cx('xbarr'),by('xbarr'),'n≤10',ac('nsz')&&ac('xbarr'));
+  lArr(rgt('nsz'),cy_('nsz'),cx('xbars'),by('xbars'),'n≥11',ac('nsz')&&ac('xbars'));
+  vArr(cx('count'),bot('count'),by('focus'),'',ac('count')&&ac('focus'));
+  lArr(lft('focus'),cy_('focus'),cx('nprate'),by('nprate'),'不良',ac('focus')&&ac('nprate'));
+  lArr(rgt('focus'),cy_('focus'),cx('defect'),by('defect'),'缺點',ac('focus')&&ac('defect'));
+  vArr(cx('nprate'),bot('nprate'),by('fixn'),'',ac('nprate')&&ac('fixn'));
+  vArr(cx('defect'),bot('defect'),by('fixu'),'',ac('defect')&&ac('fixu'));
+  lArr(lft('fixn'),cy_('fixn'),cx('np'),by('np'),'固定',ac('fixn')&&ac('np'));
+  lArr(rgt('fixn'),cy_('fixn'),cx('p'),by('p'),'不固定',ac('fixn')&&ac('p'));
+  lArr(lft('fixu'),cy_('fixu'),cx('c'),by('c'),'固定',ac('fixu')&&ac('c'));
+  lArr(rgt('fixu'),cy_('fixu'),cx('u'),by('u'),'不固定',ac('fixu')&&ac('u'));
+  Object.keys(ns).forEach(drawN);
+  const finals=['imr','xbarr','xbars','np','p','c','u'];
+  const fin=finals.find(id=>act.has(id));
+  if(fin){const fn=ns[fin];ctx.save();ctx.font='italic 11px -apple-system,sans-serif';ctx.fillStyle=RED_F;ctx.textAlign='left';ctx.fillText('← 本案例',fn.x+fn.w+5,fn.y+fn.h/2);ctx.restore();}
+  const pathArr={'XBARR':['開始','資料型態？','連續型','有子組？','是','子組大小？','n≤10','Xbar-R'],'IMR':['開始','資料型態？','連續型','有子組？','否','I-MR'],'XBARS':['開始','資料型態？','連續型','有子組？','是','子組大小？','n≥11','Xbar-S'],'NP':['開始','資料型態？','計數型','關心的是？','不良品','樣本數固定？','固定','np Chart'],'P':['開始','資料型態？','計數型','關心的是？','不良品','樣本數固定？','不固定','p Chart'],'C':['開始','資料型態？','計數型','關心的是？','缺點數','單位固定？','固定','c Chart'],'U':['開始','資料型態？','計數型','關心的是？','缺點數','單位固定？','不固定','u Chart']};
+  const pa=pathArr[SR.chartType]||[];
+  document.getElementById('spc-path-div').innerHTML=`<div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">判斷路徑</div><div style="line-height:2">${pa.map(p=>`<span style="background:var(--navy2);color:#fff;border-radius:5px;display:inline-block;padding:2px 9px;font-size:12px;margin:2px 3px">${p}</span>`).join('<span style="color:#E24B4A;font-weight:700;margin:0 2px"> → </span>')}</div>`;
+}
+
+// ════════════════════════════════════════════
+// Pareto 工具
+// ════════════════════════════════════════════
+function paretoLoadEx(){document.getElementById('pa-data').value='尺寸超差, 45\n外觀刮傷, 32\n焊接不良, 18\n組裝錯誤, 12\n材料缺陷, 8\n其他, 5';}
+function paretoAnalyze(){
+  const lines=document.getElementById('pa-data').value.trim().split('\n').filter(l=>l.trim());
+  const items=lines.map(l=>{const p=l.split(',');return{label:p[0].trim(),value:parseFloat(p[1])||0};}).filter(i=>i.value>0);
+  items.sort((a,b)=>b.value-a.value);
+  const total=sum(items.map(i=>i.value));
+  let cumPct=0;const cumPcts=items.map(i=>{cumPct+=i.value/total*100;return parseFloat(cumPct.toFixed(1));});
+  document.getElementById('pa-info').innerHTML=`<strong>總計：</strong>${total} ${document.getElementById('pa-unit').value} ｜ 前 ${items.filter((_,i)=>cumPcts[i]<=80.1).length} 項佔 ≥80%`;
+  const canvas=document.getElementById('pa-canvas');canvas.width=canvas.parentElement.offsetWidth||640;
+  destroyCharts();
+  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:items.map(i=>i.label),datasets:[{type:'bar',label:document.getElementById('pa-unit').value,data:items.map(i=>i.value),backgroundColor:items.map((_,i)=>cumPcts[i]<=80?'#1D3B8A':'#93C5FD'),yAxisID:'y'},{type:'line',label:'累積%',data:cumPcts,borderColor:'#DC2626',borderWidth:2,pointRadius:4,pointBackgroundColor:'#DC2626',fill:false,tension:0.1,yAxisID:'y2'}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:document.getElementById('pa-title').value,font:{size:14,weight:'600'},padding:{bottom:8}},legend:{labels:{font:{size:12}}}},scales:{y:{position:'left',grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y2:{position:'right',min:0,max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{display:false}}}}});
+  chartInst.push(inst);
+  document.getElementById('pa-table').innerHTML=`<thead><tr><th>排名</th><th>類別</th><th>數量</th><th>佔比%</th><th>累積%</th><th>狀態</th></tr></thead><tbody>${items.map((it,i)=>`<tr><td>${i+1}</td><td>${it.label}</td><td>${it.value}</td><td>${(it.value/total*100).toFixed(1)}%</td><td>${cumPcts[i]}%</td><td>${cumPcts[i]<=80?'<span class="badge-r blue">關鍵項目</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">次要</span>'}</td></tr>`).join('')}</tbody>`;
+  document.getElementById('pa-out').style.display='block';
+}
+
+// ════════════════════════════════════════════
+// 魚骨圖工具
+// ════════════════════════════════════════════
+function fishboneDraw(){
+  const problem=document.getElementById('fb-problem').value||'問題';
+  const cats=[
+    {id:'fb-man',label:'人員 Man',color:'#1D4ED8'},
+    {id:'fb-machine',label:'機器 Machine',color:'#0891B2'},
+    {id:'fb-material',label:'材料 Material',color:'#059669'},
+    {id:'fb-method',label:'方法 Method',color:'#D97706'},
+    {id:'fb-measure',label:'量測 Measurement',color:'#7C3AED'},
+    {id:'fb-env',label:'環境 Environment',color:'#BE185D'},
+  ];
+  const data=cats.map(c=>({label:c.label,color:c.color,causes:document.getElementById(c.id).value.trim().split('\n').filter(s=>s.trim())}));
+  const canvas=document.getElementById('fb-canvas');canvas.width=canvas.parentElement.offsetWidth||720;canvas.height=420;
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  const W=canvas.width,H=canvas.height,cx=W*0.82,cy=H/2;
+  // 主骨
+  ctx.beginPath();ctx.moveTo(60,cy);ctx.lineTo(cx,cy);ctx.strokeStyle='#1a1a2e';ctx.lineWidth=3;ctx.stroke();
+  // 魚頭（問題方塊）
+  ctx.fillStyle='#1D3B8A';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(cx,cy-28,W-cx-10,56,8);else ctx.rect(cx,cy-28,W-cx-10,56);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 13px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  const plines=problem.length>8?[problem.slice(0,8),problem.slice(8)]:[ problem];
+  plines.forEach((l,i)=>ctx.fillText(l,cx+(W-cx-10)/2,cy+(i-(plines.length-1)/2)*18));
+  // 6 根主刺（上3下3）
+  const topY=[H*0.15,H*0.15,H*0.15],botY=[H*0.85,H*0.85,H*0.85];
+  const mainXs=[W*0.22,W*0.44,W*0.66];
+  const topData=[data[0],data[2],data[4]],botData=[data[1],data[3],data[5]];
+  function drawBone(startX,startY,endX,endY,cat){
+    ctx.beginPath();ctx.moveTo(startX,startY);ctx.lineTo(endX,endY);ctx.strokeStyle=cat.color;ctx.lineWidth=2;ctx.stroke();
+    // 標籤
+    ctx.fillStyle=cat.color;ctx.font='bold 12px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(cat.label,startX,startY+(startY<cy?-16:16));
+    // 小刺
+    const dx=(endX-startX),dy=(endY-startY),len=Math.sqrt(dx*dx+dy*dy);
+    const nx=-dy/len,ny=dx/len;
+    cat.causes.forEach((cause,i)=>{
+      const t=0.25+(i*0.18);const bx=startX+dx*t,by=startY+dy*t;
+      const sl=60,sign=startY<cy?1:-1;
+      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+sl*0.7,by+sl*sign*0.5);ctx.strokeStyle=cat.color;ctx.lineWidth=1.2;ctx.stroke();
+      ctx.fillStyle='#374151';ctx.font='11px -apple-system,sans-serif';ctx.textAlign=startX<cx?'left':'left';ctx.textBaseline='middle';
+      ctx.fillText(cause,bx+sl*0.7+4,by+sl*sign*0.5);
+    });
+  }
+  mainXs.forEach((mx,i)=>{
+    drawBone(mx,topY[0],cx-20,cy,topData[i]);
+    drawBone(mx,botY[0],cx-20,cy,botData[i]);
+  });
+  document.getElementById('fb-out').style.display='block';
+}
+
+// ════════════════════════════════════════════
+// 直方圖 + 常態檢定
+// ════════════════════════════════════════════
+function histLoadEx(){document.getElementById('hi-data').value='25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.1 24.6 25.2 25.0 25.4 24.9 25.3 25.5 24.8 25.2 25.0 24.7 25.1 25.3 24.9 25.4 25.2 24.8 25.1 25.0';}
+function histAnalyze(){
+  const data=parseNums(document.getElementById('hi-data').value);
+  if(data.length<3)return alert('請輸入至少 3 筆數據');
+  const bins=parseInt(document.getElementById('hi-bins').value)||10;
+  const alpha=parseFloat(document.getElementById('hi-alpha').value)||0.05;
+  const n=data.length,m=mean(data),s=stdS(data);
+  const sk=data.reduce((a,v)=>a+(v-m)**3,0)/n/s**3;
+  const ku=data.reduce((a,v)=>a+(v-m)**4,0)/n/s**4-3;
+  // Shapiro-Wilk 簡化版（小樣本近似）
+  const sorted=[...data].sort((a,b)=>a-b);
+  let W=0;const a_n=shapiroCoeff(n);
+  for(let i=0;i<Math.floor(n/2);i++)W+=a_n[i]*(sorted[n-1-i]-sorted[i]);
+  W=W**2/((n-1)*s**2);W=Math.min(1,Math.max(0,W));
+  const pW=shapiroPval(W,n);
+  const isNormal=pW>alpha;
+  document.getElementById('hi-stats').innerHTML=[{v:n,l:'樣本數 n'},{v:r4(m),l:'平均值'},{v:r4(s),l:'標準差 s'},{v:r4(Math.min(...data)),l:'最小值'},{v:r4(Math.max(...data)),l:'最大值'},{v:r4(sk),l:'偏態係數'},{v:r4(ku),l:'峰態係數'}].map(c=>`<div class="sc"><div class="v">${c.v}</div><div class="l">${c.l}</div></div>`).join('');
+  // 直方圖
+  const mn=Math.min(...data),mx=Math.max(...data),bw=(mx-mn)/bins;
+  const counts=Array(bins).fill(0);
+  data.forEach(v=>{let b=Math.floor((v-mn)/bw);if(b>=bins)b=bins-1;counts[b]++;});
+  const labels=counts.map((_,i)=>r2(mn+i*bw));
+  const canvas=document.getElementById('hi-canvas');canvas.width=canvas.parentElement.offsetWidth||640;
+  destroyCharts();
+  // 常態曲線疊加
+  const normX=Array.from({length:50},(_,i)=>mn+(mx-mn)*i/49);
+  const normY=normX.map(x=>n*bw*(1/(s*Math.sqrt(2*Math.PI)))*Math.exp(-((x-m)**2)/(2*s**2)));
+  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{type:'bar',label:'次數',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#1D3B8A',borderWidth:1},{type:'line',label:'常態曲線',data:normY.filter((_,i)=>i%(50/bins|0)===0).slice(0,bins),borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false,tension:0.4}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('hi-item').value} 直方圖`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+  chartInst.push(inst);
+  document.getElementById('hi-test').innerHTML=`<div class="alert ${isNormal?'success':'danger'}"><strong>Shapiro-Wilk 常態性檢定</strong><br>W = ${W.toFixed(4)}，p-value ≈ ${pW.toFixed(4)}（α = ${alpha}）<br><strong>結論：</strong>${isNormal?`✅ 無法拒絕常態性假設（p > α），資料符合常態分佈`:`⚠️ 拒絕常態性假設（p ≤ α），資料不符合常態分佈`}</div>`;
+  document.getElementById('hi-out').style.display='block';
+}
+function shapiroCoeff(n){
+  const a6=[0.6872,0.1677,0.0],a8=[0.6052,0.2117,0.0632,0.0],a10=[0.5739,0.2360,0.0982,0.0344,0.0];
+  if(n<=6)return a6.slice(0,Math.floor(n/2));if(n<=8)return a8.slice(0,Math.floor(n/2));return a10.slice(0,Math.floor(n/2));
+}
+function shapiroPval(W,n){if(n<3)return 1;const mu=-1.2725+1.0521*Math.log(n-3+1);const sigma=Math.exp(-0.6714+0.7543*Math.log(n));const z=(Math.log(1-W)-mu)/sigma;return 1-normalCDF(z);}
+function normalCDF(z){return 0.5*(1+erf(z/Math.sqrt(2)));}
+function erf(x){const t=1/(1+0.3275911*Math.abs(x));const poly=t*(0.254829592+t*(-0.284496736+t*(1.421413741+t*(-1.453152027+t*1.061405429))));const r=1-poly*Math.exp(-x*x);return x>=0?r:-r;}
+
+// ════════════════════════════════════════════
+// DOE 實驗設計
+// ════════════════════════════════════════════
+function doeUpdateFactors(){
+  const nf=parseInt(document.getElementById('doe-nf').value)||3;
+  const names=['溫度','壓力','時間','濃度'];
+  const lows=['180','2.0','30','5%'];
+  const highs=['220','3.0','60','15%'];
+  let fw='';
+  for(let i=0;i<nf;i++)fw+=`<div class="g3" style="margin-bottom:8px"><div class="field"><label>因子 ${i+1} 名稱</label><input type="text" id="doe-f${i+1}" value="${names[i]||'因子'+(i+1)}"></div><div class="field"><label>低水準 (−1)</label><input type="text" id="doe-l${i+1}" value="${lows[i]||'低'}"></div><div class="field"><label>高水準 (+1)</label><input type="text" id="doe-h${i+1}" value="${highs[i]||'高'}"></div></div>`;
+  document.getElementById('doe-factors-wrap').innerHTML=fw;
+  doeGenMatrix();
+}
+function doeGenMatrix(){
+  const nf=parseInt(document.getElementById('doe-nf').value)||3;
+  const rep=parseInt(document.getElementById('doe-rep').value)||2;
+  const runs=2**nf;
+  let matrix=[];
+  for(let r=0;r<runs;r++){let row=[];for(let f=0;f<nf;f++)row.push((r>>>(nf-1-f))&1?1:-1);matrix.push(row);}
+  const factors=Array.from({length:nf},(_,i)=>document.getElementById('doe-f'+(i+1))?.value||`F${i+1}`);
+  let html=`<table style="font-size:12px"><thead><tr><th>實驗#</th>${factors.map(f=>`<th>${f}</th>`).join('')}${Array.from({length:rep},(_,i)=>`<th>重複${i+1} 結果</th>`).join('')}</tr></thead><tbody>`;
+  for(let r=0;r<runs;r++){
+    html+=`<tr><td style="font-weight:700;text-align:center">${r+1}</td>`;
+    for(let f=0;f<nf;f++){const v=matrix[r][f];html+=`<td style="text-align:center;color:${v===1?'#166534':'#991B1B'};font-weight:600">${v===1?'+1':'−1'}</td>`;}
+    for(let rp=0;rp<rep;rp++)html+=`<td><input type="number" id="doe-y-${r}-${rp}" step="0.01" style="width:80px;padding:4px;text-align:center;border:1px solid #D1D5DB;border-radius:4px;font-size:12px"></td>`;
+    html+='</tr>';
+  }
+  html+='</tbody></table>';
+  document.getElementById('doe-matrix-wrap').innerHTML=html;
+  window._doeMatrix=matrix;window._doeFacs=factors;window._doeRuns=runs;window._doeRep=rep;
+}
+function doeLoadEx(){
+  const nf=parseInt(document.getElementById('doe-nf').value)||3;const runs=2**nf;const rep=parseInt(document.getElementById('doe-rep').value)||2;
+  const examples={3:{r1:[82,80,73,75,85,83,76,78],r2:[83,81,74,76,86,84,77,79]}};
+  const ex=examples[nf]||{r1:Array(runs).fill(75),r2:Array(runs).fill(76)};
+  for(let r=0;r<runs;r++){for(let rp=0;rp<rep;rp++){const el=document.getElementById(`doe-y-${r}-${rp}`);if(el)el.value=(ex[`r${rp+1}`]?.[r]||75)+((Math.random()-.5)*2).toFixed(1)*1;}}
+}
+function doeAnalyze(){
+  const nf=parseInt(document.getElementById('doe-nf').value)||3;const runs=2**nf;const rep=parseInt(document.getElementById('doe-rep').value)||2;
+  const matrix=window._doeMatrix||[];const factors=window._doeFacs||[];
+  const yMeans=[];let valid=true;
+  for(let r=0;r<runs;r++){
+    let ys=[];for(let rp=0;rp<rep;rp++){const v=parseFloat(document.getElementById(`doe-y-${r}-${rp}`)?.value);if(isNaN(v)){valid=false;break;}ys.push(v);}
+    if(!valid)break;yMeans.push(mean(ys));
+  }
+  if(!valid)return alert('請填入所有實驗結果');
+  const grandMean=mean(yMeans);
+  // Yates 演算法計算主效應
+  const effects={};
+  factors.forEach((f,fi)=>{let e=0;for(let r=0;r<runs;r++)e+=matrix[r][fi]*yMeans[r];e/=runs/2;effects[f]=e;});
+  // 二因子交互作用
+  for(let i=0;i<nf;i++)for(let j=i+1;j<nf;j++){let e=0;for(let r=0;r<runs;r++)e+=matrix[r][i]*matrix[r][j]*yMeans[r];e/=runs/2;effects[`${factors[i]}×${factors[j]}`]=e;}
+  const sortedEff=Object.entries(effects).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+  const ssTotal=yMeans.reduce((s,v)=>s+(v-grandMean)**2,0)*rep;
+  const yname=document.getElementById('doe-yname').value||'Y';
+  // 效應表
+  let effHtml=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${runs}</div><div class="l">實驗次數</div></div><div class="sc"><div class="v">${runs*rep}</div><div class="l">總觀測數</div></div><div class="sc"><div class="v">${r4(grandMean)}</div><div class="l">總平均 ${yname}</div></div></div>`;
+  effHtml+=`<div style="overflow-x:auto"><table><thead><tr><th>效應</th><th>效應值</th><th>SS</th><th>貢獻率%</th><th>重要性</th></tr></thead><tbody>`;
+  sortedEff.forEach(([name,val])=>{const ss=val**2*runs*rep/4;const pct=ssTotal>0?(ss/ssTotal*100):0;effHtml+=`<tr><td style="font-weight:600">${name}</td><td style="${Math.abs(val)>1?'color:#1D3B8A;font-weight:700':''}">${r4(val)}</td><td>${r4(ss)}</td><td>${pct.toFixed(1)}%</td><td>${Math.abs(val)>2?'<span class="badge-r blue">顯著</span>':Math.abs(val)>1?'<span class="badge-r amber">中等</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">微弱</span>'}</td></tr>`;});
+  effHtml+='</tbody></table></div>';
+  document.getElementById('doe-effects-content').innerHTML=effHtml;
+  // 效應柏拉圖
+  const canvas=document.getElementById('doe-pareto-canvas');canvas.width=canvas.parentElement.offsetWidth||640;
+  destroyCharts();
+  const absEff=sortedEff.map(([n,v])=>Math.abs(v));let cumPct=0;const cpcts=absEff.map(v=>{cumPct+=v/sum(absEff)*100;return parseFloat(cumPct.toFixed(1));});
+  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:sortedEff.map(([n])=>n),datasets:[{type:'bar',label:'|效應值|',data:absEff,backgroundColor:absEff.map(v=>v>2?'#1D3B8A':v>1?'#2E5FCF':'#93C5FD'),yAxisID:'y'},{type:'line',label:'累積%',data:cpcts,borderColor:'#DC2626',borderWidth:2,pointRadius:4,pointBackgroundColor:'#DC2626',fill:false,tension:0.1,yAxisID:'y2'}]},options:{responsive:false,animation:false,indexAxis:'y',plugins:{title:{display:true,text:'DOE 效應柏拉圖',font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y2:{position:'right',min:0,max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{display:false}}}}});
+  chartInst.push(inst);
+  // 交互作用圖（取第一對交互）
+  let intHtml='';
+  if(nf>=2){
+    const f1=factors[0],f2=factors[1];
+    const lolo=yMeans.filter((_,r)=>matrix[r][0]===-1&&matrix[r][1]===-1);const lohi=yMeans.filter((_,r)=>matrix[r][0]===-1&&matrix[r][1]===1);
+    const hilo=yMeans.filter((_,r)=>matrix[r][0]===1&&matrix[r][1]===-1);const hihi=yMeans.filter((_,r)=>matrix[r][0]===1&&matrix[r][1]===1);
+    intHtml=`<div class="alert info" style="margin-bottom:.75rem">顯示 ${f1} × ${f2} 交互作用圖。平行線 = 無交互作用；交叉線 = 有顯著交互作用。</div>`;
+    intHtml+=`<div class="canvas-wrap"><canvas id="doe-int-canvas" height="260"></canvas></div>`;
+    document.getElementById('doe-interaction-content').innerHTML=intHtml;
+    setTimeout(()=>{
+      const ic=document.getElementById('doe-int-canvas');if(!ic)return;ic.width=ic.parentElement.offsetWidth||640;
+      const ii=new Chart(ic.getContext('2d'),{type:'line',data:{labels:[`${f2} 低`,`${f2} 高`],datasets:[{label:`${f1} 低`,data:[mean(lolo)||0,mean(lohi)||0],borderColor:'#1D3B8A',borderWidth:2,pointRadius:5,fill:false},{label:`${f1} 高`,data:[mean(hilo)||0,mean(hihi)||0],borderColor:'#DC2626',borderWidth:2,pointRadius:5,fill:false,borderDash:[6,3]}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`交互作用圖：${f1} × ${f2}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:12}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'}},y:{grid:{color:'rgba(0,0,0,.05)'},title:{display:true,text:yname}}}}});
+      chartInst.push(ii);
+    },100);
+  }
+  // ANOVA 表
+  const dfModel=sortedEff.length;const ssModel=sortedEff.reduce((s,[,v])=>s+v**2*runs*rep/4,0);
+  const ssErr=ssTotal-ssModel;const dfErr=runs*(rep-1);
+  const msModel=ssModel/dfModel;const msErr=dfErr>0?ssErr/dfErr:0;
+  const Fval=msErr>0?msModel/msErr:0;const pFval=dfErr>0?fDist(Fval,dfModel,dfErr):1;
+  document.getElementById('doe-anova-content').innerHTML=`<div style="overflow-x:auto"><table><thead><tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F 值</th><th>p 值</th><th>顯著</th></tr></thead><tbody><tr><td style="font-weight:600">模型（所有效應）</td><td>${r4(ssModel)}</td><td>${dfModel}</td><td>${r4(msModel)}</td><td>${r4(Fval)}</td><td>${pFval.toFixed(4)}</td><td>${pFval<0.05?'<span class="badge-r blue">顯著</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">不顯著</span>'}</td></tr>${dfErr>0?`<tr><td>誤差</td><td>${r4(ssErr)}</td><td>${dfErr}</td><td>${r4(msErr)}</td><td>—</td><td>—</td><td>—</td></tr>`:''}<tr style="font-weight:700"><td>總計</td><td>${r4(ssTotal)}</td><td>${dfModel+dfErr}</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>`;
+  document.getElementById('doe-out').style.display='block';
+}
+function doeSw(name){
+  document.querySelectorAll('#page-doe .tab').forEach((t,i)=>t.classList.toggle('active',['effects','pareto','interaction','anova'][i]===name));
+  ['effects','pareto','interaction','anova'].forEach(t=>document.getElementById('doe-tab-'+t).classList.remove('show'));
+  document.getElementById('doe-tab-'+name).classList.add('show');
+  if(name==='pareto'||name==='interaction')setTimeout(()=>{},50);
+}
+
+// ════════════════════════════════════════════
+// SIPOC 工具
+// ════════════════════════════════════════════
+function sipocDraw(){
+  const cols=['s','i','p','o','c'];const colLabels=['Supplier\n供應商','Input\n輸入','Process\n製程','Output\n輸出','Customer\n客戶'];
+  const colColors=['#1D4ED8','#0891B2','#059669','#D97706','#7C3AED'];
+  const data=cols.map(c=>document.getElementById('si-'+c).value.trim().split('\n').filter(s=>s.trim()));
+  const canvas=document.getElementById('si-canvas');canvas.width=canvas.parentElement.offsetWidth||720;canvas.height=380;
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  const W=canvas.width,H=canvas.height,cw=(W-40)/5,ch=H-60,startX=20,startY=50;
+  cols.forEach((c,i)=>{
+    const x=startX+i*cw;
+    ctx.fillStyle=colColors[i];ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,startY,cw-4,36,i===0?[6,0,0,6]:i===4?[0,6,6,0]:[0]);else ctx.rect(x,startY,cw-4,36);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 13px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    const parts=colLabels[i].split('\n');parts.forEach((p,pi)=>ctx.fillText(p,x+cw/2-2,startY+18+(pi-(parts.length-1)/2)*15));
+    ctx.fillStyle='#fff';ctx.strokeStyle=colColors[i];ctx.lineWidth=1.5;ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,startY+40,cw-4,ch-40,i===0?[0,0,6,6]:i===4?[0,0,6,6]:[0]);else ctx.rect(x,startY+40,cw-4,ch-40);ctx.fill();ctx.stroke();
+    const items=data[i];items.forEach((item,ii)=>{
+      const iy=startY+60+ii*28;if(iy+20>startY+ch+10)return;
+      ctx.fillStyle=colColors[i]+'22';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x+6,iy,cw-16,22,4);else ctx.rect(x+6,iy,cw-16,22);ctx.fill();
+      ctx.fillStyle='#1a1a2e';ctx.font='11px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      const txt=item.length>12?item.slice(0,11)+'…':item;ctx.fillText(txt,x+cw/2-2,iy+11);
+    });
+    if(i<4){ctx.fillStyle=colColors[i];ctx.beginPath();const ax=x+cw-4,ay=startY+58;ctx.moveTo(ax,ay);ctx.lineTo(ax+8,ay+8);ctx.lineTo(ax,ay+16);ctx.closePath();ctx.fill();}
+  });
+  document.getElementById('si-out').style.display='block';
+}
+
+// ════════════════════════════════════════════
+// CUSUM / EWMA
+// ════════════════════════════════════════════
+function cusumLoadEx(){document.getElementById('ce-data').value='25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.5 25.4 25.6 25.7 25.5 25.8 25.6 25.9 25.7 25.8';}
+function cusumAnalyze(){
+  const data=parseNums(document.getElementById('ce-data').value);if(data.length<5)return alert('請輸入至少 5 筆數據');
+  const mu=parseFloat(document.getElementById('ce-mu').value)||mean(data);
+  const sigma=parseFloat(document.getElementById('ce-sigma').value)||stdS(data);
+  const k=parseFloat(document.getElementById('ce-k').value)||0.5;
+  const h=parseFloat(document.getElementById('ce-h').value)||4;
+  const lambda=parseFloat(document.getElementById('ce-lambda').value)||0.2;
+  const type=document.getElementById('ce-type').value;
+  // CUSUM
+  let Cp=0,Cm=0;const cusumP=[],cusumM=[];
+  data.forEach(v=>{Cp=Math.max(0,Cp+(v-mu)/sigma-k);Cm=Math.max(0,Cm-(v-mu)/sigma-k);cusumP.push(parseFloat(Cp.toFixed(4)));cusumM.push(parseFloat(Cm.toFixed(4)));});
+  // EWMA
+  let ewma=mu;const ewmaVals=[mu];
+  data.forEach(v=>{ewma=lambda*v+(1-lambda)*ewma;ewmaVals.push(parseFloat(ewma.toFixed(4)));});
+  const ewmaUCL=mu+3*sigma*Math.sqrt(lambda/(2-lambda));const ewmaLCL=mu-3*sigma*Math.sqrt(lambda/(2-lambda));
+  const alarms=cusumP.map((v,i)=>v>h||cusumM[i]>h);const ewmaAlarms=ewmaVals.slice(1).map(v=>v>ewmaUCL||v<ewmaLCL);
+  document.getElementById('ce-stats').innerHTML=[{v:data.length,l:'樣本數'},{v:r4(mu),l:'目標 μ₀'},{v:r4(sigma),l:'製程 σ'},{v:alarms.filter(Boolean).length,l:'CUSUM 警示'},{v:ewmaAlarms.filter(Boolean).length,l:'EWMA 警示'}].map(c=>`<div class="sc"><div class="v">${c.v}</div><div class="l">${c.l}</div></div>`).join('');
+  destroyCharts();
+  const labels=data.map((_,i)=>`${i+1}`);
+  const mkChart=(id,title,ds)=>{
+    const c=document.getElementById(id);if(!c)return;
+    c.width=c.parentElement.offsetWidth||640;c.height=210;
+    const inst=new Chart(c.getContext('2d'),{
+      type:'line',
+      data:{labels,datasets:ds},
+      options:{responsive:false,animation:false,
+        plugins:{title:{display:true,text:title,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},
+        scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}
+    });
+    chartInst.push(inst);
+  }
+  if(type==='cusum'||type==='both'){
+    mkChart('ce-c1','CUSUM 管制圖',[
+      {label:'C+',data:cusumP,borderColor:'#1D3B8A',borderWidth:2,pointRadius:cusumP.map((v)=>v>h?6:3),pointBackgroundColor:cusumP.map((v)=>v>h?'#DC2626':'#1D3B8A'),fill:false,tension:0.1},
+      {label:'C-',data:cusumM,borderColor:'#7C3AED',borderWidth:2,pointRadius:cusumM.map((v)=>v>h?6:3),pointBackgroundColor:cusumM.map((v)=>v>h?'#DC2626':'#7C3AED'),fill:false,tension:0.1},
+      {label:'UCL='+h,data:Array(data.length).fill(h),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
+    ]);
+  }
+  if(type==='ewma'||type==='both'){
+    document.getElementById('ce-c2-wrap').style.display='block';
+    mkChart('ce-c2','EWMA (lambda='+lambda+')',[
+      {label:'EWMA',data:ewmaVals.slice(1),borderColor:'#059669',borderWidth:2,pointRadius:ewmaVals.slice(1).map(v=>v>ewmaUCL||v<ewmaLCL?6:3),pointBackgroundColor:ewmaVals.slice(1).map(v=>v>ewmaUCL||v<ewmaLCL?'#DC2626':'#059669'),fill:false,tension:0.1},
+      {label:'UCL='+r4(ewmaUCL),data:Array(data.length).fill(parseFloat(r4(ewmaUCL))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false},
+      {label:'LCL='+r4(ewmaLCL),data:Array(data.length).fill(parseFloat(r4(ewmaLCL))),borderColor:'#2563EB',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false},
+      {label:'原始值',data:data,borderColor:'#9CA3AF',borderWidth:1,borderDash:[3,3],pointRadius:0,fill:false}
+    ]);
+  } else {
+    document.getElementById('ce-c2-wrap').style.display='none';
+  }
+  const firstAlarm=alarms.findIndex(Boolean)+1;const firstEWMA=ewmaAlarms.findIndex(Boolean)+1;
+  document.getElementById('ce-result').innerHTML=`<div class="alert ${(firstAlarm>0||firstEWMA>0)?'danger':'success'}"><strong>偵測結果：</strong>${firstAlarm>0?`CUSUM 於第 ${firstAlarm} 點發出警示`:'CUSUM 未發現偏移'}${(firstEWMA>0&&(type==='ewma'||type==='both'))?`；EWMA 於第 ${firstEWMA} 點發出警示`:''}。${(firstAlarm===0&&firstEWMA===0)?'製程未見偏移訊號。':''}</div>`;
+  document.getElementById('ce-out').style.display='block';
+}
+
+// ════════════════════════════════════════════
+// 散佈圖 + 相關性
+// ════════════════════════════════════════════
+function scatterLoadEx(){document.getElementById('sc-x').value='180 185 190 195 200 205 210 215 220 225 230 235';document.getElementById('sc-y').value='92 91 93 94 95 95 96 94 93 91 89 87';}
+function scatterAnalyze(){
+  const X=parseNums(document.getElementById('sc-x').value),Y=parseNums(document.getElementById('sc-y').value);
+  if(X.length!==Y.length||X.length<3)return alert('X 和 Y 筆數需相同且至少 3 筆');
+  const n=X.length,xm=mean(X),ym=mean(Y);
+  const sxy=X.reduce((s,x,i)=>s+(x-xm)*(Y[i]-ym),0),sxx=X.reduce((s,x)=>s+(x-xm)**2,0),syy=Y.reduce((s,y)=>s+(y-ym)**2,0);
+  const r=sxy/Math.sqrt(sxx*syy),r2=r**2,b1=sxy/sxx,b0=ym-b1*xm;
+  const t=r*Math.sqrt(n-2)/Math.sqrt(1-r**2),pVal=2*(1-normalCDF(Math.abs(t)));
+  const alpha=parseFloat(document.getElementById('sc-alpha').value)||0.05;
+  document.getElementById('sc-stats').innerHTML=[{v:n,l:'樣本數 n'},{v:r4(r),l:'Pearson r'},{v:r4(r2),l:'R² 決定係數'},{v:r4(b1),l:'斜率 b₁'},{v:r4(b0),l:'截距 b₀'},{v:pVal.toFixed(4),l:'p-value'}].map(c=>`<div class="sc"><div class="v">${c.v}</div><div class="l">${c.l}</div></div>`).join('');
+  const canvas=document.getElementById('sc-canvas');canvas.width=canvas.parentElement.offsetWidth||640;
+  destroyCharts();
+  const xMin=Math.min(...X),xMax=Math.max(...X);const regX=[xMin,xMax],regY=[b0+b1*xMin,b0+b1*xMax];
+  const inst=new Chart(canvas.getContext('2d'),{type:'scatter',data:{datasets:[{label:'觀測值',data:X.map((x,i)=>({x,y:Y[i]})),backgroundColor:'#1D3B8A',pointRadius:5},{label:`迴歸線 y=${r4(b0)}+${r4(b1)}x`,data:regX.map((x,i)=>({x,y:regY[i]})),type:'line',borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('sc-xname').value} vs ${document.getElementById('sc-yname').value}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{title:{display:true,text:document.getElementById('sc-xname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{title:{display:true,text:document.getElementById('sc-yname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+  chartInst.push(inst);
+  const strength=Math.abs(r)>=0.9?'極強':Math.abs(r)>=0.7?'強':Math.abs(r)>=0.5?'中等':Math.abs(r)>=0.3?'弱':'極弱';
+  const dir=r>0?'正':'負';const sig=pVal<alpha;
+  document.getElementById('sc-result').innerHTML=`<div class="alert ${sig?'success':'warn'}"><strong>相關性分析結果</strong><br>r = ${r4(r)}（${dir}相關、${strength}相關），R² = ${r4(r2)}（X 可解釋 Y 變異的 ${(r2*100).toFixed(1)}%）<br>t 統計量 = ${r4(t)}，p-value = ${pVal.toFixed(4)}（α = ${alpha}）<br><strong>結論：</strong>${sig?`✅ 相關性顯著（p < α），X 與 Y 存在${dir}線性關係`:`⚠️ 相關性不顯著（p ≥ α）`}</div><div class="alert info" style="margin-top:.5rem;font-size:12px">迴歸方程式：${document.getElementById('sc-yname').value} = ${r4(b0)} + ${r4(b1)} × ${document.getElementById('sc-xname').value}</div>`;
+  document.getElementById('sc-out').style.display='block';
+}
+
+// ════════════════════════════════════════════
+// 假設檢定
+// ════════════════════════════════════════════
+function hyUpdateUI(){
+  const type=document.getElementById('hy-type').value;
+  let html='';
+  if(type==='1t'){html=`<div class="g3"><div class="field"><label>樣本數據</label><textarea id="hy-d1" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3</textarea></div><div class="field"><label>假設均值 μ₀</label><input id="hy-mu0" value="25.0"></div><div class="field"><label>對立假設</label><select id="hy-tail"><option value="two">雙尾 μ ≠ μ₀</option><option value="right">右尾 μ > μ₀</option><option value="left">左尾 μ < μ₀</option></select></div></div>`;}
+  else if(type==='2t'){html=`<div class="g2"><div class="field"><label>樣本 1</label><textarea id="hy-d1" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3</textarea></div><div class="field"><label>樣本 2</label><textarea id="hy-d2" rows="4">24.8 25.3 25.5 24.6 25.1 24.9 25.4 25.2 24.7 25.0</textarea></div></div>`;}
+  else if(type==='pair'){html=`<div class="g2"><div class="field"><label>改善前</label><textarea id="hy-d1" rows="4">82 79 85 88 76 83 90 74 87 81</textarea></div><div class="field"><label>改善後</label><textarea id="hy-d2" rows="4">85 82 87 91 80 86 93 78 90 84</textarea></div></div>`;}
+  else if(type==='f'){html=`<div class="g2"><div class="field"><label>樣本 1</label><textarea id="hy-d1" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3</textarea></div><div class="field"><label>樣本 2</label><textarea id="hy-d2" rows="4">24.8 25.3 25.5 24.6 25.1 24.9 25.4 25.2 24.7 25.0</textarea></div></div>`;}
+  document.getElementById('hy-input-wrap').innerHTML=html;
+}
+function hyLoadEx(){hyUpdateUI();}
+function hyAnalyze(){
+  const type=document.getElementById('hy-type').value;const alpha=parseFloat(document.getElementById('hy-alpha').value)||0.05;
+  const d1=parseNums(document.getElementById('hy-d1')?.value||'');const d2=parseNums(document.getElementById('hy-d2')?.value||'');
+  let result='';
+  if(type==='1t'){
+    const mu0=parseFloat(document.getElementById('hy-mu0')?.value)||0;const tail=document.getElementById('hy-tail')?.value||'two';
+    const n=d1.length,m=mean(d1),s=stdS(d1),se=s/Math.sqrt(n),t=(m-mu0)/se,df=n-1;
+    let p=tDist(Math.abs(t),df);if(tail==='two')p=Math.min(1,2*p);else if((tail==='right'&&t<0)||(tail==='left'&&t>0))p=1-p;
+    const sig=p<alpha;result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">樣本均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${df}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>單樣本 t 檢定結果</strong><br>H₀: μ = ${mu0}，H₁: μ ${tail==='two'?'≠':tail==='right'?'>':'<'} ${mu0}<br>t = ${r4(t)}，df = ${df}，p = ${p.toFixed(4)}（α = ${alpha}）<br><strong>${sig?`✅ 拒絕 H₀：均值與 ${mu0} 有顯著差異`:`⚠️ 無法拒絕 H₀：均值與 ${mu0} 無顯著差異`}</strong></div>`;
+  }else if(type==='2t'){
+    const n1=d1.length,n2=d2.length,m1=mean(d1),m2=mean(d2),s1=stdS(d1),s2=stdS(d2);
+    const se=Math.sqrt(s1**2/n1+s2**2/n2),t=(m1-m2)/se;
+    const df=Math.floor((s1**2/n1+s2**2/n2)**2/((s1**2/n1)**2/(n1-1)+(s2**2/n2)**2/(n2-1)));
+    const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
+    result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${r4(m1)}</div><div class="l">樣本1均值</div></div><div class="sc"><div class="v">${r4(m2)}</div><div class="l">樣本2均值</div></div><div class="sc"><div class="v">${r4(m1-m2)}</div><div class="l">均值差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${df}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>獨立雙樣本 t 檢定（Welch）</strong><br>t = ${r4(t)}，df = ${df}，p = ${p.toFixed(4)}（α = ${alpha}）<br><strong>${sig?`✅ 拒絕 H₀：兩組均值有顯著差異（差異 = ${r4(m1-m2)}）`:`⚠️ 無法拒絕 H₀：兩組均值無顯著差異`}</strong></div>`;
+  }else if(type==='pair'){
+    if(d1.length!==d2.length)return alert('配對樣本筆數需相同');
+    const diff=d1.map((v,i)=>v-d2[i]),n=diff.length,m=mean(diff),s=stdS(diff),se=s/Math.sqrt(n),t=m/se,df=n-1;
+    const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
+    result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">配對數 n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">差值均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">差值標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>配對樣本 t 檢定</strong><br>差值均值 = ${r4(m)}，t = ${r4(t)}，p = ${p.toFixed(4)}<br><strong>${sig?`✅ 拒絕 H₀：改善前後有顯著差異`:`⚠️ 無法拒絕 H₀：改善前後無顯著差異`}</strong></div>`;
+  }else if(type==='f'){
+    const n1=d1.length,n2=d2.length,s1=stdS(d1),s2=stdS(d2);
+    const F=s1**2/s2**2,df1=n1-1,df2=n2-1,p=Math.min(1,2*Math.min(fDist(F,df1,df2),1-fDist(F,df1,df2)));const sig=p<alpha;
+    result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${r4(s1)}</div><div class="l">s₁</div></div><div class="sc"><div class="v">${r4(s2)}</div><div class="l">s₂</div></div><div class="sc"><div class="v">${r4(s1**2/s2**2)}</div><div class="l">變異數比 F</div></div><div class="sc"><div class="v">${df1},${df2}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>F 檢定（變異數齊一性）</strong><br>F = ${r4(F)}，df=(${df1},${df2})，p = ${p.toFixed(4)}<br><strong>${sig?`✅ 拒絕 H₀：兩組變異數有顯著差異`:`⚠️ 無法拒絕 H₀：兩組變異數無顯著差異`}</strong></div>`;
+  }
+  document.getElementById('hy-result').innerHTML=result;
+  document.getElementById('hy-out').style.display='block';
+}
+
+// ════════════════════════════════════════════
+// Box Plot
+// ════════════════════════════════════════════
+function boxplotAnalyze(){
+  const lines=document.getElementById('bp-data').value.trim().split('\n').filter(l=>l.includes(':'));
+  const groups=lines.map(l=>{const[name,...rest]=l.split(':');const vals=parseNums(rest.join(':'));return{name:name.trim(),vals};}).filter(g=>g.vals.length>0);
+  if(!groups.length)return alert('請輸入有效的分組數據');
+  const yname=document.getElementById('bp-yname').value||'值';
+  // 計算箱型圖統計
+  const stats=groups.map(g=>{
+    const s=[...g.vals].sort((a,b)=>a-b),n=s.length;
+    const q1=s[Math.floor(n*0.25)],q2=s[Math.floor(n*0.5)],q3=s[Math.floor(n*0.75)],iqr=q3-q1;
+    const lo=q1-1.5*iqr,hi=q3+1.5*iqr;
+    const outliers=s.filter(v=>v<lo||v>hi);
+    return{name:g.name,min:Math.min(...s),max:Math.max(...s),q1,q2,q3,iqr,mean:mean(g.vals),std:stdS(g.vals),outliers,n};
+  });
+  document.getElementById('bp-stats').innerHTML=stats.map(s=>`<div class="sc"><div class="v" style="font-size:15px">${s.name}</div><div class="l">中位數 ${r4(s.q2)} ｜ n=${s.n}</div></div>`).join('');
+  // 繪製箱型圖（用 Canvas 手繪）
+  const canvas=document.getElementById('bp-canvas');canvas.width=canvas.parentElement.offsetWidth||640;canvas.height=320;
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  const W=canvas.width,H=canvas.height,pad={l:55,r:20,t:30,b:40};
+  const allVals=groups.flatMap(g=>g.vals);const vMin=Math.min(...allVals)*0.999,vMax=Math.max(...allVals)*1.001;
+  const colors=['#1D3B8A','#059669','#D97706','#7C3AED','#DC2626'];
+  function vy(v){return pad.t+(vMax-v)/(vMax-vMin)*(H-pad.t-pad.b);}
+  // Y 軸
+  ctx.strokeStyle='#E5E7EB';ctx.lineWidth=1;ctx.fillStyle='#6B7280';ctx.font='11px -apple-system,sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+  const ticks=5;for(let i=0;i<=ticks;i++){const v=vMin+(vMax-vMin)*i/ticks;const y=vy(v);ctx.beginPath();ctx.moveTo(pad.l-4,y);ctx.lineTo(W-pad.r,y);ctx.strokeStyle=i===0||i===ticks?'#D1D5DB':'#F3F4F6';ctx.stroke();ctx.fillText(r2(v),pad.l-6,y);}
+  ctx.fillStyle='#374151';ctx.font='12px -apple-system,sans-serif';ctx.textAlign='center';ctx.save();ctx.translate(14,H/2);ctx.rotate(-Math.PI/2);ctx.fillText(yname,0,0);ctx.restore();
+  // 箱型圖
+  const bw=Math.min(60,((W-pad.l-pad.r)/groups.length)*0.5);
+  stats.forEach((s,gi)=>{
+    const cx=pad.l+((W-pad.l-pad.r)*(gi+0.5)/groups.length);const col=colors[gi%colors.length];
+    // 須線
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(cx,vy(s.min));ctx.lineTo(cx,vy(s.q1));ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cx,vy(s.q3));ctx.lineTo(cx,vy(s.max));ctx.stroke();
+    ctx.setLineDash([]);
+    // 箱體
+    ctx.fillStyle=col+'22';ctx.strokeStyle=col;ctx.lineWidth=2;
+    ctx.fillRect(cx-bw/2,vy(s.q3),bw,vy(s.q1)-vy(s.q3));
+    ctx.strokeRect(cx-bw/2,vy(s.q3),bw,vy(s.q1)-vy(s.q3));
+    // 中位線
+    ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx-bw/2,vy(s.q2));ctx.lineTo(cx+bw/2,vy(s.q2));ctx.stroke();
+    // 平均值菱形
+    ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(cx,vy(s.mean)-5);ctx.lineTo(cx+5,vy(s.mean));ctx.lineTo(cx,vy(s.mean)+5);ctx.lineTo(cx-5,vy(s.mean));ctx.closePath();ctx.fill();
+    // 端點橫線
+    [s.min,s.max].forEach(v=>{ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(cx-bw/4,vy(v));ctx.lineTo(cx+bw/4,vy(v));ctx.stroke();});
+    // 離群值
+    s.outliers.forEach(v=>{ctx.fillStyle='#DC2626';ctx.beginPath();ctx.arc(cx,vy(v),4,0,Math.PI*2);ctx.fill();});
+    // X 軸標籤
+    ctx.fillStyle='#374151';ctx.font='12px -apple-system,sans-serif';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(s.name,cx,H-pad.b+6);
+  });
+  document.getElementById('bp-table').innerHTML=`<thead><tr><th>組別</th><th>n</th><th>平均</th><th>中位數</th><th>Q1</th><th>Q3</th><th>IQR</th><th>標準差</th><th>離群值</th></tr></thead><tbody>${stats.map(s=>`<tr><td style="font-weight:600">${s.name}</td><td>${s.n}</td><td>${r4(s.mean)}</td><td>${r4(s.q2)}</td><td>${r4(s.q1)}</td><td>${r4(s.q3)}</td><td>${r4(s.iqr)}</td><td>${r4(s.std)}</td><td>${s.outliers.length?s.outliers.map(v=>r4(v)).join(', '):'—'}</td></tr>`).join('')}</tbody>`;
+  document.getElementById('bp-out').style.display='block';
+}
+
+// 初始化
+doeUpdateFactors();
+hyUpdateUI();
+
+// ── 綁定到 window 讓 onclick 能找到 ──
+window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
+window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
+window.paretoAnalyze=paretoAnalyze;window.paretoLoadEx=paretoLoadEx;
+window.fishboneDraw=fishboneDraw;
+window.histAnalyze=histAnalyze;window.histLoadEx=histLoadEx;
+window.doeUpdateFactors=doeUpdateFactors;window.doeAnalyze=doeAnalyze;window.doeLoadEx=doeLoadEx;window.doeSw=doeSw;
+window.sipocDraw=sipocDraw;
+window.cusumAnalyze=cusumAnalyze;window.cusumLoadEx=cusumLoadEx;
+window.scatterAnalyze=scatterAnalyze;window.scatterLoadEx=scatterLoadEx;
+window.hyUpdateUI=hyUpdateUI;window.hyAnalyze=hyAnalyze;window.hyLoadEx=hyLoadEx;
+window.boxplotAnalyze=boxplotAnalyze;
+</script>
+
+<script>
+// 備用事件委派 - 確保 onclick 在各種環境都能運作
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-goto]');
+  if(el) {
+    var id = el.getAttribute('data-goto');
+    if(id === 'home') goHome();
+    else goTool(id);
+  }
+});
+</script>
+</body>
+</html>
