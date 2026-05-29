@@ -218,7 +218,7 @@ tr:hover td{background:#F9FAFB}
   <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">完整 DMAIC 五階段工具・純離線運行・無需帳號<br>從定義問題到持續管制，協助製程持續改善</p>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
-    <button onclick="scrollToPhase('M')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📋 工具總覽</button>
+    <button onclick="goTool('spc')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📊 SPC 管制圖</button>
   </div>
 </div>
 
@@ -392,11 +392,7 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-desc">小偏移敏感偵測・累積和圖</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
-              <div class="tc-phase" style="color:#7252C8">CONTROL</div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
-        <div class="tc-desc">量具穩定性監控・Stability Chart</div>
-        <span class="tc-tag tag-new">可用</span>
-      </div>
+
     </div>
   </div>
 
@@ -431,26 +427,11 @@ tr:hover td{background:#F9FAFB}
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--M)"></div>
     <div>
-      <div class="tp-title">📈 SPC 統計製程管制</div>
+      <div class="tp-title">SPC 統計製程管制</div>
       <div class="tp-subtitle">Statistical Process Control — 自動判斷圖型・Nelson 8 條規則・製程能力</div>
     </div>
   </div>
-  
-<div style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:12px;padding:.85rem 1.25rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:14px">
-  <div style="flex-shrink:0;width:54px;height:54px;border-radius:50%;border:3px solid #16A34A;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#fff">
-    <div style="font-size:10px;font-weight:700;color:#16A34A;letter-spacing:.05em">PASS</div>
-    <div style="font-size:16px;line-height:1">✅</div>
-  </div>
-  <div>
-    <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:.25rem">SPC 統計製程管制 — 驗效通過</div>
-    <div style="font-size:12px;color:#166534;line-height:1.7">
-      所有統計公式已依據 <strong>Montgomery《Introduction to Statistical Quality Control》8th Ed.</strong> 驗效通過。<br>
-      涵蓋：Xbar-R UCL/LCL・R Chart・σ̂（R̄/d₂）・Cp・Cpk・np Chart・I-MR Chart
-    </div>
-    <div style="font-size:11px;color:#4ADE80;margin-top:.3rem;font-style:italic">驗效日期：2026-05-29　驗效人員：Chiu Chang Ru / Claude　依據：Montgomery 8th Ed.</div>
-  </div>
-</div>
-<div class="card">
+  <div class="card">
     <div class="card-title" style="--cc:var(--M)"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 
@@ -580,7 +561,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">📊 柏拉圖 Pareto Chart</div><div class="tp-subtitle">80/20 法則・找出關鍵少數・累積百分比曲線</div></div>
+    <div><div class="tp-title">柏拉圖 Pareto Chart</div><div class="tp-subtitle">80/20 法則・找出關鍵少數・累積百分比曲線</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
@@ -650,7 +631,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">🐟 魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
+    <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>輸入格式說明</div>
@@ -718,7 +699,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--M)"></div>
-    <div><div class="tp-title">📉 直方圖 + 常態檢定</div><div class="tp-subtitle">分佈形態分析・Shapiro-Wilk 常態性檢定・偏態/峰態</div></div>
+    <div><div class="tp-title">直方圖 + 常態檢定</div><div class="tp-subtitle">分佈形態分析・Shapiro-Wilk 常態性檢定・偏態/峰態</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
@@ -791,7 +772,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--I)"></div>
-    <div><div class="tp-title">🧪 DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
+    <div><div class="tp-title">DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>因子設定</div>
@@ -880,7 +861,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">🗺️ SIPOC 圖</div><div class="tp-subtitle">Supplier · Input · Process · Output · Customer — 製程範疇定義</div></div>
+    <div><div class="tp-title">SIPOC 圖</div><div class="tp-subtitle">Supplier · Input · Process · Output · Customer — 製程範疇定義</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>SIPOC 內容輸入</div>
@@ -939,7 +920,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--C)"></div>
-    <div><div class="tp-title">🎯 CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
+    <div><div class="tp-title">CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--C);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料與參數</div>
@@ -1014,7 +995,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--A)"></div>
-    <div><div class="tp-title">🔗 相關性分析 + 散佈圖</div><div class="tp-subtitle">Pearson r・線性迴歸・決定係數 R²・顯著性檢定</div></div>
+    <div><div class="tp-title">相關性分析 + 散佈圖</div><div class="tp-subtitle">Pearson r・線性迴歸・決定係數 R²・顯著性檢定</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
@@ -1088,7 +1069,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--A)"></div>
-    <div><div class="tp-title">🔬 假設檢定</div><div class="tp-subtitle">單樣本 t・雙樣本 t・配對 t・F 檢定・卡方適合度</div></div>
+    <div><div class="tp-title">假設檢定</div><div class="tp-subtitle">單樣本 t・雙樣本 t・配對 t・F 檢定・卡方適合度</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>選擇檢定類型</div>
@@ -1163,7 +1144,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--M)"></div>
-    <div><div class="tp-title">📦 箱型圖 Box Plot</div><div class="tp-subtitle">多組分佈比較・Q1/Q2/Q3・IQR・離群值偵測</div></div>
+    <div><div class="tp-title">箱型圖 Box Plot</div><div class="tp-subtitle">多組分佈比較・Q1/Q2/Q3・IQR・離群值偵測</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
@@ -1234,28 +1215,13 @@ tr:hover td{background:#F9FAFB}
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--M)"></div>
     <div>
-      <div class="tp-title">📐 MSA 量測系統分析</div>
+      <div class="tp-title">MSA 量測系統分析</div>
       <div class="tp-subtitle">Measurement System Analysis・Gage R&R・Bias・Linearity・Stability</div>
     </div>
   </div>
 
   <!-- 決策樹 -->
-  
-<div style="background:#F0FDF4;border:1.5px solid #86EFAC;border-radius:12px;padding:.85rem 1.25rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:14px">
-  <div style="flex-shrink:0;width:54px;height:54px;border-radius:50%;border:3px solid #16A34A;display:flex;align-items:center;justify-content:center;flex-direction:column;background:#fff">
-    <div style="font-size:10px;font-weight:700;color:#16A34A;letter-spacing:.05em">PASS</div>
-    <div style="font-size:16px;line-height:1">✅</div>
-  </div>
-  <div>
-    <div style="font-size:13px;font-weight:600;color:#166534;margin-bottom:.25rem">MSA 量測系統分析 — 驗效通過</div>
-    <div style="font-size:12px;color:#166534;line-height:1.7">
-      所有統計公式已依據 <strong>AIAG MSA 4th Edition</strong> 驗效通過。<br>
-      涵蓋：GRR ANOVA（SS/df/MS/Var Components/%GRR/ndc）・Bias t-test・Linearity 迴歸・Attribute MSA Kappa・Stability Xbar-R
-    </div>
-    <div style="font-size:11px;color:#4ADE80;margin-top:.3rem;font-style:italic">驗效日期：2026-05-29　驗效人員：Chiu Chang Ru / Claude　依據：AIAG MSA 4th Ed.</div>
-  </div>
-</div>
-<div class="card" id="msa-decision-card">
+  <div class="card" id="msa-decision-card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Step 1：選擇分析方法</div>
 
     <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.85rem 1rem;font-size:13px;margin-bottom:1rem;line-height:1.9;color:#1E40AF">
