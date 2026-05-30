@@ -276,45 +276,6 @@ tr:hover td{background:#F9FAFB}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
-
-/* ════ 工作流程狀態 ════ */
-.tool-card{transition:all .25s ease}
-.tool-card.wf-inactive{opacity:.35;filter:grayscale(80%)}
-.tool-card.wf-inactive:hover{opacity:.55;filter:grayscale(50%);transform:none}
-.tool-card.wf-recommended{opacity:1;filter:none;box-shadow:0 0 0 2px var(--card-color,#1A9CB0),0 4px 16px rgba(0,0,0,.1)}
-.tool-card.wf-next{opacity:1;filter:none;box-shadow:0 0 0 2.5px var(--card-color,#1A9CB0),0 6px 20px rgba(0,0,0,.15);animation:wf-pulse 2s ease-in-out infinite}
-@keyframes wf-pulse{0%,100%{box-shadow:0 0 0 2.5px var(--card-color,#1A9CB0),0 6px 20px rgba(0,0,0,.12)}50%{box-shadow:0 0 0 4px var(--card-color,#1A9CB0),0 8px 24px rgba(0,0,0,.2)}}
-.tool-card.wf-done{opacity:.5;filter:grayscale(40%)}
-.tool-card.wf-done::after{content:'✅';position:absolute;top:8px;right:8px;font-size:14px;z-index:2}
-/* ════ AI 浮動按鈕 ════ */
-.ai-float-btn{position:fixed;bottom:20px;right:18px;z-index:9990;background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:28px;padding:10px 18px 10px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(190,24,93,.45);transition:all .2s;white-space:nowrap}
-.ai-float-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(190,24,93,.55)}
-.ai-float-btn .afb-dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;flex-shrink:0;animation:afb-pulse 2s ease-in-out infinite}
-@keyframes afb-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
-/* ════ 側邊抽屜 ════ */
-.ai-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9991;display:none;backdrop-filter:blur(2px)}
-.ai-drawer-overlay.open{display:block}
-.ai-drawer{position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100vh;background:#fff;z-index:9992;display:flex;flex-direction:column;box-shadow:-4px 0 32px rgba(0,0,0,.2);transition:right .3s cubic-bezier(.4,0,.2,1)}
-.ai-drawer.open{right:0}
-.ai-drawer-header{background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.ai-drawer-header .adh-left{display:flex;align-items:center;gap:10px}
-.ai-drawer-header .adh-title{font-size:14px;font-weight:600}
-.ai-drawer-header .adh-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
-.ai-drawer-header .adh-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ai-drawer-messages{flex:1;overflow-y:auto;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.65rem}
-.hcm-user{background:#BE185D;color:#fff;padding:.55rem .9rem;border-radius:8px 8px 2px 8px;font-size:13px;align-self:flex-end;max-width:88%}
-.hcm-assistant{background:#F8FAFF;color:#1a1a2e;border:1px solid #E2ECF8;padding:.65rem .9rem;border-radius:8px 8px 8px 2px;font-size:13px;align-self:flex-start;max-width:95%;line-height:1.75}
-.hcm-assistant strong{font-weight:700}
-.tool-link{display:inline-flex;align-items:center;gap:5px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:4px 12px;margin:4px 3px 4px 0;font-size:12px;color:#1D3B8A;cursor:pointer;font-weight:600;text-decoration:none}
-.tool-link:hover{background:#DBEAFE}
-.ai-drawer-input{padding:.75rem 1.25rem 1rem;border-top:1px solid #E8EDF5;flex-shrink:0}
-.ai-drawer-input textarea{width:100%;border:1px solid #D1D5DB;border-radius:8px;padding:.6rem .85rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.55;margin-bottom:6px}
-.ai-drawer-input textarea:focus{border-color:#BE185D}
-.ai-drawer-input-row{display:flex;gap:6px}
-.adi-send{flex:1;background:#BE185D;color:#fff;border:none;border-radius:7px;padding:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
-.adi-send:disabled{background:#9CA3AF;cursor:not-allowed}
-.adi-reset{background:transparent;border:1px solid #E2ECF8;border-radius:7px;padding:8px 12px;font-size:11px;color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap}
-
 </style>
 
 <style id="edu-styles">
@@ -423,7 +384,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">Offline · Free · Pure JS</span>
+    <span class="tb-status" id="dmaic-save-status">v2.0 · 2026-05-31 02:02</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -4255,7 +4216,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='Offline · Auto-save enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.0 · 2026-05-31 02:02 enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4349,172 +4310,8 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('Offline · Auto-save enabled');
+  status('v2.0 · 2026-05-31 02:02 enabled');
 })();
-
-// ════════════════════════════════════════════════════════
-// 新功能整合：工作流程狀態 + AI 助理抽屜
-// 直接掛到 goTool/goHome 的 after hook，不覆寫
-// ════════════════════════════════════════════════════════
-
-var TOOL_COLORS = {
-  spc:'#1A9CB0', msa:'#7252C8', doe:'#D4850A',
-  histogram:'#1A9CB0', hypothesis:'#1A9E75', scatter:'#1A9E75',
-  boxplot:'#1A9E75', pareto:'#3B7DD8', fishbone:'#3B7DD8',
-  sipoc:'#3B7DD8', cusum:'#7252C8',
-};
-
-var TOOL_DISPLAY = {
-  spc:'📈 SPC 管制圖', msa:'📐 MSA 量測系統', doe:'🧪 DOE 實驗設計',
-  histogram:'📉 直方圖', hypothesis:'🔬 假設檢定', scatter:'🔗 相關性分析',
-  boxplot:'📦 箱型圖', pareto:'📊 柏拉圖', fishbone:'🐟 魚骨圖',
-  sipoc:'🗺️ SIPOC', cusum:'🎯 CUSUM/EWMA',
-};
-
-var WF_KEY = 'medqa_workflow_v2';
-function wfLoad(){try{var s=localStorage.getItem(WF_KEY);return s?JSON.parse(s):{recommended:[],completed:[],next:null,active:false};}catch(e){return {recommended:[],completed:[],next:null,active:false};}}
-function wfSave(s){try{localStorage.setItem(WF_KEY,JSON.stringify(s));}catch(e){}}
-
-function wfApplyStyles(state){
-  Object.keys(TOOL_DISPLAY).forEach(function(tid){
-    var card=document.querySelector('[data-tool="'+tid+'"]');
-    if(!card)return;
-    card.classList.remove('wf-inactive','wf-recommended','wf-next','wf-done');
-    card.style.setProperty('--card-color', TOOL_COLORS[tid]||'#1A9CB0');
-    if(!state.active)return;
-    var done=state.completed.indexOf(tid)>=0;
-    var next=state.next===tid;
-    var rec=state.recommended.indexOf(tid)>=0;
-    if(done) card.classList.add('wf-done');
-    else if(next) card.classList.add('wf-next');
-    else if(rec) card.classList.add('wf-recommended');
-    else card.classList.add('wf-inactive');
-  });
-}
-
-function wfReset(){
-  localStorage.removeItem(WF_KEY);
-  wfApplyStyles({recommended:[],completed:[],next:null,active:false});
-  var msgs=document.getElementById('hc-messages');
-  if(msgs) msgs.innerHTML='<div class="hcm-assistant">已清除。請重新描述您的問題。</div>';
-  homeChatHistory=[];
-}
-
-// ── AI 抽屜 ──
-function aiDrawerOpen(){
-  var d=document.getElementById('ai-drawer');
-  var o=document.getElementById('ai-overlay');
-  var b=document.getElementById('ai-float-btn');
-  if(d)d.classList.add('open');
-  if(o)o.classList.add('open');
-  if(b)b.style.display='none';
-  setTimeout(function(){var i=document.getElementById('hc-input');if(i)i.focus();},350);
-}
-function aiDrawerClose(){
-  var d=document.getElementById('ai-drawer');
-  var o=document.getElementById('ai-overlay');
-  var b=document.getElementById('ai-float-btn');
-  if(d)d.classList.remove('open');
-  if(o)o.classList.remove('open');
-  if(b)b.style.display='flex';
-}
-
-// ── goTool / goHome after hooks（不覆寫，用 patch）──
-(function(){
-  var _orig = window.goTool;
-  window.goTool = function(id){
-    _orig(id);
-    // WF 狀態
-    var state=wfLoad();
-    if(state.active && state.recommended.indexOf(id)>=0 && state.completed.indexOf(id)<0){
-      state.completed.push(id);
-      var next=null;
-      state.recommended.forEach(function(t){if(!next&&state.completed.indexOf(t)<0)next=t;});
-      state.next=next; wfSave(state);
-    }
-    // 隱藏浮動按鈕
-    aiDrawerClose();
-    // DT 助理
-    setTimeout(function(){
-      var c=document.getElementById('da-container-'+id);
-      if(c && typeof dtAssistantHTML==='function' && typeof DT_CONFIG!=='undefined' && DT_CONFIG[id]){
-        c.innerHTML=dtAssistantHTML(id);
-      }
-      if(typeof hideFormatHint==='function') hideFormatHint();
-    },150);
-  };
-})();
-
-(function(){
-  var _orig = window.goHome;
-  window.goHome = function(){
-    _orig();
-    setTimeout(function(){
-      var state=wfLoad();
-      wfApplyStyles(state);
-      var fb=document.getElementById('ai-float-btn');
-      if(fb)fb.style.display='flex';
-    },100);
-  };
-})();
-
-// ── 主頁聊天助理 ──
-var homeChatHistory=[];
-var HOME_CHAT_SYSTEM='你是工具分類器。只能輸出 JSON，不可有任何其他文字。\n\nJSON 格式：{"tools":["id1","id2","id3"],"reasons":["原因1","原因2","原因3"]}\n\n可用 id：pareto, fishbone, spc, msa, histogram, hypothesis, scatter, doe, boxplot, cusum, sipoc\n\n規則：tools 最多 4 個，reasons 和 tools 數量相同，每個原因 10 字以內，只輸出 JSON。';
-
-async function homeChatSend(){
-  var input=document.getElementById('hc-input');
-  var msgs=document.getElementById('hc-messages');
-  var btn=document.getElementById('hc-send');
-  if(!input||!msgs)return;
-  var q=input.value.trim(); if(!q)return;
-  var uDiv=document.createElement('div'); uDiv.className='hcm-user'; uDiv.textContent=q;
-  msgs.appendChild(uDiv); input.value=''; if(btn)btn.disabled=true;
-  msgs.scrollTop=msgs.scrollHeight;
-  homeChatHistory.push({role:'user',content:q});
-  var aDiv=document.createElement('div'); aDiv.className='hcm-assistant'; aDiv.textContent='分析中...';
-  msgs.appendChild(aDiv); msgs.scrollTop=msgs.scrollHeight;
-  try{
-    var resp=await fetch(CLAUDE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:homeChatHistory,system:HOME_CHAT_SYSTEM})});
-    var data=await resp.json();
-    var reply=data.content[0].text;
-    homeChatHistory.push({role:'assistant',content:reply});
-    var tools=[],reasons=[];
-    try{
-      var m=reply.match(/\{[\s\S]*?"tools"[\s\S]*?\}/);
-      if(m){var p=JSON.parse(m[0]);tools=(p.tools||[]).filter(function(t){return TOOL_DISPLAY[t];});reasons=p.reasons||[];}
-    }catch(e){}
-    var clean=tools.length?tools.map(function(tid,i){return (i+1)+'. '+(TOOL_DISPLAY[tid])+(reasons[i]?' — '+reasons[i]:'');}).join('\n'):'請描述更具體的問題。';
-    aDiv.innerHTML=renderMarkdown(clean);
-    if(tools.length>0){
-      var btns=document.createElement('div'); btns.style.cssText='margin-top:.5rem;display:flex;flex-wrap:wrap;gap:4px';
-      tools.forEach(function(tid,i){
-        var a=document.createElement('a'); a.className='tool-link';
-        a.innerHTML=(i+1)+'. '+TOOL_DISPLAY[tid];
-        a.onclick=function(e){e.preventDefault();aiDrawerClose();goTool(tid);};
-        btns.appendChild(a);
-      });
-      aDiv.appendChild(btns);
-      var state=wfLoad(); state.active=true; state.recommended=tools;
-      state.next=tools.filter(function(t){return state.completed.indexOf(t)<0;})[0]||null;
-      wfSave(state); wfApplyStyles(state);
-    }
-    var rb=document.createElement('button'); rb.className='adi-reset'; rb.textContent='🔄 清除推薦'; rb.onclick=wfReset;
-    aDiv.appendChild(rb);
-  }catch(err){aDiv.textContent='⚠️ 連線失敗：'+err.message;}
-  if(btn)btn.disabled=false; msgs.scrollTop=msgs.scrollHeight;
-}
-
-function homeChatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}}
-
-window.aiDrawerOpen=aiDrawerOpen;
-window.aiDrawerClose=aiDrawerClose;
-window.homeChatSend=homeChatSend;
-window.homeChatKeydown=homeChatKeydown;
-window.wfReset=wfReset;
-window.wfApplyStyles=wfApplyStyles;
-
 </script>
 
 <section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
@@ -4528,40 +4325,5 @@ window.wfApplyStyles=wfApplyStyles;
 </section>
 
 
-<div id="version-badge" style="position:fixed;bottom:12px;right:12px;z-index:9999;
-  background:rgba(27,58,92,.85);color:rgba(255,255,255,.65);
-  font-size:10px;padding:4px 10px;border-radius:20px;
-  font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
-  border:1px solid rgba(255,255,255,.12);pointer-events:none">
-  v1.0 正式版 · 2026-05-30 13:08
-</div>
-
-<!-- AI 助理浮動按鈕 -->
-<button class="ai-float-btn" id="ai-float-btn" onclick="aiDrawerOpen()" title="AI 分析助理">
-  <span class="afb-dot"></span>🤖 AI 分析助理
-</button>
-<div class="ai-drawer-overlay" id="ai-overlay" onclick="aiDrawerClose()"></div>
-<div class="ai-drawer" id="ai-drawer">
-  <div class="ai-drawer-header">
-    <div class="adh-left">
-      <span style="font-size:22px">🤖</span>
-      <div><div class="adh-title">AI 分析助理</div><div class="adh-sub">描述問題，推薦工具路徑</div></div>
-    </div>
-    <button class="adh-close" onclick="aiDrawerClose()">✕</button>
-  </div>
-  <div class="ai-drawer-messages" id="hc-messages">
-    <div class="hcm-assistant">您好！請描述品質問題，我推薦合適的分析工具。<br><span style="font-size:11px;color:#6B7280">也可直接點選主頁工具使用。</span></div>
-  </div>
-  <div class="ai-drawer-input">
-    <textarea id="hc-input" rows="2" placeholder="例如：SPC 發現異常需要 CAPA..." onkeydown="homeChatKeydown(event)"></textarea>
-    <div class="ai-drawer-input-row">
-      <button class="adi-send" id="hc-send" onclick="homeChatSend()">送出 →</button>
-      <button class="adi-reset" onclick="wfReset()">🔄 清除</button>
-    </div>
-  </div>
-</div>
-
-
-<div style="position:fixed;bottom:68px;right:16px;z-index:9989;background:rgba(27,58,92,.8);color:rgba(255,255,255,.6);font-size:10px;padding:3px 9px;border-radius:20px;font-family:monospace;pointer-events:none">v2.0 · 2026-05-31 01:51</div>
 </body>
 </html>
