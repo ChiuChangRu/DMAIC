@@ -1761,12 +1761,7 @@ function goTool(id){
   // 顯示工具列（返回按鈕）
   showToolBar(TOOL_NAMES[id]||id);
   // 初始化數據設計助理
-  setTimeout(function(){
-    var daContainer=document.getElementById('da-container-'+id);
-    if(daContainer&&typeof designAssistantHTML==='function'){
-      daContainer.innerHTML=designAssistantHTML(id);
-    }
-  },100);
+
   try{window.scrollTo(0,0);}catch(e){}
 }
 
@@ -4074,115 +4069,7 @@ function renderMarkdown(text) {
 // ════════════════════════════════════════════════════
 // 數據設計助理
 // ════════════════════════════════════════════════════
-var DESIGN_PROMPTS = {
-  spc: {
-    hint: '💡 可以問我：「我的產品是血管內導管，應該選哪種管制圖？子組大小多少？需要幾組？」',
-    system: `你是 MedQA 平台 SPC 管制圖的參數設定助理。
-你的唯一職責是告訴使用者「要在本平台填入哪些參數」，不做任何統計計算或結果評估。
 
-根據使用者描述，只回答以下問題：
-① 應選哪種管制圖類型？（Xbar-R/I-MR/np/p/c/u）選擇理由一句話。
-② 子組大小 n 填多少？
-③ 需要幾組數據？
-④ LSL/USL 要填什麼？（如果使用者沒提規格，提醒他填入設計規格）
-
-當使用者貼上數據時，只說：「請將數據貼入輸入框，填入 LSL/USL，按執行分析，平台會自動計算所有統計數值。」
-絕對不要自己計算均值、標準差、Cpk、管制界限等任何數值。
-用繁體中文，60字以內，條列式。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  msa: {
-    hint: '💡 可以問我：「我的量具是卡尺，需要幾個操作員和零件才能做 Gage R&R？」',
-    system: `你是 MedQA 平台 MSA 量測系統分析的參數設定助理。
-你的唯一職責是告訴使用者「要填幾個操作員、幾個零件、幾次重複」，不做任何分析。
-
-只回答：
-① 操作員數建議填幾？（標準建議3人）
-② 零件數建議填幾？（標準建議10件）
-③ 重複次數填幾？（標準建議2次）
-④ 輸入格式提醒：每列「操作員,零件,量測值1,量測值2」
-
-回答完後說：「填好數據後按執行分析，平台自動計算 %GRR 和 ndc。」
-絕對不要預測或計算任何 GRR 數值。
-用繁體中文，60字以內，條列式。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  doe: {
-    hint: '💡 可以問我：「我想優化親水塗層附著力，有溫度、壓力、濃度三個因子，怎麼設計？」',
-    system: `你是 MedQA 平台 DOE 實驗設計的參數設定助理。
-你的唯一職責是告訴使用者「要在本平台填入哪些參數」，不做任何分析或結果預測。
-
-根據使用者描述，只回答：
-① 建議幾個因子（2-4個）？每個因子名稱填什麼？
-② 每個因子的低水準值填多少、高水準值填多少？（請使用者確認，給具體數值建議）
-③ 重複次數建議填幾次？（建議2次）
-④ 反應變數 Y 名稱填什麼？
-
-回答完後說：「填好後按套用到表格，再輸入實驗結果，按執行分析。」
-絕對不要預測效應值、分析哪個因子重要、評估任何結果。
-用繁體中文，80字以內，條列式。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  histogram: {
-    hint: '💡 可以問我：「我想確認製程數據的分佈，需要收集幾筆？怎麼輸入？」',
-    system: `你是 MedQA 平台直方圖的參數設定助理。
-你的唯一職責是告訴使用者「要填哪些參數」，不做任何計算或分析。
-
-只回答：
-① 組距數建議填幾？（建議 8-15 組）
-② 顯著水準 α 建議填多少？（通常 0.05）
-③ 輸入格式：數值用空格或逗號分隔，直接貼上
-
-回答完後說：「貼入數據，按執行分析，平台自動計算統計數值和常態性檢定。」
-絕對不做任何統計計算。
-用繁體中文，40字以內，條列式。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  hypothesis: {
-    hint: '💡 可以問我：「我想比較改善前後的差異，應該用哪種檢定？各需要幾個樣本？」',
-    system: `你是 MedQA 平台假設檢定的參數設定助理。
-你的唯一職責是告訴使用者「要選哪種檢定、填什麼參數」，不做任何計算。
-
-只回答：
-① 應選哪種檢定類型？（1-sample t / 2-sample t / Paired t / F-test）一句話理由。
-② 顯著水準 α 建議填多少？（通常 0.05）
-③ 數據輸入格式提醒
-
-回答完後說：「選好類型，填入數據，按執行分析，平台自動計算 t 值和 p 值。」
-絕對不要自己計算或評估任何統計數值。
-用繁體中文，50字以內，條列式。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  scatter: {
-    hint: '💡 可以問我：「我想分析溫度和附著力的關係，數據怎麼輸入？」',
-    system: `你是 MedQA 平台相關性分析的參數設定助理。
-你的唯一職責是告訴使用者「X 和 Y 各填什麼、格式怎麼輸入」，不做任何計算。
-
-只回答：
-① X（自變數）建議填什麼？Y（因變數）填什麼？
-② 輸入格式：X 和 Y 分別一列，空格或逗號分隔
-
-回答完後說：「填好後按執行分析，平台自動計算 Pearson r 和 Spearman ρ。」
-絕對不預測相關性強弱或計算任何數值。
-用繁體中文，40字以內。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  boxplot: {
-    hint: '💡 可以問我：「我想比較三台機台的輸出，數據格式怎麼輸入？」',
-    system: `你是 MedQA 平台箱型圖的參數設定助理。只告訴使用者輸入格式：每列「組名: 數值1, 數值2,...」。回答完說：「貼好後按執行分析」。不做任何計算。50字以內。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  pareto: {
-    hint: '💡 可以問我：「我想分析不良品原因，類別和數量怎麼輸入？」',
-    system: `你是 MedQA 平台柏拉圖的參數設定助理。只告訴使用者輸入格式：每列「類別名稱,發生次數」。不做任何分析和計算。40字以內。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-  cusum: {
-    hint: '💡 可以問我：「我想監控製程微小偏移，k 和 h 應該怎麼設定？」',
-    system: `你是 MedQA 平台 CUSUM/EWMA 的參數設定助理。只告訴使用者：k 填 0.5、h 填 4-5、λ 填 0.2，μ₀ 填製程目標值，σ 填歷史標準差。不做任何計算。50字以內。
-⚠️ 鐵律：當使用者貼出數據時，只說「請將數據貼入輸入框，填好參數，按執行分析」，絕對不分析數據、不計算任何數值、不評估製程狀態、不建議實驗設計方案。`
-  },
-};
 
 // ════════════════════════════════════════════════════
 // 三層邊界處理機制
@@ -4261,74 +4148,7 @@ var designHistory = {};
 
 
 
-window.daSend = async function(toolId) {
-  var input = document.getElementById('da-input-'+toolId);
-  var msgs = document.getElementById('da-msgs-'+toolId);
-  var btn = document.getElementById('da-send-'+toolId);
-  if(!input || !msgs) return;
-  var q = input.value.trim();
-  if(!q) return;
 
-  // 使用者訊息
-  var uDiv = document.createElement('div');
-  uDiv.className = 'design-msg user';
-  uDiv.textContent = q;
-  msgs.appendChild(uDiv);
-  input.value = ''; btn.disabled = true;
-  msgs.scrollTop = msgs.scrollHeight;
-
-  // 歷史
-  if(!designHistory[toolId]) designHistory[toolId] = [];
-  designHistory[toolId].push({role:'user', content:q});
-
-  // 載入中
-  var aDiv = document.createElement('div');
-  aDiv.className = 'design-msg assistant';
-  aDiv.textContent = '思考中...';
-  msgs.appendChild(aDiv);
-  msgs.scrollTop = msgs.scrollHeight;
-
-  try {
-    var cfg = DESIGN_PROMPTS[toolId] || {};
-    var response = await fetch(CLAUDE_WORKER, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        messages: designHistory[toolId],
-        system: cfg.system || '你是品質工程助理，用繁體中文回答。'
-      })
-    });
-    var data = await response.json();
-    var reply = data.content[0].text;
-    designHistory[toolId].push({role:'assistant', content:reply});
-    aDiv.innerHTML = renderMarkdown(reply);
-    // DOE 套用按鈕：若回應包含因子建議則顯示
-    if(toolId==='doe' && (reply.indexOf('因子')>=0||reply.indexOf('Factor')>=0||reply.indexOf('水準')>=0)){
-      var applyBtn = document.createElement('button');
-      applyBtn.className = 'claude-send';
-      applyBtn.style.cssText = 'margin-top:6px;width:100%;background:#059669';
-      applyBtn.textContent = '✅ 解析設計建議 → 套用到 DOE 表格';
-      applyBtn.onclick = function(){ doeApplyFromAI(reply); };
-      aDiv.appendChild(document.createElement('br'));
-      aDiv.appendChild(applyBtn);
-    }
-    // MSA 套用按鈕
-    if(toolId==='msa' && (reply.indexOf('操作員')>=0||reply.indexOf('零件')>=0||reply.indexOf('重複')>=0)){
-      var applyBtnM = document.createElement('button');
-      applyBtnM.className = 'claude-send';
-      applyBtnM.style.cssText = 'margin-top:6px;width:100%;background:#0891B2';
-      applyBtnM.textContent = '✅ 套用 MSA 設計建議';
-      applyBtnM.onclick = function(){ msaApplyFromAI(reply); };
-      aDiv.appendChild(document.createElement('br'));
-      aDiv.appendChild(applyBtnM);
-    }
-  } catch(err) {
-    aDiv.className = 'design-msg assistant';
-    aDiv.textContent = '⚠️ 錯誤：' + err.message;
-  }
-  btn.disabled = false;
-  msgs.scrollTop = msgs.scrollHeight;
-};
 
 
 
@@ -5293,7 +5113,7 @@ document.addEventListener('click', function(e) {
   font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
   border:1px solid rgba(255,255,255,.12);cursor:default"
   title="v2.0 MedQA · Build 2026-05-30 13:59">
-  v2.0 · 2026-05-30 14:05
+  v2.0 · 2026-05-30 14:12
 </div>
 </body>
 </html>
