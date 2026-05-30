@@ -291,22 +291,6 @@ tr:hover td{background:#F9FAFB}
 .claude-msg.assistant p{margin:.2rem 0;font-size:13px;line-height:1.6}
 .claude-msg.assistant hr{border:none;border-top:1px solid #E2ECF8;margin:.4rem 0}
 /* 數據設計助理 */
-.design-assistant{background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;margin-bottom:1rem;overflow:hidden}
-.design-assistant-header{background:#92400E;color:#fff;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between}
-.design-assistant-header .dah-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
-.design-assistant-header button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
-.design-assistant-body{padding:.75rem 1rem;display:none}
-.design-assistant-body.open{display:block}
-.design-hint{font-size:12px;color:#92400E;background:#FEF3C7;border-radius:6px;padding:.5rem .75rem;margin-bottom:.6rem}
-.design-messages{max-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem}
-.design-msg.user{background:#92400E;color:#fff;padding:.5rem .8rem;border-radius:7px 7px 2px 7px;font-size:13px;align-self:flex-end;max-width:88%}
-.design-msg.assistant{background:#fff;color:#1a1a2e;border:1px solid #FDE68A;padding:.5rem .8rem;border-radius:7px 7px 7px 2px;font-size:13px;align-self:flex-start;max-width:88%;line-height:1.65}
-.design-msg.assistant strong{font-weight:700}
-.design-msg.assistant ul{padding-left:1.1rem;margin:.2rem 0}
-.design-msg.assistant li{margin:.15rem 0}
-.design-msg.assistant p{margin:.2rem 0}
-
-/* ════ 決策樹設計助理 ════ */
 .dt-assistant{background:#F8FAFF;border:1px solid #DBEAFE;border-radius:8px;margin-bottom:1rem;overflow:hidden}
 .dt-header{background:#1B3A5C;color:#fff;padding:.55rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
 .dt-header .dt-title{font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.85)}
@@ -4269,103 +4253,13 @@ window.checkAndHandleBoundary = function(toolId, aiReply, containerEl) {
 };
 
 // 新版 daSend（含邊界檢查 + 套用按鈕）
-window.daSend = async function(toolId) {
-  var input = document.getElementById('da-input-'+toolId);
-  var msgs = document.getElementById('da-msgs-'+toolId);
-  var btn = document.getElementById('da-send-'+toolId);
-  if(!input || !msgs) return;
-  var q = input.value.trim();
-  if(!q) return;
 
-  var uDiv = document.createElement('div');
-  uDiv.className = 'design-msg user';
-  uDiv.textContent = q;
-  msgs.appendChild(uDiv);
-  input.value = ''; btn.disabled = true;
-  msgs.scrollTop = msgs.scrollHeight;
-
-  if(!designHistory[toolId]) designHistory[toolId] = [];
-  designHistory[toolId].push({role:'user', content:q});
-
-  var aDiv = document.createElement('div');
-  aDiv.className = 'design-msg assistant';
-  aDiv.textContent = '思考中...';
-  msgs.appendChild(aDiv);
-  msgs.scrollTop = msgs.scrollHeight;
-
-  try {
-    var cfg = DESIGN_PROMPTS[toolId] || {};
-    var response = await fetch(CLAUDE_WORKER, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        messages: designHistory[toolId],
-        system: cfg.system || '你是醫療器材品質工程助理，用繁體中文回答，100字以內。'
-      })
-    });
-    var data = await response.json();
-    var reply = data.content[0].text;
-    designHistory[toolId].push({role:'assistant', content:reply});
-    aDiv.innerHTML = renderMarkdown(reply);
-
-    // 三層邊界檢查
-    checkAndHandleBoundary(toolId, reply, aDiv);
-
-    // DOE 套用按鈕
-    if(toolId==='doe' && (reply.indexOf('因子')>=0||reply.indexOf('水準')>=0)){
-      var applyBtn = document.createElement('button');
-      applyBtn.className = 'claude-send';
-      applyBtn.style.cssText = 'margin-top:8px;width:100%;background:#059669;font-size:12px';
-      applyBtn.textContent = '✅ 解析建議 → 套用到 DOE 表格';
-      applyBtn.onclick = function(){ doeApplyFromAI(reply); };
-      aDiv.appendChild(applyBtn);
-    }
-    // MSA 套用按鈕
-    if(toolId==='msa' && (reply.indexOf('操作員')>=0||reply.indexOf('零件')>=0)){
-      var applyBtnM = document.createElement('button');
-      applyBtnM.className = 'claude-send';
-      applyBtnM.style.cssText = 'margin-top:8px;width:100%;background:#0891B2;font-size:12px';
-      applyBtnM.textContent = '✅ 套用 MSA 設計建議';
-      applyBtnM.onclick = function(){ msaApplyFromAI(reply); };
-      aDiv.appendChild(applyBtnM);
-    }
-  } catch(err) {
-    aDiv.className = 'design-msg assistant';
-    aDiv.textContent = '⚠️ 錯誤：' + err.message;
-  }
-  btn.disabled = false;
-  msgs.scrollTop = msgs.scrollHeight;
-};
 
 var designHistory = {};
 
-window.designAssistantHTML = function(toolId) {
-  var cfg = DESIGN_PROMPTS[toolId];
-  if(!cfg) return '';
-  return '<div class="design-assistant" id="da-'+toolId+'">'+
-    '<div class="design-assistant-header">'+
-      '<div class="dah-title"><span>🎯</span> 數據設計助理</div>'+
-      '<button onclick="daToggle(\''+toolId+'\')">展開</button>'+
-    '</div>'+
-    '<div class="design-assistant-body" id="da-body-'+toolId+'">'+
-      '<div class="design-hint">'+cfg.hint+'</div>'+
-      '<div class="design-messages" id="da-msgs-'+toolId+'"></div>'+
-      '<div class="claude-input-row">'+
-        '<textarea id="da-input-'+toolId+'" rows="2" placeholder="輸入問題..." onkeydown="daKeydown(event,\''+toolId+'\')"></textarea>'+
-        '<button class="claude-send" id="da-send-'+toolId+'" onclick="daSend(\''+toolId+'\')">送出</button>'+
-      '</div>'+
-    '</div>'+
-  '</div>';
-};
 
-window.daToggle = function(toolId) {
-  var body = document.getElementById('da-body-'+toolId);
-  var btn = document.querySelector('#da-'+toolId+' .design-assistant-header button');
-  if(!body) return;
-  var isOpen = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  if(btn) btn.textContent = isOpen ? '展開' : '收合';
-};
+
+
 
 window.daSend = async function(toolId) {
   var input = document.getElementById('da-input-'+toolId);
@@ -4436,12 +4330,7 @@ window.daSend = async function(toolId) {
   msgs.scrollTop = msgs.scrollHeight;
 };
 
-window.daKeydown = function(event, toolId) {
-  if(event.key==='Enter' && !event.shiftKey) {
-    event.preventDefault();
-    daSend(toolId);
-  }
-};
+
 
 // 覆寫 claudeAutoAnalyze，加入 Markdown 渲染
 var _origClaudeAutoAnalyze = window.claudeAutoAnalyze;
@@ -5000,7 +4889,6 @@ window.goTool = function(id) {
 window.dtAssistantHTML=dtAssistantHTML;window.dtToggle=dtToggle;window.dtUpdate=dtUpdate;window.dtApply=dtApply;window.showFormatHint=showFormatHint;window.hideFormatHint=hideFormatHint;
 window.checkAndHandleBoundary=checkAndHandleBoundary;
 window.doeApplyFromAI=doeApplyFromAI;window.msaApplyFromAI=msaApplyFromAI;
-window.daToggle=daToggle;window.daSend=daSend;window.daKeydown=daKeydown;window.designAssistantHTML=designAssistantHTML;
 window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
 window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
@@ -5405,7 +5293,7 @@ document.addEventListener('click', function(e) {
   font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
   border:1px solid rgba(255,255,255,.12);cursor:default"
   title="v2.0 MedQA · Build 2026-05-30 13:59">
-  v2.0 · 2026-05-30 13:59
+  v2.0 · 2026-05-30 14:05
 </div>
 </body>
 </html>
