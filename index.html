@@ -111,6 +111,146 @@ tr:hover td{background:#F9FAFB}
 .tab.active{color:var(--navy2);border-bottom-color:var(--navy2);font-weight:600}
 .tab-c{display:none}.tab-c.show{display:block}
 @media(max-width:600px){.g2,.g3,.g4{grid-template-columns:1fr}.dmaic-flow{flex-direction:column}.phase-arrow{display:none}}
+
+/* ════════════════════════════════════════
+   Minitab 風格 UI 精進
+   ════════════════════════════════════════ */
+
+/* Minitab 配色 */
+:root {
+  --mt-blue: #1F4E79;
+  --mt-blue2: #2E75B6;
+  --mt-blue3: #9DC3E6;
+  --mt-green: #375623;
+  --mt-green2: #70AD47;
+  --mt-red: #C00000;
+  --mt-orange: #ED7D31;
+  --mt-gray: #F2F2F2;
+  --mt-border: #BFBFBF;
+  --mt-header-bg: #1F4E79;
+  --mt-session-bg: #0F0F0F;
+  --mt-session-fg: #C8E6C9;
+}
+
+/* Session Window 風格（終端機輸出） */
+.mt-session {
+  background: var(--mt-session-bg);
+  color: var(--mt-session-fg);
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.65;
+  padding: 1rem 1.25rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  border: 1px solid #333;
+}
+.mt-session .mt-title { color: #4EC9B0; font-weight: bold; margin-bottom: 4px; }
+.mt-session .mt-section { color: #9CDCFE; margin-top: 8px; }
+.mt-session .mt-sig { color: #FF4444; }
+.mt-session .mt-sig2 { color: #FF8C00; }
+.mt-session .mt-sig3 { color: #FFD700; }
+.mt-session .mt-ok { color: #A8FF78; }
+.mt-session .mt-warn { color: #FF6B6B; }
+.mt-session .mt-num { color: #B5CEA8; }
+.mt-session .mt-kw { color: #569CD6; }
+.mt-session table { border-collapse: collapse; width: 100%; }
+.mt-session th { color: #4EC9B0; text-align: right; padding: 2px 10px; border-bottom: 1px solid #333; font-weight: 400; }
+.mt-session th:first-child { text-align: left; }
+.mt-session td { text-align: right; padding: 2px 10px; color: #A8FF78; }
+.mt-session td:first-child { text-align: left; color: #A8FF78; }
+.mt-session td.mt-indent { padding-left: 24px; }
+.mt-session td.mt-group { color: #569CD6; font-weight: 700; }
+.mt-session tr.mt-total td { border-top: 1px solid #555; }
+.mt-session tr.mt-subtotal td { color: #9CDCFE; }
+
+/* Minitab 風格統計輸出卡 */
+.mt-stat-card {
+  background: #FAFBFC;
+  border: 1px solid var(--mt-border);
+  border-top: 3px solid var(--mt-blue2);
+  border-radius: 4px;
+  padding: .75rem 1rem;
+  margin-bottom: .75rem;
+}
+.mt-stat-card .mt-stat-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mt-blue);
+  margin-bottom: .5rem;
+  letter-spacing: .02em;
+}
+.mt-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border: 1px solid var(--mt-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: .5rem;
+}
+.mt-stat-cell {
+  flex: 1;
+  min-width: 80px;
+  padding: .4rem .7rem;
+  border-right: 1px solid var(--mt-border);
+  background: #fff;
+}
+.mt-stat-cell:last-child { border-right: none; }
+.mt-stat-cell .mt-label {
+  font-size: 10px;
+  color: var(--mt-blue2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 1px;
+}
+.mt-stat-cell .mt-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a2e;
+  font-family: 'Courier New', monospace;
+}
+.mt-stat-cell.mt-pass { background: #F0FDF4; }
+.mt-stat-cell.mt-warn { background: #FFFBEB; }
+.mt-stat-cell.mt-fail { background: #FFF1F2; }
+.mt-stat-cell.mt-pass .mt-val { color: #166534; }
+.mt-stat-cell.mt-warn .mt-val { color: #92400E; }
+.mt-stat-cell.mt-fail .mt-val { color: #9F1239; }
+
+/* Minitab 風格判斷橫幅 */
+.mt-verdict {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: .6rem 1rem;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: .75rem;
+  border: 1px solid;
+}
+.mt-verdict.pass { background: #F0FDF4; color: #166534; border-color: #86EFAC; }
+.mt-verdict.warn { background: #FFFBEB; color: #92400E; border-color: #FDE68A; }
+.mt-verdict.fail { background: #FFF1F2; color: #9F1239; border-color: #FECDD3; }
+.mt-verdict .mt-icon { font-size: 20px; flex-shrink: 0; }
+.mt-verdict .mt-text { line-height: 1.45; }
+.mt-verdict .mt-ref { font-size: 11px; font-weight: 400; opacity: .75; margin-top: 1px; }
+
+/* Nelson 規則旗標 */
+.nelson-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 2px 3px;
+}
+.nelson-flag.triggered { background: #FFF1F2; color: #9F1239; border: 1px solid #FECDD3; }
+.nelson-flag.ok { background: #F0FDF4; color: #166534; border: 1px solid #86EFAC; }
+
+
 </style>
 
 <style id="edu-styles">
@@ -175,25 +315,62 @@ tr:hover td{background:#F9FAFB}
 }
 </style>
 
+
+<style id="print-styles">
+@media print {
+  /* 隱藏不需要列印的元素 */
+  .topbar, #tool-bar, .btn-row, .edu-btn, .edu-panel,
+  .tab-bar, .record-actions, #back-bar,
+  .quality-record .card-title .record-toggle-icon { display:none !important; }
+
+  /* 顯示所有分頁內容（不管 active 狀態）*/
+  .tab-c { display:block !important; }
+
+  /* 讓 canvas 可列印 */
+  canvas { max-width:100% !important; page-break-inside:avoid; }
+
+  /* 記錄區塊強制顯示 */
+  .record-body { display:block !important; }
+
+  /* 分頁斷點 */
+  .card { page-break-inside:avoid; margin-bottom:1rem; }
+
+  /* 隱藏主頁 */
+  #page-home { display:none !important; }
+
+  /* 顯示目前工具頁 */
+  .page.active { display:block !important; }
+
+  /* 調整字體 */
+  body { font-size:11px; }
+  .tp-title { font-size:16px; }
+}
+</style>
 </head>
 <body>
 
 <!-- ── 頂欄 ── -->
 <div class="topbar">
   <div class="topbar-left">
-    <div class="logo" data-goto="home" onclick="goHome()">
+    <div class="logo" data-goto="home" onclick="goHome()" title="返回主目錄">
       <div class="logo-badge">6σ</div>
       <div class="logo-title">DMAIC 工具平台</div>
     </div>
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <button class="tb-btn" onclick="dmaicSaveCurrent()">💾 儲存</button>
-    <button class="tb-btn" onclick="dmaicExportJSON()">⬇ JSON</button>
-    <button class="tb-btn" onclick="dmaicPrintPDF()">🖨 匯出 PDF</button>
-    <button class="tb-btn" onclick="dmaicClearCurrent()">清除本頁</button>
     <span class="tb-status" id="dmaic-save-status">Offline · Free · Pure JS</span>
   </div>
+</div>
+<!-- 子頁面工具列 -->
+<div id="tool-bar" style="display:none;background:#1B3A5C;padding:7px 1.5rem;align-items:center;gap:10px;border-bottom:2px solid #7EC8E3">
+  <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1B3A5C;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
+    ← 主目錄
+  </button>
+  <span id="tool-bar-title" style="font-size:13px;color:#7EC8E3;font-weight:500;flex:1"></span>
+  <button onclick="dmaicSaveCurrent()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">💾 儲存</button>
+  <button onclick="dmaicExportJSON()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">⬇ JSON</button>
+  <button onclick="dmaicPrintCurrentTool()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">🖨 列印</button>
 </div>
 
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
@@ -218,7 +395,7 @@ tr:hover td{background:#F9FAFB}
   <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">完整 DMAIC 五階段工具・純離線運行・無需帳號<br>從定義問題到持續管制，協助製程持續改善</p>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
-    <button onclick="goTool('spc')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📊 SPC 管制圖</button>
+    <button onclick="scrollToPhase('D')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📋 工具總覽</button>
   </div>
 </div>
 
@@ -406,6 +583,29 @@ tr:hover td{background:#F9FAFB}
       <div class="workflow-step"><strong>3. 執行分析</strong>產生圖表、統計摘要、異常點與製程能力結果。</div>
       <div class="workflow-step"><strong>4. 填寫結論</strong>補上 PASS/FAIL、異常原因、處置與備註。</div>
       <div class="workflow-step"><strong>5. 匯出保存</strong>列印成 PDF，或匯出 JSON 作為可再編輯紀錄。</div>
+    </div>
+  </div>
+
+  <!-- FMEA 工具（開發中）-->
+  <div class="tools-section">
+    <div class="tools-section-title" style="color:#6B7280">⚠️ 開發中 — 即將推出</div>
+    <div class="tools-grid">
+      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#6B7280;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#6B7280">ANALYZE / IMPROVE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">⚠️</div>
+        <div class="tc-name" style="color:#6B7280">FMEA 失效模式分析</div>
+        <div class="tc-desc">ISO 14971・風險矩陣・RPN・FDA MAUDE 整合</div>
+        <span class="tc-tag tag-soon">開發中</span>
+      </div>
+      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#6B7280;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#6B7280">ANALYZE / IMPROVE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📋</div>
+        <div class="tc-name" style="color:#6B7280">RACT 風險評估表</div>
+        <div class="tc-desc">ISO 14971・5×5 風險矩陣・LOF・ACC/NACC 判定</div>
+        <span class="tc-tag tag-soon">開發中</span>
+      </div>
     </div>
   </div>
 
@@ -844,13 +1044,19 @@ tr:hover td{background:#F9FAFB}
       <div class="tab-bar">
         <div class="tab active" onclick="doeSw('effects')">效應分析</div>
         <div class="tab" onclick="doeSw('pareto')">效應柏拉圖</div>
+        <div class="tab" onclick="doeSw('halfnormal')">Half-Normal Plot</div>
+        <div class="tab" onclick="doeSw('maineff')">主效應圖</div>
         <div class="tab" onclick="doeSw('interaction')">交互作用圖</div>
         <div class="tab" onclick="doeSw('anova')">ANOVA 表</div>
+        <div class="tab" onclick="doeSw('residual')">殘差分析</div>
       </div>
       <div id="doe-tab-effects" class="tab-c show"><div id="doe-effects-content"></div></div>
       <div id="doe-tab-pareto" class="tab-c"><div class="canvas-wrap"><canvas id="doe-pareto-canvas" height="300"></canvas></div></div>
+      <div id="doe-tab-maineff" class="tab-c"><div id="doe-maineff-content"></div></div>
       <div id="doe-tab-interaction" class="tab-c"><div id="doe-interaction-content"></div></div>
+      <div id="doe-tab-halfnormal" class="tab-c"><div id="doe-hn-content"></div></div>
       <div id="doe-tab-anova" class="tab-c"><div id="doe-anova-content"></div></div>
+      <div id="doe-tab-residual" class="tab-c"><div id="doe-residual-content"></div></div>
     </div>
   </div>
 </div>
@@ -1189,7 +1395,12 @@ tr:hover td{background:#F9FAFB}
   </div>
 </div>
 
-    <div class="field"><label>Y 軸項目名稱</label><input type="text" id="bp-yname" value="量測值"></div>
+    <div class="g2">
+      <div class="field"><label>Y 軸項目名稱</label><input type="text" id="bp-yname" value="量測值"></div>
+      <div class="field"><label>顯示 Notch（中位數信賴區間）</label>
+        <select id="bp-notch"><option value="0">不顯示</option><option value="1">顯示 Notch</option></select>
+      </div>
+    </div>
     <div class="field"><label>分組數據 <span style="font-size:11px;font-weight:400;color:var(--faint)">（格式：組名: 數值1, 數值2, ...）</span></label>
       <textarea id="bp-data" rows="8">機台A: 25.1, 24.9, 25.2, 25.4, 24.8, 25.1, 25.6, 24.7, 25.0, 25.3
 機台B: 24.8, 25.3, 25.5, 24.6, 25.1, 24.9, 25.4, 25.2, 24.7, 25.0
@@ -1329,15 +1540,19 @@ tr:hover td{background:#F9FAFB}
         <div class="card">
           <div class="tab-bar">
             <div class="tab active" onclick="grrSw('summary')">變異來源摘要</div>
-            <div class="tab" onclick="grrSw('bar')">GRR 長條圖</div>
-            <div class="tab" onclick="grrSw('xbarr')">Xbar-R 管制圖</div>
+            <div class="tab" onclick="grrSw('sixpack')">六合一圖表</div>
             <div class="tab" onclick="grrSw('anova')">ANOVA 表</div>
           </div>
           <div id="grr-tab-summary" class="tab-c show"><div id="grr-summary-content"></div></div>
-          <div id="grr-tab-bar" class="tab-c"><div class="canvas-wrap"><canvas id="grr-bar-canvas" height="320"></canvas></div></div>
-          <div id="grr-tab-xbarr" class="tab-c">
-            <div class="canvas-wrap"><canvas id="grr-xbar-canvas"></canvas></div>
-            <div class="canvas-wrap" style="margin-top:.75rem"><canvas id="grr-r-canvas"></canvas></div>
+          <div id="grr-tab-sixpack" class="tab-c">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="canvas-wrap"><canvas id="grr-comp-canvas" height="220"></canvas></div>
+              <div class="canvas-wrap"><canvas id="grr-bypart-canvas" height="220"></canvas></div>
+              <div class="canvas-wrap"><canvas id="grr-r-canvas" height="220"></canvas></div>
+              <div class="canvas-wrap"><canvas id="grr-byop-canvas" height="220"></canvas></div>
+              <div class="canvas-wrap"><canvas id="grr-xbar-canvas" height="220"></canvas></div>
+              <div class="canvas-wrap"><canvas id="grr-interact-canvas" height="220"></canvas></div>
+            </div>
           </div>
           <div id="grr-tab-anova" class="tab-c"><div id="grr-anova-content"></div></div>
         </div>
@@ -1453,6 +1668,8 @@ function goHome(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-home').classList.add('active');
   document.getElementById('breadcrumb').innerHTML='';
+  hideToolBar();
+  try{window.scrollTo(0,0);}catch(e){}
 }
 
 function goTool(id){
@@ -1461,6 +1678,8 @@ function goTool(id){
   document.getElementById('breadcrumb').innerHTML=`<span class="sep">›</span><span>${TOOL_NAMES[id]||id}</span>`;
   if(id==='doe')doeUpdateFactors();
   if(id==='hypothesis')hyUpdateUI();
+  // 顯示工具列（返回按鈕）
+  showToolBar(TOOL_NAMES[id]||id);
   try{window.scrollTo(0,0);}catch(e){}
 }
 
@@ -1610,12 +1829,9 @@ function calcSPCU(){
   SR.mainVals=SR.counts.map(c=>c/SR.sampleN);SR.chartName='u Chart';SR.mainLabel='u Chart';SR.sub2Vals=null;
 }
 function calcSPCNelson(){
-  const vals=SR.mainVals;if(!vals)return;
-  const cl=SR.CL_main,s=SR.sigma||SR.sigmaOverall||std(vals);
-  SR.nelson={r1:[],r2:[],r3:[],r4:[],r5:[],r6:[],r7:[],r8:[]};
-  vals.forEach((v,i)=>{if(v>SR.UCL_main||v<SR.LCL_main)SR.nelson.r1.push(i+1);});
-  for(let i=0;i<=vals.length-9;i++){const side=vals[i]>cl?1:-1;if(vals.slice(i,i+9).every(v=>(v>cl?1:-1)===side))for(let j=i;j<i+9;j++)if(!SR.nelson.r2.includes(j+1))SR.nelson.r2.push(j+1);}
-  for(let i=0;i<=vals.length-6;i++){const up=vals.slice(i,i+6).every((v,j,a)=>j===0||v>a[j-1]);const dn=vals.slice(i,i+6).every((v,j,a)=>j===0||v<a[j-1]);if(up||dn)for(let j=i;j<i+6;j++)if(!SR.nelson.r3.includes(j+1))SR.nelson.r3.push(j+1);}
+  var vals=SR.mainVals; if(!vals)return;
+  var cl=SR.CL_main, s=SR.sigma||SR.sigmaOverall||std(vals);
+  SR.nelson = calcNelsonAll(vals, cl, SR.UCL_main, SR.LCL_main, s);
 }
 function renderSPCStats(){
   const{chartType,grandMean,sigma,sigmaOverall,UCL_main,LCL_main,CL_main,UCL2,LCL2,CL2,sub2label,data,n,Rbar,mRbar,Sbar}=SR;
@@ -1630,24 +1846,21 @@ function renderSPCStats(){
   document.getElementById('spc-anom').innerHTML=anoms.length?anoms.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F3F4F6;font-size:13px"><span class="badge-r red">組 ${a.g}</span>值 = ${a.v}，超出管制界限</div>`).join(''):'<div class="alert success">✅ 無異常點，製程穩定</div>';
 }
 function renderSPCCap(){
-  const{lsl,usl,tgt,sigma,sigmaOverall,grandMean,chartType}=SR,el=document.getElementById('spc-cap');
-  if(['NP','P','C','U'].includes(chartType)){el.innerHTML='<div class="alert info">計數型不適用 Cp/Cpk</div>';return;}
-  if(lsl==null&&usl==null){el.innerHTML='<div class="alert warn">未提供 LSL / USL，不計算製程能力指標。</div>';return;}
-  const mu=grandMean,sw=sigma,so=sigmaOverall;
-  let Cp=null,Cpk=null,Pp=null,Ppk=null;
-  if(lsl!=null&&usl!=null){Cp=(usl-lsl)/(6*sw);Pp=(usl-lsl)/(6*so);}
-  const CPU_w=usl!=null?(usl-mu)/(3*sw):null,CPL_w=lsl!=null?(mu-lsl)/(3*sw):null;
-  if(CPU_w!=null&&CPL_w!=null)Cpk=Math.min(CPU_w,CPL_w);else Cpk=CPU_w??CPL_w;
-  const CPU_o=usl!=null?(usl-mu)/(3*so):null,CPL_o=lsl!=null?(mu-lsl)/(3*so):null;
-  if(CPU_o!=null&&CPL_o!=null)Ppk=Math.min(CPU_o,CPL_o);else Ppk=CPU_o??CPL_o;
-  function badge(v){if(v==null)return'<span class="badge-r blue">N/A</span>';if(v>=1.67)return`<span class="badge-r green">${v.toFixed(3)} 優秀</span>`;if(v>=1.33)return`<span class="badge-r green">${v.toFixed(3)} 良好</span>`;if(v>=1.0)return`<span class="badge-r amber">${v.toFixed(3)} 尚可</span>`;return`<span class="badge-r red">${v.toFixed(3)} 不足</span>`;}
-  el.innerHTML=`<div class="stat-grid">${lsl!=null?`<div class="sc"><div class="v" style="font-size:16px">${lsl}</div><div class="l">LSL</div></div>`:''}<div class="sc"><div class="v" style="font-size:16px">${r4(mu)}</div><div class="l">均值</div></div>${usl!=null?`<div class="sc"><div class="v" style="font-size:16px">${usl}</div><div class="l">USL</div></div>`:''}<div class="sc"><div class="v" style="font-size:16px">${r4(sw)}</div><div class="l">組內σ</div></div></div><div style="overflow-x:auto"><table><thead><tr><th>指標</th><th>值</th><th>評級</th></tr></thead><tbody>${[['Cp',Cp],['Cpk',Cpk],['Pp',Pp],['Ppk',Ppk]].map(([n,v])=>`<tr><td style="font-weight:700">${n}</td><td>${v?.toFixed(3)??'—'}</td><td>${badge(v)}</td></tr>`).join('')}</tbody></table></div><div class="alert info" style="margin-top:.5rem;font-size:12px">≥1.67 優秀｜≥1.33 良好｜≥1.00 尚可｜&lt;1.00 不足</div>`;
+  var{lsl,usl,tgt,sigma,sigmaOverall,grandMean,chartType,allVals}=SR;
+  var el=document.getElementById('spc-cap');
+  if(['NP','P','C','U'].includes(chartType)){el.innerHTML='<div class="alert info">計數型管制圖不適用 Cp/Cpk</div>';return;}
+  if(lsl==null&&usl==null){el.innerHTML='<div class="alert warn">未提供 LSL / USL，不計算製程能力。</div>';return;}
+  if(!allVals||allVals.length===0){el.innerHTML='<div class="alert warn">無原始數據可計算整體σ。</div>';return;}
+
+  // 計算完整能力指標
+  var cap = calcProcessCapability(allVals, usl, lsl, isNaN(tgt)?null:tgt, sigma);
+  el.innerHTML = renderCapabilityMT(cap, lsl, usl, isNaN(tgt)?null:tgt);
 }
+
 function renderSPCNelson(){
-  const n=SR.nelson,el=document.getElementById('spc-nelson');if(!n){el.innerHTML='';return;}
-  const rules=[{k:'r1',name:'Rule 1',desc:'超出 3σ 界限'},{k:'r2',name:'Rule 2',desc:'連續 9 點同側'},{k:'r3',name:'Rule 3',desc:'連續 6 點趨勢'}];
-  const stable=rules.every(r=>!n[r.k]?.length);
-  el.innerHTML=`<div class="alert ${stable?'success':'danger'}" style="margin-bottom:.75rem"><strong>製程狀態：</strong>${stable?'✅ 穩定':'⚠️ 不穩定 — 需調查'}</div><table><thead><tr><th>規則</th><th>說明</th><th>觸發點</th><th>狀態</th></tr></thead><tbody>${rules.map(r=>`<tr><td style="font-weight:700">${r.name}</td><td style="font-size:12px;color:var(--muted)">${r.desc}</td><td style="font-size:12px">${(n[r.k]||[]).join(', ')||'—'}</td><td>${(n[r.k]||[]).length?'<span class="badge-r red">觸發</span>':'<span class="badge-r green">正常</span>'}</td></tr>`).join('')}</tbody></table>`;
+  var n=SR.nelson, el=document.getElementById('spc-nelson');
+  if(!n){el.innerHTML='';return;}
+  el.innerHTML = renderNelsonFull(n);
 }
 function spcSw(name){
   const tabs=['tree','stats','chart','cap','nelson'];
@@ -1866,8 +2079,10 @@ function histAnalyze(){
   let W=0;const a_n=shapiroCoeff(n);
   for(let i=0;i<Math.floor(n/2);i++)W+=a_n[i]*(sorted[n-1-i]-sorted[i]);
   W=W**2/((n-1)*s**2);W=Math.min(1,Math.max(0,W));
-  const pW=shapiroPval(W,n);
-  const isNormal=pW>alpha;
+  var pW=shapiroPval(W,n);
+  var isNormal=pW>alpha;
+  // Anderson-Darling 補充
+  var ad=andersonDarling(data);
   document.getElementById('hi-stats').innerHTML=[{v:n,l:'樣本數 n'},{v:r4(m),l:'平均值'},{v:r4(s),l:'標準差 s'},{v:r4(Math.min(...data)),l:'最小值'},{v:r4(Math.max(...data)),l:'最大值'},{v:r4(sk),l:'偏態係數'},{v:r4(ku),l:'峰態係數'}].map(c=>`<div class="sc"><div class="v">${c.v}</div><div class="l">${c.l}</div></div>`).join('');
   // 直方圖
   const mn=Math.min(...data),mx=Math.max(...data),bw=(mx-mn)/bins;
@@ -1881,7 +2096,16 @@ function histAnalyze(){
   const normY=normX.map(x=>n*bw*(1/(s*Math.sqrt(2*Math.PI)))*Math.exp(-((x-m)**2)/(2*s**2)));
   const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{type:'bar',label:'次數',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#1D3B8A',borderWidth:1},{type:'line',label:'常態曲線',data:normY.filter((_,i)=>i%(50/bins|0)===0).slice(0,bins),borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false,tension:0.4}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('hi-item').value} 直方圖`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
   chartInst.push(inst);
-  document.getElementById('hi-test').innerHTML=`<div class="alert ${isNormal?'success':'danger'}"><strong>Shapiro-Wilk 常態性檢定</strong><br>W = ${W.toFixed(4)}，p-value ≈ ${pW.toFixed(4)}（α = ${alpha}）<br><strong>結論：</strong>${isNormal?`✅ 無法拒絕常態性假設（p > α），資料符合常態分佈`:`⚠️ 拒絕常態性假設（p ≤ α），資料不符合常態分佈`}</div>`;
+  var adOk=ad.p?ad.p>alpha:true;
+  var testHTML='<div class="mt-session">';
+  testHTML+='<div class="mt-title">Normality Tests</div><table>';
+  testHTML+='<thead><tr><th style="text-align:left">方法</th><th>統計量</th><th>p-value</th><th>結論（α='+alpha+'）</th></tr></thead><tbody>';
+  testHTML+='<tr><td class="mt-kw">Shapiro-Wilk</td><td class="mt-num">W = '+W.toFixed(4)+'</td><td class="mt-num">'+pW.toFixed(4)+'</td><td>'+(isNormal?'<span class="nelson-flag ok">✅ 常態</span>':'<span class="nelson-flag triggered">⚠️ 非常態</span>')+'</td></tr>';
+  if(ad.W!=null) testHTML+='<tr><td class="mt-kw">Anderson-Darling</td><td class="mt-num">A² = '+ad.W.toFixed(4)+'</td><td class="mt-num">'+ad.p.toFixed(4)+'</td><td>'+(adOk?'<span class="nelson-flag ok">✅ 常態</span>':'<span class="nelson-flag triggered">⚠️ 非常態</span>')+'</td></tr>';
+  testHTML+='</tbody></table>';
+  testHTML+='<div style="color:#888;font-size:10px;margin-top:4px">兩種方法均不顯著（p > α）時，可視為常態分佈</div>';
+  testHTML+='</div>';
+  document.getElementById('hi-test').innerHTML=testHTML;
   document.getElementById('hi-out').style.display='block';
 }
 function shapiroCoeff(n){
@@ -1979,14 +2203,154 @@ function doeAnalyze(){
   const ssErr=ssTotal-ssModel;const dfErr=runs*(rep-1);
   const msModel=ssModel/dfModel;const msErr=dfErr>0?ssErr/dfErr:0;
   const Fval=msErr>0?msModel/msErr:0;const pFval=dfErr>0?fDist(Fval,dfModel,dfErr):1;
-  document.getElementById('doe-anova-content').innerHTML=`<div style="overflow-x:auto"><table><thead><tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F 值</th><th>p 值</th><th>顯著</th></tr></thead><tbody><tr><td style="font-weight:600">模型（所有效應）</td><td>${r4(ssModel)}</td><td>${dfModel}</td><td>${r4(msModel)}</td><td>${r4(Fval)}</td><td>${pFval.toFixed(4)}</td><td>${pFval<0.05?'<span class="badge-r blue">顯著</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">不顯著</span>'}</td></tr>${dfErr>0?`<tr><td>誤差</td><td>${r4(ssErr)}</td><td>${dfErr}</td><td>${r4(msErr)}</td><td>—</td><td>—</td><td>—</td></tr>`:''}<tr style="font-weight:700"><td>總計</td><td>${r4(ssTotal)}</td><td>${dfModel+dfErr}</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>`;
+  // ── 計算殘差（供殘差圖用）──
+  var fittedVals=[]; var residualVals=[];
+  for(var ri=0;ri<runs;ri++){
+    var rowEff=0;
+    sortedEff.forEach(function(e){
+      var fname=e[0]; var parts2=fname.split('×');
+      var sign=1;
+      if(parts2.length===1){
+        var fi2=factors.indexOf(fname);
+        if(fi2>=0)sign=matrix[ri][fi2];
+      } else {
+        parts2.forEach(function(pf){var fi2=factors.indexOf(pf);if(fi2>=0)sign*=matrix[ri][fi2];});
+      }
+      rowEff+=e[1]*sign/2;
+    });
+    var fit=grandMean+rowEff;
+    fittedVals.push(fit);
+    for(var rp2=0;rp2<rep;rp2++){
+      var el2=document.getElementById('doe-y-'+ri+'-'+rp2);
+      var yv=el2?parseFloat(el2.value)||0:0;
+      residualVals.push(yv-fit);
+    }
+  }
+  window._doeEffects=Object.fromEntries(sortedEff);
+window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,runs:runs,rep:rep,yMeans:yMeans,grandMean:grandMean};
+
+  // ── ANOVA 終端機格式輸出（含 LOF）──
+  var anovaResult = doeFormatANOVA(sortedEff, runs, rep, yMeans, factors, nf, yname, grandMean);
+  document.getElementById('doe-anova-content').innerHTML = anovaResult.html;
+
   document.getElementById('doe-out').style.display='block';
 }
 function doeSw(name){
-  document.querySelectorAll('#page-doe .tab').forEach((t,i)=>t.classList.toggle('active',['effects','pareto','interaction','anova'][i]===name));
-  ['effects','pareto','interaction','anova'].forEach(t=>document.getElementById('doe-tab-'+t).classList.remove('show'));
-  document.getElementById('doe-tab-'+name).classList.add('show');
-  if(name==='pareto'||name==='interaction')setTimeout(()=>{},50);
+  var allTabs=['effects','pareto','halfnormal','maineff','interaction','anova','residual'];
+  document.querySelectorAll('#page-doe .tab').forEach(function(t,i){t.classList.toggle('active',allTabs[i]===name);});
+  allTabs.forEach(function(t){var el=document.getElementById('doe-tab-'+t);if(el)el.classList.remove('show');});
+  var target=document.getElementById('doe-tab-'+name);
+  if(target)target.classList.add('show');
+  if(name==='halfnormal')setTimeout(function(){drawHalfNormalPlot(window._doeEffects||{},'doe-hn-content');},50);
+  if(name==='maineff')setTimeout(function(){drawDOEMainEffects();},50);
+  if(name==='residual')setTimeout(function(){drawDOEResiduals();},50);
+}
+
+function drawDOEMainEffects(){
+  var factors=window._doeFacs||[];
+  var matrix=window._doeMatrix||[];
+  var runs=window._doeRuns||0;
+  var rep=window._doeRep||1;
+  if(!factors.length||!runs)return;
+
+  var yMeans=[];
+  for(var r2=0;r2<runs;r2++){
+    var ys=[];
+    for(var rp=0;rp<rep;rp++){
+      var el=document.getElementById('doe-y-'+r2+'-'+rp);
+      if(el)ys.push(parseFloat(el.value)||0);
+    }
+    yMeans.push(ys.length?ys.reduce(function(s,v){return s+v;},0)/ys.length:0);
+  }
+
+  var grandMean=yMeans.reduce(function(s,v){return s+v;},0)/yMeans.length;
+  var nf=factors.length;
+
+  // 計算每個因子（含交互）的高/低均值
+  var allEffects=[];
+  // 主效應
+  factors.forEach(function(f,fi){
+    var hiVals=[], loVals=[];
+    for(var r2=0;r2<runs;r2++){
+      if(matrix[r2][fi]===1)hiVals.push(yMeans[r2]);
+      else loVals.push(yMeans[r2]);
+    }
+    var hiM=hiVals.reduce(function(s,v){return s+v;},0)/hiVals.length;
+    var loM=loVals.reduce(function(s,v){return s+v;},0)/loVals.length;
+    allEffects.push({name:f,hi:hiM,lo:loM,effect:hiM-loM});
+  });
+  // 二因子交互
+  for(var i=0;i<nf;i++){
+    for(var j=i+1;j<nf;j++){
+      var hiVals=[], loVals=[];
+      for(var r2=0;r2<runs;r2++){
+        var ab=matrix[r2][i]*matrix[r2][j];
+        if(ab===1)hiVals.push(yMeans[r2]);
+        else loVals.push(yMeans[r2]);
+      }
+      var hiM=hiVals.reduce(function(s,v){return s+v;},0)/hiVals.length;
+      var loM=loVals.reduce(function(s,v){return s+v;},0)/loVals.length;
+      allEffects.push({name:factors[i]+'×'+factors[j],hi:hiM,lo:loM,effect:hiM-loM});
+    }
+  }
+
+  var yname=document.getElementById('doe-yname').value||'Y';
+  var container=document.getElementById('doe-maineff-content');
+  if(!container)return;
+
+  // 每個效應畫一張小圖
+  var cols=Math.min(allEffects.length,4);
+  var rows=Math.ceil(allEffects.length/cols);
+  var html='<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">每張圖顯示因子從低水準（−1）到高水準（+1）時，反應變數均值的變化。斜率越陡 = 效應越大。</div>';
+  html+='<div style="display:grid;grid-template-columns:repeat('+cols+',1fr);gap:8px">';
+  allEffects.forEach(function(e,i){
+    html+='<div class="canvas-wrap"><canvas id="doe-me-'+i+'" height="160"></canvas></div>';
+  });
+  html+='</div>';
+  container.innerHTML=html;
+
+  // 全域 y 軸範圍
+  var allY=allEffects.reduce(function(a,e){return a.concat([e.hi,e.lo]);},[]);
+  var yMin=Math.min.apply(null,allY), yMax=Math.max.apply(null,allY);
+  var yPad=(yMax-yMin)*0.15||0.1;
+  yMin-=yPad; yMax+=yPad;
+
+  // 畫每張圖
+  setTimeout(function(){
+    allEffects.forEach(function(e,i){
+      var c=document.getElementById('doe-me-'+i);
+      if(!c)return;
+      c.width=c.parentElement.offsetWidth||180;
+      var isSig=Math.abs(e.effect)>0.5;
+      var lineColor=isSig?'#DC2626':'#1D3B8A';
+      chartInst.push(new Chart(c.getContext('2d'),{
+        type:'line',
+        data:{
+          labels:['-1','+1'],
+          datasets:[
+            {label:e.name,data:[parseFloat(e.lo.toFixed(4)),parseFloat(e.hi.toFixed(4))],
+              borderColor:lineColor,borderWidth:2.5,
+              pointRadius:6,pointBackgroundColor:lineColor,
+              fill:false,tension:0},
+            {label:'Grand Mean',data:[parseFloat(grandMean.toFixed(4)),parseFloat(grandMean.toFixed(4))],
+              borderColor:'#9CA3AF',borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}
+          ]
+        },
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:e.name+(isSig?' *':''),
+            font:{size:11,weight:'600'},color:lineColor,padding:{bottom:3}},
+            legend:{display:false},
+            tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+ctx.parsed.y.toFixed(4);}}}
+          },
+          scales:{
+            x:{ticks:{font:{size:10}},title:{display:true,text:'水準'}},
+            y:{min:parseFloat(yMin.toFixed(4)),max:parseFloat(yMax.toFixed(4)),
+              ticks:{font:{size:9}},title:{display:true,text:yname}}
+          }
+        }
+      }));
+    });
+  },80);
 }
 
 // ════════════════════════════════════════════
@@ -2093,8 +2457,21 @@ function scatterAnalyze(){
   const inst=new Chart(canvas.getContext('2d'),{type:'scatter',data:{datasets:[{label:'觀測值',data:X.map((x,i)=>({x,y:Y[i]})),backgroundColor:'#1D3B8A',pointRadius:5},{label:`迴歸線 y=${r4(b0)}+${r4(b1)}x`,data:regX.map((x,i)=>({x,y:regY[i]})),type:'line',borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('sc-xname').value} vs ${document.getElementById('sc-yname').value}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{title:{display:true,text:document.getElementById('sc-xname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{title:{display:true,text:document.getElementById('sc-yname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
   chartInst.push(inst);
   const strength=Math.abs(r)>=0.9?'極強':Math.abs(r)>=0.7?'強':Math.abs(r)>=0.5?'中等':Math.abs(r)>=0.3?'弱':'極弱';
-  const dir=r>0?'正':'負';const sig=pVal<alpha;
-  document.getElementById('sc-result').innerHTML=`<div class="alert ${sig?'success':'warn'}"><strong>相關性分析結果</strong><br>r = ${r4(r)}（${dir}相關、${strength}相關），R² = ${r4(r2)}（X 可解釋 Y 變異的 ${(r2*100).toFixed(1)}%）<br>t 統計量 = ${r4(t)}，p-value = ${pVal.toFixed(4)}（α = ${alpha}）<br><strong>結論：</strong>${sig?`✅ 相關性顯著（p < α），X 與 Y 存在${dir}線性關係`:`⚠️ 相關性不顯著（p ≥ α）`}</div><div class="alert info" style="margin-top:.5rem;font-size:12px">迴歸方程式：${document.getElementById('sc-yname').value} = ${r4(b0)} + ${r4(b1)} × ${document.getElementById('sc-xname').value}</div>`;
+  const dir=r>0?'正':'負'; const sig=pVal<alpha;
+  // Spearman
+  const sp=spearman(X,Y);
+  const xname=document.getElementById('sc-xname').value;
+  const yname2=document.getElementById('sc-yname').value;
+  const scResult='<div class="mt-session" style="margin-bottom:.5rem"><table>'+
+    '<thead><tr><th style="text-align:left">方法</th><th>係數</th><th>p-value</th><th>結論</th></tr></thead><tbody>'+
+    '<tr><td class="mt-kw">Pearson r</td><td class="mt-num">r = '+r4(r)+'，R² = '+r4(r2)+'</td><td class="mt-num">'+pVal.toFixed(4)+'</td>'+
+    '<td>'+(sig?'<span class="nelson-flag triggered">⚠️ 顯著</span>':'<span class="nelson-flag ok">✅ 不顯著</span>')+'</td></tr>'+
+    '<tr><td class="mt-kw">Spearman ρ</td><td class="mt-num">ρ = '+sp.rs.toFixed(4)+'</td><td class="mt-num">'+sp.p.toFixed(4)+'</td>'+
+    '<td>'+(sp.p<alpha?'<span class="nelson-flag triggered">⚠️ 顯著</span>':'<span class="nelson-flag ok">✅ 不顯著</span>')+'</td></tr>'+
+    '</tbody></table></div>'+
+    '<div class="alert info" style="font-size:12px">迴歸方程式：'+yname2+' = '+r4(b0)+' + '+r4(b1)+' × '+xname+'<br>'+
+    'Pearson r 適用線性關係；Spearman ρ 適用非常態或非線性單調關係</div>';
+  document.getElementById('sc-result').innerHTML=scResult;
   document.getElementById('sc-out').style.display='block';
 }
 
@@ -2125,8 +2502,23 @@ function hyAnalyze(){
     const se=Math.sqrt(s1**2/n1+s2**2/n2),t=(m1-m2)/se;
     const df=Math.floor((s1**2/n1+s2**2/n2)**2/((s1**2/n1)**2/(n1-1)+(s2**2/n2)**2/(n2-1)));
     const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
-    result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${r4(m1)}</div><div class="l">樣本1均值</div></div><div class="sc"><div class="v">${r4(m2)}</div><div class="l">樣本2均值</div></div><div class="sc"><div class="v">${r4(m1-m2)}</div><div class="l">均值差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${df}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>獨立雙樣本 t 檢定（Welch）</strong><br>t = ${r4(t)}，df = ${df}，p = ${p.toFixed(4)}（α = ${alpha}）<br><strong>${sig?`✅ 拒絕 H₀：兩組均值有顯著差異（差異 = ${r4(m1-m2)}）`:`⚠️ 無法拒絕 H₀：兩組均值無顯著差異`}</strong></div>`;
-  }else if(type==='pair'){
+    const es2=cohensD(d1,d2);
+    result='<div class="stat-grid" style="margin-bottom:.75rem">'+
+      '<div class="sc"><div class="v">'+r4(m1)+'</div><div class="l">樣本1均值</div></div>'+
+      '<div class="sc"><div class="v">'+r4(m2)+'</div><div class="l">樣本2均值</div></div>'+
+      '<div class="sc"><div class="v">'+r4(m1-m2)+'</div><div class="l">均值差</div></div>'+
+      '<div class="sc"><div class="v">'+r4(t)+'</div><div class="l">t 統計量</div></div>'+
+      '<div class="sc"><div class="v">'+df+'</div><div class="l">自由度</div></div>'+
+      '<div class="sc"><div class="v">'+p.toFixed(4)+'</div><div class="l">p-value</div></div>'+
+      '</div>'+
+      '<div class="mt-session" style="margin-bottom:.5rem"><table>'+
+      '<thead><tr><th style="text-align:left">方法</th><th>統計量</th><th>值</th><th>結論</th></tr></thead><tbody>'+
+      '<tr><td class="mt-kw">Welch t-test</td><td class="mt-num">t='+r4(t)+' df='+df+'</td><td class="mt-num">p='+p.toFixed(4)+'</td>'+
+      '<td>'+(sig?'<span class="nelson-flag triggered">⚠️ 顯著（p&lt;α）</span>':'<span class="nelson-flag ok">✅ 不顯著</span>')+'</td></tr>'+
+      '<tr><td class="mt-kw">Cohen\'s d</td><td class="mt-num">d='+es2.d.toFixed(3)+'</td><td colspan="2" style="color:#9CDCFE;font-size:11px">'+es2.label+'（≥0.8大 ≥0.5中 ≥0.2小）</td></tr>'+
+      '</tbody></table></div>'+
+      '<div class="alert info" style="font-size:12px">統計顯著 ≠ 實務意義！p 值小不代表差異大，請同時參考 Cohen\'s d。</div>';
+    }else if(type==='pair'){
     if(d1.length!==d2.length)return alert('配對樣本筆數需相同');
     const diff=d1.map((v,i)=>v-d2[i]),n=diff.length,m=mean(diff),s=stdS(diff),se=s/Math.sqrt(n),t=m/se,df=n-1;
     const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
@@ -2181,8 +2573,23 @@ function boxplotAnalyze(){
     ctx.fillStyle=col+'22';ctx.strokeStyle=col;ctx.lineWidth=2;
     ctx.fillRect(cx-bw/2,vy(s.q3),bw,vy(s.q1)-vy(s.q3));
     ctx.strokeRect(cx-bw/2,vy(s.q3),bw,vy(s.q1)-vy(s.q3));
-    // 中位線
-    ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(cx-bw/2,vy(s.q2));ctx.lineTo(cx+bw/2,vy(s.q2));ctx.stroke();
+    // 中位線 + Notch
+    var showNotch=document.getElementById('bp-notch')&&document.getElementById('bp-notch').value==='1';
+    ctx.strokeStyle=col;ctx.lineWidth=2.5;
+    if(showNotch){
+      var ntch=calcNotch(s.q2,s.iqr,s.n);
+      var ny_lo=vy(ntch.lo), ny_hi=vy(ntch.hi);
+      // 畫有缺口的中位線
+      ctx.beginPath();ctx.moveTo(cx-bw/2,vy(s.q2));ctx.lineTo(cx-bw/4,vy(s.q2));ctx.stroke();
+      ctx.beginPath();ctx.moveTo(cx+bw/4,vy(s.q2));ctx.lineTo(cx+bw/2,vy(s.q2));ctx.stroke();
+      // Notch 標示
+      ctx.setLineDash([2,2]);ctx.strokeStyle=col+'88';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(cx-bw/4,ny_lo);ctx.lineTo(cx+bw/4,ny_lo);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(cx-bw/4,ny_hi);ctx.lineTo(cx+bw/4,ny_hi);ctx.stroke();
+      ctx.setLineDash([]);ctx.lineWidth=2.5;ctx.strokeStyle=col;
+    } else {
+      ctx.beginPath();ctx.moveTo(cx-bw/2,vy(s.q2));ctx.lineTo(cx+bw/2,vy(s.q2));ctx.stroke();
+    }
     // 平均值菱形
     ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(cx,vy(s.mean)-5);ctx.lineTo(cx+5,vy(s.mean));ctx.lineTo(cx,vy(s.mean)+5);ctx.lineTo(cx-5,vy(s.mean));ctx.closePath();ctx.fill();
     // 端點橫線
@@ -2426,139 +2833,257 @@ function renderGRRSummary(){
   document.getElementById('grr-summary-content').innerHTML=html;
 }
 
-function drawGRRBar(){
+
+function drawGRRSixpack(){
   var g=R.grrResult;
-  var canvas=document.getElementById('grr-bar-canvas');
-  if(!canvas)return;
-  canvas.width=canvas.parentElement.offsetWidth||640;
-  destroyCharts();
+  if(!g)return;
+  var ops=g.ops, parts=g.parts, data=g.data;
+  var colors_op=['#1D3B8A','#DC2626','#059669','#D97706'];
 
-  var labels=['Repeatability\n(EV)','Reproducibility\n(AV)','Total GRR','Part-to-Part\n(PV)'];
-  var pcts=[g.pctEV,g.pctAV,g.pctGRR,g.pctPV];
-  var colors=[
-    g.pctEV>30?'#EF4444':g.pctEV>10?'#F59E0B':'#22C55E',
-    g.pctAV>30?'#EF4444':g.pctAV>10?'#F59E0B':'#22C55E',
-    g.pctGRR>30?'#EF4444':g.pctGRR>10?'#F59E0B':'#22C55E',
-    '#3B82F6'
-  ];
+  function avg(a){return a.reduce(function(s,v){return s+v;},0)/a.length;}
 
-  var inst=new Chart(canvas.getContext('2d'),{
-    type:'bar',
-    data:{
-      labels:['Repeatability (EV)','Reproducibility (AV)','Total GRR','Part-to-Part (PV)'],
-      datasets:[{
-        label:'% of Total Variation',
-        data:pcts.map(function(v){return parseFloat(v.toFixed(2));}),
-        backgroundColor:colors,
-        borderWidth:0,
-        borderRadius:6,
-      }]
-    },
-    options:{
-      responsive:false,
-      animation:false,
-      indexAxis:'y',
-      plugins:{
-        title:{display:true,text:'Gage R&R 變異來源分解（% of Total Variation = 100%）',font:{size:13,weight:'600'},padding:{bottom:8}},
-        legend:{display:false},
-        tooltip:{callbacks:{label:function(c){return c.parsed.x.toFixed(2)+'%';}}}
-      },
-      scales:{
-        x:{min:0,max:100,grid:{color:'rgba(0,0,0,.05)'},ticks:{callback:function(v){return v+'%';},font:{size:11}},title:{display:true,text:'% of Total Variation'}},
-        y:{grid:{display:false},ticks:{font:{size:12}}}
-      }
-    }
-  });
-  chartInst.push(inst);
-
-  // 在長條圖旁邊標示參考線 10% 和 30%
-}
-
-function drawGRRCharts(){
-  var g=R.grrResult;
-  var ops=g.ops,parts=g.parts,data=g.data;
-
-  // Xbar chart by operator
-  var xbarByOp={};
+  // 預計算
+  var xbarByOp={}, rangeByOp={};
   ops.forEach(function(op){
     xbarByOp[op]=parts.map(function(pt){
       var reps=data[op]&&data[op][pt]?data[op][pt]:[];
-      return reps.length?reps.reduce(function(s,v){return s+v;},0)/reps.length:null;
+      return reps.length?avg(reps):null;
     });
-  });
-  var allXbar=ops.reduce(function(a,op){return a.concat(xbarByOp[op].filter(function(v){return v!==null;}));},[] );
-  var grandXbar=allXbar.reduce(function(s,v){return s+v;},0)/allXbar.length;
-
-  // Range by operator
-  var rangeByOp={};
-  ops.forEach(function(op){
     rangeByOp[op]=parts.map(function(pt){
       var reps=data[op]&&data[op][pt]?data[op][pt]:[];
-      return reps.length>=2?Math.max.apply(null,reps)-Math.min.apply(null,reps):null;
+      return reps.length>=2?Math.max.apply(null,reps)-Math.min.apply(null,reps):0;
     });
   });
-  var allR=ops.reduce(function(a,op){return a.concat(rangeByOp[op].filter(function(v){return v!==null;}));},[] );
-  var Rbar2=allR.reduce(function(s,v){return s+v;},0)/allR.length;
-  var n=g.parts.length;
-  var d2_2=1.128,D4_2=3.267;
-  var sigma_xbar=Rbar2/(d2_2*Math.sqrt(2));
-  var UCL_xbar=grandXbar+3*sigma_xbar;
-  var LCL_xbar=grandXbar-3*sigma_xbar;
-  var UCL_r=D4_2*Rbar2;
 
-  var colors_op=['#1D3B8A','#059669','#D97706'];
-  var labels=parts.map(function(pt){return 'P'+pt;});
+  var allXbarAll=ops.reduce(function(a,op){return a.concat(xbarByOp[op].filter(function(v){return v!==null;}));},[] );
+  var grandXbar=avg(allXbarAll);
+  var allRAll=ops.reduce(function(a,op){return a.concat(rangeByOp[op]);},[] );
+  var Rbar=avg(allRAll);
+  var d2=1.128, D4=3.267;
+  var sigmaXbar=Rbar/(d2*Math.sqrt(2));
+  var UCL_xbar=grandXbar+3*sigmaXbar, LCL_xbar=grandXbar-3*sigmaXbar;
+  var UCL_r=D4*Rbar;
 
-  var c1=document.getElementById('grr-xbar-canvas');
+  destroyCharts();
+
+  function mkCanvas(id,h){
+    var c=document.getElementById(id);
+    if(!c)return null;
+    c.width=c.parentElement.offsetWidth||320;
+    c.height=h||220;
+    return c;
+  }
+
+  // ── 1. Components of Variation ──
+  var c1=mkCanvas('grr-comp-canvas');
   if(c1){
-    c1.width=c1.parentElement.offsetWidth||640;c1.height=220;
-    var datasets=[
-      {label:'UCL='+parseFloat(UCL_xbar.toFixed(4)),data:Array(n).fill(parseFloat(UCL_xbar.toFixed(4))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0,type:'line'},
-      {label:'CL='+parseFloat(grandXbar.toFixed(4)),data:Array(n).fill(parseFloat(grandXbar.toFixed(4))),borderColor:'#16A34A',borderWidth:1.5,pointRadius:0,fill:false,tension:0,type:'line'},
-      {label:'LCL='+parseFloat(LCL_xbar.toFixed(4)),data:Array(n).fill(parseFloat(LCL_xbar.toFixed(4))),borderColor:'#2563EB',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0,type:'line'},
+    var compPcts=[g.pctGRR,g.pctEV,g.pctAV,g.pctPV];
+    var compColors=[
+      g.pctGRR>30?'#EF4444':g.pctGRR>10?'#F59E0B':'#22C55E',
+      '#60A5FA','#A78BFA','#3B82F6'
     ];
-    ops.forEach(function(op,i){
-      datasets.push({label:'操作員'+op,data:xbarByOp[op],borderColor:colors_op[i%3],borderWidth:1.5,pointRadius:4,fill:false,tension:0.1,type:'line'});
-    });
-    var inst1=new Chart(c1.getContext('2d'),{type:'line',data:{labels:labels,datasets:datasets},options:{responsive:false,animation:false,plugins:{title:{display:true,text:'Xbar Chart by Operator',font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11},boxWidth:14}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
-    chartInst.push(inst1);
+    chartInst.push(new Chart(c1.getContext('2d'),{
+      type:'bar',
+      data:{labels:['Gage R&R','Repeat','Reprod','Part-to-Part'],
+        datasets:[{label:'% Study Var',data:compPcts.map(function(v){return parseFloat(v.toFixed(2));}),
+          backgroundColor:compColors,borderWidth:0,borderRadius:4}]},
+      options:{responsive:false,animation:false,
+        plugins:{title:{display:true,text:'Components of Variation',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+        scales:{x:{ticks:{font:{size:9}}},
+          y:{min:0,ticks:{callback:function(v){return v+'%';},font:{size:9}},
+            title:{display:true,text:'%'}}}}
+    }));
   }
 
-  var c2=document.getElementById('grr-r-canvas');
+  // ── 2. Measure by Part ──
+  var c2=mkCanvas('grr-bypart-canvas');
   if(c2){
-    c2.width=c2.parentElement.offsetWidth||640;c2.height=200;
-    var ds2=[
-      {label:'UCL='+parseFloat(UCL_r.toFixed(4)),data:Array(n).fill(parseFloat(UCL_r.toFixed(4))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false,tension:0,type:'line'},
-      {label:'CL='+parseFloat(Rbar2.toFixed(4)),data:Array(n).fill(parseFloat(Rbar2.toFixed(4))),borderColor:'#16A34A',borderWidth:1.5,pointRadius:0,fill:false,tension:0,type:'line'},
-    ];
-    ops.forEach(function(op,i){
-      ds2.push({label:'操作員'+op,data:rangeByOp[op],borderColor:colors_op[i%3],borderWidth:1.5,pointRadius:4,fill:false,tension:0.1,type:'line'});
+    var scatterPts=[];
+    parts.forEach(function(pt,pi){
+      ops.forEach(function(op){
+        if(data[op]&&data[op][pt])data[op][pt].forEach(function(v){scatterPts.push({x:pi+1,y:v});});
+      });
     });
-    var inst2=new Chart(c2.getContext('2d'),{type:'line',data:{labels:labels,datasets:ds2},options:{responsive:false,animation:false,plugins:{title:{display:true,text:'R Chart by Operator',font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11},boxWidth:14}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{min:0,grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
-    chartInst.push(inst2);
+    var partMeans=parts.map(function(pt,pi){
+      var vals=[];
+      ops.forEach(function(op){if(data[op]&&data[op][pt])vals=vals.concat(data[op][pt]);});
+      return{x:pi+1,y:avg(vals)};
+    });
+    chartInst.push(new Chart(c2.getContext('2d'),{
+      type:'scatter',
+      data:{datasets:[
+        {label:'量測值',data:scatterPts,backgroundColor:'rgba(100,149,237,.65)',pointRadius:4,showLine:false},
+        {label:'均值',data:partMeans,type:'line',borderColor:'#1D3B8A',borderWidth:1.5,
+          pointRadius:5,pointBackgroundColor:'#1D3B8A',fill:false,tension:0.3,showLine:true}
+      ]},
+      options:{responsive:false,animation:false,
+        plugins:{title:{display:true,text:'Measure by Part',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+        scales:{x:{min:0.5,max:parts.length+0.5,ticks:{callback:function(v){return Number.isInteger(v)?v:'';},font:{size:9}},title:{display:true,text:'Part'}},
+          y:{ticks:{font:{size:9}},title:{display:true,text:'Measure'}}}}
+    }));
   }
 
-  // ANOVA 表
-  var g2=R.grrResult;
-  var r4=g2.r4;
-  document.getElementById('grr-anova-content').innerHTML=
-    '<div style="overflow-x:auto"><table><thead><tr><th>來源</th><th>SS</th><th>df</th><th>MS</th><th>F 值</th><th>說明</th></tr></thead><tbody>'+
-    '<tr><td>操作員 (Operator)</td><td>'+r4(g2.SSop)+'</td><td>'+g2.dfop+'</td><td>'+r4(g2.MSop)+'</td><td>'+r4(g2.MSop/g2.MSoppart)+'</td><td style="font-size:12px;color:#6B7280">操作員主效應</td></tr>'+
-    '<tr><td>零件 (Part)</td><td>'+r4(g2.SSpart)+'</td><td>'+g2.dfpart+'</td><td>'+r4(g2.MSpart)+'</td><td>'+r4(g2.MSpart/g2.MSoppart)+'</td><td style="font-size:12px;color:#6B7280">零件主效應</td></tr>'+
-    '<tr><td>Operator × Part</td><td>'+r4(g2.SSoppart)+'</td><td>'+g2.dfoppart+'</td><td>'+r4(g2.MSoppart)+'</td><td>'+r4(g2.MSoppart/g2.MSerr)+'</td><td style="font-size:12px;color:#6B7280">交互作用</td></tr>'+
-    '<tr><td>誤差 (Repeatability)</td><td>'+r4(g2.SSerr)+'</td><td>'+g2.dferr+'</td><td>'+r4(g2.MSerr)+'</td><td>—</td><td style="font-size:12px;color:#6B7280">重複量測誤差</td></tr>'+
-    '<tr style="font-weight:700;background:#F9FAFB"><td>總計</td><td>'+r4(g2.SStotal)+'</td><td>'+g2.dftotal+'</td><td>—</td><td>—</td><td></td></tr>'+
-    '</tbody></table></div>'+
-    '<div class="alert info" style="margin-top:.75rem;font-size:12px">Operator×Part 交互作用顯著（F 值大）代表不同操作員對不同零件的量測偏差不一致，需加強訓練。</div>';
+  // ── 3. R Chart by Inspector ──
+  var c3=mkCanvas('grr-r-canvas');
+  if(c3){
+    var rLabels=[], rVals=[];
+    ops.forEach(function(op){
+      parts.forEach(function(pt){
+        rLabels.push(''+pt);
+        rVals.push(rangeByOp[op][parts.indexOf(pt)]);
+      });
+    });
+    // 分段顏色
+    var rBgColors=rVals.map(function(v){return v>UCL_r?'#DC2626':'#1D3B8A';});
+    chartInst.push(new Chart(c3.getContext('2d'),{
+      type:'line',
+      data:{labels:rLabels,datasets:[
+        {label:'UCL',data:Array(rVals.length).fill(parseFloat(UCL_r.toFixed(6))),borderColor:'#DC2626',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+        {label:'R̄',data:Array(rVals.length).fill(parseFloat(Rbar.toFixed(6))),borderColor:'#16A34A',borderWidth:1.2,pointRadius:0,fill:false,tension:0},
+        {label:'LCL',data:Array(rVals.length).fill(0),borderColor:'#2563EB',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+        {label:'R',data:rVals,borderColor:'#1D3B8A',borderWidth:1.5,
+          pointRadius:rVals.map(function(v){return v>UCL_r?6:3;}),
+          pointBackgroundColor:rBgColors,fill:false,tension:0.1}
+      ]},
+      options:{responsive:false,animation:false,
+        plugins:{title:{display:true,text:'R Chart by Inspector',font:{size:12,weight:'600'},padding:{bottom:4}},
+          legend:{display:false}},
+        scales:{x:{ticks:{font:{size:8},maxRotation:0},title:{display:true,text:'Part'}},
+          y:{min:0,ticks:{font:{size:9}},title:{display:true,text:'Sample Range'}}}}
+    }));
+  }
+
+  // ── 4. Measure by Inspector（箱型圖，參考 Minitab）──
+  var c4=mkCanvas('grr-byop-canvas');
+  if(c4){
+    var opBoxData=ops.map(function(op){
+      var vals=parts.reduce(function(a,pt){return data[op]&&data[op][pt]?a.concat(data[op][pt]):a;},[]);
+      vals.sort(function(a,b){return a-b;});
+      var n4=vals.length;
+      var q1=vals[Math.floor(n4*0.25)], q2=vals[Math.floor(n4*0.5)], q3=vals[Math.floor(n4*0.75)];
+      var iqr=q3-q1, lo=q1-1.5*iqr, hi=q3+1.5*iqr;
+      var wLo=vals.filter(function(v){return v>=lo;})[0];
+      var wHi=vals.filter(function(v){return v<=hi;}).pop();
+      return{op:op,q1:q1,q2:q2,q3:q3,mean:avg(vals),wLo:wLo,wHi:wHi,vals:vals};
+    });
+    // 用 Canvas 手繪箱型圖
+    var W4=c4.width||320, H4=200;
+    c4.height=H4;
+    var ctx4=c4.getContext('2d');
+    ctx4.clearRect(0,0,W4,H4);
+    var allV=ops.reduce(function(a,op){return a.concat(parts.reduce(function(b,pt){return data[op]&&data[op][pt]?b.concat(data[op][pt]):b;},[]));},[]);
+    var vMin=Math.min.apply(null,allV)*0.999, vMax=Math.max.apply(null,allV)*1.001;
+    var padL=50, padR=15, padT=24, padB=30;
+    function yp(v){return padT+(vMax-v)/(vMax-vMin)*(H4-padT-padB);}
+    var bw=Math.min(40,(W4-padL-padR)/ops.length*0.5);
+    // 標題
+    ctx4.fillStyle='#1a1a2e';ctx4.font='600 12px -apple-system,sans-serif';ctx4.textAlign='center';
+    ctx4.fillText('Measure by Inspector',W4/2,14);
+    // Y axis
+    ctx4.strokeStyle='#E5E7EB';ctx4.lineWidth=1;ctx4.fillStyle='#6B7280';ctx4.font='9px -apple-system,sans-serif';ctx4.textAlign='right';
+    for(var ti=0;ti<=5;ti++){
+      var tv=vMin+(vMax-vMin)*ti/5;
+      ctx4.beginPath();ctx4.moveTo(padL-3,yp(tv));ctx4.lineTo(W4-padR,yp(tv));ctx4.strokeStyle='#F3F4F6';ctx4.stroke();
+      ctx4.fillText(tv.toFixed(3),padL-5,yp(tv)+3);
+    }
+    var colors4=['#1D3B8A','#DC2626','#059669','#D97706'];
+    opBoxData.forEach(function(b,gi){
+      var cx=padL+((W4-padL-padR)*(gi+0.5)/ops.length);
+      var col=colors4[gi%4];
+      // 鬚線
+      ctx4.strokeStyle=col;ctx4.lineWidth=1.5;ctx4.setLineDash([3,2]);
+      ctx4.beginPath();ctx4.moveTo(cx,yp(b.wHi));ctx4.lineTo(cx,yp(b.q3));ctx4.stroke();
+      ctx4.beginPath();ctx4.moveTo(cx,yp(b.q1));ctx4.lineTo(cx,yp(b.wLo));ctx4.stroke();
+      ctx4.setLineDash([]);
+      // 箱體
+      ctx4.fillStyle=col+'22';ctx4.strokeStyle=col;ctx4.lineWidth=2;
+      ctx4.fillRect(cx-bw/2,yp(b.q3),bw,yp(b.q1)-yp(b.q3));
+      ctx4.strokeRect(cx-bw/2,yp(b.q3),bw,yp(b.q1)-yp(b.q3));
+      // 中位線
+      ctx4.strokeStyle=col;ctx4.lineWidth=2.5;
+      ctx4.beginPath();ctx4.moveTo(cx-bw/2,yp(b.q2));ctx4.lineTo(cx+bw/2,yp(b.q2));ctx4.stroke();
+      // 均值菱形
+      ctx4.fillStyle=col;ctx4.beginPath();
+      ctx4.moveTo(cx,yp(b.mean)-4);ctx4.lineTo(cx+4,yp(b.mean));ctx4.lineTo(cx,yp(b.mean)+4);ctx4.lineTo(cx-4,yp(b.mean));
+      ctx4.closePath();ctx4.fill();
+      // X label
+      ctx4.fillStyle='#374151';ctx4.font='11px -apple-system,sans-serif';ctx4.textAlign='center';ctx4.textBaseline='top';
+      ctx4.fillText('Insp '+b.op,cx,H4-padB+4);
+    });
+  }
+
+  // ── 5. Xbar Chart by Inspector ──
+  var c5=mkCanvas('grr-xbar-canvas');
+  if(c5){
+    var xbLabels=[], xbVals=[];
+    ops.forEach(function(op){
+      parts.forEach(function(pt){
+        xbLabels.push(''+pt);
+        xbVals.push(xbarByOp[op][parts.indexOf(pt)]);
+      });
+    });
+    var anom5=xbVals.map(function(v){return v!==null&&(v>UCL_xbar||v<LCL_xbar);});
+    chartInst.push(new Chart(c5.getContext('2d'),{
+      type:'line',
+      data:{labels:xbLabels,datasets:[
+        {label:'UCL',data:Array(xbVals.length).fill(parseFloat(UCL_xbar.toFixed(6))),borderColor:'#DC2626',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+        {label:'X̄',data:Array(xbVals.length).fill(parseFloat(grandXbar.toFixed(6))),borderColor:'#16A34A',borderWidth:1.2,pointRadius:0,fill:false,tension:0},
+        {label:'LCL',data:Array(xbVals.length).fill(parseFloat(LCL_xbar.toFixed(6))),borderColor:'#2563EB',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
+        {label:'Xbar',data:xbVals,borderColor:'#1D3B8A',borderWidth:1.5,
+          pointRadius:anom5.map(function(a){return a?6:3;}),
+          pointBackgroundColor:anom5.map(function(a){return a?'#DC2626':'#1D3B8A';}),
+          fill:false,tension:0.1}
+      ]},
+      options:{responsive:false,animation:false,
+        plugins:{title:{display:true,text:'Xbar Chart by Inspector',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+        scales:{x:{ticks:{font:{size:8},maxRotation:0},title:{display:true,text:'Part'}},
+          y:{ticks:{font:{size:9}},title:{display:true,text:'Sample Mean'}}}}
+    }));
+  }
+
+  // ── 6. Part × Inspector Interaction ──
+  var c6=mkCanvas('grr-interact-canvas');
+  if(c6){
+    var interDs=ops.map(function(op,oi){
+      return {
+        label:'Inspector '+op,
+        data:parts.map(function(pt,pi){
+          return{x:pi+1,y:avg(data[op]&&data[op][pt]?data[op][pt]:[0])};
+        }),
+        borderColor:colors_op[oi%4],
+        borderWidth:1.5,
+        pointRadius:5,
+        pointBackgroundColor:colors_op[oi%4],
+        fill:false,tension:0.1,
+        showLine:true
+      };
+    });
+    chartInst.push(new Chart(c6.getContext('2d'),{
+      type:'line',
+      data:{labels:parts.map(function(p){return p;}),datasets:interDs},
+      options:{responsive:false,animation:false,
+        plugins:{title:{display:true,text:'Part * Inspector Interaction',font:{size:12,weight:'600'},padding:{bottom:4}},
+          legend:{labels:{font:{size:9},boxWidth:10}}},
+        scales:{x:{title:{display:true,text:'Part'},ticks:{font:{size:10}}},
+          y:{title:{display:true,text:'Average'},ticks:{font:{size:9}}}}}
+    }));
+  }
 }
 
+function drawGRRBar(){ drawGRRSixpack(); }
+function drawGRRCharts(){ drawGRRSixpack(); }
+
+
 function grrSw(name){
-  var tabs=['summary','bar','xbarr','anova'];
+  var tabs=['summary','sixpack','anova'];
   document.querySelectorAll('#page-msa .tab').forEach(function(t,i){t.classList.toggle('active',tabs[i]===name);});
-  tabs.forEach(function(t){document.getElementById('grr-tab-'+t).classList.remove('show');});
-  document.getElementById('grr-tab-'+name).classList.add('show');
-  if(name==='bar')setTimeout(function(){drawGRRBar();},50);
-  if(name==='xbarr')setTimeout(function(){drawGRRCharts();},50);
+  tabs.forEach(function(t){
+    var el=document.getElementById('grr-tab-'+t);
+    if(el)el.classList.remove('show');
+  });
+  var target=document.getElementById('grr-tab-'+name);
+  if(target)target.classList.add('show');
+  if(name==='sixpack')setTimeout(function(){drawGRRSixpack();},50);
 }
 
 // ── Bias 分析 ──
@@ -2756,7 +3281,7 @@ function attrAnalyze(){
 }
 
 
-window.msaDecide=msaDecide;window.grrAnalyze=grrAnalyze;window.grrLoadEx=grrLoadEx;window.grrSw=grrSw;window.biasAnalyze=biasAnalyze;window.linAnalyze=linAnalyze;window.stabAnalyze=stabAnalyze;window.attrAnalyze=attrAnalyze;
+window.msaDecide=msaDecide;window.drawGRRSixpack=drawGRRSixpack;window.grrAnalyze=grrAnalyze;window.grrLoadEx=grrLoadEx;window.grrSw=grrSw;window.biasAnalyze=biasAnalyze;window.linAnalyze=linAnalyze;window.stabAnalyze=stabAnalyze;window.attrAnalyze=attrAnalyze;
 window.toggleEdu=function(id){
   var p=document.getElementById('edu-'+id);
   if(!p)return;
@@ -2768,12 +3293,667 @@ window.toggleEdu=function(id){
       :'<span style="font-size:15px">📖</span> 工具說明 / 教育訓練';
   });
 };
+
+// ── Tool Bar（返回按鈕列）控制 ──
+function showToolBar(toolName){
+  var bar = document.getElementById('tool-bar');
+  var title = document.getElementById('tool-bar-title');
+  if(bar){ bar.style.display='flex'; }
+  if(title){ title.textContent = toolName || ''; }
+}
+function hideToolBar(){
+  var bar = document.getElementById('tool-bar');
+  if(bar){ bar.style.display='none'; }
+}
+
+// ── 存檔狀態顯示 ──
+function dmaicSetSaveStatus(saved){
+  var pages = document.querySelectorAll('.page.active');
+  var pid = pages.length ? pages[0].id.replace('page-','tool') : 'tool';
+  var el = document.getElementById(pid+'-save-indicator');
+  if(el){
+    if(saved){
+      el.textContent = '✅ 已儲存 ' + new Date().toLocaleTimeString();
+      el.style.color = '#166534';
+    } else {
+      el.textContent = '⚠️ 尚未儲存';
+      el.style.color = '#92400E';
+    }
+  }
+}
+
+// ── 記錄展開/收合 ──
+window.dmaicToggleRecord = function(titleEl){
+  var body = titleEl.closest('.card').querySelector('.record-body');
+  var icon = titleEl.querySelector('.record-toggle-icon');
+  if(!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if(icon) icon.textContent = isOpen ? '▼ 展開填寫' : '▲ 收合';
+};
+
+// ── 列印目前工具（展開所有分頁）──
+window.dmaicPrintCurrentTool = function(){
+  // 展開所有 tab-c
+  var tabs = document.querySelectorAll('.page.active .tab-c');
+  tabs.forEach(function(t){ t._origDisplay = t.style.display; t.style.display='block'; });
+  // 展開記錄區
+  var bodies = document.querySelectorAll('.page.active .record-body');
+  bodies.forEach(function(b){ b._origDisplay = b.style.display; b.style.display='block'; });
+  // 列印
+  window.print();
+  // 還原
+  setTimeout(function(){
+    tabs.forEach(function(t){ t.style.display = t._origDisplay || ''; });
+    bodies.forEach(function(b){ b.style.display = b._origDisplay || 'none'; });
+  }, 1000);
+};
+
+// ════════════════════════════════════════════════════════
+// 精進模組 1：Nelson Rule 4-8
+// ════════════════════════════════════════════════════════
+function calcNelsonAll(vals, cl, ucl, lcl, sigma) {
+  var n = vals.length;
+  var s = sigma || (ucl - cl) / 3;
+  var rules = {r1:[], r2:[], r3:[], r4:[], r5:[], r6:[], r7:[], r8:[]};
+
+  vals.forEach(function(v,i){
+    if(v > ucl || v < lcl) rules.r1.push(i+1);
+  });
+  // Rule 2: 9 連同側
+  for(var i=0;i<=n-9;i++){
+    var side=vals[i]>cl?1:-1;
+    if(vals.slice(i,i+9).every(function(v){return (v>cl?1:-1)===side;}))
+      for(var j=i;j<i+9;j++) if(rules.r2.indexOf(j+1)<0) rules.r2.push(j+1);
+  }
+  // Rule 3: 6 連趨勢
+  for(var i=0;i<=n-6;i++){
+    var up=vals.slice(i,i+6).every(function(v,j,a){return j===0||v>a[j-1];});
+    var dn=vals.slice(i,i+6).every(function(v,j,a){return j===0||v<a[j-1];});
+    if(up||dn) for(var j=i;j<i+6;j++) if(rules.r3.indexOf(j+1)<0) rules.r3.push(j+1);
+  }
+  // Rule 4: 14 點交替升降
+  for(var i=0;i<=n-14;i++){
+    var alt=true;
+    for(var j=1;j<14;j++){
+      if((j%2===1&&vals[i+j]<=vals[i+j-1])||(j%2===0&&vals[i+j]>=vals[i+j-1])){
+        alt=false; break;
+      }
+    }
+    if(alt) for(var j=i;j<i+14;j++) if(rules.r4.indexOf(j+1)<0) rules.r4.push(j+1);
+  }
+  // Rule 5: 3 點中 2 點超出 2σ 同側
+  for(var i=0;i<=n-3;i++){
+    var above=vals.slice(i,i+3).filter(function(v){return v>cl+2*s;}).length;
+    var below=vals.slice(i,i+3).filter(function(v){return v<cl-2*s;}).length;
+    if(above>=2||below>=2) for(var j=i;j<i+3;j++) if(rules.r5.indexOf(j+1)<0) rules.r5.push(j+1);
+  }
+  // Rule 6: 5 點中 4 點超出 1σ 同側
+  for(var i=0;i<=n-5;i++){
+    var above=vals.slice(i,i+5).filter(function(v){return v>cl+s;}).length;
+    var below=vals.slice(i,i+5).filter(function(v){return v<cl-s;}).length;
+    if(above>=4||below>=4) for(var j=i;j<i+5;j++) if(rules.r6.indexOf(j+1)<0) rules.r6.push(j+1);
+  }
+  // Rule 7: 15 點在 1σ 以內（過於穩定，層化）
+  for(var i=0;i<=n-15;i++){
+    if(vals.slice(i,i+15).every(function(v){return Math.abs(v-cl)<s;}))
+      for(var j=i;j<i+15;j++) if(rules.r7.indexOf(j+1)<0) rules.r7.push(j+1);
+  }
+  // Rule 8: 8 點均在 1σ 外（雙峰）
+  for(var i=0;i<=n-8;i++){
+    if(vals.slice(i,i+8).every(function(v){return Math.abs(v-cl)>s;}))
+      for(var j=i;j<i+8;j++) if(rules.r8.indexOf(j+1)<0) rules.r8.push(j+1);
+  }
+  return rules;
+}
+
+function renderNelsonFull(rules) {
+  var defs = [
+    {k:'r1', name:'Rule 1', desc:'超出 3σ 控制界限（任 1 點）'},
+    {k:'r2', name:'Rule 2', desc:'連續 9 點在中心線同側'},
+    {k:'r3', name:'Rule 3', desc:'連續 6 點持續上升或下降'},
+    {k:'r4', name:'Rule 4', desc:'連續 14 點交替升降'},
+    {k:'r5', name:'Rule 5', desc:'3 點中有 2 點超出 2σ（同側）'},
+    {k:'r6', name:'Rule 6', desc:'5 點中有 4 點超出 1σ（同側）'},
+    {k:'r7', name:'Rule 7', desc:'連續 15 點在 1σ 以內（層化）'},
+    {k:'r8', name:'Rule 8', desc:'連續 8 點均在 1σ 外（雙峰）'},
+  ];
+  var triggered = defs.filter(function(d){return (rules[d.k]||[]).length>0;});
+  var stable = triggered.length === 0;
+
+  var html = '<div class="mt-verdict '+(stable?'pass':'fail')+'">';
+  html += '<span class="mt-icon">'+(stable?'✅':'⚠️')+'</span>';
+  html += '<div class="mt-text"><div>製程狀態：'+(stable?'統計管制中（穩定）':'偵測到 '+triggered.length+' 個 Nelson 規則違反')+'</div>';
+  html += '<div class="mt-ref">依據 Nelson (1984)・Montgomery 8th Ed.</div></div></div>';
+
+  html += '<div class="mt-session" style="margin-bottom:.75rem"><table>';
+  html += '<thead><tr><th style="text-align:left">規則</th><th style="text-align:left">說明</th><th>觸發點</th><th>狀態</th></tr></thead><tbody>';
+  defs.forEach(function(d){
+    var pts = rules[d.k]||[];
+    var trig = pts.length>0;
+    html += '<tr>';
+    html += '<td class="mt-kw">'+d.name+'</td>';
+    html += '<td style="color:#9CDCFE;font-size:11px">'+d.desc+'</td>';
+    html += '<td>'+(trig?pts.slice(0,8).join(', ')+(pts.length>8?'...':''):'—')+'</td>';
+    html += '<td><span class="nelson-flag '+(trig?'triggered':'ok')+'">'+(trig?'⚠️ 觸發':'✅ 正常')+'</span></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
+// ════════════════════════════════════════════════════════
+// 精進模組 2：Pp/Ppk/PPM/Cpm 製程能力
+// ════════════════════════════════════════════════════════
+function calcProcessCapability(data, usl, lsl, target, sigmaW) {
+  // data: 所有原始數據陣列, sigmaW: 組內sigma（Rbar/d2）
+  var n = data.length;
+  var mu = data.reduce(function(s,v){return s+v;},0)/n;
+  var sigmaO = Math.sqrt(data.reduce(function(s,v){return s+(v-mu)*(v-mu);},0)/(n-1)); // 整體sigma
+
+  var r = {}; // results
+
+  // 用組內 sigma（短期）
+  if(lsl!=null && usl!=null) r.Cp  = (usl-lsl)/(6*sigmaW);
+  if(usl!=null) r.CPU = (usl-mu)/(3*sigmaW);
+  if(lsl!=null) r.CPL = (mu-lsl)/(3*sigmaW);
+  if(r.CPU!=null && r.CPL!=null) r.Cpk = Math.min(r.CPU,r.CPL);
+  else r.Cpk = r.CPU!=null?r.CPU:r.CPL;
+
+  // 用整體 sigma（長期 Pp/Ppk）
+  if(lsl!=null && usl!=null) r.Pp  = (usl-lsl)/(6*sigmaO);
+  if(usl!=null) r.PPU = (usl-mu)/(3*sigmaO);
+  if(lsl!=null) r.PPL = (mu-lsl)/(3*sigmaO);
+  if(r.PPU!=null && r.PPL!=null) r.Ppk = Math.min(r.PPU,r.PPL);
+  else r.Ppk = r.PPU!=null?r.PPU:r.PPL;
+
+  // Cpm（Taguchi）
+  if(target!=null && lsl!=null && usl!=null) {
+    var tau = Math.sqrt(sigmaW*sigmaW + (mu-target)*(mu-target));
+    r.Cpm = (usl-lsl)/(6*tau);
+  }
+
+  // PPM 估計（常態假設）
+  function normCDF(z){ return 0.5*(1+erf(z/Math.sqrt(2))); }
+  var ppmH=0, ppmL=0;
+  if(usl!=null) ppmH = (1-normCDF((usl-mu)/sigmaO))*1e6;
+  if(lsl!=null) ppmL = normCDF((lsl-mu)/sigmaO)*1e6;
+  r.PPM = ppmH + ppmL;
+  r.PPM_LSL = ppmL; r.PPM_USL = ppmH;
+
+  r.mu = mu; r.sigmaW = sigmaW; r.sigmaO = sigmaO;
+  return r;
+}
+
+function renderCapabilityMT(cap, lsl, usl, target) {
+  if(!cap) return '<div class="alert warn">未計算製程能力（請輸入 LSL / USL）</div>';
+  function r3(v){ return v==null||isNaN(v)?'—':v.toFixed(3); }
+  function badge(v){
+    if(v==null||isNaN(v)) return '<span style="color:#9CA3AF">N/A</span>';
+    var cls = v>=1.67?'pass':v>=1.33?'pass':v>=1.0?'warn':'fail';
+    var lbl = v>=1.67?'優秀':v>=1.33?'良好':v>=1.0?'尚可':'不足';
+    return '<span class="mt-stat-cell '+cls+'" style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600">'+v.toFixed(3)+' '+lbl+'</span>';
+  }
+
+  var html = '<div class="mt-session">';
+  html += '<div class="mt-title">Process Capability Analysis</div>';
+  html += '<table>';
+  html += '<thead><tr><th>指標</th><th>說明</th><th>值</th><th>評等</th></tr></thead><tbody>';
+
+  var rows = [
+    ['Cp',  '製程精密度（組內σ）', cap.Cp,  '≥1.33 良好'],
+    ['Cpk', '製程準確度（組內σ）', cap.Cpk, '≥1.33 良好'],
+    ['CPU', '上限能力',           cap.CPU, null],
+    ['CPL', '下限能力',           cap.CPL, null],
+    ['──', '──', null, null],
+    ['Pp',  '整體製程精密度（整體σ）', cap.Pp,  '≥1.33 良好'],
+    ['Ppk', '整體製程準確度（整體σ）', cap.Ppk, '≥1.33 良好'],
+  ];
+  if(cap.Cpm!=null) rows.push(['Cpm','Taguchi 能力指數（考量目標值偏移）',cap.Cpm,'≥1.33 良好']);
+  rows.push(['──','──',null,null]);
+  rows.push(['PPM Total','百萬不良率（整體σ估計）',cap.PPM,null]);
+  if(lsl!=null) rows.push(['PPM < LSL','低於下限 PPM',cap.PPM_LSL,null]);
+  if(usl!=null) rows.push(['PPM > USL','高於上限 PPM',cap.PPM_USL,null]);
+
+  rows.forEach(function(row){
+    if(row[0]==='──'){
+      html+='<tr><td colspan="4" style="border-top:1px solid #333;padding:1px 0"></td></tr>';
+      return;
+    }
+    var v=row[2];
+    var isPPM = row[0].indexOf('PPM')>=0;
+    var valStr = isPPM?(v!=null?Math.round(v).toLocaleString()+'  ppm':'—'):r3(v);
+    var badgeStr = (!isPPM&&v!=null&&row[3])?badge(v):'';
+    html+='<tr><td class="mt-kw">'+row[0]+'</td><td style="color:#9CDCFE;font-size:11px">'+row[1]+'</td><td class="mt-num">'+valStr+'</td><td>'+badgeStr+'</td></tr>';
+  });
+
+  html += '<tr style="border-top:1px solid #444"><td class="mt-kw">μ</td><td style="color:#9CDCFE;font-size:11px">製程均值</td><td class="mt-num">'+r3(cap.mu)+'</td><td></td></tr>';
+  html += '<tr><td class="mt-kw">σ̂ (Within)</td><td style="color:#9CDCFE;font-size:11px">組內標準差（Rbar/d₂）</td><td class="mt-num">'+r3(cap.sigmaW)+'</td><td></td></tr>';
+  html += '<tr><td class="mt-kw">σ (Overall)</td><td style="color:#9CDCFE;font-size:11px">整體標準差（樣本SD）</td><td class="mt-num">'+r3(cap.sigmaO)+'</td><td></td></tr>';
+  html += '</tbody></table>';
+  html += '<div style="color:#888;font-size:10px;margin-top:6px">Cp/Cpk 用組內σ（短期）｜Pp/Ppk 用整體σ（長期）｜PPM 基於常態分佈假設</div>';
+  html += '</div>';
+  return html;
+}
+
+// ════════════════════════════════════════════════════════
+// 精進模組 3：Anderson-Darling 常態性檢定
+// ════════════════════════════════════════════════════════
+function andersonDarling(data) {
+  var n = data.length;
+  if(n < 7) return {W: null, p: null, msg: '樣本數不足（需 ≥ 7）'};
+  var sorted = data.slice().sort(function(a,b){return a-b;});
+  var mu = data.reduce(function(s,v){return s+v;},0)/n;
+  var sig = Math.sqrt(data.reduce(function(s,v){return s+(v-mu)*(v-mu);},0)/(n-1));
+  if(sig===0) return {W:0,p:1,msg:'所有值相同'};
+
+  function phi(z){ return 0.5*(1+erf(z/Math.sqrt(2))); }
+  var A2 = 0;
+  for(var i=0;i<n;i++){
+    var zi=(sorted[i]-mu)/sig;
+    var pi=phi(zi);
+    pi=Math.max(1e-10,Math.min(1-1e-10,pi));
+    A2 += (2*(i+1)-1)/n*(Math.log(pi)+Math.log(1-phi((sorted[n-1-i]-mu)/sig)));
+  }
+  A2 = -n - A2;
+  // 修正係數
+  var A2star = A2*(1+0.75/n+2.25/(n*n));
+  // p-value 近似（Stephens 1974）
+  var p;
+  if(A2star<=0.200) p=1-Math.exp(-13.436+101.14*A2star-223.73*A2star*A2star);
+  else if(A2star<=0.340) p=1-Math.exp(-8.318+42.796*A2star-59.938*A2star*A2star);
+  else if(A2star<=0.600) p=Math.exp(0.9177-4.279*A2star-1.38*A2star*A2star);
+  else if(A2star<=153.467) p=Math.exp(1.2937-5.709*A2star+0.0186*A2star*A2star);
+  else p=0;
+  p=Math.max(0,Math.min(1,p));
+  return {W:A2star, p:p};
+}
+
+// ════════════════════════════════════════════════════════
+// 精進模組 4：Effect Size（Cohen's d）
+// ════════════════════════════════════════════════════════
+function cohensD(d1, d2) {
+  function avg(a){return a.reduce(function(s,v){return s+v;},0)/a.length;}
+  function s(a){var m=avg(a);return Math.sqrt(a.reduce(function(s,v){return s+(v-m)*(v-m);},0)/(a.length-1));}
+  var m1=avg(d1),m2=avg(d2),s1=s(d1),s2=s(d2);
+  var n1=d1.length,n2=d2.length;
+  // pooled SD
+  var sp=Math.sqrt(((n1-1)*s1*s1+(n2-1)*s2*s2)/(n1+n2-2));
+  var d=Math.abs(m1-m2)/sp;
+  var label=d>=0.8?'大（Large）':d>=0.5?'中（Medium）':d>=0.2?'小（Small）':'微小（Negligible）';
+  return {d:d, label:label, sp:sp};
+}
+
+// ════════════════════════════════════════════════════════
+// 精進模組 5：DOE Half-Normal Plot
+// ════════════════════════════════════════════════════════
+function drawHalfNormalPlot(effects, containerId) {
+  var container = document.getElementById(containerId);
+  if(!container) return;
+
+  var absEff = Object.entries(effects).map(function(e){return{name:e[0],abs:Math.abs(e[1]),val:e[1]};});
+  absEff.sort(function(a,b){return a.abs-b.abs;});
+  var n = absEff.length;
+
+  // Half-normal quantiles
+  absEff.forEach(function(e,i){
+    var p=(i+0.5)/n;
+    // Half-normal quantile: Φ^{-1}((1+p)/2) ≈
+    var z=Math.sqrt(2)*erfInv(p);
+    e.hnq=Math.abs(z);
+  });
+
+  // 判斷顯著：離群點（Lenth's PSE 方法）
+  var sorted=absEff.map(function(e){return e.abs;}).slice().sort(function(a,b){return a-b;});
+  var pse=1.5*sorted[Math.floor(n/2)];
+  var me=2.095*pse, sme=3.0*pse; // 近似門檻
+  absEff.forEach(function(e){e.sig=e.abs>me;});
+
+  var html='<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">Half-Normal Plot — 靠近直線為雜訊，偏離直線為顯著效應。Lenth PSE='+pse.toFixed(4)+' ME≈'+me.toFixed(4)+'</div>';
+  html+='<div class="canvas-wrap"><canvas id="doe-hn-canvas" height="300"></canvas></div>';
+  html+='<div style="margin-top:.5rem;font-size:12px">';
+  html+=absEff.filter(function(e){return e.sig;}).map(function(e){
+    return '<span class="nelson-flag triggered">★ '+e.name+' (|eff|='+e.val.toFixed(4)+')</span>';
+  }).join('');
+  if(!absEff.some(function(e){return e.sig;})) html+='<span style="color:#6B7280">無效應超過 Lenth ME 門檻</span>';
+  html+='</div>';
+  container.innerHTML=html;
+
+  setTimeout(function(){
+    var c=document.getElementById('doe-hn-canvas');
+    if(!c)return;
+    c.width=c.parentElement.offsetWidth||640;
+    var pts=absEff.map(function(e){return{x:e.hnq,y:e.abs,name:e.name,sig:e.sig};});
+    var xMax=Math.max.apply(null,pts.map(function(p){return p.x;}))*1.15;
+    var yMax=Math.max.apply(null,pts.map(function(p){return p.y;}))*1.15;
+    // 參考直線（過原點擬合）
+    var slope=0;var cnt=0;
+    pts.filter(function(p){return !p.sig;}).forEach(function(p){slope+=p.y/p.x;cnt++;});
+    if(cnt>0)slope/=cnt; else slope=1;
+
+    var inst=new Chart(c.getContext('2d'),{
+      type:'scatter',
+      data:{datasets:[
+        {label:'非顯著',data:pts.filter(function(p){return !p.sig;}).map(function(p){return{x:p.x,y:p.y};}),
+          backgroundColor:'#1D3B8A',pointRadius:6,showLine:false},
+        {label:'顯著',data:pts.filter(function(p){return p.sig;}).map(function(p){return{x:p.x,y:p.y};}),
+          backgroundColor:'#DC2626',pointRadius:7,showLine:false},
+        {label:'參考線',data:[{x:0,y:0},{x:xMax,y:slope*xMax}],
+          type:'line',borderColor:'#6B7280',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
+      ]},
+      options:{responsive:false,animation:false,
+        plugins:{title:{display:true,text:'Half-Normal Plot of Effects',font:{size:13,weight:'600'},padding:{bottom:6}},
+          legend:{labels:{font:{size:11}}},
+          tooltip:{callbacks:{label:function(ctx){
+            var idx=ctx.dataIndex;
+            var ds=pts.filter(function(p){return ctx.dataset.label==='顯著'?p.sig:!p.sig;});
+            return (ds[idx]?ds[idx].name:'')+': |eff|='+ctx.parsed.y.toFixed(4);
+          }}}},
+        scales:{x:{min:0,max:xMax,title:{display:true,text:'Half-Normal Quantile'},ticks:{font:{size:10}}},
+                y:{min:0,max:yMax,title:{display:true,text:'|Effect|'},ticks:{font:{size:10}}}}}
+    });
+    chartInst.push(inst);
+  },80);
+}
+
+function erfInv(x){
+  // 近似 erfinv
+  var a=0.147;
+  var ln=Math.log(1-x*x);
+  var t1=2/(Math.PI*a)+ln/2;
+  return Math.sign(x)*Math.sqrt(Math.sqrt(t1*t1-ln/a)-t1);
+}
+
+// ════════════════════════════════════════════════════════
+// 精進模組 6：Spearman 等級相關
+// ════════════════════════════════════════════════════════
+function spearman(x, y) {
+  var n=x.length;
+  function rank(a){
+    var idx=a.map(function(v,i){return{v:v,i:i};}).sort(function(a,b){return a.v-b.v;});
+    var r=new Array(n);
+    idx.forEach(function(d,rank){r[d.i]=rank+1;});
+    return r;
+  }
+  var rx=rank(x), ry=rank(y);
+  var d2=rx.reduce(function(s,r,i){return s+(r-ry[i])*(r-ry[i]);},0);
+  var rs=1-6*d2/(n*(n*n-1));
+  var t=rs*Math.sqrt((n-2)/(1-rs*rs));
+  var p=2*(1-normalCDF(Math.abs(t)));
+  return {rs:rs, t:t, p:p};
+}
+
+// ════════════════════════════════════════════════════════
+// 精進模組 7：Boxplot Notch（中位數信賴區間）
+// ════════════════════════════════════════════════════════
+function calcNotch(q2, iqr, n) {
+  var ci=1.58*iqr/Math.sqrt(n);
+  return {lo:q2-ci, hi:q2+ci};
+}
+
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
 window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
 window.paretoAnalyze=paretoAnalyze;window.paretoLoadEx=paretoLoadEx;
 window.fishboneDraw=fishboneDraw;
 window.histAnalyze=histAnalyze;window.histLoadEx=histLoadEx;
-window.doeUpdateFactors=doeUpdateFactors;window.doeAnalyze=doeAnalyze;window.doeLoadEx=doeLoadEx;window.doeSw=doeSw;
+window.doeUpdateFactors=doeUpdateFactors;window.doeAnalyze=doeAnalyze;window.doeLoadEx=doeLoadEx;
+// ════════════════════════════════════════
+// DOE — 終端機模式 ANOVA + LOF + 殘差分析
+// ════════════════════════════════════════
+
+// 儲存最近一次 doeAnalyze 的完整結果供殘差圖用
+window._doeLastResult = null;
+
+function doeFormatANOVA(sortedEff, runs, rep, yMeans, factors, nf, yname, grandMean) {
+  // ── 計算各 SS ──
+  var ssModel=0, dfModel=0;
+  var effRows=sortedEff.map(function(e){
+    var ss=e[1]*e[1]*runs*rep/4;
+    ssModel+=ss; dfModel++;
+    return{name:e[0],ss:ss,df:1,effect:e[1]};
+  });
+  var ssTotal=yMeans.reduce(function(s,v){return s+(v-grandMean)*(v-grandMean);},0)*rep;
+  var ssErr=ssTotal-ssModel;
+  var dfErr=runs*(rep-1);
+
+  // Pure Error & Lack of Fit
+  var ssPE=0,dfPE=0;
+  if(rep>=2){
+    for(var ri=0;ri<runs;ri++){
+      var ys=[];
+      for(var rp=0;rp<rep;rp++){var el=document.getElementById('doe-y-'+ri+'-'+rp);if(el)ys.push(parseFloat(el.value)||0);}
+      var m=ys.reduce(function(s,v){return s+v;},0)/ys.length;
+      ys.forEach(function(v){ssPE+=(v-m)*(v-m);dfPE++;});
+    }
+    dfPE-=runs;
+  }
+  var ssLOF=ssErr-ssPE, dfLOF=dfErr-dfPE;
+  var msLOF=dfLOF>0?ssLOF/dfLOF:0, msPE=dfPE>0?ssPE/dfPE:0;
+  var F_LOF=msPE>0?msLOF/msPE:0;
+  var p_LOF=(dfLOF>0&&dfPE>0)?fDist(F_LOF,dfLOF,dfPE):1;
+  var msErr=dfErr>0?ssErr/dfErr:0;
+
+  // F & p for each effect
+  effRows.forEach(function(e){
+    e.ms=e.ss; e.F=msErr>0?e.ms/msErr:0;
+    e.p=dfErr>0?fDist(e.F,1,dfErr):1;
+  });
+
+  // 整體模型
+  var msModel2=dfModel>0?ssModel/dfModel:0;
+  var F_model=msErr>0?msModel2/msErr:0;
+  var p_model=dfErr>0?fDist(F_model,dfModel,dfErr):1;
+
+  var mainEff=effRows.filter(function(e){return e.name.indexOf('×')<0;});
+  var interEff=effRows.filter(function(e){return e.name.indexOf('×')>=0;});
+  var ssMainT=mainEff.reduce(function(s,e){return s+e.ss;},0);
+  var dfMainT=mainEff.length;
+  var msMainT=dfMainT>0?ssMainT/dfMainT:0;
+  var FMainT=msErr>0?msMainT/msErr:0;
+  var pMainT=dfErr>0?fDist(FMainT,dfMainT,dfErr):1;
+  var ssInterT=interEff.reduce(function(s,e){return s+e.ss;},0);
+  var dfInterT=interEff.length;
+  var msInterT=dfInterT>0?ssInterT/dfInterT:0;
+  var FInterT=msErr>0?msInterT/msErr:0;
+  var pInterT=dfErr>0?fDist(FInterT,dfInterT,dfErr):1;
+
+  // ── HTML table 模擬終端機（解決中文對齊問題）──
+  function r5(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(5));}
+  function r4p(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(4));}
+  function r2f(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(2));}
+  function sigMark(p){return p<0.001?'***':p<0.01?'**':p<0.05?'*':p<0.1?'.':'';}
+  function sigColor(p){return p<0.001?'#FF4444':p<0.01?'#FF8C00':p<0.05?'#FFD700':p<0.1?'#AAFFAA':'#888';}
+
+  var td='style="padding:2px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
+  var tdL='style="padding:2px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
+  var tdH='style="padding:4px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;border-bottom:1px solid #333;white-space:nowrap"';
+  var tdHL='style="padding:4px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;border-bottom:1px solid #333;white-space:nowrap"';
+  var tdG='style="padding:2px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#569CD6;white-space:nowrap;font-weight:700"';
+  var tdGR='style="padding:2px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#569CD6;white-space:nowrap;font-weight:700"';
+  var tdSub='style="padding:2px 10px 2px 24px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
+
+  function mkRow(nameStyle,name,df,ss,ms,F,p,indent){
+    var sc=p!==null?sigColor(p):'#888';
+    var sm=p!==null?sigMark(p):'';
+    return '<tr>'+
+      '<td '+(indent?tdSub:nameStyle)+'>'+name+'</td>'+
+      '<td '+td+'>'+df+'</td>'+
+      '<td '+td+'>'+r5(ss)+'</td>'+
+      '<td '+td+'>'+(ms!==null?r5(ms):'')+'</td>'+
+      '<td '+td+'>'+(F!==null?r2f(F):'')+'</td>'+
+      '<td '+td+'>'+(p!==null?r4p(p):'')+'</td>'+
+      '<td style="padding:2px 8px;font-family:Courier New,monospace;font-size:12px;color:'+sc+';text-align:center">'+sm+'</td>'+
+    '</tr>';
+  }
+
+  var rows='';
+  // Main Effects
+  rows+='<tr><td '+tdG+' colspan="7">Main Effects</td></tr>';
+  rows+=mkRow(tdG,'  (合計)',dfMainT,ssMainT,msMainT,FMainT,pMainT,false);
+  mainEff.forEach(function(e){rows+=mkRow(tdSub,'  '+e.name,1,e.ss,e.ms,e.F,e.p,false);});
+  // Interactions
+  if(interEff.length>0){
+    rows+='<tr><td '+tdG+' colspan="7">2-Way Interactions</td></tr>';
+    rows+=mkRow(tdG,'  (合計)',dfInterT,ssInterT,msInterT,FInterT,pInterT,false);
+    interEff.forEach(function(e){rows+=mkRow(tdSub,'  '+e.name,1,e.ss,e.ms,e.F,e.p,false);});
+  }
+  // Residual
+  rows+='<tr style="border-top:1px solid #444"><td '+tdL+'>Residual Error</td>'+
+    '<td '+td+'>'+dfErr+'</td><td '+td+'>'+r5(ssErr)+'</td><td '+td+'>'+r5(msErr)+'</td>'+
+    '<td '+td+'></td><td '+td+'></td><td></td></tr>';
+  if(rep>=2&&dfLOF>0){
+    var lokColor=p_LOF>0.05?'#A8FF78':'#FF4444';
+    rows+='<tr><td style="padding:2px 10px 2px 24px;font-family:Courier New,monospace;font-size:12px;color:'+lokColor+'">  Lack of Fit</td>'+
+      '<td '+td+'>'+dfLOF+'</td><td '+td+'>'+r5(ssLOF)+'</td><td '+td+'>'+r5(msLOF)+'</td>'+
+      '<td '+td+'>'+r2f(F_LOF)+'</td><td '+td+'>'+r4p(p_LOF)+'</td>'+
+      '<td style="padding:2px 8px;font-family:Courier New,monospace;font-size:12px;color:'+lokColor+'text-align:center">'+(p_LOF>0.05?'(OK)':'!!!')+'</td></tr>';
+    rows+='<tr><td style="padding:2px 10px 2px 24px;font-family:Courier New,monospace;font-size:12px;color:#A8FF78">  Pure Error</td>'+
+      '<td '+td+'>'+dfPE+'</td><td '+td+'>'+r5(ssPE)+'</td><td '+td+'>'+r5(msPE)+'</td>'+
+      '<td '+td+'></td><td '+td+'></td><td></td></tr>';
+  }
+  // Total
+  rows+='<tr style="border-top:2px solid #555"><td '+tdL+'>Total</td>'+
+    '<td '+td+'>'+(dfModel+dfErr)+'</td><td '+td+'>'+r5(ssTotal)+'</td>'+
+    '<td '+td+'></td><td '+td+'></td><td '+td+'></td><td></td></tr>';
+
+  var Rsq=(ssModel/ssTotal*100).toFixed(2);
+  var S=Math.sqrt(msErr).toFixed(4);
+  var tableHTML=
+    '<div style="background:#0F1117;border-radius:8px;padding:1rem 1.25rem;overflow-x:auto">'+
+    '<div style="font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;margin-bottom:8px">'+
+      'Analysis of Variance for <span style="color:#FFD700">'+yname+'</span> (coded units)'+
+    '</div>'+
+    '<table style="border-collapse:collapse;width:100%">'+
+      '<thead><tr>'+
+        '<th '+tdHL+'>Source</th>'+
+        '<th '+tdH+'>DF</th>'+
+        '<th '+tdH+'>Seq SS</th>'+
+        '<th '+tdH+'>Adj MS</th>'+
+        '<th '+tdH+'>F</th>'+
+        '<th '+tdH+'>P</th>'+
+        '<th '+tdH+'>Sig</th>'+
+      '</tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+    '<div style="font-family:Courier New,monospace;font-size:11px;color:#888;margin-top:8px">'+
+      'S = <span style="color:#A8FF78">'+S+'</span>   '+
+      'R-sq = <span style="color:#A8FF78">'+Rsq+'%</span>   '+
+      (rep>=2&&dfLOF>0?'Lack of Fit p = <span style="color:'+(p_LOF>0.05?'#A8FF78':'#FF4444')+'">'+r4p(p_LOF)+'</span>  '+(p_LOF>0.05?'✅ LOF not significant':'⚠️ LOF significant'):'n='+rep+' rep, LOF not available')+
+      '<br>Signif: *** 0.001 &nbsp;** 0.01 &nbsp;* 0.05 &nbsp;. 0.1'+
+    '</div>'+
+    '</div>';
+
+  return{
+    html:tableHTML, msErr:msErr, ssErr:ssErr, dfErr:dfErr,
+    ssLOF:ssLOF, dfLOF:dfLOF, msLOF:msLOF, msPE:msPE, dfPE:dfPE, F_LOF:F_LOF, p_LOF:p_LOF,
+    effRows:effRows, ssTotal:ssTotal, dfTotal:dfModel+dfErr
+  };
+}
+
+// ── 殘差分析四合一圖 ──
+function drawDOEResiduals(){
+  var res = window._doeLastResult;
+  if(!res){ document.getElementById('doe-residual-content').innerHTML='<div class="alert warn">請先執行 DOE 分析。</div>'; return; }
+
+  var fitted  = res.fitted;
+  var residuals = res.residuals;
+  var n = residuals.length;
+  if(!n){ document.getElementById('doe-residual-content').innerHTML='<div class="alert warn">無法計算殘差，請確認已填入所有實驗結果。</div>'; return; }
+
+  destroyCharts();
+
+  var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-norm" height="220"></canvas></div>';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-fit" height="220"></canvas></div>';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-hist" height="220"></canvas></div>';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-ord" height="220"></canvas></div>';
+  html += '</div>';
+  document.getElementById('doe-residual-content').innerHTML = html;
+
+  var rMean = residuals.reduce(function(s,v){return s+v;},0)/n;
+  var rStd  = Math.sqrt(residuals.reduce(function(s,v){return s+(v-rMean)*(v-rMean);},0)/(n-1));
+
+  setTimeout(function(){
+    // 1. Normal Probability Plot
+    var sorted = residuals.slice().sort(function(a,b){return a-b;});
+    var normPts = sorted.map(function(v,i){
+      var p = (i+0.5)/n;
+      // 近似 normal quantile
+      var z = (p < 0.5) ? -Math.sqrt(-2*Math.log(p)) : Math.sqrt(-2*Math.log(1-p));
+      return {x:v, y:z};
+    });
+    var c1=document.getElementById('doe-res-norm');
+    if(c1){ c1.width=c1.parentElement.offsetWidth||320;
+      chartInst.push(new Chart(c1.getContext('2d'),{
+        type:'scatter',
+        data:{datasets:[
+          {label:'Residuals',data:normPts,backgroundColor:'#1D3B8A',pointRadius:5},
+          {label:'Reference',data:[{x:sorted[0],y:(sorted[0]-rMean)/rStd},{x:sorted[n-1],y:(sorted[n-1]-rMean)/rStd}],
+            type:'line',borderColor:'#DC2626',borderWidth:1.5,pointRadius:0,fill:false}
+        ]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Normal Probability Plot',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}},
+                  y:{title:{display:true,text:'Normal Score'},ticks:{font:{size:9}}}}}
+      }));
+    }
+
+    // 2. Residuals vs Fitted
+    var c2=document.getElementById('doe-res-fit');
+    if(c2){ c2.width=c2.parentElement.offsetWidth||320;
+      var pts2=fitted.map(function(f,i){return{x:parseFloat(f.toFixed(4)),y:parseFloat(residuals[i].toFixed(4))};});
+      chartInst.push(new Chart(c2.getContext('2d'),{
+        type:'scatter',
+        data:{datasets:[
+          {label:'Residuals',data:pts2,backgroundColor:'#1D3B8A',pointRadius:5},
+          {label:'Zero',data:[{x:Math.min.apply(null,fitted),y:0},{x:Math.max.apply(null,fitted),y:0}],
+            type:'line',borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
+        ]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Residuals vs Fitted Values',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{title:{display:true,text:'Fitted Value'},ticks:{font:{size:9}}},
+                  y:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}}}}
+      }));
+    }
+
+    // 3. Histogram of Residuals
+    var c3=document.getElementById('doe-res-hist');
+    if(c3){ c3.width=c3.parentElement.offsetWidth||320;
+      var bins=Math.max(4,Math.round(Math.sqrt(n)));
+      var rMin=Math.min.apply(null,residuals), rMax=Math.max.apply(null,residuals);
+      var bw=(rMax-rMin)/bins||0.001;
+      var counts=Array(bins).fill(0);
+      residuals.forEach(function(v){var b=Math.min(bins-1,Math.floor((v-rMin)/bw));counts[b]++;});
+      var labels=counts.map(function(_,i){return (rMin+i*bw).toFixed(3);});
+      chartInst.push(new Chart(c3.getContext('2d'),{
+        type:'bar',data:{labels:labels,datasets:[{label:'Count',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#1D3B8A',borderWidth:1}]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Histogram of Residuals',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{ticks:{font:{size:8}}},y:{ticks:{font:{size:9}}}}}
+      }));
+    }
+
+    // 4. Residuals vs Order
+    var c4=document.getElementById('doe-res-ord');
+    if(c4){ c4.width=c4.parentElement.offsetWidth||320;
+      chartInst.push(new Chart(c4.getContext('2d'),{
+        type:'line',
+        data:{labels:residuals.map(function(_,i){return i+1;}),
+          datasets:[
+            {label:'Residual',data:residuals.map(function(v){return parseFloat(v.toFixed(4));}),
+              borderColor:'#1D3B8A',borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#1D3B8A',fill:false,tension:0.1},
+            {label:'Zero',data:Array(n).fill(0),borderColor:'#DC2626',borderWidth:1,borderDash:[5,3],pointRadius:0,fill:false}
+          ]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Residuals vs Order',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{title:{display:true,text:'Order'},ticks:{font:{size:9}}},
+                  y:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}}}}
+      }));
+    }
+  }, 80);
+}
+
+window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOEResiduals=drawDOEResiduals;window.doeFormatANOVA=doeFormatANOVA;
 window.sipocDraw=sipocDraw;
 window.cusumAnalyze=cusumAnalyze;window.cusumLoadEx=cusumLoadEx;
 window.scatterAnalyze=scatterAnalyze;window.scatterLoadEx=scatterLoadEx;
@@ -2813,20 +3993,29 @@ document.addEventListener('click', function(e) {
       card.className='card quality-record';
       card.setAttribute('data-quality-record','1');
       card.innerHTML=''+
-        '<div class="card-title"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>分析紀錄 / Note / 報告輸出</div>'+ 
-        '<div class="print-only">DMAIC 工具平台分析報告 - '+(document.title||'')+'</div>'+ 
-        '<div class="record-grid">'+
-          '<div class="field"><label>專案 / 產品</label><input id="'+pid+'-record-project" type="text" placeholder="例：檢體針組 / 親水塗層 / 包裝確效"></div>'+ 
-          '<div class="field"><label>批號 / Lot / 樣品</label><input id="'+pid+'-record-lot" type="text" placeholder="例：P3-001 / Lot A"></div>'+ 
-          '<div class="field"><label>分析日期</label><input id="'+pid+'-record-date" type="date" value="'+today()+'"></div>'+ 
-        '</div>'+ 
-        '<div class="record-grid-2">'+
-          '<div class="field"><label>分析者</label><input id="'+pid+'-record-owner" type="text" placeholder="分析者 / 部門"></div>'+ 
-          '<div class="field"><label>結論</label><select id="'+pid+'-record-result"><option value="未判定">未判定</option><option value="PASS">PASS</option><option value="FAIL">FAIL</option><option value="需調查">需調查</option><option value="僅供參考">僅供參考</option></select></div>'+ 
-        '</div>'+ 
-        '<div class="field"><label>分析目的</label><textarea class="record-note" id="'+pid+'-record-purpose" rows="2" placeholder="本次分析要回答的問題，例如：確認製程是否穩定、比較改善前後是否有差異、確認量測系統是否可接受。"></textarea></div>'+ 
-        '<div class="field"><label>判讀 / Note / 後續處置</label><textarea class="record-note" id="'+pid+'-record-note" rows="3" placeholder="記錄異常點、可能原因、改善措施、CAPA/變更單編號、是否需重測。"></textarea></div>'+ 
-        '<div class="record-actions"><button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存本頁</button><button class="btn btn-sec" onclick="dmaicPrintPDF()">🖨 匯出 PDF</button><button class="btn btn-sec" onclick="dmaicExportJSON()">⬇ 匯出 JSON</button></div>';
+        '<div class="card-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="dmaicToggleRecord(this)">'+ 
+          '<span style="display:flex;align-items:center;gap:6px"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>📋 分析紀錄 / 報告輸出</span>'+
+          '<span class="record-toggle-icon" style="font-size:12px;color:#6B7280">▼ 展開填寫</span>'+
+        '</div>'+
+        '<div class="record-body" style="display:none">'+
+          '<div class="print-only">DMAIC 工具平台分析報告 - '+(document.title||'')+'</div>'+ 
+          '<div class="record-grid">'+
+            '<div class="field"><label>專案 / 產品</label><input id="'+pid+'-record-project" type="text" placeholder="例：檢體針組 / 親水塗層 / 包裝確效"></div>'+ 
+            '<div class="field"><label>批號 / Lot / 樣品</label><input id="'+pid+'-record-lot" type="text" placeholder="例：P3-001 / Lot A"></div>'+ 
+            '<div class="field"><label>分析日期</label><input id="'+pid+'-record-date" type="date" value="'+today()+'"></div>'+ 
+          '</div>'+ 
+          '<div class="record-grid-2">'+
+            '<div class="field"><label>分析者</label><input id="'+pid+'-record-owner" type="text" placeholder="分析者 / 部門"></div>'+ 
+            '<div class="field"><label>結論</label><select id="'+pid+'-record-result"><option value="未判定">未判定</option><option value="PASS">PASS</option><option value="FAIL">FAIL</option><option value="需調查">需調查</option><option value="僅供參考">僅供參考</option></select></div>'+ 
+          '</div>'+ 
+          '<div class="field"><label>分析目的</label><textarea class="record-note" id="'+pid+'-record-purpose" rows="2" placeholder="本次分析要回答的問題"></textarea></div>'+ 
+          '<div class="field"><label>判讀 / Note / 後續處置</label><textarea class="record-note" id="'+pid+'-record-note" rows="3" placeholder="記錄異常點、改善措施、CAPA編號"></textarea></div>'+ 
+          '<div class="record-actions">'+
+            '<button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存</button>'+
+            '<button class="btn btn-sec" onclick="dmaicExportJSON()">⬇ 匯出 JSON</button>'+
+          '</div>'+
+          '<div id="'+pid+'-save-indicator" style="margin-top:6px;font-size:12px;color:#6B7280">尚未儲存</div>'+
+        '</div>';
       if(header) header.insertAdjacentElement('afterend',card); else tp.insertBefore(card,tp.firstChild);
     });
   };
@@ -2834,7 +4023,7 @@ document.addEventListener('click', function(e) {
   function fieldsIn(page){return Array.prototype.slice.call(page.querySelectorAll('input[id],select[id],textarea[id]'));}
   function collectPage(){var p=activePage();var data={app:APP_VER,page:pageKey(),savedAt:new Date().toISOString(),fields:{}};fieldsIn(p).forEach(function(el){data.fields[el.id]=el.value;});return data;}
   function applyData(data){if(!data||!data.fields)return;Object.keys(data.fields).forEach(function(id){var el=document.getElementById(id);if(el){el.value=data.fields[id];el.dispatchEvent(new Event('change'));}});}
-  window.dmaicSaveCurrent=function(){try{localStorage.setItem(APP_VER+'::'+pageKey(),JSON.stringify(collectPage()));status('已儲存本頁：'+new Date().toLocaleTimeString());}catch(e){alert('儲存失敗：'+e.message);}};
+  window.dmaicSaveCurrent=function(){try{localStorage.setItem(APP_VER+'::'+pageKey(),JSON.stringify(collectPage()));status('已儲存本頁：'+new Date().toLocaleTimeString());if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(true);}catch(e){alert('儲存失敗：'+e.message);}};
   window.dmaicRestoreCurrent=function(){try{var raw=localStorage.getItem(APP_VER+'::'+pageKey());if(raw)applyData(JSON.parse(raw));}catch(e){console.warn(e);}};
   window.dmaicClearCurrent=function(){if(!confirm('確定清除本頁已儲存資料？'))return;try{localStorage.removeItem(APP_VER+'::'+pageKey());status('已清除本頁儲存資料');}catch(e){} };
   window.dmaicExportJSON=function(){var data=collectPage();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(pageKey()+'_'+(data.fields[pageKey().replace('page-','tool')+'-record-project']||'record'))+'.json';a.click();URL.revokeObjectURL(a.href);status('JSON 已產生');};
@@ -2849,7 +4038,7 @@ document.addEventListener('click', function(e) {
   var oldGoTool=window.goTool, oldGoHome=window.goHome;
   if(typeof oldGoTool==='function') window.goTool=function(id){ oldGoTool(id); window.dmaicEnhanceRecords(); window.dmaicRestoreCurrent(); };
   if(typeof oldGoHome==='function') window.goHome=function(){ oldGoHome(); window.dmaicRestoreCurrent(); };
-  document.addEventListener('input',function(e){if(e.target && e.target.id){clearTimeout(window.__dmaicSaveTimer);window.__dmaicSaveTimer=setTimeout(window.dmaicSaveCurrent,700);}},true);
+  document.addEventListener('input',function(e){if(e.target && e.target.id){if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(false);clearTimeout(window.__dmaicSaveTimer);window.__dmaicSaveTimer=setTimeout(window.dmaicSaveCurrent,700);}},true);
   document.addEventListener('change',function(e){if(e.target && e.target.id) window.dmaicSaveCurrent();},true);
 
   // SPC validation + interpretation
