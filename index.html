@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA · AI 輔助醫療器材品質管理</title>
+<title>MedQA · AI 輔助統計分析平台</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
@@ -275,465 +275,45 @@ tr:hover td{background:#F9FAFB}
 .claude-input-row textarea:focus{border-color:#1B3A5C}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
-/* Markdown 渲染 */
-.ca-text h2{font-size:14px;font-weight:700;color:#1B3A5C;margin:.6rem 0 .3rem}
-.ca-text h3{font-size:13px;font-weight:600;color:#2A5278;margin:.5rem 0 .2rem}
-.ca-text strong{font-weight:700;color:#1a1a2e}
-.ca-text ul,.ca-text ol{padding-left:1.2rem;margin:.3rem 0}
-.ca-text li{margin:.2rem 0;font-size:13px;line-height:1.65}
-.ca-text p{margin:.3rem 0;font-size:13px;line-height:1.65}
-.ca-text hr{border:none;border-top:1px solid #E2ECF8;margin:.5rem 0}
-.ca-text code{background:#F0F4FF;padding:1px 5px;border-radius:3px;font-family:Courier New,monospace;font-size:12px}
-.claude-msg.assistant h2{font-size:13px;font-weight:700;margin:.4rem 0 .2rem}
-.claude-msg.assistant strong{font-weight:700}
-.claude-msg.assistant ul,.claude-msg.assistant ol{padding-left:1.1rem;margin:.2rem 0}
-.claude-msg.assistant li{margin:.15rem 0;font-size:13px}
-.claude-msg.assistant p{margin:.2rem 0;font-size:13px;line-height:1.6}
-.claude-msg.assistant hr{border:none;border-top:1px solid #E2ECF8;margin:.4rem 0}
-/* 數據設計助理 */
-.dt-assistant{background:#F8FAFF;border:1px solid #DBEAFE;border-radius:8px;margin-bottom:1rem;overflow:hidden}
-.dt-header{background:#1B3A5C;color:#fff;padding:.55rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
-.dt-header .dt-title{font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.85)}
-.dt-header .dt-toggle{font-size:10px;color:rgba(255,255,255,.5)}
-.dt-body{display:none;padding:.75rem 1rem}
-.dt-body.open{display:block}
-.dt-step{margin-bottom:.65rem}
-.dt-step label{font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:.25rem}
-.dt-step select{width:100%;border:1px solid #D1D5DB;border-radius:5px;padding:5px 8px;font-size:12px;font-family:inherit;background:#fff;color:#1a1a2e;outline:none}
-.dt-step select:focus{border-color:#1B3A5C}
-.dt-result{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:.65rem .85rem;margin-top:.5rem;display:none}
-.dt-result.show{display:block}
-.dt-result .dt-rec{font-size:12px;color:#1E40AF;font-weight:600;margin-bottom:.35rem}
-.dt-result .dt-params{font-size:12px;color:#374151;line-height:1.75}
-.dt-result .dt-params strong{color:#1B3A5C}
-.dt-apply-btn{width:100%;margin-top:.5rem;background:#1B3A5C;color:#fff;border:none;border-radius:5px;padding:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
-.dt-apply-btn:hover{background:#2A5278}
-/* 浮動格式提示 */
-.format-float{position:fixed;bottom:70px;right:16px;z-index:9998;background:#1B3A5C;color:#fff;border-radius:8px;padding:.6rem .9rem;font-size:11px;line-height:1.7;max-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none;border:1px solid rgba(126,200,227,.3)}
-.format-float.show{display:block}
-.format-float .ff-title{font-size:10px;font-weight:600;color:#7EC8E3;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem}
-.format-float .ff-close{float:right;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;line-height:1}
-.format-float code{background:rgba(255,255,255,.12);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px}
-.format-hint-btn{display:inline-flex;align-items:center;gap:4px;background:transparent;border:1px solid #C7D9F5;border-radius:5px;padding:3px 10px;font-size:11px;color:#2A5278;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
-.format-hint-btn:hover{background:#EFF6FF}
-
-/* ════ 工作流程狀態系統 ════ */
-
-/* 預設：全部淡色（未激活） */
-.tool-card {
-  transition: all .25s ease;
-}
-.tool-card.wf-inactive {
-  opacity: .35;
-  filter: grayscale(80%);
-}
-.tool-card.wf-inactive:hover {
-  opacity: .55;
-  filter: grayscale(50%);
-  transform: none;
-}
-
-/* 推薦中：彩色 + 輕發光 */
-.tool-card.wf-recommended {
-  opacity: 1;
-  filter: none;
-  box-shadow: 0 0 0 2px var(--card-color, #1A9CB0), 0 4px 16px rgba(0,0,0,.1);
-}
-
-/* 下一步：彩色 + 明顯發光 + 動畫 */
-.tool-card.wf-next {
-  opacity: 1;
-  filter: none;
-  box-shadow: 0 0 0 2.5px var(--card-color, #1A9CB0), 0 6px 20px rgba(0,0,0,.15);
-  animation: wf-pulse 2s ease-in-out infinite;
-}
-@keyframes wf-pulse {
-  0%, 100% { box-shadow: 0 0 0 2.5px var(--card-color, #1A9CB0), 0 6px 20px rgba(0,0,0,.12); }
-  50% { box-shadow: 0 0 0 4px var(--card-color, #1A9CB0), 0 8px 24px rgba(0,0,0,.2); }
-}
-
-/* 已完成：淡色 + 勾勾 */
-.tool-card.wf-done {
-  opacity: .5;
-  filter: grayscale(40%);
-}
-.tool-card.wf-done::after {
-  content: '✅';
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 14px;
-  z-index: 2;
-}
-
-/* 主頁聊天助理 */
-/* .home-chat {
-  background: #fff;
-  border: 1px solid #E8EDF5;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
-}
-.home-chat-header {
-  background: #1B3A5C;
-  color: #fff;
-  padding: .7rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-}
-.home-chat-header .hch-title {
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: rgba(255,255,255,.9);
-}
-.home-chat-header .hch-subtitle {
-  font-size: 11px;
-  color: rgba(255,255,255,.45);
-  margin-left: 4px;
-}
-.home-chat-header .hch-toggle {
-  font-size: 11px;
-  color: rgba(255,255,255,.45);
-}
-.home-chat-body {
-  display: none;
-  padding: .75rem 1.25rem 1rem;
-}
-.home-chat-body.open { display: block; }
-.home-chat-messages {
-  max-height: 260px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  margin-bottom: .6rem;
-}
-.hcm-user {
-  background: #1B3A5C;
-  color: #fff;
-  padding: .5rem .85rem;
-  border-radius: 8px 8px 2px 8px;
-  font-size: 13px;
-  align-self: flex-end;
-  max-width: 85%;
-}
-.hcm-assistant {
-  background: #F8FAFF;
-  color: #1a1a2e;
-  border: 1px solid #E2ECF8;
-  padding: .6rem .85rem;
-  border-radius: 8px 8px 8px 2px;
-  font-size: 13px;
-  align-self: flex-start;
-  max-width: 90%;
-  line-height: 1.7;
-}
-.hcm-assistant strong { font-weight: 700; }
-.hcm-assistant .tool-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #EFF6FF;
-  border: 1px solid #BFDBFE;
-  border-radius: 6px;
-  padding: 3px 10px;
-  margin: 3px 3px 3px 0;
-  font-size: 12px;
-  color: #1D3B8A;
-  cursor: pointer;
-  font-weight: 500;
-  text-decoration: none;
-}
-.hcm-assistant .tool-link:hover { background: #DBEAFE; }
-.home-chat-input {
-  display: flex;
-  gap: 6px;
-}
-.home-chat-input textarea {
-  flex: 1;
-  border: 1px solid #D1D5DB;
-  border-radius: 7px;
-  padding: .5rem .75rem;
-  font-size: 13px;
-  font-family: inherit;
-  resize: none;
-  outline: none;
-  line-height: 1.5;
-}
-.home-chat-input textarea:focus { border-color: #1B3A5C; }
-.home-chat-input .hci-send {
-  background: #1B3A5C;
-  color: #fff;
-  border: none;
-  border-radius: 7px;
-  padding: .5rem 14px;
-  font-size: 13px;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-}
-.home-chat-input .hci-send:disabled { background: #9CA3AF; cursor: not-allowed; }
-.wf-reset-btn {
-  background: transparent;
-  border: 1px solid #E2ECF8;
-  border-radius: 5px;
-  padding: 3px 10px;
-  font-size: 11px;
-  color: #6B7280;
-  cursor: pointer;
-  font-family: inherit;
-  margin-top: .4rem;
-}
-.wf-reset-btn:hover { background: #F3F4F6; }
 
 
-/* ════ 手機版修正 ════ */
-@media(max-width:600px){
-  /* topbar */
-  .topbar{padding:0 1rem;height:48px}
-  .logo-title{font-size:14px}
-
-  /* hero */
-  .hero-section{padding:2rem 1.25rem 1.75rem}
-  .hero-section h2{font-size:22px}
-
-  /* 聊天看板標題不換行 */
-  .home-chat-header{padding:.6rem 1rem}
-  .hch-title{font-size:12px}
-  .hch-subtitle{display:none}
-
-  /* 工具卡片 */
-  .tools-grid{grid-template-columns:1fr 1fr}
-
-  /* tool-bar */
-  #tool-bar{padding:5px 1rem;gap:6px}
-  #tool-bar button{font-size:11px;padding:3px 8px}
-}
-@media(max-width:400px){
-  .tools-grid{grid-template-columns:1fr}
-}
-
-/* ════ 浮動 AI 助理 ════ */
-
-/* 浮動按鈕 */
-.ai-float-btn {
-  position: fixed;
-  bottom: 80px;
-  right: 18px;
-  z-index: 9990;
-  background: linear-gradient(135deg, #BE185D, #DB2777);
-  color: #fff;
-  border: none;
-  border-radius: 28px;
-  padding: 10px 18px 10px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  box-shadow: 0 4px 20px rgba(27,58,92,.45);
-  transition: all .2s;
-  white-space: nowrap;
-}
-.ai-float-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(27,58,92,.55);
-}
-.ai-float-btn .afb-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: #4ADE80;
-  flex-shrink: 0;
-  animation: afb-pulse 2s ease-in-out infinite;
-}
-@keyframes afb-pulse {
-  0%,100%{ opacity:1; transform:scale(1); }
-  50%{ opacity:.6; transform:scale(.85); }
-}
-.ai-float-btn .afb-badge {
-  background: rgba(255,255,255,.15);
-  border-radius: 10px;
-  font-size: 10px;
-  padding: 1px 7px;
-  font-weight: 400;
-}
-
-/* 側邊抽屜遮罩 */
-.ai-drawer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.35);
-  z-index: 9991;
-  display: none;
-  backdrop-filter: blur(2px);
-}
-.ai-drawer-overlay.open { display: block; }
-
-/* 側邊抽屜 */
-.ai-drawer {
-  position: fixed;
-  top: 0;
-  right: -420px;
-  width: 400px;
-  max-width: 92vw;
-  height: 100vh;
-  background: #fff;
-  z-index: 9992;
-  display: flex;
-  flex-direction: column;
-  box-shadow: -4px 0 32px rgba(0,0,0,.2);
-  transition: right .3s cubic-bezier(.4,0,.2,1);
-}
-.ai-drawer.open { right: 0; }
-
-/* 抽屜 header */
-.ai-drawer-header {
-  background: linear-gradient(135deg, #BE185D, #DB2777);
-  color: #fff;
-  padding: 1rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-shrink: 0;
-}
-.ai-drawer-header .adh-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.ai-drawer-header .adh-icon {
-  font-size: 22px;
-  line-height: 1;
-}
-.ai-drawer-header .adh-title {
-  font-size: 14px;
-  font-weight: 600;
-}
-.ai-drawer-header .adh-sub {
-  font-size: 11px;
-  color: rgba(255,255,255,.5);
-  margin-top: 1px;
-}
-.ai-drawer-header .adh-close {
-  background: rgba(255,255,255,.15);
-  border: none;
-  color: #fff;
-  border-radius: 6px;
-  width: 30px;
-  height: 30px;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.ai-drawer-header .adh-close:hover { background: rgba(255,255,255,.25); }
-
-/* 抽屜訊息區 */
-.ai-drawer-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 1rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: .65rem;
-}
-.ai-drawer-messages .hcm-user {
-  background: #1B3A5C;
-  color: #fff;
-  padding: .55rem .9rem;
-  border-radius: 8px 8px 2px 8px;
-  font-size: 13px;
-  align-self: flex-end;
-  max-width: 88%;
-}
-.ai-drawer-messages .hcm-assistant {
-  background: #F8FAFF;
-  color: #1a1a2e;
-  border: 1px solid #E2ECF8;
-  padding: .65rem .9rem;
-  border-radius: 8px 8px 8px 2px;
-  font-size: 13px;
-  align-self: flex-start;
-  max-width: 95%;
-  line-height: 1.75;
-}
-.ai-drawer-messages .hcm-assistant strong { font-weight: 700; }
-.ai-drawer-messages .hcm-assistant .tool-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #EFF6FF;
-  border: 1px solid #BFDBFE;
-  border-radius: 6px;
-  padding: 4px 12px;
-  margin: 4px 3px 4px 0;
-  font-size: 12px;
-  color: #1D3B8A;
-  cursor: pointer;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background .15s;
-}
-.ai-drawer-messages .hcm-assistant .tool-link:hover { background: #DBEAFE; }
-
-/* 抽屜輸入區 */
-.ai-drawer-input {
-  padding: .75rem 1.25rem 1rem;
-  border-top: 1px solid #E8EDF5;
-  flex-shrink: 0;
-}
-.ai-drawer-input textarea {
-  width: 100%;
-  border: 1px solid #D1D5DB;
-  border-radius: 8px;
-  padding: .6rem .85rem;
-  font-size: 13px;
-  font-family: inherit;
-  resize: none;
-  outline: none;
-  line-height: 1.55;
-  margin-bottom: 6px;
-}
-.ai-drawer-input textarea:focus { border-color: #1B3A5C; }
-.ai-drawer-input-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-.ai-drawer-input .adi-send {
-  flex: 1;
-  background: #BE185D;
-  color: #fff;
-  border: none;
-  border-radius: 7px;
-  padding: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-}
-.ai-drawer-input .adi-send:disabled { background: #9CA3AF; cursor: not-allowed; }
-.ai-drawer-input .adi-reset {
-  background: transparent;
-  border: 1px solid #E2ECF8;
-  border-radius: 7px;
-  padding: 8px 12px;
-  font-size: 11px;
-  color: #6B7280;
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-}
+/* ════ 工作流程狀態 ════ */
+.tool-card{transition:all .25s ease}
+.tool-card.wf-inactive{opacity:.35;filter:grayscale(80%)}
+.tool-card.wf-inactive:hover{opacity:.55;filter:grayscale(50%);transform:none}
+.tool-card.wf-recommended{opacity:1;filter:none;box-shadow:0 0 0 2px var(--card-color,#1A9CB0),0 4px 16px rgba(0,0,0,.1)}
+.tool-card.wf-next{opacity:1;filter:none;box-shadow:0 0 0 2.5px var(--card-color,#1A9CB0),0 6px 20px rgba(0,0,0,.15);animation:wf-pulse 2s ease-in-out infinite}
+@keyframes wf-pulse{0%,100%{box-shadow:0 0 0 2.5px var(--card-color,#1A9CB0),0 6px 20px rgba(0,0,0,.12)}50%{box-shadow:0 0 0 4px var(--card-color,#1A9CB0),0 8px 24px rgba(0,0,0,.2)}}
+.tool-card.wf-done{opacity:.5;filter:grayscale(40%)}
+.tool-card.wf-done::after{content:'✅';position:absolute;top:8px;right:8px;font-size:14px;z-index:2}
+/* ════ AI 浮動按鈕 ════ */
+.ai-float-btn{position:fixed;bottom:20px;right:18px;z-index:9990;background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:28px;padding:10px 18px 10px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(190,24,93,.45);transition:all .2s;white-space:nowrap}
+.ai-float-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(190,24,93,.55)}
+.ai-float-btn .afb-dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;flex-shrink:0;animation:afb-pulse 2s ease-in-out infinite}
+@keyframes afb-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+/* ════ 側邊抽屜 ════ */
+.ai-drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:9991;display:none;backdrop-filter:blur(2px)}
+.ai-drawer-overlay.open{display:block}
+.ai-drawer{position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100vh;background:#fff;z-index:9992;display:flex;flex-direction:column;box-shadow:-4px 0 32px rgba(0,0,0,.2);transition:right .3s cubic-bezier(.4,0,.2,1)}
+.ai-drawer.open{right:0}
+.ai-drawer-header{background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ai-drawer-header .adh-left{display:flex;align-items:center;gap:10px}
+.ai-drawer-header .adh-title{font-size:14px;font-weight:600}
+.ai-drawer-header .adh-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+.ai-drawer-header .adh-close{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:6px;width:30px;height:30px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-drawer-messages{flex:1;overflow-y:auto;padding:1rem 1.25rem;display:flex;flex-direction:column;gap:.65rem}
+.hcm-user{background:#BE185D;color:#fff;padding:.55rem .9rem;border-radius:8px 8px 2px 8px;font-size:13px;align-self:flex-end;max-width:88%}
+.hcm-assistant{background:#F8FAFF;color:#1a1a2e;border:1px solid #E2ECF8;padding:.65rem .9rem;border-radius:8px 8px 8px 2px;font-size:13px;align-self:flex-start;max-width:95%;line-height:1.75}
+.hcm-assistant strong{font-weight:700}
+.tool-link{display:inline-flex;align-items:center;gap:5px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:4px 12px;margin:4px 3px 4px 0;font-size:12px;color:#1D3B8A;cursor:pointer;font-weight:600;text-decoration:none}
+.tool-link:hover{background:#DBEAFE}
+.ai-drawer-input{padding:.75rem 1.25rem 1rem;border-top:1px solid #E8EDF5;flex-shrink:0}
+.ai-drawer-input textarea{width:100%;border:1px solid #D1D5DB;border-radius:8px;padding:.6rem .85rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.55;margin-bottom:6px}
+.ai-drawer-input textarea:focus{border-color:#BE185D}
+.ai-drawer-input-row{display:flex;gap:6px}
+.adi-send{flex:1;background:#BE185D;color:#fff;border:none;border-radius:7px;padding:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
+.adi-send:disabled{background:#9CA3AF;cursor:not-allowed}
+.adi-reset{background:transparent;border:1px solid #E2ECF8;border-radius:7px;padding:8px 12px;font-size:11px;color:#6B7280;cursor:pointer;font-family:inherit;white-space:nowrap}
 
 </style>
 
@@ -837,57 +417,95 @@ tr:hover td{background:#F9FAFB}
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo" data-goto="home" onclick="goHome()" title="返回主目錄">
-      <div class="logo-badge" style="font-size:11px;letter-spacing:-.5px">MQ</div>
-      <div class="logo-title">MedQA</div>
+      <div class="logo-badge">6σ</div>
+      <div class="logo-title">DMAIC 工具平台</div>
     </div>
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:46</span>
+    <span class="tb-status" id="dmaic-save-status">Offline · Free · Pure JS</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
-<div id="tool-bar" style="display:none;background:#1B3A5C;padding:6px 1.5rem;align-items:center;gap:8px;border-bottom:1px solid rgba(126,200,227,.3)">
-  <button onclick="goHome()" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">
-    ← 返回
+<div id="tool-bar" style="display:none;background:#1B3A5C;padding:7px 1.5rem;align-items:center;gap:10px;border-bottom:2px solid #7EC8E3">
+  <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1B3A5C;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
+    ← 主目錄
   </button>
-  <span id="tool-bar-title" style="font-size:12px;color:rgba(255,255,255,.6);flex:1"></span>
-  <button onclick="dmaicSaveCurrent()" style="background:transparent;color:rgba(255,255,255,.55);border:none;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">💾</button>
-  <button onclick="dmaicExportJSON()" style="background:transparent;color:rgba(255,255,255,.55);border:none;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">⬇</button>
-  <button onclick="dmaicPrintCurrentTool()" style="background:transparent;color:rgba(255,255,255,.55);border:none;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">🖨</button>
+  <span id="tool-bar-title" style="font-size:13px;color:#7EC8E3;font-weight:500;flex:1"></span>
+  <button onclick="dmaicSaveCurrent()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">💾 儲存</button>
+  <button onclick="dmaicExportJSON()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">⬇ JSON</button>
+  <button onclick="dmaicPrintCurrentTool()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">🖨 列印</button>
 </div>
 
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
 <div id="page-home" class="page active">
 
 <!-- ══ 封面導覽列 ══ -->
-
+<div style="background:#1B3A5C;padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+  <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.02em">
+    醫療器材品質管理工具
+    <span style="color:#7EC8E3;margin-left:8px;font-weight:400;font-size:13px">Medical Device Quality</span>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase">DMAIC Platform</div>
+</div>
 
 <!-- ══ Hero ══ -->
-<div style="background:#2A5278;color:#fff;padding:3rem 2rem 2.5rem;text-align:center">
-  <h2 style="font-size:30px;font-weight:600;line-height:1.4;margin-bottom:.75rem;letter-spacing:-.01em;color:#fff">
-    <span style="color:#A8D8EA">AI 輔助</span>統計分析平台
+<div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
+  <div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;font-size:11px;padding:4px 16px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:1.25rem">Six Sigma · DMAIC · 品質工程</div>
+  <h2 style="font-size:28px;font-weight:600;line-height:1.4;margin-bottom:.5rem;letter-spacing:-.01em;color:#fff">
+    六標準差 <span style="color:#A8D8EA">DMAIC</span><br>分析工具平台
   </h2>
-  <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:2rem;letter-spacing:.04em;display:flex;justify-content:center;align-items:center;gap:12px">
-    <span>Edit by Chiu Chang Ru / Claude</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-31 01:26</span>
-  </div>
+  <div style="font-size:12px;color:rgba(255,255,255,.38);margin-bottom:1.5rem;letter-spacing:.04em">Edit by Chiu Chang Ru &nbsp;/&nbsp; Claude</div>
+  <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">完整 DMAIC 五階段工具・純離線運行・無需帳號<br>從定義問題到持續管制，協助製程持續改善</p>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
+    <button onclick="scrollToPhase('D')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📋 工具總覽</button>
   </div>
 </div>
 
+<!-- ══ 統計列 ══ -->
+<div style="background:#1B3A5C;padding:1rem 2rem;display:flex;justify-content:center;flex-wrap:wrap">
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">10</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">分析工具</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">5</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">DMAIC 階段</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">8</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">Nelson 規則</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center"><div style="font-size:22px;font-weight:600;color:#7EC8E3">100%</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">離線運行</div></div>
+</div>
 
 <!-- ══ 主內容 ══ -->
-<div class="home-main" style="padding-top:.5rem">
+<div class="home-main">
 
+  <!-- DMAIC 流程軸 -->
+  <div id="phase-D" style="margin-bottom:.75rem">
+    <div style="font-size:11px;font-weight:600;color:#2A5278;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:.4rem">工具架構</div>
+    <div style="font-size:18px;font-weight:600;color:#1B3A5C;text-align:center;margin-bottom:.3rem">DMAIC 五階段流程</div>
+    <div style="font-size:13px;color:#9CA3AF;text-align:center;margin-bottom:1.25rem">點選工具卡片直接進入</div>
+  </div>
 
-
-  
+  <div class="dmaic-flow">
+    <div class="phase-header" style="background:linear-gradient(135deg,#2563EB,#3B82F6)" onclick="scrollToPhase('D')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">D</div><div class="ph-word" style="color:rgba(255,255,255,.9)">DEFINE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">定義</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #3B82F6"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#0E7490,#1A9CB0)" onclick="scrollToPhase('M')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">M</div><div class="ph-word" style="color:rgba(255,255,255,.9)">MEASURE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">量測</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #1A9CB0"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#047857,#1A9E75)" onclick="scrollToPhase('A')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">A</div><div class="ph-word" style="color:rgba(255,255,255,.9)">ANALYZE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">分析</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #1A9E75"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#B45309,#D4850A)" onclick="scrollToPhase('I')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">I</div><div class="ph-word" style="color:rgba(255,255,255,.9)">IMPROVE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">改善</div></div>
+      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #D4850A"></div>
+    </div>
+    <div class="phase-header" style="background:linear-gradient(135deg,#5B21B6,#7252C8)" onclick="scrollToPhase('C')">
+      <div class="ph-inner"><div class="ph-letter" style="color:#fff">C</div><div class="ph-word" style="color:rgba(255,255,255,.9)">CONTROL</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">管制</div></div>
+    </div>
+  </div>
 
   <!-- D 工具 -->
   <div id="phase-D" class="tools-section">
-    <div class="tools-section-title" style="color:#3B7DD8;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px">Define・定義</div>
+    <div class="tools-section-title" style="color:#3B7DD8">D — Define 定義階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('pareto')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
@@ -915,21 +533,21 @@ tr:hover td{background:#F9FAFB}
 
   <!-- M 工具 -->
   <div id="phase-M" class="tools-section">
-    <div class="tools-section-title" style="color:#1A9CB0;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px;display:flex;align-items:center;gap:8px">Measure・量測<span style="font-size:11px;font-weight:500;color:#6B7280;background:#F0F4FF;border:1px solid #DBEAFE;border-radius:12px;padding:2px 8px;letter-spacing:.03em">AI 輔助</span></div>
+    <div class="tools-section-title" style="color:#1A9CB0">M — Measure 量測階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
         <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
-        <span class="tc-tag tag-done">完成</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 自動判讀</span>
+        <span class="tc-tag tag-done">完成</span>
       </div>
       <div class="tool-card" onclick="goTool('histogram')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📉</div><div class="tc-name">直方圖 + 常態檢定</div>
         <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
-        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 分佈判讀</span>
+        <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('boxplot')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
@@ -943,21 +561,21 @@ tr:hover td{background:#F9FAFB}
 
   <!-- A 工具 -->
   <div id="phase-A" class="tools-section">
-    <div class="tools-section-title" style="color:#1A9E75;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px;display:flex;align-items:center;gap:8px">Analyze・分析<span style="font-size:11px;font-weight:500;color:#6B7280;background:#F0F4FF;border:1px solid #DBEAFE;border-radius:12px;padding:2px 8px;letter-spacing:.03em">AI 輔助</span></div>
+    <div class="tools-section-title" style="color:#1A9E75">A — Analyze 分析階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('scatter')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🔗</div><div class="tc-name">相關性 + 散佈圖</div>
         <div class="tc-desc">Pearson r・線性迴歸・R²</div>
-        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 相關判讀</span>
+        <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('hypothesis')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🔬</div><div class="tc-name">假設檢定</div>
         <div class="tc-desc">t-test・F-test・卡方檢定</div>
-        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 檢定判讀</span>
+        <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('fishbone')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
@@ -971,21 +589,21 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
         <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
-        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 GRR 判讀</span>
+        <span class="tc-tag tag-new">可用</span>
       </div>
     </div>
   </div>
 
   <!-- I 工具 -->
   <div id="phase-I" class="tools-section">
-    <div class="tools-section-title" style="color:#D4850A;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px;display:flex;align-items:center;gap:8px">Improve・改善<span style="font-size:11px;font-weight:500;color:#6B7280;background:#F0F4FF;border:1px solid #DBEAFE;border-radius:12px;padding:2px 8px;letter-spacing:.03em">AI 輔助</span></div>
+    <div class="tools-section-title" style="color:#D4850A">I — Improve 改善階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('doe')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#D4850A">IMPROVE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🧪</div><div class="tc-name">DOE 實驗設計</div>
         <div class="tc-desc">全因子・部分因子・Yates 分析</div>
-        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 效應判讀</span>
+        <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" style="opacity:.55;cursor:not-allowed">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
@@ -999,7 +617,7 @@ tr:hover td{background:#F9FAFB}
 
   <!-- C 工具 -->
   <div id="phase-C" class="tools-section">
-    <div class="tools-section-title" style="color:#7252C8;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px">Control・管制</div>
+    <div class="tools-section-title" style="color:#7252C8">C — Control 管制階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#7252C8;border-radius:3px 0 0 3px"></div>
@@ -1058,8 +676,11 @@ tr:hover td{background:#F9FAFB}
 </div>
 
 <!-- Footer -->
-<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
-  <div>MedQA · AI 輔助醫療器材品質管理平台</div>
+<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
+  <div>醫療器材品質管理工具・Six Sigma DMAIC 平台</div>
+  <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(126,200,227,.12);border:1px solid rgba(126,200,227,.3);border-radius:20px;padding:3px 12px;font-size:11px;color:#7EC8E3">
+    <div style="width:6px;height:6px;border-radius:50%;background:#4ADE80;flex-shrink:0"></div>完全離線・免費使用
+  </div>
   <div>Edit by Chiu Chang Ru / Claude</div>
 </div>
 
@@ -1074,8 +695,7 @@ tr:hover td{background:#F9FAFB}
       <div class="tp-subtitle">Statistical Process Control — 自動判斷圖型・Nelson 8 條規則・製程能力</div>
     </div>
   </div>
-  <div id="da-container-spc"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title" style="--cc:var(--M)"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 
@@ -1208,8 +828,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--D)"></div>
     <div><div class="tp-title">柏拉圖 Pareto Chart</div><div class="tp-subtitle">80/20 法則・找出關鍵少數・累積百分比曲線</div></div>
   </div>
-  <div id="da-container-pareto"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('pareto')">
@@ -1349,8 +968,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--M)"></div>
     <div><div class="tp-title">直方圖 + 常態檢定</div><div class="tp-subtitle">分佈形態分析・Shapiro-Wilk 常態性檢定・偏態/峰態</div></div>
   </div>
-  <div id="da-container-histogram"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('histogram')">
@@ -1424,8 +1042,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--I)"></div>
     <div><div class="tp-title">DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
   </div>
-  <div id="da-container-doe"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>因子設定</div>
 
 <button class="edu-btn" onclick="toggleEdu('doe')">
@@ -1581,8 +1198,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--C)"></div>
     <div><div class="tp-title">CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
   </div>
-  <div id="da-container-cusum"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--C);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料與參數</div>
 
 <button class="edu-btn" onclick="toggleEdu('cusum')">
@@ -1658,8 +1274,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--A)"></div>
     <div><div class="tp-title">相關性分析 + 散佈圖</div><div class="tp-subtitle">Pearson r・線性迴歸・決定係數 R²・顯著性檢定</div></div>
   </div>
-  <div id="da-container-scatter"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('scatter')">
@@ -1734,8 +1349,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--A)"></div>
     <div><div class="tp-title">假設檢定</div><div class="tp-subtitle">單樣本 t・雙樣本 t・配對 t・F 檢定・卡方適合度</div></div>
   </div>
-  <div id="da-container-hypothesis"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>選擇檢定類型</div>
 
 <button class="edu-btn" onclick="toggleEdu('hypothesis')">
@@ -1811,8 +1425,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--M)"></div>
     <div><div class="tp-title">箱型圖 Box Plot</div><div class="tp-subtitle">多組分佈比較・Q1/Q2/Q3・IQR・離群值偵測</div></div>
   </div>
-  <div id="da-container-boxplot"></div>
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('boxplot')">
@@ -1935,8 +1548,7 @@ tr:hover td{background:#F9FAFB}
 
     <!-- Gage R&R -->
     <div id="msa-grr-area" style="display:none">
-      <div id="da-container-msa"></div>
-<div class="card">
+      <div class="card">
         <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Gage R&R 數據輸入</div>
         <div class="g3">
           <div class="field"><label>操作員數</label>
@@ -2131,9 +1743,6 @@ function goHome(){
   document.getElementById('page-home').classList.add('active');
   document.getElementById('breadcrumb').innerHTML='';
   hideToolBar();
-  // 顯示 AI 浮動按鈕
-  var fb = document.getElementById('ai-float-btn');
-  if(fb) fb.style.display='flex';
   try{window.scrollTo(0,0);}catch(e){}
 }
 
@@ -2145,14 +1754,8 @@ function goTool(id){
   if(id==='hypothesis')hyUpdateUI();
   // 顯示工具列（返回按鈕）
   showToolBar(TOOL_NAMES[id]||id);
-  // 隱藏 AI 浮動按鈕（工具頁不需要）
-  if(typeof aiDrawerClose==='function') aiDrawerClose();
-  // 初始化數據設計助理
-
   try{window.scrollTo(0,0);}catch(e){}
 }
-
-window.goTool=goTool;
 
 function scrollToPhase(ph){
   const el=document.getElementById('phase-'+ph);
@@ -3809,8 +3412,6 @@ window.toggleEdu=function(id){
 };
 
 // ── Tool Bar（返回按鈕列）控制 ──
-window.goHome=goHome;
-
 function showToolBar(toolName){
   var bar = document.getElementById('tool-bar');
   var title = document.getElementById('tool-bar-title');
@@ -4216,87 +3817,17 @@ var CLAUDE_WORKER = 'https://muddy-cell-a23a.gogoyankee.workers.dev';
 
 // 每個工具的系統提示詞
 var TOOL_PROMPTS = {
-  spc: `你是 MedQA 平台的 SPC 分析結果判讀助理。
-根據提供的統計數據，用繁體中文給出：
-① 製程狀態判斷（穩定/不穩定）
-② Cpk 對應 ISO 13485 醫療器材要求的說明
-③ 如有 Nelson 規則觸發，說明可能原因
-④ 具體改善建議（1-3 點）
-不推薦 Minitab/JMP 等外部軟體，引導使用者使用 MedQA 其他工具。
-格式：用標題和條列，150字以內。`,
-
-  msa: `你是 MedQA 平台的 MSA 分析結果判讀助理。
-根據 AIAG MSA 第四版標準，用繁體中文給出：
-① %GRR 是否可接受（< 10% 優良，< 30% 可接受）
-② ndc 鑑別力是否足夠（≥ 5）
-③ 主要變異來源（操作員 vs 量具）
-④ 具體改善建議
-格式：用標題和條列，150字以內。`,
-
-  doe: `你是 MedQA 平台的 DOE 分析結果判讀助理。
-根據效應分析和 ANOVA 表，用繁體中文給出：
-① 顯著因子排序（依效應大小）
-② 交互作用是否影響最佳化策略
-③ 建議的下一步（最佳組合方向）
-④ 是否需要補充實驗
-格式：用標題和條列，150字以內。`,
-
-  histogram: `你是 MedQA 平台的直方圖分析結果判讀助理。
-根據統計數據，用繁體中文給出：
-① 分佈形狀判斷（常態/偏態/雙峰）
-② 常態性檢定結論（SW + AD）
-③ 對後續分析的建議（是否可用參數方法）
-格式：用標題和條列，100字以內。`,
-
-  pareto: `你是 MedQA 平台的柏拉圖分析結果判讀助理。
-根據數據，用繁體中文給出：
-① 關鍵少數問題（達 80% 的項目）
-② 改善優先順序建議
-③ CAPA 行動建議
-格式：用標題和條列，100字以內。`,
-
-  fishbone: `你是 MedQA 平台的魚骨圖分析結果判讀助理。
-根據因果圖，用繁體中文給出：
-① 最可能的根本原因（效應最強的）
-② 建議的驗證方法
-③ 對應的 CAPA 行動
-格式：用標題和條列，100字以內。`,
-
-  boxplot: `你是 MedQA 平台的箱型圖分析結果判讀助理。
-根據多組比較，用繁體中文給出：
-① 各組差異是否顯著（視覺判斷）
-② 是否有離群值需要調查
-③ 建議是否進行假設檢定
-格式：用標題和條列，100字以內。`,
-
-  scatter: `你是 MedQA 平台的相關性分析結果判讀助理。
-根據 Pearson r 和 Spearman ρ，用繁體中文給出：
-① 相關性強度和方向
-② 統計顯著性的實務意義
-③ 是否建議進行 DOE 驗證因果關係
-格式：用標題和條列，100字以內。`,
-
-  hypothesis: `你是 MedQA 平台的假設檢定結果判讀助理。
-根據統計結果，用繁體中文給出：
-① 統計結論（是否有顯著差異）
-② Cohen's d 效果量的實務意義
-③ 對醫療器材品質的影響評估
-特別提醒：統計顯著 ≠ 實務重要性。
-格式：用標題和條列，100字以內。`,
-
-  cusum: `你是 MedQA 平台的 CUSUM/EWMA 分析結果判讀助理。
-根據管制圖，用繁體中文給出：
-① 是否偵測到製程偏移
-② 偏移量的實務影響評估
-③ 建議的調查和處置行動
-格式：用標題和條列，100字以內。`,
-
-  sipoc: `你是 MedQA 平台的 SIPOC 分析結果判讀助理。
-根據 SIPOC 圖，用繁體中文給出：
-① 製程範疇定義是否完整
-② 關鍵輸入/輸出是否清楚
-③ 建議補充的資訊
-格式：用標題和條列，80字以內。`,
+  spc: '你正在分析 SPC 統計製程管制圖的結果。請根據提供的統計數據，用繁體中文給出專業的製程狀態判讀和改善建議，並結合 ISO 13485、FDA 21 CFR Part 820 的要求。',
+  msa: '你正在分析 MSA 量測系統分析的結果。請根據 AIAG MSA 第四版標準，用繁體中文判讀量測系統的可接受性，並給出改善建議。',
+  doe: '你正在分析 DOE 實驗設計的結果。請根據提供的效應分析和 ANOVA 表，用繁體中文判讀哪些因子顯著，並建議最佳製程參數方向。',
+  histogram: '你正在分析直方圖和常態性檢定的結果。請用繁體中文判讀數據分佈特性，並給出後續分析建議。',
+  pareto: '你正在分析柏拉圖的結果。請用繁體中文識別關鍵少數問題，並建議改善優先順序。',
+  fishbone: '你正在分析魚骨圖（石川圖）的結果。請用繁體中文整理根本原因，並建議優先改善的方向。',
+  boxplot: '你正在分析箱型圖的結果。請用繁體中文比較各組的分佈差異，並判斷是否需要進一步統計檢定。',
+  scatter: '你正在分析相關性分析和散佈圖的結果。請用繁體中文判讀變數間的關係強度，並說明實務意義。',
+  hypothesis: '你正在分析假設檢定的結果。請用繁體中文解釋統計結果的實務意義，注意統計顯著不等於實務重要性。',
+  cusum: '你正在分析 CUSUM/EWMA 管制圖的結果。請用繁體中文判讀製程是否有微小偏移，並給出監控建議。',
+  sipoc: '你正在分析 SIPOC 圖的結果。請用繁體中文評估製程範疇定義是否完整，並給出改善建議。',
 };
 
 // 對話歷史（每個工具獨立）
@@ -4418,8 +3949,7 @@ window.claudePanelHTML = function(toolId) {
   return '<div class="claude-panel" id="claude-panel-'+toolId+'" style="display:none">'+
     '<div class="claude-panel-header">'+
       '<div class="ch-title"><span>🤖</span> Claude AI 判讀</div>'+
-      '<button class="ch-toggle" style="background:rgba(255,255,255,.12);padding:3px 8px;margin-right:4px" onclick="claudeReset(\'\'+toolId+\'\')" title="清除並重新判讀">🔄</button>'+
-        '<button class="ch-toggle" onclick="claudeToggleChat(\''+toolId+'\')">💬 追問</button>'+
+      '<button class="ch-toggle" onclick="claudeToggleChat(\''+toolId+'\')">💬 追問</button>'+
     '</div>'+
     '<div class="claude-auto">'+
       '<div class="ca-label">📋 自動判讀結果</div>'+
@@ -4436,926 +3966,602 @@ window.claudePanelHTML = function(toolId) {
   '</div>';
 };
 
-// ════════════════════════════════════════════════════
-// Markdown 簡易渲染
-// ════════════════════════════════════════════════════
-function renderMarkdown(text) {
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/`(.+?)`/g,'<code>$1</code>')
-    .replace(/^---$/gm,'<hr>')
-    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
-    .replace(/^- (.+)$/gm,'<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
-    .replace(/\n\n/g,'</p><p>')
-    .replace(/^(?!<[hulo]|<\/[hulo]|<hr)(.+)$/gm,'<p>$1</p>')
-    .replace(/<p><\/p>/g,'')
-    .replace(/<p>(<[hulo])/g,'$1')
-    .replace(/(<\/[hulo][^>]*>)<\/p>/g,'$1');
-}
+window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
+window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
+window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
+window.paretoAnalyze=paretoAnalyze;window.paretoLoadEx=paretoLoadEx;
+window.fishboneDraw=fishboneDraw;
+window.histAnalyze=histAnalyze;window.histLoadEx=histLoadEx;
+window.doeUpdateFactors=doeUpdateFactors;window.doeAnalyze=doeAnalyze;window.doeLoadEx=doeLoadEx;
+// ════════════════════════════════════════
+// DOE — 終端機模式 ANOVA + LOF + 殘差分析
+// ════════════════════════════════════════
 
-// ════════════════════════════════════════════════════
-// 數據設計助理
-// ════════════════════════════════════════════════════
+// 儲存最近一次 doeAnalyze 的完整結果供殘差圖用
+window._doeLastResult = null;
 
+function doeFormatANOVA(sortedEff, runs, rep, yMeans, factors, nf, yname, grandMean) {
+  // ── 計算各 SS ──
+  var ssModel=0, dfModel=0;
+  var effRows=sortedEff.map(function(e){
+    var ss=e[1]*e[1]*runs*rep/4;
+    ssModel+=ss; dfModel++;
+    return{name:e[0],ss:ss,df:1,effect:e[1]};
+  });
+  var ssTotal=yMeans.reduce(function(s,v){return s+(v-grandMean)*(v-grandMean);},0)*rep;
+  var ssErr=ssTotal-ssModel;
+  var dfErr=runs*(rep-1);
 
-// ════════════════════════════════════════════════════
-// 三層邊界處理機制
-// ════════════════════════════════════════════════════
-
-var PLATFORM_CAPABILITIES = {
-  spc:       {name:'📈 SPC 管制圖',       supports:['Xbar-R','I-MR','np圖','p圖','c圖','u圖','CUSUM','EWMA','製程能力','Cp','Cpk','Pp','Ppk'],        tool_id:'spc'},
-  msa:       {name:'📐 MSA 量測系統',      supports:['Gage R&R','量測系統','重複性','再現性','Bias','Linearity','Stability','量具','kappa'],            tool_id:'msa'},
-  doe:       {name:'🧪 DOE 實驗設計',      supports:['全因子','實驗設計','DOE','主效應','交互作用','效應分析','實驗矩陣'],                              tool_id:'doe'},
-  histogram: {name:'📉 直方圖',            supports:['常態性','直方圖','Shapiro-Wilk','Anderson-Darling','分佈'],                                     tool_id:'histogram'},
-  hypothesis:{name:'🔬 假設檢定',          supports:['t檢定','t-test','假設檢定','p值','均值比較','F檢定'],                                            tool_id:'hypothesis'},
-  scatter:   {name:'🔗 相關性分析',        supports:['相關','迴歸','Pearson','Spearman','線性關係'],                                                   tool_id:'scatter'},
-  boxplot:   {name:'📦 箱型圖',            supports:['箱型圖','分組比較','中位數','IQR','離群值'],                                                     tool_id:'boxplot'},
-  pareto:    {name:'📊 柏拉圖',            supports:['柏拉圖','80/20','不良分類','CAPA'],                                                              tool_id:'pareto'},
-  fishbone:  {name:'🐟 魚骨圖',            supports:['魚骨圖','石川圖','根本原因','6M','RCA'],                                                        tool_id:'fishbone'},
-  cusum:     {name:'🎯 CUSUM/EWMA',        supports:['CUSUM','EWMA','小偏移','累積和'],                                                               tool_id:'cusum'},
-  sipoc:     {name:'🗺️ SIPOC',            supports:['SIPOC','製程範疇','流程定義'],                                                                  tool_id:'sipoc'},
-};
-
-var BEYOND_KEYWORDS = ['RSM','反應曲面','Response Surface','田口','Taguchi','ARIMA',
-  '多元迴歸','Multiple Regression','存活分析','可靠度分析','混合設計','Mixture',
-  '部分因子','Fractional Factorial','D-Optimal','時間序列'];
-
-var BEYOND_ALTERNATIVES = [
-  {keys:['RSM','反應曲面'],         alt:'DOE 全因子找到顯著因子後，縮小水準範圍再做一輪 DOE'},
-  {keys:['田口','Taguchi'],          alt:'田口方法規劃中，目前可用全因子 DOE 替代基本參數最佳化'},
-  {keys:['ARIMA','時間序列'],        alt:'時間趨勢可用 CUSUM/EWMA 管制圖監控'},
-  {keys:['多元迴歸','Multiple Reg'], alt:'可逐一用相關性分析確認各因子，或用 DOE 同時評估'},
-  {keys:['部分因子','Fractional'],   alt:'部分因子設計規劃中，4因子以內建議全因子設計'},
-];
-
-window.checkAndHandleBoundary = function(toolId, aiReply, containerEl) {
-  // 層 3：完全超出平台
-  var beyondFound = BEYOND_KEYWORDS.some(function(kw){ return aiReply.indexOf(kw) >= 0; });
-  if(beyondFound) {
-    var altMsg = '';
-    BEYOND_ALTERNATIVES.forEach(function(item) {
-      if(!altMsg && item.keys.some(function(k){ return aiReply.indexOf(k) >= 0; })) {
-        altMsg = item.alt;
-      }
-    });
-    var wDiv = document.createElement('div');
-    wDiv.style.cssText = 'background:#FFFBEB;border:1px solid #FDE68A;border-radius:6px;padding:.6rem .85rem;margin-top:.5rem;font-size:12px;color:#92400E';
-    wDiv.innerHTML = '⚠️ <strong>注意：</strong>部分建議超出本平台目前支援範圍。' +
-      (altMsg ? '<br>💡 <strong>替代方案：</strong>' + altMsg : '<br>📧 如需此功能，請洽開發人員。');
-    containerEl.appendChild(wDiv);
-    return;
+  // Pure Error & Lack of Fit
+  var ssPE=0,dfPE=0;
+  if(rep>=2){
+    for(var ri=0;ri<runs;ri++){
+      var ys=[];
+      for(var rp=0;rp<rep;rp++){var el=document.getElementById('doe-y-'+ri+'-'+rp);if(el)ys.push(parseFloat(el.value)||0);}
+      var m=ys.reduce(function(s,v){return s+v;},0)/ys.length;
+      ys.forEach(function(v){ssPE+=(v-m)*(v-m);dfPE++;});
+    }
+    dfPE-=runs;
   }
+  var ssLOF=ssErr-ssPE, dfLOF=dfErr-dfPE;
+  var msLOF=dfLOF>0?ssLOF/dfLOF:0, msPE=dfPE>0?ssPE/dfPE:0;
+  var F_LOF=msPE>0?msLOF/msPE:0;
+  var p_LOF=(dfLOF>0&&dfPE>0)?fDist(F_LOF,dfLOF,dfPE):1;
+  var msErr=dfErr>0?ssErr/dfErr:0;
 
-  // 層 2：超出當前工具但平台有其他工具
-  var suggestions = [];
-  Object.keys(PLATFORM_CAPABILITIES).forEach(function(tid) {
-    if(tid === toolId) return;
-    var cap = PLATFORM_CAPABILITIES[tid];
-    var matched = cap.supports.some(function(kw) { return aiReply.indexOf(kw) >= 0; });
-    if(matched) suggestions.push(cap);
+  // F & p for each effect
+  effRows.forEach(function(e){
+    e.ms=e.ss; e.F=msErr>0?e.ms/msErr:0;
+    e.p=dfErr>0?fDist(e.F,1,dfErr):1;
   });
 
-  if(suggestions.length > 0) {
-    var sDiv = document.createElement('div');
-    sDiv.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:.6rem .85rem;margin-top:.5rem;font-size:12px;color:#1E40AF';
-    var links = suggestions.slice(0,2).map(function(s) {
-      return '<a href="#" onclick="goTool(\''+s.tool_id+'\');return false;" style="color:#1D3B8A;font-weight:600;text-decoration:underline">' + s.name + '</a>';
-    }).join('、');
-    sDiv.innerHTML = '💡 <strong>相關工具：</strong>此需求可使用 ' + links + ' 進行分析。';
-    containerEl.appendChild(sDiv);
-  }
-};
+  // 整體模型
+  var msModel2=dfModel>0?ssModel/dfModel:0;
+  var F_model=msErr>0?msModel2/msErr:0;
+  var p_model=dfErr>0?fDist(F_model,dfModel,dfErr):1;
 
-// 新版 daSend（含邊界檢查 + 套用按鈕）
+  var mainEff=effRows.filter(function(e){return e.name.indexOf('×')<0;});
+  var interEff=effRows.filter(function(e){return e.name.indexOf('×')>=0;});
+  var ssMainT=mainEff.reduce(function(s,e){return s+e.ss;},0);
+  var dfMainT=mainEff.length;
+  var msMainT=dfMainT>0?ssMainT/dfMainT:0;
+  var FMainT=msErr>0?msMainT/msErr:0;
+  var pMainT=dfErr>0?fDist(FMainT,dfMainT,dfErr):1;
+  var ssInterT=interEff.reduce(function(s,e){return s+e.ss;},0);
+  var dfInterT=interEff.length;
+  var msInterT=dfInterT>0?ssInterT/dfInterT:0;
+  var FInterT=msErr>0?msInterT/msErr:0;
+  var pInterT=dfErr>0?fDist(FInterT,dfInterT,dfErr):1;
 
+  // ── HTML table 模擬終端機（解決中文對齊問題）──
+  function r5(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(5));}
+  function r4p(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(4));}
+  function r2f(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(2));}
+  function sigMark(p){return p<0.001?'***':p<0.01?'**':p<0.05?'*':p<0.1?'.':'';}
+  function sigColor(p){return p<0.001?'#FF4444':p<0.01?'#FF8C00':p<0.05?'#FFD700':p<0.1?'#AAFFAA':'#888';}
 
-var designHistory = {};
+  var td='style="padding:2px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
+  var tdL='style="padding:2px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
+  var tdH='style="padding:4px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;border-bottom:1px solid #333;white-space:nowrap"';
+  var tdHL='style="padding:4px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;border-bottom:1px solid #333;white-space:nowrap"';
+  var tdG='style="padding:2px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#569CD6;white-space:nowrap;font-weight:700"';
+  var tdGR='style="padding:2px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#569CD6;white-space:nowrap;font-weight:700"';
+  var tdSub='style="padding:2px 10px 2px 24px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
 
-
-
-
-
-
-
-
-
-// 覆寫 claudeAutoAnalyze，加入 Markdown 渲染
-var _origClaudeAutoAnalyze = window.claudeAutoAnalyze;
-window.claudeAutoAnalyze = async function(toolId, statsText) {
-  var panelId = 'claude-panel-' + toolId;
-  var panel = document.getElementById(panelId);
-  if(!panel) return;
-  var autoDiv = panel.querySelector('.ca-text');
-  var loadDiv = panel.querySelector('.ca-loading');
-  if(!autoDiv || !loadDiv) return;
-
-  autoDiv.style.display = 'none';
-  loadDiv.style.display = 'flex';
-  panel.style.display = 'block';
-
-  // 儲存統計數據供 Reset 重用
-  if(!window._lastStats) window._lastStats = {};
-  window._lastStats[toolId] = statsText;
-  try {
-    var messages = [{role:'user', content:'以下是分析結果，請給出專業判讀和建議（200字以內）：\n\n'+statsText}];
-    claudeHistory[toolId] = messages;
-    var reply = await callClaude(toolId, messages);
-    claudeHistory[toolId].push({role:'assistant', content:reply});
-    loadDiv.style.display = 'none';
-    autoDiv.style.display = 'block';
-    autoDiv.innerHTML = renderMarkdown(reply);
-  } catch(err) {
-    loadDiv.style.display = 'none';
-    autoDiv.style.display = 'block';
-    autoDiv.textContent = '⚠️ 判讀失敗：' + err.message;
-  }
-};
-
-// 覆寫 claudeSend，加入 Markdown 渲染
-window.claudeSend = async function(toolId) {
-  var input = document.getElementById('claude-input-'+toolId);
-  var messagesDiv = document.getElementById('claude-msgs-'+toolId);
-  var sendBtn = document.getElementById('claude-send-'+toolId);
-  if(!input || !messagesDiv) return;
-  var question = input.value.trim();
-  if(!question) return;
-
-  var userMsg = document.createElement('div');
-  userMsg.className = 'claude-msg user';
-  userMsg.textContent = question;
-  messagesDiv.appendChild(userMsg);
-  input.value = ''; sendBtn.disabled = true;
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-  if(!claudeHistory[toolId]) claudeHistory[toolId] = [];
-  claudeHistory[toolId].push({role:'user', content:question});
-
-  var loadMsg = document.createElement('div');
-  loadMsg.className = 'claude-msg assistant';
-  loadMsg.textContent = '思考中...';
-  messagesDiv.appendChild(loadMsg);
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-  try {
-    var reply = await callClaude(toolId, claudeHistory[toolId]);
-    claudeHistory[toolId].push({role:'assistant', content:reply});
-    loadMsg.innerHTML = renderMarkdown(reply);
-  } catch(err) {
-    loadMsg.className = 'claude-msg error';
-    loadMsg.textContent = '⚠️ 錯誤：'+err.message;
-  }
-  sendBtn.disabled = false;
-  messagesDiv.scrollTop = messagesDiv.scrollHeight;
-};
-
-// ════════════════════════════════════════════════════
-// 設計助理套用到表格（AI 建議 → HTML 計算）
-// 原則：AI 只建議參數名稱和範圍，所有計算由 JS 執行
-// ════════════════════════════════════════════════════
-
-window.doeApplyFromAI = function(aiText) {
-  // 從 AI 文字中解析因子資訊
-  // 支援格式如：「因子A：溫度，低水準60，高水準80」
-  // 或「A = 溫度：60-80°C」
-  var lines = aiText.split('\n');
-  var factors = [];
-  var lows = [];
-  var highs = [];
-  var yname = '';
-
-  // 解析因子名稱
-  lines.forEach(function(line) {
-    // 匹配「因子X：名稱」或「A = 名稱」或「- 名稱（60-80）」
-    var mFactor = line.match(/因子[A-Z\d]?[：:]\s*([^\s，,（(]+)/);
-    var mRange  = line.match(/[（(]?(\d+\.?\d*)\s*[-~到]\s*(\d+\.?\d*)[）)°]?/);
-    var mAB     = line.match(/^[A-C]\s*[=：:]\s*([^\s，,（(、]+)/);
-
-    if(mFactor && mFactor[1]) {
-      factors.push(mFactor[1].replace(/[（(（(]/,'').trim());
-      if(mRange) { lows.push(parseFloat(mRange[1])); highs.push(parseFloat(mRange[2])); }
-      else { lows.push(null); highs.push(null); }
-    } else if(mAB && mAB[1] && factors.length<4) {
-      factors.push(mAB[1].trim());
-      if(mRange) { lows.push(parseFloat(mRange[1])); highs.push(parseFloat(mRange[2])); }
-      else { lows.push(null); highs.push(null); }
-    }
-  });
-
-  // 解析反應變數
-  var yMatch = aiText.match(/反應[變变]?[數数量]?[：:]\s*([^\s，,\n]+)/);
-  if(yMatch) yname = yMatch[1].trim();
-
-  if(factors.length === 0) {
-    alert('無法自動解析因子設定，請手動填入。\n\n提示：請問 Claude「請列出因子名稱和高低水準的具體數值」');
-    return;
+  function mkRow(nameStyle,name,df,ss,ms,F,p,indent){
+    var sc=p!==null?sigColor(p):'#888';
+    var sm=p!==null?sigMark(p):'';
+    return '<tr>'+
+      '<td '+(indent?tdSub:nameStyle)+'>'+name+'</td>'+
+      '<td '+td+'>'+df+'</td>'+
+      '<td '+td+'>'+r5(ss)+'</td>'+
+      '<td '+td+'>'+(ms!==null?r5(ms):'')+'</td>'+
+      '<td '+td+'>'+(F!==null?r2f(F):'')+'</td>'+
+      '<td '+td+'>'+(p!==null?r4p(p):'')+'</td>'+
+      '<td style="padding:2px 8px;font-family:Courier New,monospace;font-size:12px;color:'+sc+';text-align:center">'+sm+'</td>'+
+    '</tr>';
   }
 
-  // 設定因子數量
-  var nfEl = document.getElementById('doe-nfactors');
-  if(nfEl) {
-    nfEl.value = Math.min(factors.length, 4);
-    if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
+  var rows='';
+  // Main Effects
+  rows+='<tr><td '+tdG+' colspan="7">Main Effects</td></tr>';
+  rows+=mkRow(tdG,'  (合計)',dfMainT,ssMainT,msMainT,FMainT,pMainT,false);
+  mainEff.forEach(function(e){rows+=mkRow(tdSub,'  '+e.name,1,e.ss,e.ms,e.F,e.p,false);});
+  // Interactions
+  if(interEff.length>0){
+    rows+='<tr><td '+tdG+' colspan="7">2-Way Interactions</td></tr>';
+    rows+=mkRow(tdG,'  (合計)',dfInterT,ssInterT,msInterT,FInterT,pInterT,false);
+    interEff.forEach(function(e){rows+=mkRow(tdSub,'  '+e.name,1,e.ss,e.ms,e.F,e.p,false);});
   }
-
-  // 填入因子名稱和水準
-  setTimeout(function() {
-    factors.forEach(function(fname, i) {
-      var nameEl = document.getElementById('doe-f'+(i+1)+'-name');
-      var loEl   = document.getElementById('doe-f'+(i+1)+'-lo');
-      var hiEl   = document.getElementById('doe-f'+(i+1)+'-hi');
-      if(nameEl) nameEl.value = fname;
-      if(loEl && lows[i]!==null) loEl.value = lows[i];
-      if(hiEl && highs[i]!==null) hiEl.value = highs[i];
-    });
-    if(yname) {
-      var ynEl = document.getElementById('doe-yname');
-      if(ynEl) ynEl.value = yname;
-    }
-    // 更新矩陣
-    if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
-
-    // 顯示成功提示
-    var msg = '✅ 已套用 ' + factors.length + ' 個因子設定到 DOE 表格！\n\n';
-    msg += factors.map(function(f,i){
-      return f + '：' + (lows[i]!==null?lows[i]:'?') + ' ~ ' + (highs[i]!==null?highs[i]:'?');
-    }).join('\n');
-    msg += '\n\n⚠️ 請確認水準數值，然後填入實驗結果後執行分析。\n（所有計算均由本平台 JS 執行，不依賴 AI）';
-    alert(msg);
-
-    // 捲動到 DOE 輸入區
-    var doeCard = document.querySelector('#page-doe .card');
-    if(doeCard) doeCard.scrollIntoView({behavior:'smooth'});
-  }, 200);
-};
-
-window.msaApplyFromAI = function(aiText) {
-  // 解析操作員數、零件數、重複次數
-  var opMatch  = aiText.match(/(\d+)\s*[個位名]?\s*操作員/);
-  var ptMatch  = aiText.match(/(\d+)\s*[個件]?\s*零件/);
-  var repMatch = aiText.match(/重複\s*(\d+)\s*次/);
-
-  var nop  = opMatch  ? parseInt(opMatch[1])  : null;
-  var npt  = ptMatch  ? parseInt(ptMatch[1])  : null;
-  var nrep = repMatch ? parseInt(repMatch[1]) : null;
-
-  var applied = [];
-  if(nop) {
-    var opEl = document.getElementById('grr-nop');
-    if(opEl) { opEl.value = Math.min(nop, 3); applied.push('操作員數：'+nop); }
+  // Residual
+  rows+='<tr style="border-top:1px solid #444"><td '+tdL+'>Residual Error</td>'+
+    '<td '+td+'>'+dfErr+'</td><td '+td+'>'+r5(ssErr)+'</td><td '+td+'>'+r5(msErr)+'</td>'+
+    '<td '+td+'></td><td '+td+'></td><td></td></tr>';
+  if(rep>=2&&dfLOF>0){
+    var lokColor=p_LOF>0.05?'#A8FF78':'#FF4444';
+    rows+='<tr><td style="padding:2px 10px 2px 24px;font-family:Courier New,monospace;font-size:12px;color:'+lokColor+'">  Lack of Fit</td>'+
+      '<td '+td+'>'+dfLOF+'</td><td '+td+'>'+r5(ssLOF)+'</td><td '+td+'>'+r5(msLOF)+'</td>'+
+      '<td '+td+'>'+r2f(F_LOF)+'</td><td '+td+'>'+r4p(p_LOF)+'</td>'+
+      '<td style="padding:2px 8px;font-family:Courier New,monospace;font-size:12px;color:'+lokColor+'text-align:center">'+(p_LOF>0.05?'(OK)':'!!!')+'</td></tr>';
+    rows+='<tr><td style="padding:2px 10px 2px 24px;font-family:Courier New,monospace;font-size:12px;color:#A8FF78">  Pure Error</td>'+
+      '<td '+td+'>'+dfPE+'</td><td '+td+'>'+r5(ssPE)+'</td><td '+td+'>'+r5(msPE)+'</td>'+
+      '<td '+td+'></td><td '+td+'></td><td></td></tr>';
   }
-  if(npt) {
-    var ptEl = document.getElementById('grr-npart');
-    if(ptEl) { ptEl.value = Math.min(npt, 10); applied.push('零件數：'+npt); }
-  }
-  if(nrep) {
-    var repEl = document.getElementById('grr-nrep');
-    if(repEl) { repEl.value = Math.min(nrep, 3); applied.push('重複次數：'+nrep); }
-  }
+  // Total
+  rows+='<tr style="border-top:2px solid #555"><td '+tdL+'>Total</td>'+
+    '<td '+td+'>'+(dfModel+dfErr)+'</td><td '+td+'>'+r5(ssTotal)+'</td>'+
+    '<td '+td+'></td><td '+td+'></td><td '+td+'></td><td></td></tr>';
 
-  if(applied.length > 0) {
-    alert('✅ 已套用 MSA 設計建議：\n\n' + applied.join('\n') + '\n\n請填入實際量測數據後執行分析。');
-    var msaCard = document.querySelector('#page-msa .card');
-    if(msaCard) msaCard.scrollIntoView({behavior:'smooth'});
-  } else {
-    alert('無法自動解析 MSA 設計參數，請手動設定。');
-  }
-};
-
-// ════════════════════════════════════════════════════
-// 決策樹設計助理 - 下拉式選單
-// ════════════════════════════════════════════════════
-
-// 決策樹設定
-var DT_CONFIG = {
-
-  spc: {
-    title: '🎯 管制圖選擇助理',
-    steps: [
-      {id:'dtype', label:'數據類型', options:[
-        {val:'', text:'— 請選擇 —'},
-        {val:'cont', text:'連續數值（長度、重量、壓力...）'},
-        {val:'count_def', text:'每批不良品數（通過/失敗）'},
-        {val:'count_rate', text:'不良品比例（大量生產）'},
-        {val:'defects_c', text:'缺陷數（固定樣本）'},
-        {val:'defects_u', text:'缺陷數（樣本大小不固定）'},
-      ]},
-      {id:'nsize', label:'每次量測幾個？（子組大小）', options:[
-        {val:'', text:'— 請選擇 —'},
-        {val:'1', text:'1 個（每次只量一件）'},
-        {val:'2to5', text:'2-5 個（小批次）'},
-        {val:'5plus', text:'5 個以上'},
-      ], showIf:{dtype:'cont'}},
-    ],
-    recommend: function(vals) {
-      var dtype = vals.dtype, n = vals.nsize;
-      if(!dtype) return null;
-      if(dtype==='cont' && !n) return null;
-      var chart='', params=[], format='';
-      if(dtype==='cont'){
-        if(n==='1'){
-          chart='I-MR 管制圖（個別值圖）';
-          params=['每列一筆數值，空格或逗號分隔','建議至少 20-25 筆','有規格請填 LSL / USL'];
-          format='25.1 24.9 25.2 25.4 24.8 ...';
-        } else if(n==='2to5'){
-          chart='Xbar-R 管制圖';
-          params=['每列一個子組，組內數值用逗號分隔','建議至少 20-25 組','子組大小建議 3-5','有規格請填 LSL / USL'];
-          format='25.1,24.9,25.2\n24.8,25.1,25.3\n...';
-        } else {
-          chart='Xbar-S 管制圖';
-          params=['每列一個子組，組內數值用逗號分隔','子組大小 ≥ 5','有規格請填 LSL / USL'];
-          format='25.1,24.9,25.2,25.0,25.1\n...';
-        }
-      } else if(dtype==='count_def'){
-        chart='np 管制圖（樣本大小固定）或 p 管制圖';
-        params=['每列一批的不良品數（整數）','樣本大小（每批抽幾件）請填入','建議至少 20-25 批'];
-        format='2\n0\n1\n3\n0\n...';
-      } else if(dtype==='count_rate'){
-        chart='p 管制圖（不良品比例）';
-        params=['每列格式：不良品數,樣本大小','建議至少 20-25 批'];
-        format='2,100\n0,98\n1,105\n...';
-      } else if(dtype==='defects_c'){
-        chart='c 管制圖（固定樣本缺陷數）';
-        params=['每列一批的缺陷數（整數）','每批樣本大小相同','建議至少 20-25 批'];
-        format='0\n2\n1\n0\n1\n...';
-      } else {
-        chart='u 管制圖（每單位缺陷數）';
-        params=['每列格式：缺陷數,樣本大小','各批樣本大小可不同'];
-        format='0,50\n2,48\n1,52\n...';
-      }
-      return {chart:chart, params:params, format:format};
-    },
-    apply: function(vals) {
-      var chartEl = document.getElementById('spc-chart-select');
-      if(!chartEl) return;
-      var dtype=vals.dtype, n=vals.nsize;
-      if(dtype==='cont'&&n==='1') chartEl.value='IMR';
-      else if(dtype==='cont'&&n==='2to5') chartEl.value='XBARR';
-      else if(dtype==='cont'&&n==='5plus') chartEl.value='XBARS';
-      else if(dtype==='count_def') chartEl.value='NP';
-      else if(dtype==='count_rate') chartEl.value='P';
-      else if(dtype==='defects_c') chartEl.value='C';
-      else chartEl.value='U';
-      if(typeof spcUpdateUI==='function') spcUpdateUI();
-    }
-  },
-
-  msa: {
-    title: '🎯 MSA 設計助理',
-    steps: [
-      {id:'mtype', label:'量具輸出類型', options:[
-        {val:'', text:'— 請選擇 —'},
-        {val:'cont', text:'連續數值（卡尺、天平、壓力表...）'},
-        {val:'attr', text:'通過/失敗、目視判斷、等級'},
-      ]},
-      {id:'mpurpose', label:'分析目的', options:[
-        {val:'', text:'— 請選擇 —'},
-        {val:'grr', text:'評估操作員和量具一致性'},
-        {val:'bias', text:'新量具導入，確認是否有偏差'},
-        {val:'linearity', text:'確認量具在不同範圍的偏差'},
-        {val:'stability', text:'長期監控量具是否漂移'},
-      ], showIf:{mtype:'cont'}},
-    ],
-    recommend: function(vals) {
-      var mt=vals.mtype, mp=vals.mpurpose;
-      if(!mt) return null;
-      if(mt==='cont' && !mp) return null;
-      var chart='', params=[], format='';
-      if(mt==='attr'){
-        chart='Attribute MSA（Kappa 一致性分析）';
-        params=['操作員數建議 2-3 人','樣本數建議 20-30 件（含通過和失敗各半）','每人判讀 2 次'];
-        format='樣本#,標準答案,評估員1第1次,第2次,評估員2第1次,第2次\n1,0,0,0,0,0\n2,1,1,1,1,1\n...';
-      } else if(mp==='grr'){
-        chart='Gage R&R（ANOVA 法）';
-        params=['操作員數建議 3 人','零件數建議 10 件（涵蓋量測範圍）','每人每件量 2 次，共 60 筆'];
-        format='操作員,零件,量測值1,量測值2\n1,1,25.1,25.0\n1,2,24.9,25.1\n...';
-      } else if(mp==='bias'){
-        chart='Bias 偏差分析';
-        params=['需要一個標準件（已知基準值）','重複量測 15-30 次'];
-        format='25.1 25.0 25.2 25.1 24.9 ...（空格分隔）\n並填入基準值（如 25.0）';
-      } else if(mp==='linearity'){
-        chart='Linearity 線性分析';
-        params=['選 5 個不同範圍的基準值','每個基準值重複量測 3-5 次'];
-        format='基準值,量測值1,量測值2,量測值3\n20,19.8,20.1,20.0\n...';
-      } else {
-        chart='Stability 穩定性分析';
-        params=['每個時間點量測 3-5 次','建議監控 7-10 個時間點'];
-        format='每列一個時間點的量測值\n25.1,25.0,25.2\n24.9,25.1,25.0\n...';
-      }
-      return {chart:chart, params:params, format:format};
-    },
-    apply: function(vals) {
-      var mt=vals.mtype, mp=vals.mpurpose;
-      // 自動選擇分析方法
-      var q1=document.getElementById('msa-q1');
-      var q2=document.getElementById('msa-q2');
-      if(q1){ q1.value = mt==='attr'?'attribute':'continuous'; }
-      if(q2 && mt==='cont'){ q2.value = mp||'grr'; }
-      if(typeof msaDecide==='function') msaDecide();
-    }
-  },
-
-  doe: {
-    title: '🎯 DOE 設計助理',
-    steps: [
-      {id:'nfac', label:'有幾個影響因子？', options:[
-        {val:'', text:'— 請選擇 —'},
-        {val:'2', text:'2 個因子（4 種組合）'},
-        {val:'3', text:'3 個因子（8 種組合）'},
-        {val:'4', text:'4 個因子（16 種組合）'},
-      ]},
-      {id:'rep', label:'每個組合重複幾次？', options:[
-        {val:'', text:'— 請選擇 —'},
-        {val:'1', text:'1 次（無法計算 Lack of Fit）'},
-        {val:'2', text:'2 次（建議，可計算 LOF）'},
-        {val:'3', text:'3 次（最完整，樣本較多）'},
-      ]},
-    ],
-    recommend: function(vals) {
-      var nf=vals.nfac, rep=vals.rep;
-      if(!nf||!rep) return null;
-      var total = Math.pow(2,parseInt(nf)) * parseInt(rep);
-      var params = [
-        '因子數：'+nf+' 個',
-        '重複次數：'+rep+' 次',
-        '總實驗次數：'+total+' 次',
-        rep==='1'?'⚠️ 重複1次無法計算 Lack of Fit，建議至少2次':'✅ 可計算 Lack of Fit',
-      ];
-      return {
-        chart: '2^'+nf+' 全因子設計',
-        params: params,
-        format: '在下方填入每個因子名稱、高水準值、低水準值，\n然後填入每個實驗的結果（Y 值）'
-      };
-    },
-    apply: function(vals) {
-      var nfEl=document.getElementById('doe-nfactors');
-      var repEl=document.getElementById('doe-rep');
-      if(nfEl && vals.nfac){ nfEl.value=vals.nfac; }
-      if(repEl && vals.rep){ repEl.value=vals.rep; }
-      if(typeof doeUpdateFactors==='function') doeUpdateFactors();
-    }
-  },
-
-  hypothesis: {
-    title: '🎯 假設檢定選擇助理',
-    steps: [
-      {id:'hgoal', label:'你想比較什麼？', options:[
-        {val:'', text:'— 請選擇 —'},
-        {val:'vs_target', text:'一組數據和目標值比較'},
-        {val:'two_groups', text:'兩組獨立數據比較'},
-        {val:'before_after', text:'改善前後（同一批樣本）'},
-        {val:'variance', text:'比較兩組的變異程度'},
-      ]},
-    ],
-    recommend: function(vals) {
-      var g=vals.hgoal;
-      if(!g) return null;
-      var chart='', params=[], format='';
-      if(g==='vs_target'){
-        chart='1-Sample t 檢定'; params=['輸入一組數據','填入目標值（μ₀）','建議樣本數 ≥ 20'];
-        format='25.1 24.9 25.2 25.4 24.8 ...（空格分隔）';
-      } else if(g==='two_groups'){
-        chart='2-Sample t 檢定（Welch）'; params=['輸入兩組獨立數據','建議每組 ≥ 20 筆'];
-        format='樣本1：25.1 24.9 25.2 ...\n樣本2：24.8 25.1 25.3 ...';
-      } else if(g==='before_after'){
-        chart='Paired t 檢定（配對）'; params=['輸入改善前和改善後的配對數據','兩組數量必須相同'];
-        format='改善前：25.1 24.9 25.2 ...\n改善後：24.8 25.1 25.3 ...';
-      } else {
-        chart='F 檢定（等變異數檢定）'; params=['輸入兩組數據','F 檢定比較的是分散程度，不是均值'];
-        format='樣本1：25.1 24.9 25.2 ...\n樣本2：24.8 25.1 25.3 ...';
-      }
-      return {chart:chart, params:params, format:format};
-    },
-    apply: function(vals) {
-      var typeEl=document.getElementById('hy-type');
-      if(!typeEl) return;
-      var g=vals.hgoal;
-      if(g==='vs_target') typeEl.value='1t';
-      else if(g==='two_groups') typeEl.value='2t';
-      else if(g==='before_after') typeEl.value='pair';
-      else typeEl.value='ftest';
-      if(typeof hyUpdateUI==='function') hyUpdateUI();
-    }
-  },
-
-};
-
-// 渲染決策樹 HTML
-window.dtAssistantHTML = function(toolId) {
-  var cfg = DT_CONFIG[toolId];
-  if(!cfg) return '';
-
-  var stepsHtml = cfg.steps.map(function(step, si) {
-    var opts = step.options.map(function(o){
-      return '<option value="'+o.val+'">'+o.text+'</option>';
-    }).join('');
-    var showIf = step.showIf ? 'data-showif="'+JSON.stringify(step.showIf).replace(/"/g,"'")+'"' : '';
-    return '<div class="dt-step" id="dt-step-'+toolId+'-'+step.id+'" '+showIf+' style="'+(step.showIf?'display:none':'')+'">'+
-      '<label>'+step.label+'</label>'+
-      '<select id="dt-'+toolId+'-'+step.id+'" onchange="dtUpdate(\''+toolId+'\')">'+opts+'</select>'+
+  var Rsq=(ssModel/ssTotal*100).toFixed(2);
+  var S=Math.sqrt(msErr).toFixed(4);
+  var tableHTML=
+    '<div style="background:#0F1117;border-radius:8px;padding:1rem 1.25rem;overflow-x:auto">'+
+    '<div style="font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;margin-bottom:8px">'+
+      'Analysis of Variance for <span style="color:#FFD700">'+yname+'</span> (coded units)'+
+    '</div>'+
+    '<table style="border-collapse:collapse;width:100%">'+
+      '<thead><tr>'+
+        '<th '+tdHL+'>Source</th>'+
+        '<th '+tdH+'>DF</th>'+
+        '<th '+tdH+'>Seq SS</th>'+
+        '<th '+tdH+'>Adj MS</th>'+
+        '<th '+tdH+'>F</th>'+
+        '<th '+tdH+'>P</th>'+
+        '<th '+tdH+'>Sig</th>'+
+      '</tr></thead>'+
+      '<tbody>'+rows+'</tbody>'+
+    '</table>'+
+    '<div style="font-family:Courier New,monospace;font-size:11px;color:#888;margin-top:8px">'+
+      'S = <span style="color:#A8FF78">'+S+'</span>   '+
+      'R-sq = <span style="color:#A8FF78">'+Rsq+'%</span>   '+
+      (rep>=2&&dfLOF>0?'Lack of Fit p = <span style="color:'+(p_LOF>0.05?'#A8FF78':'#FF4444')+'">'+r4p(p_LOF)+'</span>  '+(p_LOF>0.05?'✅ LOF not significant':'⚠️ LOF significant'):'n='+rep+' rep, LOF not available')+
+      '<br>Signif: *** 0.001 &nbsp;** 0.01 &nbsp;* 0.05 &nbsp;. 0.1'+
+    '</div>'+
     '</div>';
-  }).join('');
 
-  return '<div class="dt-assistant" id="dta-'+toolId+'">'+
-    '<div class="dt-header" onclick="dtToggle(\''+toolId+'\')">'+
-      '<div class="dt-title">'+cfg.title+'</div>'+
-      '<span class="dt-toggle">▼ 展開</span>'+
-    '</div>'+
-    '<div class="dt-body" id="dt-body-'+toolId+'">'+
-      stepsHtml+
-      '<div class="dt-result" id="dt-result-'+toolId+'">'+
-        '<div class="dt-rec" id="dt-rec-'+toolId+'"></div>'+
-        '<div class="dt-params" id="dt-params-'+toolId+'"></div>'+
-        '<button class="dt-apply-btn" id="dt-apply-'+toolId+'" onclick="dtApply(\''+toolId+'\')">✅ 套用設定到表單</button>'+
-      '</div>'+
-    '</div>'+
-  '</div>';
-};
+  return{
+    html:tableHTML, msErr:msErr, ssErr:ssErr, dfErr:dfErr,
+    ssLOF:ssLOF, dfLOF:dfLOF, msLOF:msLOF, msPE:msPE, dfPE:dfPE, F_LOF:F_LOF, p_LOF:p_LOF,
+    effRows:effRows, ssTotal:ssTotal, dfTotal:dfModel+dfErr
+  };
+}
 
-// 展開/收合
-window.dtToggle = function(toolId) {
-  var body = document.getElementById('dt-body-'+toolId);
-  var icon = document.querySelector('#dta-'+toolId+' .dt-toggle');
-  if(!body) return;
-  var open = body.classList.contains('open');
-  body.classList.toggle('open', !open);
-  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
-};
+// ── 殘差分析四合一圖 ──
+function drawDOEResiduals(){
+  var res = window._doeLastResult;
+  if(!res){ document.getElementById('doe-residual-content').innerHTML='<div class="alert warn">請先執行 DOE 分析。</div>'; return; }
 
-// 更新決策樹
-window.dtUpdate = function(toolId) {
-  var cfg = DT_CONFIG[toolId];
-  if(!cfg) return;
+  var fitted  = res.fitted;
+  var residuals = res.residuals;
+  var n = residuals.length;
+  if(!n){ document.getElementById('doe-residual-content').innerHTML='<div class="alert warn">無法計算殘差，請確認已填入所有實驗結果。</div>'; return; }
 
-  // 收集目前的選值
-  var vals = {};
-  cfg.steps.forEach(function(step) {
-    var el = document.getElementById('dt-'+toolId+'-'+step.id);
-    if(el) vals[step.id] = el.value;
-  });
+  destroyCharts();
 
-  // 顯示/隱藏條件步驟
-  cfg.steps.forEach(function(step) {
-    if(!step.showIf) return;
-    var el = document.getElementById('dt-step-'+toolId+'-'+step.id);
-    if(!el) return;
-    var show = Object.entries(step.showIf).every(function(entry){
-      return vals[entry[0]] === entry[1];
+  var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-norm" height="220"></canvas></div>';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-fit" height="220"></canvas></div>';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-hist" height="220"></canvas></div>';
+  html += '<div class="canvas-wrap"><canvas id="doe-res-ord" height="220"></canvas></div>';
+  html += '</div>';
+  document.getElementById('doe-residual-content').innerHTML = html;
+
+  var rMean = residuals.reduce(function(s,v){return s+v;},0)/n;
+  var rStd  = Math.sqrt(residuals.reduce(function(s,v){return s+(v-rMean)*(v-rMean);},0)/(n-1));
+
+  setTimeout(function(){
+    // 1. Normal Probability Plot
+    var sorted = residuals.slice().sort(function(a,b){return a-b;});
+    var normPts = sorted.map(function(v,i){
+      var p = (i+0.5)/n;
+      // 近似 normal quantile
+      var z = (p < 0.5) ? -Math.sqrt(-2*Math.log(p)) : Math.sqrt(-2*Math.log(1-p));
+      return {x:v, y:z};
     });
-    el.style.display = show ? 'block' : 'none';
-    if(!show) vals[step.id] = '';
-  });
-
-  // 計算建議
-  var rec = cfg.recommend(vals);
-  var resultEl = document.getElementById('dt-result-'+toolId);
-  if(!rec) { resultEl.classList.remove('show'); return; }
-
-  document.getElementById('dt-rec-'+toolId).innerHTML = '建議使用：<strong>' + rec.chart + '</strong>';
-  document.getElementById('dt-params-'+toolId).innerHTML =
-    rec.params.map(function(p){ return '• ' + p; }).join('<br>') +
-    '<br><br><strong>輸入格式：</strong><br><code>' + rec.format.replace(/\n/g,'<br>') + '</code>';
-  resultEl.classList.add('show');
-
-  // 儲存目前選值
-  resultEl._vals = vals;
-};
-
-// 套用設定
-window.dtApply = function(toolId) {
-  var cfg = DT_CONFIG[toolId];
-  var resultEl = document.getElementById('dt-result-'+toolId);
-  if(!cfg || !resultEl || !resultEl._vals) return;
-  cfg.apply(resultEl._vals);
-
-  // 顯示成功提示並關閉
-  var btn = document.getElementById('dt-apply-'+toolId);
-  if(btn) { btn.textContent = '✅ 已套用！'; btn.style.background='#059669'; }
-  setTimeout(function(){
-    dtToggle(toolId);
-    var card = document.querySelector('#page-'+toolId+' .card');
-    if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
-  }, 800);
-};
-
-// 浮動格式提示
-var FORMAT_HINTS = {
-  spc:        '每列一組數值\n用空格或逗號分隔\n例：<code>25.1 24.9 25.2</code>',
-  msa:        '每列：操作員,零件,值1,值2\n例：<code>1,1,25.1,25.0</code>',
-  doe:        '因子高/低水準各填一個數值\n實驗結果每格填一個 Y 值',
-  histogram:  '數值用空格或逗號分隔\n例：<code>25.1 24.9 25.2 25.4</code>',
-  hypothesis: '每組數值用空格分隔\n兩組各填一列',
-  scatter:    'X 和 Y 各填一列\n數值空格分隔',
-  boxplot:    '格式：<code>組名: 值1, 值2, ...</code>\n每組一列',
-  pareto:     '格式：<code>類別名稱, 次數</code>\n每類一列',
-  cusum:      '每列一個量測值\n例：<code>25.1</code>\n並填入目標值 μ₀ 和 σ',
-};
-
-window.showFormatHint = function(toolId) {
-  var hint = FORMAT_HINTS[toolId];
-  if(!hint) return;
-  var el = document.getElementById('format-float');
-  if(!el){
-    el = document.createElement('div');
-    el.id = 'format-float';
-    el.className = 'format-float';
-    document.body.appendChild(el);
-  }
-  el.innerHTML = '<span class="ff-close" onclick="hideFormatHint()">✕</span>'+
-    '<div class="ff-title">輸入格式</div>'+
-    hint.replace(/\n/g,'<br>');
-  el.classList.add('show');
-};
-window.hideFormatHint = function() {
-  var el = document.getElementById('format-float');
-  if(el) el.classList.remove('show');
-};
-
-// 整合版 goTool（DT初始化 + WF狀態追蹤）
-var _origGoTool = window.goTool;
-window.goTool = function(id) {
-  // 呼叫原始 goTool
-  if(typeof _origGoTool === 'function') _origGoTool(id);
-
-  // 工作流程狀態追蹤
-  var state = wfLoad();
-  if(state.active && state.recommended.indexOf(id) >= 0) {
-    if(state.completed.indexOf(id) < 0) {
-      state.completed.push(id);
-      var nextTool = null;
-      state.recommended.forEach(function(t) {
-        if(!nextTool && state.completed.indexOf(t) < 0) nextTool = t;
-      });
-      state.next = nextTool;
-      wfSave(state);
+    var c1=document.getElementById('doe-res-norm');
+    if(c1){ c1.width=c1.parentElement.offsetWidth||320;
+      chartInst.push(new Chart(c1.getContext('2d'),{
+        type:'scatter',
+        data:{datasets:[
+          {label:'Residuals',data:normPts,backgroundColor:'#1D3B8A',pointRadius:5},
+          {label:'Reference',data:[{x:sorted[0],y:(sorted[0]-rMean)/rStd},{x:sorted[n-1],y:(sorted[n-1]-rMean)/rStd}],
+            type:'line',borderColor:'#DC2626',borderWidth:1.5,pointRadius:0,fill:false}
+        ]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Normal Probability Plot',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}},
+                  y:{title:{display:true,text:'Normal Score'},ticks:{font:{size:9}}}}}
+      }));
     }
-  }
 
-  // 初始化決策樹
-  setTimeout(function(){
-    var daContainer = document.getElementById('da-container-'+id);
-    if(daContainer && typeof DT_CONFIG !== 'undefined' && DT_CONFIG[id]) {
-      daContainer.innerHTML = dtAssistantHTML(id);
-      var firstCard = document.querySelector('#page-'+id+' .card');
-      if(firstCard){
-        var existing = firstCard.querySelector('.format-hint-btn');
-        if(!existing){
-          var btn = document.createElement('button');
-          btn.className = 'format-hint-btn';
-          btn.innerHTML = '📋 輸入格式說明';
-          btn.onclick = function(){ showFormatHint(id); };
-          firstCard.insertBefore(btn, firstCard.firstChild);
-        }
-      }
+    // 2. Residuals vs Fitted
+    var c2=document.getElementById('doe-res-fit');
+    if(c2){ c2.width=c2.parentElement.offsetWidth||320;
+      var pts2=fitted.map(function(f,i){return{x:parseFloat(f.toFixed(4)),y:parseFloat(residuals[i].toFixed(4))};});
+      chartInst.push(new Chart(c2.getContext('2d'),{
+        type:'scatter',
+        data:{datasets:[
+          {label:'Residuals',data:pts2,backgroundColor:'#1D3B8A',pointRadius:5},
+          {label:'Zero',data:[{x:Math.min.apply(null,fitted),y:0},{x:Math.max.apply(null,fitted),y:0}],
+            type:'line',borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
+        ]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Residuals vs Fitted Values',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{title:{display:true,text:'Fitted Value'},ticks:{font:{size:9}}},
+                  y:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}}}}
+      }));
     }
-    if(typeof hideFormatHint === 'function') hideFormatHint();
-  }, 150);
-};
-;
 
-// ════════════════════════════════════════════════════
-// 工作流程狀態系統 + 主頁聊天助理
-// ════════════════════════════════════════════════════
+    // 3. Histogram of Residuals
+    var c3=document.getElementById('doe-res-hist');
+    if(c3){ c3.width=c3.parentElement.offsetWidth||320;
+      var bins=Math.max(4,Math.round(Math.sqrt(n)));
+      var rMin=Math.min.apply(null,residuals), rMax=Math.max.apply(null,residuals);
+      var bw=(rMax-rMin)/bins||0.001;
+      var counts=Array(bins).fill(0);
+      residuals.forEach(function(v){var b=Math.min(bins-1,Math.floor((v-rMin)/bw));counts[b]++;});
+      var labels=counts.map(function(_,i){return (rMin+i*bw).toFixed(3);});
+      chartInst.push(new Chart(c3.getContext('2d'),{
+        type:'bar',data:{labels:labels,datasets:[{label:'Count',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#1D3B8A',borderWidth:1}]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Histogram of Residuals',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{ticks:{font:{size:8}}},y:{ticks:{font:{size:9}}}}}
+      }));
+    }
 
-// 工具顏色對照（和左側色條一致）
+    // 4. Residuals vs Order
+    var c4=document.getElementById('doe-res-ord');
+    if(c4){ c4.width=c4.parentElement.offsetWidth||320;
+      chartInst.push(new Chart(c4.getContext('2d'),{
+        type:'line',
+        data:{labels:residuals.map(function(_,i){return i+1;}),
+          datasets:[
+            {label:'Residual',data:residuals.map(function(v){return parseFloat(v.toFixed(4));}),
+              borderColor:'#1D3B8A',borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#1D3B8A',fill:false,tension:0.1},
+            {label:'Zero',data:Array(n).fill(0),borderColor:'#DC2626',borderWidth:1,borderDash:[5,3],pointRadius:0,fill:false}
+          ]},
+        options:{responsive:false,animation:false,
+          plugins:{title:{display:true,text:'Residuals vs Order',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
+          scales:{x:{title:{display:true,text:'Order'},ticks:{font:{size:9}}},
+                  y:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}}}}
+      }));
+    }
+  }, 80);
+}
+
+window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOEResiduals=drawDOEResiduals;window.doeFormatANOVA=doeFormatANOVA;
+window.sipocDraw=sipocDraw;
+window.cusumAnalyze=cusumAnalyze;window.cusumLoadEx=cusumLoadEx;
+window.scatterAnalyze=scatterAnalyze;window.scatterLoadEx=scatterLoadEx;
+window.hyUpdateUI=hyUpdateUI;window.hyAnalyze=hyAnalyze;window.hyLoadEx=hyLoadEx;
+window.boxplotAnalyze=boxplotAnalyze;
+</script>
+
+<script>
+// 備用事件委派 - 確保 onclick 在各種環境都能運作
+document.addEventListener('click', function(e) {
+  var el = e.target.closest('[data-goto]');
+  if(el) {
+    var id = el.getAttribute('data-goto');
+    if(id === 'home') goHome();
+    else goTool(id);
+  }
+});
+</script>
+
+<script id="dmaic-record-enhancements">
+(function(){
+  'use strict';
+  var APP_VER='dmaic-v2-records';
+  function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
+  function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='Offline · Auto-save enabled';},2200);}}
+  function today(){return new Date().toISOString().slice(0,10);}
+  function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
+
+  window.dmaicEnhanceRecords=function(){
+    document.querySelectorAll('.tool-page').forEach(function(tp){
+      if(tp.querySelector('[data-quality-record]')) return;
+      var page=tp.closest('.page');
+      var pid=page?page.id.replace('page-','tool'):'tool';
+      var header=tp.querySelector('.tp-header');
+      var card=document.createElement('div');
+      card.className='card quality-record';
+      card.setAttribute('data-quality-record','1');
+      card.innerHTML=''+
+        '<div class="card-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="dmaicToggleRecord(this)">'+ 
+          '<span style="display:flex;align-items:center;gap:6px"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>📋 分析紀錄 / 報告輸出</span>'+
+          '<span class="record-toggle-icon" style="font-size:12px;color:#6B7280">▼ 展開填寫</span>'+
+        '</div>'+
+        '<div class="record-body" style="display:none">'+
+          '<div class="print-only">DMAIC 工具平台分析報告 - '+(document.title||'')+'</div>'+ 
+          '<div class="record-grid">'+
+            '<div class="field"><label>專案 / 產品</label><input id="'+pid+'-record-project" type="text" placeholder="例：檢體針組 / 親水塗層 / 包裝確效"></div>'+ 
+            '<div class="field"><label>批號 / Lot / 樣品</label><input id="'+pid+'-record-lot" type="text" placeholder="例：P3-001 / Lot A"></div>'+ 
+            '<div class="field"><label>分析日期</label><input id="'+pid+'-record-date" type="date" value="'+today()+'"></div>'+ 
+          '</div>'+ 
+          '<div class="record-grid-2">'+
+            '<div class="field"><label>分析者</label><input id="'+pid+'-record-owner" type="text" placeholder="分析者 / 部門"></div>'+ 
+            '<div class="field"><label>結論</label><select id="'+pid+'-record-result"><option value="未判定">未判定</option><option value="PASS">PASS</option><option value="FAIL">FAIL</option><option value="需調查">需調查</option><option value="僅供參考">僅供參考</option></select></div>'+ 
+          '</div>'+ 
+          '<div class="field"><label>分析目的</label><textarea class="record-note" id="'+pid+'-record-purpose" rows="2" placeholder="本次分析要回答的問題"></textarea></div>'+ 
+          '<div class="field"><label>判讀 / Note / 後續處置</label><textarea class="record-note" id="'+pid+'-record-note" rows="3" placeholder="記錄異常點、改善措施、CAPA編號"></textarea></div>'+ 
+          '<div class="record-actions">'+
+            '<button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存</button>'+
+            '<button class="btn btn-sec" onclick="dmaicExportJSON()">⬇ 匯出 JSON</button>'+
+          '</div>'+
+          '<div id="'+pid+'-save-indicator" style="margin-top:6px;font-size:12px;color:#6B7280">尚未儲存</div>'+
+        '</div>';
+      if(header) header.insertAdjacentElement('afterend',card); else tp.insertBefore(card,tp.firstChild);
+    });
+  };
+
+  function fieldsIn(page){return Array.prototype.slice.call(page.querySelectorAll('input[id],select[id],textarea[id]'));}
+  function collectPage(){var p=activePage();var data={app:APP_VER,page:pageKey(),savedAt:new Date().toISOString(),fields:{}};fieldsIn(p).forEach(function(el){data.fields[el.id]=el.value;});return data;}
+  function applyData(data){if(!data||!data.fields)return;Object.keys(data.fields).forEach(function(id){var el=document.getElementById(id);if(el){el.value=data.fields[id];el.dispatchEvent(new Event('change'));}});}
+  window.dmaicSaveCurrent=function(){try{localStorage.setItem(APP_VER+'::'+pageKey(),JSON.stringify(collectPage()));status('已儲存本頁：'+new Date().toLocaleTimeString());if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(true);}catch(e){alert('儲存失敗：'+e.message);}};
+  window.dmaicRestoreCurrent=function(){try{var raw=localStorage.getItem(APP_VER+'::'+pageKey());if(raw)applyData(JSON.parse(raw));}catch(e){console.warn(e);}};
+  window.dmaicClearCurrent=function(){if(!confirm('確定清除本頁已儲存資料？'))return;try{localStorage.removeItem(APP_VER+'::'+pageKey());status('已清除本頁儲存資料');}catch(e){} };
+  window.dmaicExportJSON=function(){var data=collectPage();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(pageKey()+'_'+(data.fields[pageKey().replace('page-','tool')+'-record-project']||'record'))+'.json';a.click();URL.revokeObjectURL(a.href);status('JSON 已產生');};
+  window.dmaicPrintPDF=function(){
+    var p=activePage();
+    var title=p.querySelector('.tp-title')?.textContent || 'DMAIC 工具平台';
+    document.title=safeName(title+'_分析報告_'+today());
+    window.print();
+  };
+
+  // auto-save, restore on navigation
+  var oldGoTool=window.goTool, oldGoHome=window.goHome;
+  if(typeof oldGoTool==='function') window.goTool=function(id){ oldGoTool(id); window.dmaicEnhanceRecords(); window.dmaicRestoreCurrent(); };
+  if(typeof oldGoHome==='function') window.goHome=function(){ oldGoHome(); window.dmaicRestoreCurrent(); };
+  document.addEventListener('input',function(e){if(e.target && e.target.id){if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(false);clearTimeout(window.__dmaicSaveTimer);window.__dmaicSaveTimer=setTimeout(window.dmaicSaveCurrent,700);}},true);
+  document.addEventListener('change',function(e){if(e.target && e.target.id) window.dmaicSaveCurrent();},true);
+
+  // SPC validation + interpretation
+  window.dmaicSpcConclusion=function(){
+    try{
+      if(typeof SR==='undefined' || !SR || !SR.chartType) return;
+      var host=document.getElementById('spc-auto-conclusion');
+      if(!host){host=document.createElement('div');host.id='spc-auto-conclusion';var out=document.querySelector('#spc-out .card');if(out)out.insertBefore(host,out.firstChild);}
+      var msgs=[],level='success';
+      if(SR.nelson){var r1=(SR.nelson.r1||[]).length,r2=(SR.nelson.r2||[]).length,r3=(SR.nelson.r3||[]).length;if(r1||r2||r3){level='danger';msgs.push('Nelson 規則已觸發，製程可能不在統計管制狀態，需先調查特殊原因。');}else msgs.push('未偵測到 Nelson Rule 1-3 訊號，初步可視為統計管制狀態。');}
+      if(['XBARR','XBARS','IMR'].indexOf(SR.chartType)>=0 && SR.lsl!=null && SR.usl!=null){
+        var cp=(SR.usl-SR.lsl)/(6*SR.sigma);var cpu=(SR.usl-SR.grandMean)/(3*SR.sigma);var cpl=(SR.grandMean-SR.lsl)/(3*SR.sigma);var cpk=Math.min(cpu,cpl);
+        if(cpk>=1.67) msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力優秀。');
+        else if(cpk>=1.33) msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力良好。');
+        else if(cpk>=1.00){level=level==='danger'?'danger':'warn';msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力僅尚可，建議監控中心值與變異。');}
+        else {level='danger';msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力不足，需改善或重估規格/製程變異來源。');}
+        if(cp>=1.33 && cpk<1.33) msgs.push('Cp 可接受但 Cpk 偏低，代表製程中心可能偏移。');
+      } else if(['NP','P','C','U'].indexOf(SR.chartType)>=0) msgs.push('此為計數型管制圖，不適用 Cp/Cpk；請以管制界限與異常規則判讀。');
+      host.innerHTML='<div class="alert '+level+'"><strong>SPC 自動判讀：</strong><br>'+msgs.map(function(m){return '• '+m;}).join('<br>')+'<br><span style="font-size:12px;color:#6B7280">註：自動判讀僅供工程判斷輔助；正式結論仍需結合抽樣計畫、量測系統、製程變更與原始紀錄。</span></div>';
+    }catch(e){console.warn(e);}
+  };
+  var oldSpc=window.spcAnalyze;
+  if(typeof oldSpc==='function') window.spcAnalyze=function(){
+    var lsl=parseFloat(document.getElementById('spc-lsl')?.value), usl=parseFloat(document.getElementById('spc-usl')?.value);
+    if(!isNaN(lsl)&&!isNaN(usl)&&usl<=lsl){alert('規格輸入錯誤：USL 必須大於 LSL。');return;}
+    var rows=(document.getElementById('spc-raw')?.value||'').trim().split('\n').filter(Boolean).length;
+    if(rows>0 && rows<5){if(!confirm('資料列數少於 5，統計判讀可靠度不足。仍要分析？'))return;}
+    oldSpc();
+    setTimeout(window.dmaicSpcConclusion,120);
+    window.dmaicSaveCurrent();
+  };
+
+  window.dmaicEnhanceRecords();
+  window.dmaicRestoreCurrent();
+  status('Offline · Auto-save enabled');
+})();
+
+// ════════════════════════════════════════════════════════
+// 新功能整合：工作流程狀態 + AI 助理抽屜
+// 直接掛到 goTool/goHome 的 after hook，不覆寫
+// ════════════════════════════════════════════════════════
+
 var TOOL_COLORS = {
-  spc:        '#1A9CB0',
-  msa:        '#7252C8',
-  doe:        '#D4850A',
-  histogram:  '#1A9CB0',
-  hypothesis: '#1A9E75',
-  scatter:    '#1A9E75',
-  boxplot:    '#1A9E75',
-  pareto:     '#3B7DD8',
-  fishbone:   '#3B7DD8',
-  sipoc:      '#3B7DD8',
-  cusum:      '#7252C8',
+  spc:'#1A9CB0', msa:'#7252C8', doe:'#D4850A',
+  histogram:'#1A9CB0', hypothesis:'#1A9E75', scatter:'#1A9E75',
+  boxplot:'#1A9E75', pareto:'#3B7DD8', fishbone:'#3B7DD8',
+  sipoc:'#3B7DD8', cusum:'#7252C8',
 };
 
-// 工具名稱對照
 var TOOL_DISPLAY = {
-  spc:        '📈 SPC 管制圖',
-  msa:        '📐 MSA 量測系統',
-  doe:        '🧪 DOE 實驗設計',
-  histogram:  '📉 直方圖',
-  hypothesis: '🔬 假設檢定',
-  scatter:    '🔗 相關性分析',
-  boxplot:    '📦 箱型圖',
-  pareto:     '📊 柏拉圖',
-  fishbone:   '🐟 魚骨圖',
-  sipoc:      '🗺️ SIPOC',
-  cusum:      '🎯 CUSUM/EWMA',
+  spc:'📈 SPC 管制圖', msa:'📐 MSA 量測系統', doe:'🧪 DOE 實驗設計',
+  histogram:'📉 直方圖', hypothesis:'🔬 假設檢定', scatter:'🔗 相關性分析',
+  boxplot:'📦 箱型圖', pareto:'📊 柏拉圖', fishbone:'🐟 魚骨圖',
+  sipoc:'🗺️ SIPOC', cusum:'🎯 CUSUM/EWMA',
 };
 
-// 工作流程狀態（存 localStorage）
 var WF_KEY = 'medqa_workflow_v2';
+function wfLoad(){try{var s=localStorage.getItem(WF_KEY);return s?JSON.parse(s):{recommended:[],completed:[],next:null,active:false};}catch(e){return {recommended:[],completed:[],next:null,active:false};}}
+function wfSave(s){try{localStorage.setItem(WF_KEY,JSON.stringify(s));}catch(e){}}
 
-function wfLoad() {
-  try {
-    var s = localStorage.getItem(WF_KEY);
-    return s ? JSON.parse(s) : {recommended:[], completed:[], next:null, active:false};
-  } catch(e) {
-    return {recommended:[], completed:[], next:null, active:false};
-  }
-}
-function wfSave(state) {
-  try { localStorage.setItem(WF_KEY, JSON.stringify(state)); } catch(e){}
-}
-function wfReset() {
-  localStorage.removeItem(WF_KEY);
-  wfApplyStyles({recommended:[], completed:[], next:null, active:false});
-  // 清除對話
-  var msgs = document.getElementById('hc-messages');
-  if(msgs) msgs.innerHTML = '<div class="hcm-assistant">您好！請描述您的品質問題或分析需求，我幫您推薦合適的工具。<br><span style="font-size:11px;color:#6B7280">您也可以直接點選任何工具使用，不需要先進行對話。</span></div>';
-  homeChatHistory = [];
-}
-
-// ── AI 助理抽屜 ──
-function aiDrawerOpen() {
-  var drawer = document.getElementById('ai-drawer');
-  var overlay = document.getElementById('ai-overlay');
-  var floatBtn = document.getElementById('ai-float-btn');
-  if(drawer) drawer.classList.add('open');
-  if(overlay) overlay.classList.add('open');
-  if(floatBtn) floatBtn.style.display = 'none';
-  setTimeout(function(){
-    var input = document.getElementById('hc-input');
-    if(input) input.focus();
-  }, 350);
-}
-
-function aiDrawerClose() {
-  var drawer = document.getElementById('ai-drawer');
-  var overlay = document.getElementById('ai-overlay');
-  var floatBtn = document.getElementById('ai-float-btn');
-  if(drawer) drawer.classList.remove('open');
-  if(overlay) overlay.classList.remove('open');
-  if(floatBtn) floatBtn.style.display = 'flex';
-}
-
-
-// 套用視覺狀態到工具卡片
-function wfApplyStyles(state) {
-  var allTools = Object.keys(TOOL_DISPLAY);
-  allTools.forEach(function(tid) {
-    var card = document.querySelector('[data-tool="'+tid+'"]');
-    if(!card) return;
+function wfApplyStyles(state){
+  Object.keys(TOOL_DISPLAY).forEach(function(tid){
+    var card=document.querySelector('[data-tool="'+tid+'"]');
+    if(!card)return;
     card.classList.remove('wf-inactive','wf-recommended','wf-next','wf-done');
-
-    // 設定 CSS 變數（顏色）
     card.style.setProperty('--card-color', TOOL_COLORS[tid]||'#1A9CB0');
-
-    if(!state.active) return; // 未激活時全部預設樣式
-
-    var isDone = state.completed.indexOf(tid) >= 0;
-    var isNext = state.next === tid;
-    var isRec  = state.recommended.indexOf(tid) >= 0;
-
-    if(isDone)        card.classList.add('wf-done');
-    else if(isNext)   card.classList.add('wf-next');
-    else if(isRec)    card.classList.add('wf-recommended');
-    else              card.classList.add('wf-inactive');
+    if(!state.active)return;
+    var done=state.completed.indexOf(tid)>=0;
+    var next=state.next===tid;
+    var rec=state.recommended.indexOf(tid)>=0;
+    if(done) card.classList.add('wf-done');
+    else if(next) card.classList.add('wf-next');
+    else if(rec) card.classList.add('wf-recommended');
+    else card.classList.add('wf-inactive');
   });
 }
 
-;
+function wfReset(){
+  localStorage.removeItem(WF_KEY);
+  wfApplyStyles({recommended:[],completed:[],next:null,active:false});
+  var msgs=document.getElementById('hc-messages');
+  if(msgs) msgs.innerHTML='<div class="hcm-assistant">已清除。請重新描述您的問題。</div>';
+  homeChatHistory=[];
+}
 
-// 整合版 goHome
-var _origGoHome = window.goHome;
-window.goHome = function() {
-  if(typeof _origGoHome === 'function') _origGoHome();
-  setTimeout(function() {
-    var state = wfLoad();
-    wfApplyStyles(state);
-    if(state.next) {
-      var card = document.querySelector('[data-tool="'+state.next+'"]');
-      if(card) setTimeout(function(){card.scrollIntoView({behavior:'smooth',block:'center'});},400);
+// ── AI 抽屜 ──
+function aiDrawerOpen(){
+  var d=document.getElementById('ai-drawer');
+  var o=document.getElementById('ai-overlay');
+  var b=document.getElementById('ai-float-btn');
+  if(d)d.classList.add('open');
+  if(o)o.classList.add('open');
+  if(b)b.style.display='none';
+  setTimeout(function(){var i=document.getElementById('hc-input');if(i)i.focus();},350);
+}
+function aiDrawerClose(){
+  var d=document.getElementById('ai-drawer');
+  var o=document.getElementById('ai-overlay');
+  var b=document.getElementById('ai-float-btn');
+  if(d)d.classList.remove('open');
+  if(o)o.classList.remove('open');
+  if(b)b.style.display='flex';
+}
+
+// ── goTool / goHome after hooks（不覆寫，用 patch）──
+(function(){
+  var _orig = window.goTool;
+  window.goTool = function(id){
+    _orig(id);
+    // WF 狀態
+    var state=wfLoad();
+    if(state.active && state.recommended.indexOf(id)>=0 && state.completed.indexOf(id)<0){
+      state.completed.push(id);
+      var next=null;
+      state.recommended.forEach(function(t){if(!next&&state.completed.indexOf(t)<0)next=t;});
+      state.next=next; wfSave(state);
     }
-    // 顯示 AI 浮動按鈕
-    var fb = document.getElementById('ai-float-btn');
-    if(fb) fb.style.display='flex';
-  }, 100);
-};
-;
+    // 隱藏浮動按鈕
+    aiDrawerClose();
+    // DT 助理
+    setTimeout(function(){
+      var c=document.getElementById('da-container-'+id);
+      if(c && typeof dtAssistantHTML==='function' && typeof DT_CONFIG!=='undefined' && DT_CONFIG[id]){
+        c.innerHTML=dtAssistantHTML(id);
+      }
+      if(typeof hideFormatHint==='function') hideFormatHint();
+    },150);
+  };
+})();
+
+(function(){
+  var _orig = window.goHome;
+  window.goHome = function(){
+    _orig();
+    setTimeout(function(){
+      var state=wfLoad();
+      wfApplyStyles(state);
+      var fb=document.getElementById('ai-float-btn');
+      if(fb)fb.style.display='flex';
+    },100);
+  };
+})();
 
 // ── 主頁聊天助理 ──
-var homeChatHistory = [];
+var homeChatHistory=[];
+var HOME_CHAT_SYSTEM='你是工具分類器。只能輸出 JSON，不可有任何其他文字。\n\nJSON 格式：{"tools":["id1","id2","id3"],"reasons":["原因1","原因2","原因3"]}\n\n可用 id：pareto, fishbone, spc, msa, histogram, hypothesis, scatter, doe, boxplot, cusum, sipoc\n\n規則：tools 最多 4 個，reasons 和 tools 數量相同，每個原因 10 字以內，只輸出 JSON。';
 
-var HOME_CHAT_SYSTEM = '你是工具分類器。只能輸出 JSON，不可有任何其他文字。\n\nJSON 格式：{"tools":["id1","id2","id3"],"reasons":["原因1","原因2","原因3"]}\n\n可用 id：pareto, fishbone, spc, msa, histogram, hypothesis, scatter, doe, boxplot, cusum, sipoc\n\n規則：\n- tools 最多 4 個\n- reasons 和 tools 數量相同，每個原因 10 字以內\n- 只輸出 JSON，第一個字必須是 {，最後一個字必須是 }\n- 絕對不可有 JSON 以外的任何文字';
-async function homeChatSend() {
-  var input = document.getElementById('hc-input');
-  var msgs  = document.getElementById('hc-messages');
-  var btn   = document.getElementById('hc-send');
-  if(!input||!msgs) return;
-  var q = input.value.trim();
-  if(!q) return;
-
-  var uDiv = document.createElement('div');
-  uDiv.className = 'hcm-user';
-  uDiv.textContent = q;
-  msgs.appendChild(uDiv);
-  input.value = ''; btn.disabled = true;
-  msgs.scrollTop = msgs.scrollHeight;
-
-  homeChatHistory.push({role:'user', content:q});
-
-  var aDiv = document.createElement('div');
-  aDiv.className = 'hcm-assistant';
-  aDiv.textContent = '分析中...';
-  msgs.appendChild(aDiv);
-  msgs.scrollTop = msgs.scrollHeight;
-
-  try {
-    var response = await fetch(CLAUDE_WORKER, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({messages: homeChatHistory, system: HOME_CHAT_SYSTEM})
-    });
-    var data = await response.json();
-    var reply = data.content[0].text;
-    homeChatHistory.push({role:'assistant', content:reply});
-
-    // 解析 JSON（Claude 只輸出 JSON）
-    var recommendedTools = [];
-    var reasons = [];
-    try {
-      var jsonMatch = reply.match(/\{[\s\S]*?"tools"[\s\S]*?\}/);
-      if(jsonMatch) {
-        var parsed = JSON.parse(jsonMatch[0]);
-        recommendedTools = (parsed.tools||[]).filter(function(t){return TOOL_DISPLAY[t];});
-        reasons = parsed.reasons||[];
-      }
-    } catch(e) {}
-
-    // 組顯示內容（只顯示工具推薦，不顯示 Claude 原始文字）
-    var cleanReply = '';
-    if(recommendedTools.length > 0) {
-      cleanReply = recommendedTools.map(function(tid,i){
-        return (i+1)+'. '+(TOOL_DISPLAY[tid]||tid)+(reasons[i]?' — '+reasons[i]:'');
-      }).join('
-');
-    } else {
-      cleanReply = '請描述更具體的問題，例如：良率下降、SPC 發現異常、圓度不足。';
-    }
-    aDiv.innerHTML = renderMarkdown(cleanReply);
-
-    if(recommendedTools.length > 0) {
-      var toolBtns = document.createElement('div');
-      toolBtns.style.cssText = 'margin-top:.5rem;display:flex;flex-wrap:wrap;gap:4px';
-      recommendedTools.forEach(function(tid,idx){
-        var btn2 = document.createElement('a');
-        btn2.className = 'tool-link';
-        btn2.innerHTML = (idx+1)+'. '+(TOOL_DISPLAY[tid]||tid);
-        btn2.onclick = function(e){
-          e.preventDefault();
-          aiDrawerClose();
-          goTool(tid);
-        };
-        toolBtns.appendChild(btn2);
+async function homeChatSend(){
+  var input=document.getElementById('hc-input');
+  var msgs=document.getElementById('hc-messages');
+  var btn=document.getElementById('hc-send');
+  if(!input||!msgs)return;
+  var q=input.value.trim(); if(!q)return;
+  var uDiv=document.createElement('div'); uDiv.className='hcm-user'; uDiv.textContent=q;
+  msgs.appendChild(uDiv); input.value=''; if(btn)btn.disabled=true;
+  msgs.scrollTop=msgs.scrollHeight;
+  homeChatHistory.push({role:'user',content:q});
+  var aDiv=document.createElement('div'); aDiv.className='hcm-assistant'; aDiv.textContent='分析中...';
+  msgs.appendChild(aDiv); msgs.scrollTop=msgs.scrollHeight;
+  try{
+    var resp=await fetch(CLAUDE_WORKER,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({messages:homeChatHistory,system:HOME_CHAT_SYSTEM})});
+    var data=await resp.json();
+    var reply=data.content[0].text;
+    homeChatHistory.push({role:'assistant',content:reply});
+    var tools=[],reasons=[];
+    try{
+      var m=reply.match(/\{[\s\S]*?"tools"[\s\S]*?\}/);
+      if(m){var p=JSON.parse(m[0]);tools=(p.tools||[]).filter(function(t){return TOOL_DISPLAY[t];});reasons=p.reasons||[];}
+    }catch(e){}
+    var clean=tools.length?tools.map(function(tid,i){return (i+1)+'. '+(TOOL_DISPLAY[tid])+(reasons[i]?' — '+reasons[i]:'');}).join('\n'):'請描述更具體的問題。';
+    aDiv.innerHTML=renderMarkdown(clean);
+    if(tools.length>0){
+      var btns=document.createElement('div'); btns.style.cssText='margin-top:.5rem;display:flex;flex-wrap:wrap;gap:4px';
+      tools.forEach(function(tid,i){
+        var a=document.createElement('a'); a.className='tool-link';
+        a.innerHTML=(i+1)+'. '+TOOL_DISPLAY[tid];
+        a.onclick=function(e){e.preventDefault();aiDrawerClose();goTool(tid);};
+        btns.appendChild(a);
       });
-      aDiv.appendChild(toolBtns);
-
-      var state = wfLoad();
-      state.active = true;
-      state.recommended = recommendedTools;
-      state.next = recommendedTools.filter(function(t){
-        return state.completed.indexOf(t)<0;
-      })[0]||null;
-      wfSave(state);
-      wfApplyStyles(state);
+      aDiv.appendChild(btns);
+      var state=wfLoad(); state.active=true; state.recommended=tools;
+      state.next=tools.filter(function(t){return state.completed.indexOf(t)<0;})[0]||null;
+      wfSave(state); wfApplyStyles(state);
     }
-
-    var resetBtn = document.createElement('button');
-    resetBtn.className = 'adi-reset';
-    resetBtn.textContent = '🔄 清除推薦';
-    resetBtn.onclick = wfReset;
-    aDiv.appendChild(resetBtn);
-
-  } catch(err) {
-    aDiv.textContent = '⚠️ 連線失敗：'+err.message;
-  }
-  btn.disabled = false;
-  msgs.scrollTop = msgs.scrollHeight;
+    var rb=document.createElement('button'); rb.className='adi-reset'; rb.textContent='🔄 清除推薦'; rb.onclick=wfReset;
+    aDiv.appendChild(rb);
+  }catch(err){aDiv.textContent='⚠️ 連線失敗：'+err.message;}
+  if(btn)btn.disabled=false; msgs.scrollTop=msgs.scrollHeight;
 }
 
-function homeChatToggle() {
-  var body = document.getElementById('hc-body');
-  var icon = document.querySelector('.hch-toggle');
-  if(!body) return;
-  var open = body.classList.contains('open');
-  body.classList.toggle('open',!open);
-  if(icon) icon.textContent = open?'▼ 展開':'▲ 收合';
-}
+function homeChatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}}
 
-function homeChatKeydown(e) {
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}
-}
+window.aiDrawerOpen=aiDrawerOpen;
+window.aiDrawerClose=aiDrawerClose;
+window.homeChatSend=homeChatSend;
+window.homeChatKeydown=homeChatKeydown;
+window.wfReset=wfReset;
+window.wfApplyStyles=wfApplyStyles;
 
-window.aiDrawerOpen=aiDrawerOpen;window.aiDrawerClose=aiDrawerClose;
-window.homeChatSend=homeChatSend;window.homeChatToggle=homeChatToggle;window.homeChatKeydown=homeChatKeydown;
-window.wfReset=wfReset;window.wfApplyStyles=wfApplyStyles;
+</script>
 
+<section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
+  <div class="card" style="background:#F8FAFC;border-left:4px solid var(--gold);font-size:12px;line-height:1.8;color:#374151">
+    <div class="card-title"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>方法來源與驗算聲明</div>
+    <p><strong>定位：</strong>本工具為內部工程分析與教育訓練輔助工具，不等同第三方軟體認證或法規驗證系統。</p>
+    <p><strong>SPC：</strong>Xbar-R、I-MR、np chart、Cp/Cpk 等公式依 Montgomery《Introduction to Statistical Quality Control》與常用 SPC 手冊公式設計，已以範例資料做初步驗算。</p>
+    <p><strong>MSA：</strong>Gage R&amp;R 支援 ANOVA 法與平均全距法；判斷門檻採常見 AIAG MSA 判讀：%GRR &lt; 10% 優良、10%~30% 條件接受、&gt;30% 不合格，ndc 建議 ≥ 5。正式使用前仍應以公司核准樣本資料與既有統計軟體交叉確認。</p>
+    <p><strong>報告責任：</strong>輸出 PDF/JSON 可作為紀錄草稿，正式品質紀錄仍需依公司文件管制、審查與批准流程執行。</p>
+  </div>
+</section>
+
+
+<div id="version-badge" style="position:fixed;bottom:12px;right:12px;z-index:9999;
+  background:rgba(27,58,92,.85);color:rgba(255,255,255,.65);
+  font-size:10px;padding:4px 10px;border-radius:20px;
+  font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.12);pointer-events:none">
+  v1.0 正式版 · 2026-05-30 13:08
+</div>
+
+<!-- AI 助理浮動按鈕 -->
+<button class="ai-float-btn" id="ai-float-btn" onclick="aiDrawerOpen()" title="AI 分析助理">
+  <span class="afb-dot"></span>🤖 AI 分析助理
+</button>
+<div class="ai-drawer-overlay" id="ai-overlay" onclick="aiDrawerClose()"></div>
+<div class="ai-drawer" id="ai-drawer">
+  <div class="ai-drawer-header">
+    <div class="adh-left">
+      <span style="font-size:22px">🤖</span>
+      <div><div class="adh-title">AI 分析助理</div><div class="adh-sub">描述問題，推薦工具路徑</div></div>
+    </div>
+    <button class="adh-close" onclick="aiDrawerClose()">✕</button>
+  </div>
+  <div class="ai-drawer-messages" id="hc-messages">
+    <div class="hcm-assistant">您好！請描述品質問題，我推薦合適的分析工具。<br><span style="font-size:11px;color:#6B7280">也可直接點選主頁工具使用。</span></div>
+  </div>
+  <div class="ai-drawer-input">
+    <textarea id="hc-input" rows="2" placeholder="例如：SPC 發現異常需要 CAPA..." onkeydown="homeChatKeydown(event)"></textarea>
+    <div class="ai-drawer-input-row">
+      <button class="adi-send" id="hc-send" onclick="homeChatSend()">送出 →</button>
+      <button class="adi-reset" onclick="wfReset()">🔄 清除</button>
+    </div>
+  </div>
+</div>
+
+
+<div style="position:fixed;bottom:68px;right:16px;z-index:9989;background:rgba(27,58,92,.8);color:rgba(255,255,255,.6);font-size:10px;padding:3px 9px;border-radius:20px;font-family:monospace;pointer-events:none">v2.0 · 2026-05-31 01:51</div>
+</body>
+</html>
