@@ -317,6 +317,208 @@ tr:hover td{background:#F9FAFB}
 .format-hint-btn{display:inline-flex;align-items:center;gap:4px;background:transparent;border:1px solid #C7D9F5;border-radius:5px;padding:3px 10px;font-size:11px;color:#2A5278;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
 .format-hint-btn:hover{background:#EFF6FF}
 
+/* ════ 工作流程狀態系統 ════ */
+
+/* 預設：全部淡色（未激活） */
+.tool-card {
+  transition: all .25s ease;
+}
+.tool-card.wf-inactive {
+  opacity: .35;
+  filter: grayscale(80%);
+}
+.tool-card.wf-inactive:hover {
+  opacity: .55;
+  filter: grayscale(50%);
+  transform: none;
+}
+
+/* 推薦中：彩色 + 輕發光 */
+.tool-card.wf-recommended {
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 0 0 2px var(--card-color, #1A9CB0), 0 4px 16px rgba(0,0,0,.1);
+}
+
+/* 下一步：彩色 + 明顯發光 + 動畫 */
+.tool-card.wf-next {
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 0 0 2.5px var(--card-color, #1A9CB0), 0 6px 20px rgba(0,0,0,.15);
+  animation: wf-pulse 2s ease-in-out infinite;
+}
+@keyframes wf-pulse {
+  0%, 100% { box-shadow: 0 0 0 2.5px var(--card-color, #1A9CB0), 0 6px 20px rgba(0,0,0,.12); }
+  50% { box-shadow: 0 0 0 4px var(--card-color, #1A9CB0), 0 8px 24px rgba(0,0,0,.2); }
+}
+
+/* 已完成：淡色 + 勾勾 */
+.tool-card.wf-done {
+  opacity: .5;
+  filter: grayscale(40%);
+}
+.tool-card.wf-done::after {
+  content: '✅';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 14px;
+  z-index: 2;
+}
+
+/* 主頁聊天助理 */
+.home-chat {
+  background: #fff;
+  border: 1px solid #E8EDF5;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.home-chat-header {
+  background: #1B3A5C;
+  color: #fff;
+  padding: .7rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.home-chat-header .hch-title {
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,.9);
+}
+.home-chat-header .hch-subtitle {
+  font-size: 11px;
+  color: rgba(255,255,255,.45);
+  margin-left: 4px;
+}
+.home-chat-header .hch-toggle {
+  font-size: 11px;
+  color: rgba(255,255,255,.45);
+}
+.home-chat-body {
+  display: none;
+  padding: .75rem 1.25rem 1rem;
+}
+.home-chat-body.open { display: block; }
+.home-chat-messages {
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-bottom: .6rem;
+}
+.hcm-user {
+  background: #1B3A5C;
+  color: #fff;
+  padding: .5rem .85rem;
+  border-radius: 8px 8px 2px 8px;
+  font-size: 13px;
+  align-self: flex-end;
+  max-width: 85%;
+}
+.hcm-assistant {
+  background: #F8FAFF;
+  color: #1a1a2e;
+  border: 1px solid #E2ECF8;
+  padding: .6rem .85rem;
+  border-radius: 8px 8px 8px 2px;
+  font-size: 13px;
+  align-self: flex-start;
+  max-width: 90%;
+  line-height: 1.7;
+}
+.hcm-assistant strong { font-weight: 700; }
+.hcm-assistant .tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 6px;
+  padding: 3px 10px;
+  margin: 3px 3px 3px 0;
+  font-size: 12px;
+  color: #1D3B8A;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+}
+.hcm-assistant .tool-link:hover { background: #DBEAFE; }
+.home-chat-input {
+  display: flex;
+  gap: 6px;
+}
+.home-chat-input textarea {
+  flex: 1;
+  border: 1px solid #D1D5DB;
+  border-radius: 7px;
+  padding: .5rem .75rem;
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  line-height: 1.5;
+}
+.home-chat-input textarea:focus { border-color: #1B3A5C; }
+.home-chat-input .hci-send {
+  background: #1B3A5C;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: .5rem 14px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.home-chat-input .hci-send:disabled { background: #9CA3AF; cursor: not-allowed; }
+.wf-reset-btn {
+  background: transparent;
+  border: 1px solid #E2ECF8;
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #6B7280;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: .4rem;
+}
+.wf-reset-btn:hover { background: #F3F4F6; }
+
+
+/* ════ 手機版修正 ════ */
+@media(max-width:600px){
+  /* topbar */
+  .topbar{padding:0 1rem;height:48px}
+  .logo-title{font-size:14px}
+
+  /* hero */
+  .hero-section{padding:2rem 1.25rem 1.75rem}
+  .hero-section h2{font-size:22px}
+
+  /* 聊天看板標題不換行 */
+  .home-chat-header{padding:.6rem 1rem}
+  .hch-title{font-size:12px}
+  .hch-subtitle{display:none}
+
+  /* 工具卡片 */
+  .tools-grid{grid-template-columns:1fr 1fr}
+
+  /* tool-bar */
+  #tool-bar{padding:5px 1rem;gap:6px}
+  #tool-bar button{font-size:11px;padding:3px 8px}
+}
+@media(max-width:400px){
+  .tools-grid{grid-template-columns:1fr}
+}
+
 </style>
 
 <style id="edu-styles">
@@ -452,7 +654,7 @@ tr:hover td{background:#F9FAFB}
   </h2>
   <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:2rem;letter-spacing:.04em;display:flex;justify-content:center;align-items:center;gap:12px">
     <span>Edit by Chiu Chang Ru / Claude</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-30 22:50</span>
+    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-31 00:56</span>
   </div>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
@@ -466,6 +668,27 @@ tr:hover td{background:#F9FAFB}
 
 
   
+
+<!-- ══ 主頁聊天助理 ══ -->
+<div class="home-chat">
+  <div class="home-chat-header" onclick="homeChatToggle()">
+    <div class="hch-title">
+      <span>🤖</span>
+      <span style="white-space:nowrap">分析導航助理</span>
+      <span class="hch-subtitle" style="white-space:nowrap">描述問題，推薦工具</span>
+    </div>
+    <span class="hch-toggle">▼ 展開</span>
+  </div>
+  <div class="home-chat-body" id="hc-body">
+    <div class="home-chat-messages" id="hc-messages">
+      <div class="hcm-assistant">您好！請描述您的品質問題或分析需求，我幫您推薦合適的工具。<br><span style="font-size:11px;color:#6B7280">您也可以直接點選下方任何工具使用，不需要先進行對話。</span></div>
+    </div>
+    <div class="home-chat-input">
+      <textarea id="hc-input" rows="2" placeholder="例如：SPC 發現異常需要 CAPA，或：想了解哪些因子影響良率..." onkeydown="homeChatKeydown(event)"></textarea>
+      <button class="hci-send" id="hc-send" onclick="homeChatSend()">送出</button>
+    </div>
+  </div>
+</div>
 
   <!-- D 工具 -->
   <div id="phase-D" class="tools-section">
@@ -4674,6 +4897,269 @@ window.goTool = function(id) {
   }, 150);
 };
 
+// ════════════════════════════════════════════════════
+// 工作流程狀態系統 + 主頁聊天助理
+// ════════════════════════════════════════════════════
+
+// 工具顏色對照（和左側色條一致）
+var TOOL_COLORS = {
+  spc:        '#1A9CB0',
+  msa:        '#7252C8',
+  doe:        '#D4850A',
+  histogram:  '#1A9CB0',
+  hypothesis: '#1A9E75',
+  scatter:    '#1A9E75',
+  boxplot:    '#1A9E75',
+  pareto:     '#3B7DD8',
+  fishbone:   '#3B7DD8',
+  sipoc:      '#3B7DD8',
+  cusum:      '#7252C8',
+};
+
+// 工具名稱對照
+var TOOL_DISPLAY = {
+  spc:        '📈 SPC 管制圖',
+  msa:        '📐 MSA 量測系統',
+  doe:        '🧪 DOE 實驗設計',
+  histogram:  '📉 直方圖',
+  hypothesis: '🔬 假設檢定',
+  scatter:    '🔗 相關性分析',
+  boxplot:    '📦 箱型圖',
+  pareto:     '📊 柏拉圖',
+  fishbone:   '🐟 魚骨圖',
+  sipoc:      '🗺️ SIPOC',
+  cusum:      '🎯 CUSUM/EWMA',
+};
+
+// 工作流程狀態（存 localStorage）
+var WF_KEY = 'medqa_workflow_v2';
+
+function wfLoad() {
+  try {
+    var s = localStorage.getItem(WF_KEY);
+    return s ? JSON.parse(s) : {recommended:[], completed:[], next:null, active:false};
+  } catch(e) {
+    return {recommended:[], completed:[], next:null, active:false};
+  }
+}
+function wfSave(state) {
+  try { localStorage.setItem(WF_KEY, JSON.stringify(state)); } catch(e){}
+}
+function wfReset() {
+  localStorage.removeItem(WF_KEY);
+  wfApplyStyles({recommended:[], completed:[], next:null, active:false});
+  // 清除對話
+  var msgs = document.getElementById('hc-messages');
+  if(msgs) msgs.innerHTML = '<div class="hcm-assistant">您好！請描述您的品質問題或分析需求，我幫您推薦合適的工具。<br><span style="font-size:11px;color:#6B7280">您也可以直接點選任何工具使用，不需要先進行對話。</span></div>';
+  homeChatHistory = [];
+}
+
+// 套用視覺狀態到工具卡片
+function wfApplyStyles(state) {
+  var allTools = Object.keys(TOOL_DISPLAY);
+  allTools.forEach(function(tid) {
+    var card = document.querySelector('[data-tool="'+tid+'"]');
+    if(!card) return;
+    card.classList.remove('wf-inactive','wf-recommended','wf-next','wf-done');
+
+    // 設定 CSS 變數（顏色）
+    card.style.setProperty('--card-color', TOOL_COLORS[tid]||'#1A9CB0');
+
+    if(!state.active) return; // 未激活時全部預設樣式
+
+    var isDone = state.completed.indexOf(tid) >= 0;
+    var isNext = state.next === tid;
+    var isRec  = state.recommended.indexOf(tid) >= 0;
+
+    if(isDone)        card.classList.add('wf-done');
+    else if(isNext)   card.classList.add('wf-next');
+    else if(isRec)    card.classList.add('wf-recommended');
+    else              card.classList.add('wf-inactive');
+  });
+}
+
+// 進入工具時記錄（用於自動完成標記）
+var _origGoToolWF = window.goTool;
+window.goTool = function(id) {
+  if(typeof _origGoToolWF === 'function') _origGoToolWF(id);
+  // 自動標記完成（只有在工作流程激活時）
+  var state = wfLoad();
+  if(state.active && state.recommended.indexOf(id) >= 0) {
+    if(state.completed.indexOf(id) < 0) {
+      state.completed.push(id);
+      // 更新下一步（推薦列表中第一個未完成的）
+      var nextTool = null;
+      state.recommended.forEach(function(t) {
+        if(!nextTool && state.completed.indexOf(t) < 0) nextTool = t;
+      });
+      state.next = nextTool;
+      wfSave(state);
+    }
+  }
+};
+
+// 回到主頁時更新視覺狀態
+var _origGoHomeWF = window.goHome;
+window.goHome = function() {
+  if(typeof _origGoHomeWF === 'function') _origGoHomeWF();
+  setTimeout(function() {
+    var state = wfLoad();
+    wfApplyStyles(state);
+    // 如果有下一步，滾動到那個工具卡片
+    if(state.next) {
+      var card = document.querySelector('[data-tool="'+state.next+'"]');
+      if(card) setTimeout(function(){card.scrollIntoView({behavior:'smooth',block:'center'});},400);
+    }
+  }, 100);
+};
+
+// ── 主頁聊天助理 ──
+var homeChatHistory = [];
+
+var HOME_CHAT_SYSTEM = `你是 MedQA 平台的分析導航助理。
+你的唯一職責是根據使用者描述的品質問題，推薦本平台的工具組合和分析順序。
+
+可推薦的工具（只能推薦這些）：
+- pareto：柏拉圖（找出主要問題類別）
+- fishbone：魚骨圖（找根本原因）
+- spc：SPC 管制圖（製程穩定性監控）
+- msa：MSA 量測系統分析（確認量具可信度）
+- histogram：直方圖（確認數據分佈）
+- hypothesis：假設檢定（比較改善前後）
+- scatter：相關性分析（找變數關係）
+- doe：DOE 實驗設計（最佳化製程參數）
+- boxplot：箱型圖（比較多組數據）
+- cusum：CUSUM/EWMA（監控微小偏移）
+- sipoc：SIPOC（定義製程範疇）
+
+回答格式：
+1. 簡短說明分析方向（1-2句）
+2. 推薦工具順序（每個工具一行）
+3. 格式：[TOOLS: tool1, tool2, tool3]（這行必須有，供系統解析）
+
+絕對禁止：
+- 不輸出任何數值、統計結果、計算
+- 不說「你的 Cpk 大概是...」等估計
+- 不推薦 Minitab、JMP 等外部軟體
+- 不超過 200 字`;
+
+window.homeChatSend = async function() {
+  var input = document.getElementById('hc-input');
+  var msgs  = document.getElementById('hc-messages');
+  var btn   = document.getElementById('hc-send');
+  if(!input || !msgs) return;
+  var q = input.value.trim();
+  if(!q) return;
+
+  // 使用者訊息
+  var uDiv = document.createElement('div');
+  uDiv.className = 'hcm-user';
+  uDiv.textContent = q;
+  msgs.appendChild(uDiv);
+  input.value = ''; btn.disabled = true;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  homeChatHistory.push({role:'user', content:q});
+
+  // 載入中
+  var aDiv = document.createElement('div');
+  aDiv.className = 'hcm-assistant';
+  aDiv.textContent = '分析中...';
+  msgs.appendChild(aDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    var response = await fetch(CLAUDE_WORKER, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({messages: homeChatHistory, system: HOME_CHAT_SYSTEM})
+    });
+    var data = await response.json();
+    var reply = data.content[0].text;
+    homeChatHistory.push({role:'assistant', content:reply});
+
+    // 解析推薦工具
+    var toolMatch = reply.match(/\[TOOLS:\s*([^\]]+)\]/);
+    var recommendedTools = [];
+    if(toolMatch) {
+      recommendedTools = toolMatch[1].split(',').map(function(t){return t.trim();})
+        .filter(function(t){return TOOL_DISPLAY[t];});
+      reply = reply.replace(/\[TOOLS:[^\]]+\]/, '').trim();
+    }
+
+    // 渲染回覆
+    var cleanReply = renderMarkdown(reply);
+    aDiv.innerHTML = cleanReply;
+
+    // 加入工具按鈕
+    if(recommendedTools.length > 0) {
+      var toolBtns = document.createElement('div');
+      toolBtns.style.cssText = 'margin-top:.5rem;display:flex;flex-wrap:wrap;gap:4px';
+      recommendedTools.forEach(function(tid, idx) {
+        var btn2 = document.createElement('a');
+        btn2.className = 'tool-link';
+        btn2.innerHTML = (idx+1)+'. '+TOOL_DISPLAY[tid];
+        btn2.onclick = function(e) {
+          e.preventDefault();
+          // 關閉聊天，進入工具
+          homeChatToggle();
+          goTool(tid);
+        };
+        toolBtns.appendChild(btn2);
+      });
+      aDiv.appendChild(toolBtns);
+
+      // 更新工作流程狀態
+      var state = wfLoad();
+      state.active = true;
+      state.recommended = recommendedTools;
+      state.next = recommendedTools.filter(function(t){
+        return state.completed.indexOf(t) < 0;
+      })[0] || null;
+      wfSave(state);
+      wfApplyStyles(state);
+    }
+
+    // 加入重置按鈕
+    var resetBtn = document.createElement('button');
+    resetBtn.className = 'wf-reset-btn';
+    resetBtn.textContent = '🔄 重新開始 / 清除推薦';
+    resetBtn.onclick = wfReset;
+    aDiv.appendChild(resetBtn);
+
+  } catch(err) {
+    aDiv.textContent = '⚠️ 連線失敗：'+err.message;
+  }
+  btn.disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+};
+
+window.homeChatToggle = function() {
+  var body = document.getElementById('hc-body');
+  var icon = document.querySelector('.hch-toggle');
+  if(!body) return;
+  var open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
+};
+
+window.homeChatKeydown = function(e) {
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}
+};
+
+// 頁面載入時初始化
+document.addEventListener('DOMContentLoaded', function() {
+  // 為所有工具卡片加上 data-tool 屬性
+  Object.keys(TOOL_DISPLAY).forEach(function(tid) {
+    var card = document.querySelector('[onclick="goTool(\''+tid+'\')"]');
+    if(card) card.setAttribute('data-tool', tid);
+  });
+  // 套用初始狀態
+  var state = wfLoad();
+  wfApplyStyles(state);
+});
+
+window.homeChatSend=homeChatSend;window.homeChatToggle=homeChatToggle;window.homeChatKeydown=homeChatKeydown;window.wfReset=wfReset;
 window.dtAssistantHTML=dtAssistantHTML;window.dtToggle=dtToggle;window.dtUpdate=dtUpdate;window.dtApply=dtApply;window.showFormatHint=showFormatHint;window.hideFormatHint=hideFormatHint;
 window.checkAndHandleBoundary=checkAndHandleBoundary;
 window.doeApplyFromAI=doeApplyFromAI;window.msaApplyFromAI=msaApplyFromAI;
@@ -5118,7 +5604,7 @@ document.addEventListener('click', function(e) {
   font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
   border:1px solid rgba(255,255,255,.12);cursor:default"
   title="v2.0 MedQA · Build 2026-05-30 13:59">
-  v2.0 · 2026-05-30 22:50
+  v2.0 · 2026-05-31 00:56
 </div>
 </body>
 </html>
