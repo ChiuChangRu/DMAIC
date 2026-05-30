@@ -367,7 +367,7 @@ tr:hover td{background:#F9FAFB}
 }
 
 /* 主頁聊天助理 */
-.home-chat {
+/* .home-chat {
   background: #fff;
   border: 1px solid #E8EDF5;
   border-radius: 10px;
@@ -519,6 +519,222 @@ tr:hover td{background:#F9FAFB}
   .tools-grid{grid-template-columns:1fr}
 }
 
+/* ════ 浮動 AI 助理 ════ */
+
+/* 浮動按鈕 */
+.ai-float-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 18px;
+  z-index: 9990;
+  background: linear-gradient(135deg, #BE185D, #DB2777);
+  color: #fff;
+  border: none;
+  border-radius: 28px;
+  padding: 10px 18px 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 20px rgba(27,58,92,.45);
+  transition: all .2s;
+  white-space: nowrap;
+}
+.ai-float-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(27,58,92,.55);
+}
+.ai-float-btn .afb-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #4ADE80;
+  flex-shrink: 0;
+  animation: afb-pulse 2s ease-in-out infinite;
+}
+@keyframes afb-pulse {
+  0%,100%{ opacity:1; transform:scale(1); }
+  50%{ opacity:.6; transform:scale(.85); }
+}
+.ai-float-btn .afb-badge {
+  background: rgba(255,255,255,.15);
+  border-radius: 10px;
+  font-size: 10px;
+  padding: 1px 7px;
+  font-weight: 400;
+}
+
+/* 側邊抽屜遮罩 */
+.ai-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.35);
+  z-index: 9991;
+  display: none;
+  backdrop-filter: blur(2px);
+}
+.ai-drawer-overlay.open { display: block; }
+
+/* 側邊抽屜 */
+.ai-drawer {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 400px;
+  max-width: 92vw;
+  height: 100vh;
+  background: #fff;
+  z-index: 9992;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 32px rgba(0,0,0,.2);
+  transition: right .3s cubic-bezier(.4,0,.2,1);
+}
+.ai-drawer.open { right: 0; }
+
+/* 抽屜 header */
+.ai-drawer-header {
+  background: linear-gradient(135deg, #BE185D, #DB2777);
+  color: #fff;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.ai-drawer-header .adh-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ai-drawer-header .adh-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+.ai-drawer-header .adh-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.ai-drawer-header .adh-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,.5);
+  margin-top: 1px;
+}
+.ai-drawer-header .adh-close {
+  background: rgba(255,255,255,.15);
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.ai-drawer-header .adh-close:hover { background: rgba(255,255,255,.25); }
+
+/* 抽屜訊息區 */
+.ai-drawer-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .65rem;
+}
+.ai-drawer-messages .hcm-user {
+  background: #1B3A5C;
+  color: #fff;
+  padding: .55rem .9rem;
+  border-radius: 8px 8px 2px 8px;
+  font-size: 13px;
+  align-self: flex-end;
+  max-width: 88%;
+}
+.ai-drawer-messages .hcm-assistant {
+  background: #F8FAFF;
+  color: #1a1a2e;
+  border: 1px solid #E2ECF8;
+  padding: .65rem .9rem;
+  border-radius: 8px 8px 8px 2px;
+  font-size: 13px;
+  align-self: flex-start;
+  max-width: 95%;
+  line-height: 1.75;
+}
+.ai-drawer-messages .hcm-assistant strong { font-weight: 700; }
+.ai-drawer-messages .hcm-assistant .tool-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 6px;
+  padding: 4px 12px;
+  margin: 4px 3px 4px 0;
+  font-size: 12px;
+  color: #1D3B8A;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background .15s;
+}
+.ai-drawer-messages .hcm-assistant .tool-link:hover { background: #DBEAFE; }
+
+/* 抽屜輸入區 */
+.ai-drawer-input {
+  padding: .75rem 1.25rem 1rem;
+  border-top: 1px solid #E8EDF5;
+  flex-shrink: 0;
+}
+.ai-drawer-input textarea {
+  width: 100%;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: .6rem .85rem;
+  font-size: 13px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  line-height: 1.55;
+  margin-bottom: 6px;
+}
+.ai-drawer-input textarea:focus { border-color: #1B3A5C; }
+.ai-drawer-input-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ai-drawer-input .adi-send {
+  flex: 1;
+  background: #BE185D;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+}
+.ai-drawer-input .adi-send:disabled { background: #9CA3AF; cursor: not-allowed; }
+.ai-drawer-input .adi-reset {
+  background: transparent;
+  border: 1px solid #E2ECF8;
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #6B7280;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
 </style>
 
 <style id="edu-styles">
@@ -627,7 +843,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">Offline · Auto-save</span>
+    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:17</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -654,7 +870,7 @@ tr:hover td{background:#F9FAFB}
   </h2>
   <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:2rem;letter-spacing:.04em;display:flex;justify-content:center;align-items:center;gap:12px">
     <span>Edit by Chiu Chang Ru / Claude</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-31 01:06</span>
+    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-31 01:14</span>
   </div>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
@@ -668,27 +884,6 @@ tr:hover td{background:#F9FAFB}
 
 
   
-
-<!-- ══ 主頁聊天助理 ══ -->
-<div class="home-chat">
-  <div class="home-chat-header" onclick="homeChatToggle()">
-    <div class="hch-title">
-      <span>🤖</span>
-      <span style="white-space:nowrap">分析導航助理</span>
-      <span class="hch-subtitle" style="white-space:nowrap">描述問題，推薦工具</span>
-    </div>
-    <span class="hch-toggle">▼ 展開</span>
-  </div>
-  <div class="home-chat-body" id="hc-body">
-    <div class="home-chat-messages" id="hc-messages">
-      <div class="hcm-assistant">您好！請描述您的品質問題或分析需求，我幫您推薦合適的工具。<br><span style="font-size:11px;color:#6B7280">您也可以直接點選下方任何工具使用，不需要先進行對話。</span></div>
-    </div>
-    <div class="home-chat-input">
-      <textarea id="hc-input" rows="2" placeholder="例如：SPC 發現異常需要 CAPA，或：想了解哪些因子影響良率..." onkeydown="homeChatKeydown(event)"></textarea>
-      <button class="hci-send" id="hc-send" onclick="homeChatSend()">送出</button>
-    </div>
-  </div>
-</div>
 
   <!-- D 工具 -->
   <div id="phase-D" class="tools-section">
@@ -1936,6 +2131,9 @@ function goHome(){
   document.getElementById('page-home').classList.add('active');
   document.getElementById('breadcrumb').innerHTML='';
   hideToolBar();
+  // 顯示 AI 浮動按鈕
+  var fb = document.getElementById('ai-float-btn');
+  if(fb) fb.style.display = 'flex';
   try{window.scrollTo(0,0);}catch(e){}
 }
 
@@ -1947,6 +2145,9 @@ function goTool(id){
   if(id==='hypothesis')hyUpdateUI();
   // 顯示工具列（返回按鈕）
   showToolBar(TOOL_NAMES[id]||id);
+  // 隱藏 AI 浮動按鈕（工具頁不需要）
+  var fb = document.getElementById('ai-float-btn');
+  if(fb) fb.style.display = 'none';
   // 初始化數據設計助理
 
   try{window.scrollTo(0,0);}catch(e){}
@@ -5018,6 +5219,141 @@ var homeChatHistory = [];
 
 var HOME_CHAT_SYSTEM = '你是 MedQA 平台的工具導航助理。\n\n任務只有一件事：告訴使用者要用哪些工具、為什麼。\n\n嚴格輸出格式（不可有任何其他內容）：\n① [工具名稱] — 一句話說明用途\n② [工具名稱] — 一句話說明用途\n[TOOLS: tool1, tool2, tool3]\n\n可用工具 ID：pareto, fishbone, spc, msa, histogram, hypothesis, scatter, doe, boxplot, cusum, sipoc\n\n絕對禁止：\n- 不分析問題、不給改善建議\n- 不說 ISO/FDA/FMEA/文件/風險等\n- 不超過 5 行，只說工具名稱和一句用途\n- 範例：① 柏拉圖 — 找出主要不良原因類別\n        ② 魚骨圖 — 追查根本原因\n        [TOOLS: pareto, fishbone]';
 
+
+window.homeChatToggle = function() {
+  var body = document.getElementById('hc-body');
+  var icon = document.querySelector('.hch-toggle');
+  if(!body) return;
+  var open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
+};
+
+window.homeChatKeydown = function(e) {
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}
+};
+
+window.wfReset = function() {
+  localStorage.removeItem('medqa_workflow_v2');
+  wfApplyStyles({recommended:[], completed:[], next:null, active:false});
+  var msgs = document.getElementById('hc-messages');
+  if(msgs) msgs.innerHTML = '<div class="hcm-assistant">已清除推薦。請重新描述您的問題。</div>';
+  homeChatHistory = [];
+};
+
+
+async function homeChatSend() {
+  var input = document.getElementById('hc-input');
+  var msgs  = document.getElementById('hc-messages');
+  var btn   = document.getElementById('hc-send');
+  if(!input || !msgs) return;
+  var q = input.value.trim();
+  if(!q) return;
+
+  var uDiv = document.createElement('div');
+  uDiv.className = 'hcm-user';
+  uDiv.textContent = q;
+  msgs.appendChild(uDiv);
+  input.value = ''; btn.disabled = true;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  homeChatHistory.push({role:'user', content:q});
+
+  var aDiv = document.createElement('div');
+  aDiv.className = 'hcm-assistant';
+  aDiv.textContent = '分析中...';
+  msgs.appendChild(aDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    var response = await fetch(CLAUDE_WORKER, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({messages: homeChatHistory, system: HOME_CHAT_SYSTEM})
+    });
+    var data = await response.json();
+    var reply = data.content[0].text;
+    homeChatHistory.push({role:'assistant', content:reply});
+
+    var toolMatch = reply.match(/\[TOOLS:\s*([^\]]+)\]/);
+    var recommendedTools = [];
+    if(toolMatch) {
+      recommendedTools = toolMatch[1].split(',').map(function(t){return t.trim();})
+        .filter(function(t){return TOOL_DISPLAY[t];});
+      reply = reply.replace(/\[TOOLS:[^\]]+\]/, '').trim();
+    }
+
+    aDiv.innerHTML = renderMarkdown(reply);
+
+    if(recommendedTools.length > 0) {
+      var toolBtns = document.createElement('div');
+      toolBtns.style.cssText = 'margin-top:.5rem;display:flex;flex-wrap:wrap;gap:4px';
+      recommendedTools.forEach(function(tid, idx) {
+        var btn2 = document.createElement('a');
+        btn2.className = 'tool-link';
+        btn2.innerHTML = (idx+1)+'. '+(TOOL_DISPLAY[tid]||tid);
+        btn2.onclick = function(e) {
+          e.preventDefault();
+          aiDrawerClose();
+          goTool(tid);
+        };
+        toolBtns.appendChild(btn2);
+      });
+      aDiv.appendChild(toolBtns);
+
+      var state = wfLoad();
+      state.active = true;
+      state.recommended = recommendedTools;
+      state.next = recommendedTools.filter(function(t){
+        return state.completed.indexOf(t) < 0;
+      })[0] || null;
+      wfSave(state);
+      wfApplyStyles(state);
+    }
+
+    var resetBtn = document.createElement('button');
+    resetBtn.className = 'wf-reset-btn';
+    resetBtn.textContent = '🔄 清除推薦';
+    resetBtn.onclick = wfReset;
+    aDiv.appendChild(resetBtn);
+
+  } catch(err) {
+    aDiv.textContent = '⚠️ 連線失敗：'+err.message;
+  }
+  btn.disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function homeChatToggle() {
+  var body = document.getElementById('hc-body');
+  var icon = document.querySelector('.hch-toggle');
+  if(!body) return;
+  var open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
+}
+
+function homeChatKeydown(e) {
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}
+}
+
+
+// ── AI 助理浮動抽屜 ──
+function aiDrawerOpen() {
+  document.getElementById('ai-drawer').classList.add('open');
+  document.getElementById('ai-overlay').classList.add('open');
+  document.getElementById('ai-float-btn').style.display = 'none';
+  setTimeout(function(){
+    var input = document.getElementById('hc-input');
+    if(input) input.focus();
+  }, 350);
+}
+function aiDrawerClose() {
+  document.getElementById('ai-drawer').classList.remove('open');
+  document.getElementById('ai-overlay').classList.remove('open');
+  document.getElementById('ai-float-btn').style.display = 'flex';
+}
+window.aiDrawerOpen=aiDrawerOpen;window.aiDrawerClose=aiDrawerClose;
 window.homeChatSend=homeChatSend;window.homeChatToggle=homeChatToggle;window.homeChatKeydown=homeChatKeydown;window.wfReset=wfReset;
 window.dtAssistantHTML=dtAssistantHTML;window.dtToggle=dtToggle;window.dtUpdate=dtUpdate;window.dtApply=dtApply;window.showFormatHint=showFormatHint;window.hideFormatHint=hideFormatHint;
 window.checkAndHandleBoundary=checkAndHandleBoundary;
@@ -5457,13 +5793,42 @@ document.addEventListener('click', function(e) {
 </section>
 
 
-<div id="version-badge" style="position:fixed;bottom:12px;right:12px;z-index:9999;
-  background:rgba(27,58,92,.85);color:rgba(255,255,255,.65);
-  font-size:10px;padding:4px 10px;border-radius:20px;
-  font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
-  border:1px solid rgba(255,255,255,.12);cursor:default"
-  title="v2.0 MedQA · Build 2026-05-30 13:59">
-  v2.0 · 2026-05-31 01:06
+<!-- ══ AI 助理浮動按鈕 ══ -->
+<button class="ai-float-btn" onclick="aiDrawerOpen()" id="ai-float-btn" title="AI 分析助理">
+  <span class="afb-dot"></span>
+  🤖 AI 分析助理
+  <span class="afb-badge">推薦工具</span>
+</button>
+
+<!-- 遮罩 -->
+<div class="ai-drawer-overlay" id="ai-overlay" onclick="aiDrawerClose()"></div>
+
+<!-- 側邊抽屜 -->
+<div class="ai-drawer" id="ai-drawer">
+  <div class="ai-drawer-header">
+    <div class="adh-left">
+      <span class="adh-icon">🤖</span>
+      <div>
+        <div class="adh-title">AI 分析助理</div>
+        <div class="adh-sub">描述問題，推薦分析工具路徑</div>
+      </div>
+    </div>
+    <button class="adh-close" onclick="aiDrawerClose()">✕</button>
+  </div>
+  <div class="ai-drawer-messages" id="hc-messages">
+    <div class="hcm-assistant">
+      您好！請描述您的品質問題或分析需求，我推薦合適的工具。
+      <br><span style="font-size:11px;color:#6B7280">您也可以直接點選主頁工具使用，不需要先進行對話。</span>
+    </div>
+  </div>
+  <div class="ai-drawer-input">
+    <textarea id="hc-input" rows="2" placeholder="例如：SPC 發現異常需要 CAPA，或：想了解哪些因子影響良率..." onkeydown="homeChatKeydown(event)"></textarea>
+    <div class="ai-drawer-input-row">
+      <button class="adi-send" id="hc-send" onclick="homeChatSend()">送出 →</button>
+      <button class="adi-reset" onclick="wfReset()">🔄 清除</button>
+    </div>
+  </div>
 </div>
+
 </body>
 </html>
