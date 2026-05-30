@@ -306,6 +306,33 @@ tr:hover td{background:#F9FAFB}
 .design-msg.assistant li{margin:.15rem 0}
 .design-msg.assistant p{margin:.2rem 0}
 
+/* ════ 決策樹設計助理 ════ */
+.dt-assistant{background:#F8FAFF;border:1px solid #DBEAFE;border-radius:8px;margin-bottom:1rem;overflow:hidden}
+.dt-header{background:#1B3A5C;color:#fff;padding:.55rem 1rem;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.dt-header .dt-title{font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.85)}
+.dt-header .dt-toggle{font-size:10px;color:rgba(255,255,255,.5)}
+.dt-body{display:none;padding:.75rem 1rem}
+.dt-body.open{display:block}
+.dt-step{margin-bottom:.65rem}
+.dt-step label{font-size:11px;font-weight:600;color:#374151;display:block;margin-bottom:.25rem}
+.dt-step select{width:100%;border:1px solid #D1D5DB;border-radius:5px;padding:5px 8px;font-size:12px;font-family:inherit;background:#fff;color:#1a1a2e;outline:none}
+.dt-step select:focus{border-color:#1B3A5C}
+.dt-result{background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:.65rem .85rem;margin-top:.5rem;display:none}
+.dt-result.show{display:block}
+.dt-result .dt-rec{font-size:12px;color:#1E40AF;font-weight:600;margin-bottom:.35rem}
+.dt-result .dt-params{font-size:12px;color:#374151;line-height:1.75}
+.dt-result .dt-params strong{color:#1B3A5C}
+.dt-apply-btn{width:100%;margin-top:.5rem;background:#1B3A5C;color:#fff;border:none;border-radius:5px;padding:7px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit}
+.dt-apply-btn:hover{background:#2A5278}
+/* 浮動格式提示 */
+.format-float{position:fixed;bottom:70px;right:16px;z-index:9998;background:#1B3A5C;color:#fff;border-radius:8px;padding:.6rem .9rem;font-size:11px;line-height:1.7;max-width:220px;box-shadow:0 4px 16px rgba(0,0,0,.25);display:none;border:1px solid rgba(126,200,227,.3)}
+.format-float.show{display:block}
+.format-float .ff-title{font-size:10px;font-weight:600;color:#7EC8E3;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem}
+.format-float .ff-close{float:right;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;line-height:1}
+.format-float code{background:rgba(255,255,255,.12);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px}
+.format-hint-btn{display:inline-flex;align-items:center;gap:4px;background:transparent;border:1px solid #C7D9F5;border-radius:5px;padding:3px 10px;font-size:11px;color:#2A5278;cursor:pointer;font-family:inherit;margin-bottom:.5rem}
+.format-hint-btn:hover{background:#EFF6FF}
+
 </style>
 
 <style id="edu-styles">
@@ -411,34 +438,29 @@ tr:hover td{background:#F9FAFB}
       <div class="logo-badge" style="font-size:11px;letter-spacing:-.5px">MQ</div>
       <div class="logo-title">MedQA</div>
     </div>
+    <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:6px;white-space:nowrap">品質 AI 輔助工具</span>
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">Offline · Free · Pure JS</span>
+    <span class="tb-status" id="dmaic-save-status">Offline · Auto-save</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
-<div id="tool-bar" style="display:none;background:#1B3A5C;padding:7px 1.5rem;align-items:center;gap:10px;border-bottom:2px solid #7EC8E3">
-  <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1B3A5C;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
-    ← 主目錄
+<div id="tool-bar" style="display:none;background:#1B3A5C;padding:6px 1.5rem;align-items:center;gap:8px;border-bottom:1px solid rgba(126,200,227,.3)">
+  <button onclick="goHome()" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 12px;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0">
+    ← 返回
   </button>
-  <span id="tool-bar-title" style="font-size:13px;color:#7EC8E3;font-weight:500;flex:1"></span>
-  <button onclick="dmaicSaveCurrent()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">💾 儲存</button>
-  <button onclick="dmaicExportJSON()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">⬇ JSON</button>
-  <button onclick="dmaicPrintCurrentTool()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">🖨 列印</button>
+  <span id="tool-bar-title" style="font-size:12px;color:rgba(255,255,255,.6);flex:1"></span>
+  <button onclick="dmaicSaveCurrent()" style="background:transparent;color:rgba(255,255,255,.55);border:none;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">💾</button>
+  <button onclick="dmaicExportJSON()" style="background:transparent;color:rgba(255,255,255,.55);border:none;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">⬇</button>
+  <button onclick="dmaicPrintCurrentTool()" style="background:transparent;color:rgba(255,255,255,.55);border:none;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit">🖨</button>
 </div>
 
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
 <div id="page-home" class="page active">
 
 <!-- ══ 封面導覽列 ══ -->
-<div style="background:#1B3A5C;padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-  <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:.04em;display:flex;align-items:center;gap:8px">
-    <span style="color:#7EC8E3">Med</span><span>QA</span>
-    <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.5);margin-left:4px;letter-spacing:.02em">AI 輔助醫療器材品質管理</span>
-  </div>
-  <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.06em;text-transform:uppercase">Medical Device Quality Platform</div>
-</div>
+
 
 <!-- ══ Hero ══ -->
 <div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
@@ -4600,6 +4622,382 @@ window.msaApplyFromAI = function(aiText) {
   }
 };
 
+// ════════════════════════════════════════════════════
+// 決策樹設計助理 - 下拉式選單
+// ════════════════════════════════════════════════════
+
+// 決策樹設定
+var DT_CONFIG = {
+
+  spc: {
+    title: '🎯 管制圖選擇助理',
+    steps: [
+      {id:'dtype', label:'數據類型', options:[
+        {val:'', text:'— 請選擇 —'},
+        {val:'cont', text:'連續數值（長度、重量、壓力...）'},
+        {val:'count_def', text:'每批不良品數（通過/失敗）'},
+        {val:'count_rate', text:'不良品比例（大量生產）'},
+        {val:'defects_c', text:'缺陷數（固定樣本）'},
+        {val:'defects_u', text:'缺陷數（樣本大小不固定）'},
+      ]},
+      {id:'nsize', label:'每次量測幾個？（子組大小）', options:[
+        {val:'', text:'— 請選擇 —'},
+        {val:'1', text:'1 個（每次只量一件）'},
+        {val:'2to5', text:'2-5 個（小批次）'},
+        {val:'5plus', text:'5 個以上'},
+      ], showIf:{dtype:'cont'}},
+    ],
+    recommend: function(vals) {
+      var dtype = vals.dtype, n = vals.nsize;
+      if(!dtype) return null;
+      if(dtype==='cont' && !n) return null;
+      var chart='', params=[], format='';
+      if(dtype==='cont'){
+        if(n==='1'){
+          chart='I-MR 管制圖（個別值圖）';
+          params=['每列一筆數值，空格或逗號分隔','建議至少 20-25 筆','有規格請填 LSL / USL'];
+          format='25.1 24.9 25.2 25.4 24.8 ...';
+        } else if(n==='2to5'){
+          chart='Xbar-R 管制圖';
+          params=['每列一個子組，組內數值用逗號分隔','建議至少 20-25 組','子組大小建議 3-5','有規格請填 LSL / USL'];
+          format='25.1,24.9,25.2\n24.8,25.1,25.3\n...';
+        } else {
+          chart='Xbar-S 管制圖';
+          params=['每列一個子組，組內數值用逗號分隔','子組大小 ≥ 5','有規格請填 LSL / USL'];
+          format='25.1,24.9,25.2,25.0,25.1\n...';
+        }
+      } else if(dtype==='count_def'){
+        chart='np 管制圖（樣本大小固定）或 p 管制圖';
+        params=['每列一批的不良品數（整數）','樣本大小（每批抽幾件）請填入','建議至少 20-25 批'];
+        format='2\n0\n1\n3\n0\n...';
+      } else if(dtype==='count_rate'){
+        chart='p 管制圖（不良品比例）';
+        params=['每列格式：不良品數,樣本大小','建議至少 20-25 批'];
+        format='2,100\n0,98\n1,105\n...';
+      } else if(dtype==='defects_c'){
+        chart='c 管制圖（固定樣本缺陷數）';
+        params=['每列一批的缺陷數（整數）','每批樣本大小相同','建議至少 20-25 批'];
+        format='0\n2\n1\n0\n1\n...';
+      } else {
+        chart='u 管制圖（每單位缺陷數）';
+        params=['每列格式：缺陷數,樣本大小','各批樣本大小可不同'];
+        format='0,50\n2,48\n1,52\n...';
+      }
+      return {chart:chart, params:params, format:format};
+    },
+    apply: function(vals) {
+      var chartEl = document.getElementById('spc-chart-select');
+      if(!chartEl) return;
+      var dtype=vals.dtype, n=vals.nsize;
+      if(dtype==='cont'&&n==='1') chartEl.value='IMR';
+      else if(dtype==='cont'&&n==='2to5') chartEl.value='XBARR';
+      else if(dtype==='cont'&&n==='5plus') chartEl.value='XBARS';
+      else if(dtype==='count_def') chartEl.value='NP';
+      else if(dtype==='count_rate') chartEl.value='P';
+      else if(dtype==='defects_c') chartEl.value='C';
+      else chartEl.value='U';
+      if(typeof spcUpdateUI==='function') spcUpdateUI();
+    }
+  },
+
+  msa: {
+    title: '🎯 MSA 設計助理',
+    steps: [
+      {id:'mtype', label:'量具輸出類型', options:[
+        {val:'', text:'— 請選擇 —'},
+        {val:'cont', text:'連續數值（卡尺、天平、壓力表...）'},
+        {val:'attr', text:'通過/失敗、目視判斷、等級'},
+      ]},
+      {id:'mpurpose', label:'分析目的', options:[
+        {val:'', text:'— 請選擇 —'},
+        {val:'grr', text:'評估操作員和量具一致性'},
+        {val:'bias', text:'新量具導入，確認是否有偏差'},
+        {val:'linearity', text:'確認量具在不同範圍的偏差'},
+        {val:'stability', text:'長期監控量具是否漂移'},
+      ], showIf:{mtype:'cont'}},
+    ],
+    recommend: function(vals) {
+      var mt=vals.mtype, mp=vals.mpurpose;
+      if(!mt) return null;
+      if(mt==='cont' && !mp) return null;
+      var chart='', params=[], format='';
+      if(mt==='attr'){
+        chart='Attribute MSA（Kappa 一致性分析）';
+        params=['操作員數建議 2-3 人','樣本數建議 20-30 件（含通過和失敗各半）','每人判讀 2 次'];
+        format='樣本#,標準答案,評估員1第1次,第2次,評估員2第1次,第2次\n1,0,0,0,0,0\n2,1,1,1,1,1\n...';
+      } else if(mp==='grr'){
+        chart='Gage R&R（ANOVA 法）';
+        params=['操作員數建議 3 人','零件數建議 10 件（涵蓋量測範圍）','每人每件量 2 次，共 60 筆'];
+        format='操作員,零件,量測值1,量測值2\n1,1,25.1,25.0\n1,2,24.9,25.1\n...';
+      } else if(mp==='bias'){
+        chart='Bias 偏差分析';
+        params=['需要一個標準件（已知基準值）','重複量測 15-30 次'];
+        format='25.1 25.0 25.2 25.1 24.9 ...（空格分隔）\n並填入基準值（如 25.0）';
+      } else if(mp==='linearity'){
+        chart='Linearity 線性分析';
+        params=['選 5 個不同範圍的基準值','每個基準值重複量測 3-5 次'];
+        format='基準值,量測值1,量測值2,量測值3\n20,19.8,20.1,20.0\n...';
+      } else {
+        chart='Stability 穩定性分析';
+        params=['每個時間點量測 3-5 次','建議監控 7-10 個時間點'];
+        format='每列一個時間點的量測值\n25.1,25.0,25.2\n24.9,25.1,25.0\n...';
+      }
+      return {chart:chart, params:params, format:format};
+    },
+    apply: function(vals) {
+      var mt=vals.mtype, mp=vals.mpurpose;
+      // 自動選擇分析方法
+      var q1=document.getElementById('msa-q1');
+      var q2=document.getElementById('msa-q2');
+      if(q1){ q1.value = mt==='attr'?'attribute':'continuous'; }
+      if(q2 && mt==='cont'){ q2.value = mp||'grr'; }
+      if(typeof msaDecide==='function') msaDecide();
+    }
+  },
+
+  doe: {
+    title: '🎯 DOE 設計助理',
+    steps: [
+      {id:'nfac', label:'有幾個影響因子？', options:[
+        {val:'', text:'— 請選擇 —'},
+        {val:'2', text:'2 個因子（4 種組合）'},
+        {val:'3', text:'3 個因子（8 種組合）'},
+        {val:'4', text:'4 個因子（16 種組合）'},
+      ]},
+      {id:'rep', label:'每個組合重複幾次？', options:[
+        {val:'', text:'— 請選擇 —'},
+        {val:'1', text:'1 次（無法計算 Lack of Fit）'},
+        {val:'2', text:'2 次（建議，可計算 LOF）'},
+        {val:'3', text:'3 次（最完整，樣本較多）'},
+      ]},
+    ],
+    recommend: function(vals) {
+      var nf=vals.nfac, rep=vals.rep;
+      if(!nf||!rep) return null;
+      var total = Math.pow(2,parseInt(nf)) * parseInt(rep);
+      var params = [
+        '因子數：'+nf+' 個',
+        '重複次數：'+rep+' 次',
+        '總實驗次數：'+total+' 次',
+        rep==='1'?'⚠️ 重複1次無法計算 Lack of Fit，建議至少2次':'✅ 可計算 Lack of Fit',
+      ];
+      return {
+        chart: '2^'+nf+' 全因子設計',
+        params: params,
+        format: '在下方填入每個因子名稱、高水準值、低水準值，\n然後填入每個實驗的結果（Y 值）'
+      };
+    },
+    apply: function(vals) {
+      var nfEl=document.getElementById('doe-nfactors');
+      var repEl=document.getElementById('doe-rep');
+      if(nfEl && vals.nfac){ nfEl.value=vals.nfac; }
+      if(repEl && vals.rep){ repEl.value=vals.rep; }
+      if(typeof doeUpdateFactors==='function') doeUpdateFactors();
+    }
+  },
+
+  hypothesis: {
+    title: '🎯 假設檢定選擇助理',
+    steps: [
+      {id:'hgoal', label:'你想比較什麼？', options:[
+        {val:'', text:'— 請選擇 —'},
+        {val:'vs_target', text:'一組數據和目標值比較'},
+        {val:'two_groups', text:'兩組獨立數據比較'},
+        {val:'before_after', text:'改善前後（同一批樣本）'},
+        {val:'variance', text:'比較兩組的變異程度'},
+      ]},
+    ],
+    recommend: function(vals) {
+      var g=vals.hgoal;
+      if(!g) return null;
+      var chart='', params=[], format='';
+      if(g==='vs_target'){
+        chart='1-Sample t 檢定'; params=['輸入一組數據','填入目標值（μ₀）','建議樣本數 ≥ 20'];
+        format='25.1 24.9 25.2 25.4 24.8 ...（空格分隔）';
+      } else if(g==='two_groups'){
+        chart='2-Sample t 檢定（Welch）'; params=['輸入兩組獨立數據','建議每組 ≥ 20 筆'];
+        format='樣本1：25.1 24.9 25.2 ...\n樣本2：24.8 25.1 25.3 ...';
+      } else if(g==='before_after'){
+        chart='Paired t 檢定（配對）'; params=['輸入改善前和改善後的配對數據','兩組數量必須相同'];
+        format='改善前：25.1 24.9 25.2 ...\n改善後：24.8 25.1 25.3 ...';
+      } else {
+        chart='F 檢定（等變異數檢定）'; params=['輸入兩組數據','F 檢定比較的是分散程度，不是均值'];
+        format='樣本1：25.1 24.9 25.2 ...\n樣本2：24.8 25.1 25.3 ...';
+      }
+      return {chart:chart, params:params, format:format};
+    },
+    apply: function(vals) {
+      var typeEl=document.getElementById('hy-type');
+      if(!typeEl) return;
+      var g=vals.hgoal;
+      if(g==='vs_target') typeEl.value='1t';
+      else if(g==='two_groups') typeEl.value='2t';
+      else if(g==='before_after') typeEl.value='pair';
+      else typeEl.value='ftest';
+      if(typeof hyUpdateUI==='function') hyUpdateUI();
+    }
+  },
+
+};
+
+// 渲染決策樹 HTML
+window.dtAssistantHTML = function(toolId) {
+  var cfg = DT_CONFIG[toolId];
+  if(!cfg) return '';
+
+  var stepsHtml = cfg.steps.map(function(step, si) {
+    var opts = step.options.map(function(o){
+      return '<option value="'+o.val+'">'+o.text+'</option>';
+    }).join('');
+    var showIf = step.showIf ? 'data-showif="'+JSON.stringify(step.showIf).replace(/"/g,"'")+'"' : '';
+    return '<div class="dt-step" id="dt-step-'+toolId+'-'+step.id+'" '+showIf+' style="'+(step.showIf?'display:none':'')+'">'+
+      '<label>'+step.label+'</label>'+
+      '<select id="dt-'+toolId+'-'+step.id+'" onchange="dtUpdate(\''+toolId+'\')">'+opts+'</select>'+
+    '</div>';
+  }).join('');
+
+  return '<div class="dt-assistant" id="dta-'+toolId+'">'+
+    '<div class="dt-header" onclick="dtToggle(\''+toolId+'\')">'+
+      '<div class="dt-title">'+cfg.title+'</div>'+
+      '<span class="dt-toggle">▼ 展開</span>'+
+    '</div>'+
+    '<div class="dt-body" id="dt-body-'+toolId+'">'+
+      stepsHtml+
+      '<div class="dt-result" id="dt-result-'+toolId+'">'+
+        '<div class="dt-rec" id="dt-rec-'+toolId+'"></div>'+
+        '<div class="dt-params" id="dt-params-'+toolId+'"></div>'+
+        '<button class="dt-apply-btn" id="dt-apply-'+toolId+'" onclick="dtApply(\''+toolId+'\')">✅ 套用設定到表單</button>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+};
+
+// 展開/收合
+window.dtToggle = function(toolId) {
+  var body = document.getElementById('dt-body-'+toolId);
+  var icon = document.querySelector('#dta-'+toolId+' .dt-toggle');
+  if(!body) return;
+  var open = body.classList.contains('open');
+  body.classList.toggle('open', !open);
+  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
+};
+
+// 更新決策樹
+window.dtUpdate = function(toolId) {
+  var cfg = DT_CONFIG[toolId];
+  if(!cfg) return;
+
+  // 收集目前的選值
+  var vals = {};
+  cfg.steps.forEach(function(step) {
+    var el = document.getElementById('dt-'+toolId+'-'+step.id);
+    if(el) vals[step.id] = el.value;
+  });
+
+  // 顯示/隱藏條件步驟
+  cfg.steps.forEach(function(step) {
+    if(!step.showIf) return;
+    var el = document.getElementById('dt-step-'+toolId+'-'+step.id);
+    if(!el) return;
+    var show = Object.entries(step.showIf).every(function(entry){
+      return vals[entry[0]] === entry[1];
+    });
+    el.style.display = show ? 'block' : 'none';
+    if(!show) vals[step.id] = '';
+  });
+
+  // 計算建議
+  var rec = cfg.recommend(vals);
+  var resultEl = document.getElementById('dt-result-'+toolId);
+  if(!rec) { resultEl.classList.remove('show'); return; }
+
+  document.getElementById('dt-rec-'+toolId).innerHTML = '建議使用：<strong>' + rec.chart + '</strong>';
+  document.getElementById('dt-params-'+toolId).innerHTML =
+    rec.params.map(function(p){ return '• ' + p; }).join('<br>') +
+    '<br><br><strong>輸入格式：</strong><br><code>' + rec.format.replace(/\n/g,'<br>') + '</code>';
+  resultEl.classList.add('show');
+
+  // 儲存目前選值
+  resultEl._vals = vals;
+};
+
+// 套用設定
+window.dtApply = function(toolId) {
+  var cfg = DT_CONFIG[toolId];
+  var resultEl = document.getElementById('dt-result-'+toolId);
+  if(!cfg || !resultEl || !resultEl._vals) return;
+  cfg.apply(resultEl._vals);
+
+  // 顯示成功提示並關閉
+  var btn = document.getElementById('dt-apply-'+toolId);
+  if(btn) { btn.textContent = '✅ 已套用！'; btn.style.background='#059669'; }
+  setTimeout(function(){
+    dtToggle(toolId);
+    var card = document.querySelector('#page-'+toolId+' .card');
+    if(card) card.scrollIntoView({behavior:'smooth',block:'start'});
+  }, 800);
+};
+
+// 浮動格式提示
+var FORMAT_HINTS = {
+  spc:        '每列一組數值\n用空格或逗號分隔\n例：<code>25.1 24.9 25.2</code>',
+  msa:        '每列：操作員,零件,值1,值2\n例：<code>1,1,25.1,25.0</code>',
+  doe:        '因子高/低水準各填一個數值\n實驗結果每格填一個 Y 值',
+  histogram:  '數值用空格或逗號分隔\n例：<code>25.1 24.9 25.2 25.4</code>',
+  hypothesis: '每組數值用空格分隔\n兩組各填一列',
+  scatter:    'X 和 Y 各填一列\n數值空格分隔',
+  boxplot:    '格式：<code>組名: 值1, 值2, ...</code>\n每組一列',
+  pareto:     '格式：<code>類別名稱, 次數</code>\n每類一列',
+  cusum:      '每列一個量測值\n例：<code>25.1</code>\n並填入目標值 μ₀ 和 σ',
+};
+
+window.showFormatHint = function(toolId) {
+  var hint = FORMAT_HINTS[toolId];
+  if(!hint) return;
+  var el = document.getElementById('format-float');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'format-float';
+    el.className = 'format-float';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = '<span class="ff-close" onclick="hideFormatHint()">✕</span>'+
+    '<div class="ff-title">輸入格式</div>'+
+    hint.replace(/\n/g,'<br>');
+  el.classList.add('show');
+};
+window.hideFormatHint = function() {
+  var el = document.getElementById('format-float');
+  if(el) el.classList.remove('show');
+};
+
+// 初始化（進入工具時）
+var _origGoTool = window.goTool;
+window.goTool = function(id) {
+  if(typeof _origGoTool==='function') _origGoTool(id);
+  // 初始化決策樹
+  setTimeout(function(){
+    var daContainer = document.getElementById('da-container-'+id);
+    if(daContainer && DT_CONFIG[id]) {
+      daContainer.innerHTML = dtAssistantHTML(id);
+      // 加入格式提示按鈕到第一個 card
+      var firstCard = document.querySelector('#page-'+id+' .card');
+      if(firstCard){
+        var existing = firstCard.querySelector('.format-hint-btn');
+        if(!existing){
+          var btn = document.createElement('button');
+          btn.className = 'format-hint-btn';
+          btn.innerHTML = '📋 輸入格式說明';
+          btn.onclick = function(){ showFormatHint(id); };
+          firstCard.insertBefore(btn, firstCard.firstChild);
+        }
+      }
+    }
+    hideFormatHint();
+  }, 150);
+};
+
+window.dtAssistantHTML=dtAssistantHTML;window.dtToggle=dtToggle;window.dtUpdate=dtUpdate;window.dtApply=dtApply;window.showFormatHint=showFormatHint;window.hideFormatHint=hideFormatHint;
 window.checkAndHandleBoundary=checkAndHandleBoundary;
 window.doeApplyFromAI=doeApplyFromAI;window.msaApplyFromAI=msaApplyFromAI;
 window.daToggle=daToggle;window.daSend=daSend;window.daKeydown=daKeydown;window.designAssistantHTML=designAssistantHTML;
@@ -5005,8 +5403,9 @@ document.addEventListener('click', function(e) {
   background:rgba(27,58,92,.85);color:rgba(255,255,255,.65);
   font-size:10px;padding:4px 10px;border-radius:20px;
   font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
-  border:1px solid rgba(255,255,255,.12);pointer-events:none">
-  v2.0 MedQA · 2026-05-30 13:43
+  border:1px solid rgba(255,255,255,.12);cursor:default"
+  title="v2.0 MedQA · Build 2026-05-30 13:59">
+  v2.0 · 2026-05-30 13:59
 </div>
 </body>
 </html>
