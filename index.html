@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Six Sigma DMAIC 工具平台</title>
+<title>MedQA · AI 輔助醫療器材品質管理</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
@@ -408,8 +408,8 @@ tr:hover td{background:#F9FAFB}
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo" data-goto="home" onclick="goHome()" title="返回主目錄">
-      <div class="logo-badge">6σ</div>
-      <div class="logo-title">DMAIC 工具平台</div>
+      <div class="logo-badge" style="font-size:11px;letter-spacing:-.5px">MQ</div>
+      <div class="logo-title">MedQA</div>
     </div>
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
@@ -433,21 +433,21 @@ tr:hover td{background:#F9FAFB}
 
 <!-- ══ 封面導覽列 ══ -->
 <div style="background:#1B3A5C;padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-  <div style="font-size:15px;font-weight:600;color:#fff;letter-spacing:.02em">
-    醫療器材品質管理工具
-    <span style="color:#7EC8E3;margin-left:8px;font-weight:400;font-size:13px">Medical Device Quality</span>
+  <div style="font-size:16px;font-weight:700;color:#fff;letter-spacing:.04em;display:flex;align-items:center;gap:8px">
+    <span style="color:#7EC8E3">Med</span><span>QA</span>
+    <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.5);margin-left:4px;letter-spacing:.02em">AI 輔助醫療器材品質管理</span>
   </div>
-  <div style="font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.06em;text-transform:uppercase">DMAIC Platform</div>
+  <div style="font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.06em;text-transform:uppercase">Medical Device Quality Platform</div>
 </div>
 
 <!-- ══ Hero ══ -->
 <div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
-  <div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;font-size:11px;padding:4px 16px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:1.25rem">Six Sigma · DMAIC · 品質工程</div>
+  <div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;font-size:11px;padding:4px 16px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:1.25rem">CAPA · Design Control · Process Quality · Risk Management</div>
   <h2 style="font-size:28px;font-weight:600;line-height:1.4;margin-bottom:.5rem;letter-spacing:-.01em;color:#fff">
-    六標準差 <span style="color:#A8D8EA">DMAIC</span><br>分析工具平台
+    醫療器材<span style="color:#A8D8EA">品質管理</span><br>分析工具平台
   </h2>
   <div style="font-size:12px;color:rgba(255,255,255,.38);margin-bottom:1.5rem;letter-spacing:.04em">Edit by Chiu Chang Ru &nbsp;/&nbsp; Claude</div>
-  <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">完整 DMAIC 五階段工具・純離線運行・無需帳號<br>從定義問題到持續管制，協助製程持續改善</p>
+  <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">CAPA 根因分析・Design Control・製程品質監控・AI 輔助判讀<br>從問題定義到風險管制，符合 ISO 13485 / FDA 21 CFR 要求</p>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
     <button onclick="scrollToPhase('D')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📋 工具總覽</button>
@@ -457,8 +457,8 @@ tr:hover td{background:#F9FAFB}
 <!-- ══ 統計列 ══ -->
 <div style="background:#1B3A5C;padding:1rem 2rem;display:flex;justify-content:center;flex-wrap:wrap">
   <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">10</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">分析工具</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">5</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">DMAIC 階段</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">8</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">Nelson 規則</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">CAPA</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">根因分析</div></div>
+  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">Design</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">Design Control</div></div>
   <div style="padding:.5rem 1.75rem;text-align:center"><div style="font-size:22px;font-weight:600;color:#7EC8E3">100%</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">離線運行</div></div>
 </div>
 
@@ -468,7 +468,7 @@ tr:hover td{background:#F9FAFB}
   <!-- DMAIC 流程軸 -->
   <div id="phase-D" style="margin-bottom:.75rem">
     <div style="font-size:11px;font-weight:600;color:#2A5278;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:.4rem">工具架構</div>
-    <div style="font-size:18px;font-weight:600;color:#1B3A5C;text-align:center;margin-bottom:.3rem">DMAIC 五階段流程</div>
+    <div style="font-size:18px;font-weight:600;color:#1B3A5C;text-align:center;margin-bottom:.3rem">品質管理工具架構</div>
     <div style="font-size:13px;color:#9CA3AF;text-align:center;margin-bottom:1.25rem">點選工具卡片直接進入</div>
   </div>
 
@@ -668,7 +668,7 @@ tr:hover td{background:#F9FAFB}
 
 <!-- Footer -->
 <div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
-  <div>醫療器材品質管理工具・Six Sigma DMAIC 平台</div>
+  <div>MedQA · AI 輔助醫療器材品質管理平台</div>
   <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(126,200,227,.12);border:1px solid rgba(126,200,227,.3);border-radius:20px;padding:3px 12px;font-size:11px;color:#7EC8E3">
     <div style="width:6px;height:6px;border-radius:50%;background:#4ADE80;flex-shrink:0"></div>完全離線・免費使用
   </div>
@@ -4108,6 +4108,26 @@ window.daSend = async function(toolId) {
     var reply = data.content[0].text;
     designHistory[toolId].push({role:'assistant', content:reply});
     aDiv.innerHTML = renderMarkdown(reply);
+    // DOE 套用按鈕：若回應包含因子建議則顯示
+    if(toolId==='doe' && (reply.indexOf('因子')>=0||reply.indexOf('Factor')>=0||reply.indexOf('水準')>=0)){
+      var applyBtn = document.createElement('button');
+      applyBtn.className = 'claude-send';
+      applyBtn.style.cssText = 'margin-top:6px;width:100%;background:#059669';
+      applyBtn.textContent = '✅ 解析設計建議 → 套用到 DOE 表格';
+      applyBtn.onclick = function(){ doeApplyFromAI(reply); };
+      aDiv.appendChild(document.createElement('br'));
+      aDiv.appendChild(applyBtn);
+    }
+    // MSA 套用按鈕
+    if(toolId==='msa' && (reply.indexOf('操作員')>=0||reply.indexOf('零件')>=0||reply.indexOf('重複')>=0)){
+      var applyBtnM = document.createElement('button');
+      applyBtnM.className = 'claude-send';
+      applyBtnM.style.cssText = 'margin-top:6px;width:100%;background:#0891B2';
+      applyBtnM.textContent = '✅ 套用 MSA 設計建議';
+      applyBtnM.onclick = function(){ msaApplyFromAI(reply); };
+      aDiv.appendChild(document.createElement('br'));
+      aDiv.appendChild(applyBtnM);
+    }
   } catch(err) {
     aDiv.className = 'design-msg assistant';
     aDiv.textContent = '⚠️ 錯誤：' + err.message;
@@ -4189,6 +4209,120 @@ window.claudeSend = async function(toolId) {
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 };
 
+// ════════════════════════════════════════════════════
+// 設計助理套用到表格（AI 建議 → HTML 計算）
+// 原則：AI 只建議參數名稱和範圍，所有計算由 JS 執行
+// ════════════════════════════════════════════════════
+
+window.doeApplyFromAI = function(aiText) {
+  // 從 AI 文字中解析因子資訊
+  // 支援格式如：「因子A：溫度，低水準60，高水準80」
+  // 或「A = 溫度：60-80°C」
+  var lines = aiText.split('\n');
+  var factors = [];
+  var lows = [];
+  var highs = [];
+  var yname = '';
+
+  // 解析因子名稱
+  lines.forEach(function(line) {
+    // 匹配「因子X：名稱」或「A = 名稱」或「- 名稱（60-80）」
+    var mFactor = line.match(/因子[A-Z\d]?[：:]\s*([^\s，,（(]+)/);
+    var mRange  = line.match(/[（(]?(\d+\.?\d*)\s*[-~到]\s*(\d+\.?\d*)[）)°]?/);
+    var mAB     = line.match(/^[A-C]\s*[=：:]\s*([^\s，,（(、]+)/);
+
+    if(mFactor && mFactor[1]) {
+      factors.push(mFactor[1].replace(/[（(（(]/,'').trim());
+      if(mRange) { lows.push(parseFloat(mRange[1])); highs.push(parseFloat(mRange[2])); }
+      else { lows.push(null); highs.push(null); }
+    } else if(mAB && mAB[1] && factors.length<4) {
+      factors.push(mAB[1].trim());
+      if(mRange) { lows.push(parseFloat(mRange[1])); highs.push(parseFloat(mRange[2])); }
+      else { lows.push(null); highs.push(null); }
+    }
+  });
+
+  // 解析反應變數
+  var yMatch = aiText.match(/反應[變变]?[數数量]?[：:]\s*([^\s，,\n]+)/);
+  if(yMatch) yname = yMatch[1].trim();
+
+  if(factors.length === 0) {
+    alert('無法自動解析因子設定，請手動填入。\n\n提示：請問 Claude「請列出因子名稱和高低水準的具體數值」');
+    return;
+  }
+
+  // 設定因子數量
+  var nfEl = document.getElementById('doe-nfactors');
+  if(nfEl) {
+    nfEl.value = Math.min(factors.length, 4);
+    if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
+  }
+
+  // 填入因子名稱和水準
+  setTimeout(function() {
+    factors.forEach(function(fname, i) {
+      var nameEl = document.getElementById('doe-f'+(i+1)+'-name');
+      var loEl   = document.getElementById('doe-f'+(i+1)+'-lo');
+      var hiEl   = document.getElementById('doe-f'+(i+1)+'-hi');
+      if(nameEl) nameEl.value = fname;
+      if(loEl && lows[i]!==null) loEl.value = lows[i];
+      if(hiEl && highs[i]!==null) hiEl.value = highs[i];
+    });
+    if(yname) {
+      var ynEl = document.getElementById('doe-yname');
+      if(ynEl) ynEl.value = yname;
+    }
+    // 更新矩陣
+    if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
+
+    // 顯示成功提示
+    var msg = '✅ 已套用 ' + factors.length + ' 個因子設定到 DOE 表格！\n\n';
+    msg += factors.map(function(f,i){
+      return f + '：' + (lows[i]!==null?lows[i]:'?') + ' ~ ' + (highs[i]!==null?highs[i]:'?');
+    }).join('\n');
+    msg += '\n\n⚠️ 請確認水準數值，然後填入實驗結果後執行分析。\n（所有計算均由本平台 JS 執行，不依賴 AI）';
+    alert(msg);
+
+    // 捲動到 DOE 輸入區
+    var doeCard = document.querySelector('#page-doe .card');
+    if(doeCard) doeCard.scrollIntoView({behavior:'smooth'});
+  }, 200);
+};
+
+window.msaApplyFromAI = function(aiText) {
+  // 解析操作員數、零件數、重複次數
+  var opMatch  = aiText.match(/(\d+)\s*[個位名]?\s*操作員/);
+  var ptMatch  = aiText.match(/(\d+)\s*[個件]?\s*零件/);
+  var repMatch = aiText.match(/重複\s*(\d+)\s*次/);
+
+  var nop  = opMatch  ? parseInt(opMatch[1])  : null;
+  var npt  = ptMatch  ? parseInt(ptMatch[1])  : null;
+  var nrep = repMatch ? parseInt(repMatch[1]) : null;
+
+  var applied = [];
+  if(nop) {
+    var opEl = document.getElementById('grr-nop');
+    if(opEl) { opEl.value = Math.min(nop, 3); applied.push('操作員數：'+nop); }
+  }
+  if(npt) {
+    var ptEl = document.getElementById('grr-npart');
+    if(ptEl) { ptEl.value = Math.min(npt, 10); applied.push('零件數：'+npt); }
+  }
+  if(nrep) {
+    var repEl = document.getElementById('grr-nrep');
+    if(repEl) { repEl.value = Math.min(nrep, 3); applied.push('重複次數：'+nrep); }
+  }
+
+  if(applied.length > 0) {
+    alert('✅ 已套用 MSA 設計建議：\n\n' + applied.join('\n') + '\n\n請填入實際量測數據後執行分析。');
+    var msaCard = document.querySelector('#page-msa .card');
+    if(msaCard) msaCard.scrollIntoView({behavior:'smooth'});
+  } else {
+    alert('無法自動解析 MSA 設計參數，請手動設定。');
+  }
+};
+
+window.doeApplyFromAI=doeApplyFromAI;window.msaApplyFromAI=msaApplyFromAI;
 window.daToggle=daToggle;window.daSend=daSend;window.daKeydown=daKeydown;window.designAssistantHTML=designAssistantHTML;
 window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
@@ -4587,5 +4721,13 @@ document.addEventListener('click', function(e) {
   </div>
 </section>
 
+
+<div id="version-badge" style="position:fixed;bottom:12px;right:12px;z-index:9999;
+  background:rgba(27,58,92,.85);color:rgba(255,255,255,.65);
+  font-size:10px;padding:4px 10px;border-radius:20px;
+  font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
+  border:1px solid rgba(255,255,255,.12);pointer-events:none">
+  v2.0 MedQA · 2026-05-30 13:08
+</div>
 </body>
 </html>
