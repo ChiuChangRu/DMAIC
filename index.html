@@ -422,7 +422,6 @@ tr:hover td{background:#F9FAFB}
       <div class="logo-badge" style="font-size:11px;letter-spacing:-.5px">MQ</div>
       <div class="logo-title">MedQA</div>
     </div>
-    <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:6px;white-space:nowrap">品質 AI 輔助工具</span>
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
@@ -447,37 +446,24 @@ tr:hover td{background:#F9FAFB}
 
 
 <!-- ══ Hero ══ -->
-<div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
-  
-  <h2 style="font-size:28px;font-weight:600;line-height:1.4;margin-bottom:.5rem;letter-spacing:-.01em;color:#fff">
-    醫療器材<span style="color:#A8D8EA">品質管理</span><br>分析工具平台
+<div style="background:#2A5278;color:#fff;padding:3rem 2rem 2.5rem;text-align:center">
+  <h2 style="font-size:30px;font-weight:600;line-height:1.4;margin-bottom:.75rem;letter-spacing:-.01em;color:#fff">
+    <span style="color:#A8D8EA">AI 輔助</span>統計分析平台
   </h2>
-  <div style="font-size:12px;color:rgba(255,255,255,.38);margin-bottom:1.5rem;letter-spacing:.04em;display:flex;justify-content:center;align-items:center;gap:16px">
+  <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:2rem;letter-spacing:.04em;display:flex;justify-content:center;align-items:center;gap:12px">
     <span>Edit by Chiu Chang Ru / Claude</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-size:10px;letter-spacing:.06em;font-family:monospace">v2.0 · 2026-05-30 14:24</span>
+    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-30 22:50</span>
   </div>
-  <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">製程監控・量測分析・實驗設計・風險管制<br>符合 ISO 13485 / FDA 21 CFR 要求</p>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
-    <button onclick="scrollToPhase('D')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📋 工具總覽</button>
   </div>
 </div>
 
-<!-- ══ 統計列 ══ -->
-<div style="background:#1B3A5C;padding:1rem 2rem;display:flex;justify-content:center;flex-wrap:wrap">
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">10</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">分析工具</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">CAPA</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">根因分析</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">Design</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">Design Control</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center"><div style="font-size:22px;font-weight:600;color:#7EC8E3">100%</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">離線運行</div></div>
-</div>
 
 <!-- ══ 主內容 ══ -->
 <div class="home-main" style="padding-top:.5rem">
 
-  <!-- DMAIC 流程軸 -->
-  <div id="phase-D" style="margin-bottom:.75rem">
-    <div style="font-size:12px;color:#9CA3AF;text-align:center;margin-bottom:.75rem;letter-spacing:.02em">選擇分析工具</div>
-  </div>
+
 
   
 
@@ -511,21 +497,21 @@ tr:hover td{background:#F9FAFB}
 
   <!-- M 工具 -->
   <div id="phase-M" class="tools-section">
-    <div class="tools-section-title" style="color:#1A9CB0;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px">Measure・量測</div>
+    <div class="tools-section-title" style="color:#1A9CB0;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px;display:flex;align-items:center;gap:8px">Measure・量測<span style="font-size:11px;font-weight:500;color:#6B7280;background:#F0F4FF;border:1px solid #DBEAFE;border-radius:12px;padding:2px 8px;letter-spacing:.03em">AI 輔助</span></div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
         <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
-        <span class="tc-tag tag-done">完成</span>
+        <span class="tc-tag tag-done">完成</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 自動判讀</span>
       </div>
       <div class="tool-card" onclick="goTool('histogram')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📉</div><div class="tc-name">直方圖 + 常態檢定</div>
         <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
-        <span class="tc-tag tag-new">可用</span>
+        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 分佈判讀</span>
       </div>
       <div class="tool-card" onclick="goTool('boxplot')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
@@ -539,21 +525,21 @@ tr:hover td{background:#F9FAFB}
 
   <!-- A 工具 -->
   <div id="phase-A" class="tools-section">
-    <div class="tools-section-title" style="color:#1A9E75;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px">Analyze・分析</div>
+    <div class="tools-section-title" style="color:#1A9E75;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px;display:flex;align-items:center;gap:8px">Analyze・分析<span style="font-size:11px;font-weight:500;color:#6B7280;background:#F0F4FF;border:1px solid #DBEAFE;border-radius:12px;padding:2px 8px;letter-spacing:.03em">AI 輔助</span></div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('scatter')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🔗</div><div class="tc-name">相關性 + 散佈圖</div>
         <div class="tc-desc">Pearson r・線性迴歸・R²</div>
-        <span class="tc-tag tag-new">可用</span>
+        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 相關判讀</span>
       </div>
       <div class="tool-card" onclick="goTool('hypothesis')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🔬</div><div class="tc-name">假設檢定</div>
         <div class="tc-desc">t-test・F-test・卡方檢定</div>
-        <span class="tc-tag tag-new">可用</span>
+        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 檢定判讀</span>
       </div>
       <div class="tool-card" onclick="goTool('fishbone')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
@@ -567,21 +553,21 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
         <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
-        <span class="tc-tag tag-new">可用</span>
+        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 GRR 判讀</span>
       </div>
     </div>
   </div>
 
   <!-- I 工具 -->
   <div id="phase-I" class="tools-section">
-    <div class="tools-section-title" style="color:#D4850A;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px">Improve・改善</div>
+    <div class="tools-section-title" style="color:#D4850A;font-size:16px;font-weight:700;letter-spacing:.02em;padding:4px 0 8px;display:flex;align-items:center;gap:8px">Improve・改善<span style="font-size:11px;font-weight:500;color:#6B7280;background:#F0F4FF;border:1px solid #DBEAFE;border-radius:12px;padding:2px 8px;letter-spacing:.03em">AI 輔助</span></div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('doe')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
         <div class="tc-phase" style="color:#D4850A">IMPROVE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🧪</div><div class="tc-name">DOE 實驗設計</div>
         <div class="tc-desc">全因子・部分因子・Yates 分析</div>
-        <span class="tc-tag tag-new">可用</span>
+        <span class="tc-tag tag-new">可用</span><span style="font-size:10px;background:#EFF6FF;color:#1D3B8A;border:1px solid #BFDBFE;border-radius:10px;padding:1px 7px;margin-left:3px;font-weight:500">🤖 效應判讀</span>
       </div>
       <div class="tool-card" style="opacity:.55;cursor:not-allowed">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
@@ -654,11 +640,8 @@ tr:hover td{background:#F9FAFB}
 </div>
 
 <!-- Footer -->
-<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
+<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
   <div>MedQA · AI 輔助醫療器材品質管理平台</div>
-  <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(126,200,227,.12);border:1px solid rgba(126,200,227,.3);border-radius:20px;padding:3px 12px;font-size:11px;color:#7EC8E3">
-    <div style="width:6px;height:6px;border-radius:50%;background:#4ADE80;flex-shrink:0"></div>完全離線・免費使用
-  </div>
   <div>Edit by Chiu Chang Ru / Claude</div>
 </div>
 
@@ -5117,6 +5100,14 @@ document.addEventListener('click', function(e) {
     <p><strong>SPC：</strong>Xbar-R、I-MR、np chart、Cp/Cpk 等公式依 Montgomery《Introduction to Statistical Quality Control》與常用 SPC 手冊公式設計，已以範例資料做初步驗算。</p>
     <p><strong>MSA：</strong>Gage R&amp;R 支援 ANOVA 法與平均全距法；判斷門檻採常見 AIAG MSA 判讀：%GRR &lt; 10% 優良、10%~30% 條件接受、&gt;30% 不合格，ndc 建議 ≥ 5。正式使用前仍應以公司核准樣本資料與既有統計軟體交叉確認。</p>
     <p><strong>報告責任：</strong>輸出 PDF/JSON 可作為紀錄草稿，正式品質紀錄仍需依公司文件管制、審查與批准流程執行。</p>
+    <p style="background:#FFF8E1;border-left:3px solid #F59E0B;padding:.5rem .75rem;border-radius:0 4px 4px 0;margin-top:.5rem">
+      <strong>⚠️ 資料輸入注意事項：</strong>本工具輸入之數據將用於統計計算及 AI 判讀分析。請勿輸入以下機密或敏感資訊：
+      <br>• 客戶名稱、醫院名稱、患者資料（含姓名、病歷號）
+      <br>• 公司內部料號、批號完整編碼、供應商機密資訊
+      <br>• 員工姓名、工號、個人識別資料
+      <br>• 合約條款、財務數據、未公開的研發規格
+      <br><span style="color:#92400E">建議以匿名代碼（如 LOT-A、Inspector-1）替代敏感識別資訊後再行輸入。</span>
+    </p>
   </div>
 </section>
 
@@ -5127,7 +5118,7 @@ document.addEventListener('click', function(e) {
   font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
   border:1px solid rgba(255,255,255,.12);cursor:default"
   title="v2.0 MedQA · Build 2026-05-30 13:59">
-  v2.0 · 2026-05-30 14:24
+  v2.0 · 2026-05-30 22:50
 </div>
 </body>
 </html>
