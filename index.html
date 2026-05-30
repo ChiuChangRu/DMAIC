@@ -843,7 +843,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:26</span>
+    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:39</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2133,7 +2133,7 @@ function goHome(){
   hideToolBar();
   // 顯示 AI 浮動按鈕
   var fb = document.getElementById('ai-float-btn');
-  if(fb) fb.style.display = 'flex';
+  if(fb) fb.style.display='flex';
   try{window.scrollTo(0,0);}catch(e){}
 }
 
@@ -2146,8 +2146,7 @@ function goTool(id){
   // 顯示工具列（返回按鈕）
   showToolBar(TOOL_NAMES[id]||id);
   // 隱藏 AI 浮動按鈕（工具頁不需要）
-  var fb = document.getElementById('ai-float-btn');
-  if(fb) fb.style.display = 'none';
+  if(typeof aiDrawerClose==='function') aiDrawerClose();
   // 初始化數據設計助理
 
   try{window.scrollTo(0,0);}catch(e){}
@@ -5155,6 +5154,30 @@ function wfReset() {
   homeChatHistory = [];
 }
 
+// ── AI 助理抽屜 ──
+function aiDrawerOpen() {
+  var drawer = document.getElementById('ai-drawer');
+  var overlay = document.getElementById('ai-overlay');
+  var floatBtn = document.getElementById('ai-float-btn');
+  if(drawer) drawer.classList.add('open');
+  if(overlay) overlay.classList.add('open');
+  if(floatBtn) floatBtn.style.display = 'none';
+  setTimeout(function(){
+    var input = document.getElementById('hc-input');
+    if(input) input.focus();
+  }, 350);
+}
+
+function aiDrawerClose() {
+  var drawer = document.getElementById('ai-drawer');
+  var overlay = document.getElementById('ai-overlay');
+  var floatBtn = document.getElementById('ai-float-btn');
+  if(drawer) drawer.classList.remove('open');
+  if(overlay) overlay.classList.remove('open');
+  if(floatBtn) floatBtn.style.display = 'flex';
+}
+
+
 // 套用視覺狀態到工具卡片
 function wfApplyStyles(state) {
   var allTools = Object.keys(TOOL_DISPLAY);
@@ -5217,36 +5240,12 @@ window.goHome = function() {
 // ── 主頁聊天助理 ──
 var homeChatHistory = [];
 
-var HOME_CHAT_SYSTEM = '你是 MedQA 平台的工具導航助理。\n\n任務只有一件事：告訴使用者要用哪些工具、為什麼。\n\n嚴格輸出格式（不可有任何其他內容）：\n① [工具名稱] — 一句話說明用途\n② [工具名稱] — 一句話說明用途\n[TOOLS: tool1, tool2, tool3]\n\n可用工具 ID：pareto, fishbone, spc, msa, histogram, hypothesis, scatter, doe, boxplot, cusum, sipoc\n\n絕對禁止：\n- 不分析問題、不給改善建議\n- 不說 ISO/FDA/FMEA/文件/風險等\n- 不超過 5 行，只說工具名稱和一句用途\n- 範例：① 柏拉圖 — 找出主要不良原因類別\n        ② 魚骨圖 — 追查根本原因\n        [TOOLS: pareto, fishbone]';
-
-
-window.homeChatToggle = function() {
-  var body = document.getElementById('hc-body');
-  var icon = document.querySelector('.hch-toggle');
-  if(!body) return;
-  var open = body.classList.contains('open');
-  body.classList.toggle('open', !open);
-  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
-};
-
-window.homeChatKeydown = function(e) {
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}
-};
-
-window.wfReset = function() {
-  localStorage.removeItem('medqa_workflow_v2');
-  wfApplyStyles({recommended:[], completed:[], next:null, active:false});
-  var msgs = document.getElementById('hc-messages');
-  if(msgs) msgs.innerHTML = '<div class="hcm-assistant">已清除推薦。請重新描述您的問題。</div>';
-  homeChatHistory = [];
-};
-
-
+var HOME_CHAT_SYSTEM = '你是工具分類器。只能輸出 JSON，不可有任何其他文字。\n\nJSON 格式：{"tools":["id1","id2","id3"],"reasons":["原因1","原因2","原因3"]}\n\n可用 id：pareto, fishbone, spc, msa, histogram, hypothesis, scatter, doe, boxplot, cusum, sipoc\n\n規則：\n- tools 最多 4 個\n- reasons 和 tools 數量相同，每個原因 10 字以內\n- 只輸出 JSON，第一個字必須是 {，最後一個字必須是 }\n- 絕對不可有 JSON 以外的任何文字';
 async function homeChatSend() {
   var input = document.getElementById('hc-input');
   var msgs  = document.getElementById('hc-messages');
   var btn   = document.getElementById('hc-send');
-  if(!input || !msgs) return;
+  if(!input||!msgs) return;
   var q = input.value.trim();
   if(!q) return;
 
@@ -5267,43 +5266,46 @@ async function homeChatSend() {
 
   try {
     var response = await fetch(CLAUDE_WORKER, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({messages: homeChatHistory, system: HOME_CHAT_SYSTEM})
     });
     var data = await response.json();
     var reply = data.content[0].text;
     homeChatHistory.push({role:'assistant', content:reply});
 
-    var toolMatch = reply.match(/\[TOOLS:\s*([^\]]+)\]/);
+    // 解析 JSON（Claude 只輸出 JSON）
     var recommendedTools = [];
-    if(toolMatch) {
-      recommendedTools = toolMatch[1].split(',').map(function(t){return t.trim();})
-        .filter(function(t){return TOOL_DISPLAY[t];});
-      reply = reply.replace(/\[TOOLS:[^\]]+\]/, '').trim();
-    }
+    var reasons = [];
+    try {
+      var jsonMatch = reply.match(/\{[\s\S]*?"tools"[\s\S]*?\}/);
+      if(jsonMatch) {
+        var parsed = JSON.parse(jsonMatch[0]);
+        recommendedTools = (parsed.tools||[]).filter(function(t){return TOOL_DISPLAY[t];});
+        reasons = parsed.reasons||[];
+      }
+    } catch(e) {}
 
-    // 前端過濾：只保留 ①②③ 格式的行
-    var lines = reply.split('\n');
-    var filtered = lines.filter(function(line) {
-      var t = line.trim();
-      return t.match(/^[①②③④⑤⑥⑦⑧⑨]/) || t.match(/^\d+\.\s+[\u4e00-\u9fff]/) || t === '';
-    });
-    var cleanReply = filtered.join('\n').trim();
-    // 如果過濾後沒內容（格式完全不對），顯示通用提示
-    if(!cleanReply && recommendedTools.length === 0) {
-      cleanReply = '請直接點選下方工具開始分析，或換個方式描述您的問題。';
+    // 組顯示內容（只顯示工具推薦，不顯示 Claude 原始文字）
+    var cleanReply = '';
+    if(recommendedTools.length > 0) {
+      cleanReply = recommendedTools.map(function(tid,i){
+        return (i+1)+'. '+(TOOL_DISPLAY[tid]||tid)+(reasons[i]?' — '+reasons[i]:'');
+      }).join('
+');
+    } else {
+      cleanReply = '請描述更具體的問題，例如：良率下降、SPC 發現異常、圓度不足。';
     }
-    aDiv.innerHTML = renderMarkdown(cleanReply || '');
+    aDiv.innerHTML = renderMarkdown(cleanReply);
 
     if(recommendedTools.length > 0) {
       var toolBtns = document.createElement('div');
       toolBtns.style.cssText = 'margin-top:.5rem;display:flex;flex-wrap:wrap;gap:4px';
-      recommendedTools.forEach(function(tid, idx) {
+      recommendedTools.forEach(function(tid,idx){
         var btn2 = document.createElement('a');
         btn2.className = 'tool-link';
         btn2.innerHTML = (idx+1)+'. '+(TOOL_DISPLAY[tid]||tid);
-        btn2.onclick = function(e) {
+        btn2.onclick = function(e){
           e.preventDefault();
           aiDrawerClose();
           goTool(tid);
@@ -5316,14 +5318,14 @@ async function homeChatSend() {
       state.active = true;
       state.recommended = recommendedTools;
       state.next = recommendedTools.filter(function(t){
-        return state.completed.indexOf(t) < 0;
-      })[0] || null;
+        return state.completed.indexOf(t)<0;
+      })[0]||null;
       wfSave(state);
       wfApplyStyles(state);
     }
 
     var resetBtn = document.createElement('button');
-    resetBtn.className = 'wf-reset-btn';
+    resetBtn.className = 'adi-reset';
     resetBtn.textContent = '🔄 清除推薦';
     resetBtn.onclick = wfReset;
     aDiv.appendChild(resetBtn);
@@ -5340,506 +5342,15 @@ function homeChatToggle() {
   var icon = document.querySelector('.hch-toggle');
   if(!body) return;
   var open = body.classList.contains('open');
-  body.classList.toggle('open', !open);
-  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
+  body.classList.toggle('open',!open);
+  if(icon) icon.textContent = open?'▼ 展開':'▲ 收合';
 }
 
 function homeChatKeydown(e) {
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}
 }
 
-
-// ── AI 助理浮動抽屜 ──
-function aiDrawerOpen() {
-  document.getElementById('ai-drawer').classList.add('open');
-  document.getElementById('ai-overlay').classList.add('open');
-  document.getElementById('ai-float-btn').style.display = 'none';
-  setTimeout(function(){
-    var input = document.getElementById('hc-input');
-    if(input) input.focus();
-  }, 350);
-}
-function aiDrawerClose() {
-  document.getElementById('ai-drawer').classList.remove('open');
-  document.getElementById('ai-overlay').classList.remove('open');
-  document.getElementById('ai-float-btn').style.display = 'flex';
-}
 window.aiDrawerOpen=aiDrawerOpen;window.aiDrawerClose=aiDrawerClose;
-window.homeChatSend=homeChatSend;window.homeChatToggle=homeChatToggle;window.homeChatKeydown=homeChatKeydown;window.wfReset=wfReset;
-window.dtAssistantHTML=dtAssistantHTML;window.dtToggle=dtToggle;window.dtUpdate=dtUpdate;window.dtApply=dtApply;window.showFormatHint=showFormatHint;window.hideFormatHint=hideFormatHint;
-window.checkAndHandleBoundary=checkAndHandleBoundary;
-window.doeApplyFromAI=doeApplyFromAI;window.msaApplyFromAI=msaApplyFromAI;
+window.homeChatSend=homeChatSend;window.homeChatToggle=homeChatToggle;window.homeChatKeydown=homeChatKeydown;
+window.wfReset=wfReset;window.wfApplyStyles=wfApplyStyles;
 
-// Claude AI 重新判讀
-window.claudeReset = function(toolId) {
-  // 清除對話歷史
-  if(claudeHistory) claudeHistory[toolId] = [];
-  
-  // 清除面板內容
-  var panel = document.getElementById('claude-panel-'+toolId);
-  if(!panel) return;
-  
-  var autoDiv = panel.querySelector('.ca-text');
-  var loadDiv = panel.querySelector('.ca-loading');
-  var chatDiv = document.getElementById('claude-chat-'+toolId);
-  var msgsDiv = document.getElementById('claude-msgs-'+toolId);
-  
-  if(autoDiv) { autoDiv.innerHTML = ''; autoDiv.style.display = 'none'; }
-  if(loadDiv) loadDiv.style.display = 'none';
-  if(chatDiv) chatDiv.classList.remove('open');
-  if(msgsDiv) msgsDiv.innerHTML = '';
-  
-  // 重新觸發判讀（從 _lastStats 取上次的統計數據）
-  var lastStats = window._lastStats && window._lastStats[toolId];
-  if(lastStats) {
-    setTimeout(function(){ claudeAutoAnalyze(toolId, lastStats); }, 100);
-  } else {
-    if(autoDiv) { autoDiv.textContent = '請重新執行分析後，判讀將自動更新。'; autoDiv.style.display = 'block'; }
-  }
-};
-window.claudeReset=claudeReset;
-window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
-window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
-window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
-window.paretoAnalyze=paretoAnalyze;window.paretoLoadEx=paretoLoadEx;
-window.fishboneDraw=fishboneDraw;
-window.histAnalyze=histAnalyze;window.histLoadEx=histLoadEx;
-window.doeUpdateFactors=doeUpdateFactors;window.doeAnalyze=doeAnalyze;window.doeLoadEx=doeLoadEx;
-// ════════════════════════════════════════
-// DOE — 終端機模式 ANOVA + LOF + 殘差分析
-// ════════════════════════════════════════
-
-// 儲存最近一次 doeAnalyze 的完整結果供殘差圖用
-window._doeLastResult = null;
-
-function doeFormatANOVA(sortedEff, runs, rep, yMeans, factors, nf, yname, grandMean) {
-  // ── 計算各 SS ──
-  var ssModel=0, dfModel=0;
-  var effRows=sortedEff.map(function(e){
-    var ss=e[1]*e[1]*runs*rep/4;
-    ssModel+=ss; dfModel++;
-    return{name:e[0],ss:ss,df:1,effect:e[1]};
-  });
-  var ssTotal=yMeans.reduce(function(s,v){return s+(v-grandMean)*(v-grandMean);},0)*rep;
-  var ssErr=ssTotal-ssModel;
-  var dfErr=runs*(rep-1);
-
-  // Pure Error & Lack of Fit
-  var ssPE=0,dfPE=0;
-  if(rep>=2){
-    for(var ri=0;ri<runs;ri++){
-      var ys=[];
-      for(var rp=0;rp<rep;rp++){var el=document.getElementById('doe-y-'+ri+'-'+rp);if(el)ys.push(parseFloat(el.value)||0);}
-      var m=ys.reduce(function(s,v){return s+v;},0)/ys.length;
-      ys.forEach(function(v){ssPE+=(v-m)*(v-m);dfPE++;});
-    }
-    dfPE-=runs;
-  }
-  var ssLOF=ssErr-ssPE, dfLOF=dfErr-dfPE;
-  var msLOF=dfLOF>0?ssLOF/dfLOF:0, msPE=dfPE>0?ssPE/dfPE:0;
-  var F_LOF=msPE>0?msLOF/msPE:0;
-  var p_LOF=(dfLOF>0&&dfPE>0)?fDist(F_LOF,dfLOF,dfPE):1;
-  var msErr=dfErr>0?ssErr/dfErr:0;
-
-  // F & p for each effect
-  effRows.forEach(function(e){
-    e.ms=e.ss; e.F=msErr>0?e.ms/msErr:0;
-    e.p=dfErr>0?fDist(e.F,1,dfErr):1;
-  });
-
-  // 整體模型
-  var msModel2=dfModel>0?ssModel/dfModel:0;
-  var F_model=msErr>0?msModel2/msErr:0;
-  var p_model=dfErr>0?fDist(F_model,dfModel,dfErr):1;
-
-  var mainEff=effRows.filter(function(e){return e.name.indexOf('×')<0;});
-  var interEff=effRows.filter(function(e){return e.name.indexOf('×')>=0;});
-  var ssMainT=mainEff.reduce(function(s,e){return s+e.ss;},0);
-  var dfMainT=mainEff.length;
-  var msMainT=dfMainT>0?ssMainT/dfMainT:0;
-  var FMainT=msErr>0?msMainT/msErr:0;
-  var pMainT=dfErr>0?fDist(FMainT,dfMainT,dfErr):1;
-  var ssInterT=interEff.reduce(function(s,e){return s+e.ss;},0);
-  var dfInterT=interEff.length;
-  var msInterT=dfInterT>0?ssInterT/dfInterT:0;
-  var FInterT=msErr>0?msInterT/msErr:0;
-  var pInterT=dfErr>0?fDist(FInterT,dfInterT,dfErr):1;
-
-  // ── HTML table 模擬終端機（解決中文對齊問題）──
-  function r5(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(5));}
-  function r4p(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(4));}
-  function r2f(v){return (v===null||isNaN(v))?'*':parseFloat(v.toFixed(2));}
-  function sigMark(p){return p<0.001?'***':p<0.01?'**':p<0.05?'*':p<0.1?'.':'';}
-  function sigColor(p){return p<0.001?'#FF4444':p<0.01?'#FF8C00':p<0.05?'#FFD700':p<0.1?'#AAFFAA':'#888';}
-
-  var td='style="padding:2px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
-  var tdL='style="padding:2px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
-  var tdH='style="padding:4px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;border-bottom:1px solid #333;white-space:nowrap"';
-  var tdHL='style="padding:4px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;border-bottom:1px solid #333;white-space:nowrap"';
-  var tdG='style="padding:2px 10px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#569CD6;white-space:nowrap;font-weight:700"';
-  var tdGR='style="padding:2px 10px;text-align:right;font-family:Courier New,monospace;font-size:12px;color:#569CD6;white-space:nowrap;font-weight:700"';
-  var tdSub='style="padding:2px 10px 2px 24px;text-align:left;font-family:Courier New,monospace;font-size:12px;color:#A8FF78;white-space:nowrap"';
-
-  function mkRow(nameStyle,name,df,ss,ms,F,p,indent){
-    var sc=p!==null?sigColor(p):'#888';
-    var sm=p!==null?sigMark(p):'';
-    return '<tr>'+
-      '<td '+(indent?tdSub:nameStyle)+'>'+name+'</td>'+
-      '<td '+td+'>'+df+'</td>'+
-      '<td '+td+'>'+r5(ss)+'</td>'+
-      '<td '+td+'>'+(ms!==null?r5(ms):'')+'</td>'+
-      '<td '+td+'>'+(F!==null?r2f(F):'')+'</td>'+
-      '<td '+td+'>'+(p!==null?r4p(p):'')+'</td>'+
-      '<td style="padding:2px 8px;font-family:Courier New,monospace;font-size:12px;color:'+sc+';text-align:center">'+sm+'</td>'+
-    '</tr>';
-  }
-
-  var rows='';
-  // Main Effects
-  rows+='<tr><td '+tdG+' colspan="7">Main Effects</td></tr>';
-  rows+=mkRow(tdG,'  (合計)',dfMainT,ssMainT,msMainT,FMainT,pMainT,false);
-  mainEff.forEach(function(e){rows+=mkRow(tdSub,'  '+e.name,1,e.ss,e.ms,e.F,e.p,false);});
-  // Interactions
-  if(interEff.length>0){
-    rows+='<tr><td '+tdG+' colspan="7">2-Way Interactions</td></tr>';
-    rows+=mkRow(tdG,'  (合計)',dfInterT,ssInterT,msInterT,FInterT,pInterT,false);
-    interEff.forEach(function(e){rows+=mkRow(tdSub,'  '+e.name,1,e.ss,e.ms,e.F,e.p,false);});
-  }
-  // Residual
-  rows+='<tr style="border-top:1px solid #444"><td '+tdL+'>Residual Error</td>'+
-    '<td '+td+'>'+dfErr+'</td><td '+td+'>'+r5(ssErr)+'</td><td '+td+'>'+r5(msErr)+'</td>'+
-    '<td '+td+'></td><td '+td+'></td><td></td></tr>';
-  if(rep>=2&&dfLOF>0){
-    var lokColor=p_LOF>0.05?'#A8FF78':'#FF4444';
-    rows+='<tr><td style="padding:2px 10px 2px 24px;font-family:Courier New,monospace;font-size:12px;color:'+lokColor+'">  Lack of Fit</td>'+
-      '<td '+td+'>'+dfLOF+'</td><td '+td+'>'+r5(ssLOF)+'</td><td '+td+'>'+r5(msLOF)+'</td>'+
-      '<td '+td+'>'+r2f(F_LOF)+'</td><td '+td+'>'+r4p(p_LOF)+'</td>'+
-      '<td style="padding:2px 8px;font-family:Courier New,monospace;font-size:12px;color:'+lokColor+'text-align:center">'+(p_LOF>0.05?'(OK)':'!!!')+'</td></tr>';
-    rows+='<tr><td style="padding:2px 10px 2px 24px;font-family:Courier New,monospace;font-size:12px;color:#A8FF78">  Pure Error</td>'+
-      '<td '+td+'>'+dfPE+'</td><td '+td+'>'+r5(ssPE)+'</td><td '+td+'>'+r5(msPE)+'</td>'+
-      '<td '+td+'></td><td '+td+'></td><td></td></tr>';
-  }
-  // Total
-  rows+='<tr style="border-top:2px solid #555"><td '+tdL+'>Total</td>'+
-    '<td '+td+'>'+(dfModel+dfErr)+'</td><td '+td+'>'+r5(ssTotal)+'</td>'+
-    '<td '+td+'></td><td '+td+'></td><td '+td+'></td><td></td></tr>';
-
-  var Rsq=(ssModel/ssTotal*100).toFixed(2);
-  var S=Math.sqrt(msErr).toFixed(4);
-  var tableHTML=
-    '<div style="background:#0F1117;border-radius:8px;padding:1rem 1.25rem;overflow-x:auto">'+
-    '<div style="font-family:Courier New,monospace;font-size:12px;color:#4EC9B0;margin-bottom:8px">'+
-      'Analysis of Variance for <span style="color:#FFD700">'+yname+'</span> (coded units)'+
-    '</div>'+
-    '<table style="border-collapse:collapse;width:100%">'+
-      '<thead><tr>'+
-        '<th '+tdHL+'>Source</th>'+
-        '<th '+tdH+'>DF</th>'+
-        '<th '+tdH+'>Seq SS</th>'+
-        '<th '+tdH+'>Adj MS</th>'+
-        '<th '+tdH+'>F</th>'+
-        '<th '+tdH+'>P</th>'+
-        '<th '+tdH+'>Sig</th>'+
-      '</tr></thead>'+
-      '<tbody>'+rows+'</tbody>'+
-    '</table>'+
-    '<div style="font-family:Courier New,monospace;font-size:11px;color:#888;margin-top:8px">'+
-      'S = <span style="color:#A8FF78">'+S+'</span>   '+
-      'R-sq = <span style="color:#A8FF78">'+Rsq+'%</span>   '+
-      (rep>=2&&dfLOF>0?'Lack of Fit p = <span style="color:'+(p_LOF>0.05?'#A8FF78':'#FF4444')+'">'+r4p(p_LOF)+'</span>  '+(p_LOF>0.05?'✅ LOF not significant':'⚠️ LOF significant'):'n='+rep+' rep, LOF not available')+
-      '<br>Signif: *** 0.001 &nbsp;** 0.01 &nbsp;* 0.05 &nbsp;. 0.1'+
-    '</div>'+
-    '</div>';
-
-  return{
-    html:tableHTML, msErr:msErr, ssErr:ssErr, dfErr:dfErr,
-    ssLOF:ssLOF, dfLOF:dfLOF, msLOF:msLOF, msPE:msPE, dfPE:dfPE, F_LOF:F_LOF, p_LOF:p_LOF,
-    effRows:effRows, ssTotal:ssTotal, dfTotal:dfModel+dfErr
-  };
-}
-
-// ── 殘差分析四合一圖 ──
-function drawDOEResiduals(){
-  var res = window._doeLastResult;
-  if(!res){ document.getElementById('doe-residual-content').innerHTML='<div class="alert warn">請先執行 DOE 分析。</div>'; return; }
-
-  var fitted  = res.fitted;
-  var residuals = res.residuals;
-  var n = residuals.length;
-  if(!n){ document.getElementById('doe-residual-content').innerHTML='<div class="alert warn">無法計算殘差，請確認已填入所有實驗結果。</div>'; return; }
-
-  destroyCharts();
-
-  var html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-  html += '<div class="canvas-wrap"><canvas id="doe-res-norm" height="220"></canvas></div>';
-  html += '<div class="canvas-wrap"><canvas id="doe-res-fit" height="220"></canvas></div>';
-  html += '<div class="canvas-wrap"><canvas id="doe-res-hist" height="220"></canvas></div>';
-  html += '<div class="canvas-wrap"><canvas id="doe-res-ord" height="220"></canvas></div>';
-  html += '</div>';
-  document.getElementById('doe-residual-content').innerHTML = html;
-
-  var rMean = residuals.reduce(function(s,v){return s+v;},0)/n;
-  var rStd  = Math.sqrt(residuals.reduce(function(s,v){return s+(v-rMean)*(v-rMean);},0)/(n-1));
-
-  setTimeout(function(){
-    // 1. Normal Probability Plot
-    var sorted = residuals.slice().sort(function(a,b){return a-b;});
-    var normPts = sorted.map(function(v,i){
-      var p = (i+0.5)/n;
-      // 近似 normal quantile
-      var z = (p < 0.5) ? -Math.sqrt(-2*Math.log(p)) : Math.sqrt(-2*Math.log(1-p));
-      return {x:v, y:z};
-    });
-    var c1=document.getElementById('doe-res-norm');
-    if(c1){ c1.width=c1.parentElement.offsetWidth||320;
-      chartInst.push(new Chart(c1.getContext('2d'),{
-        type:'scatter',
-        data:{datasets:[
-          {label:'Residuals',data:normPts,backgroundColor:'#1D3B8A',pointRadius:5},
-          {label:'Reference',data:[{x:sorted[0],y:(sorted[0]-rMean)/rStd},{x:sorted[n-1],y:(sorted[n-1]-rMean)/rStd}],
-            type:'line',borderColor:'#DC2626',borderWidth:1.5,pointRadius:0,fill:false}
-        ]},
-        options:{responsive:false,animation:false,
-          plugins:{title:{display:true,text:'Normal Probability Plot',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
-          scales:{x:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}},
-                  y:{title:{display:true,text:'Normal Score'},ticks:{font:{size:9}}}}}
-      }));
-    }
-
-    // 2. Residuals vs Fitted
-    var c2=document.getElementById('doe-res-fit');
-    if(c2){ c2.width=c2.parentElement.offsetWidth||320;
-      var pts2=fitted.map(function(f,i){return{x:parseFloat(f.toFixed(4)),y:parseFloat(residuals[i].toFixed(4))};});
-      chartInst.push(new Chart(c2.getContext('2d'),{
-        type:'scatter',
-        data:{datasets:[
-          {label:'Residuals',data:pts2,backgroundColor:'#1D3B8A',pointRadius:5},
-          {label:'Zero',data:[{x:Math.min.apply(null,fitted),y:0},{x:Math.max.apply(null,fitted),y:0}],
-            type:'line',borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
-        ]},
-        options:{responsive:false,animation:false,
-          plugins:{title:{display:true,text:'Residuals vs Fitted Values',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
-          scales:{x:{title:{display:true,text:'Fitted Value'},ticks:{font:{size:9}}},
-                  y:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}}}}
-      }));
-    }
-
-    // 3. Histogram of Residuals
-    var c3=document.getElementById('doe-res-hist');
-    if(c3){ c3.width=c3.parentElement.offsetWidth||320;
-      var bins=Math.max(4,Math.round(Math.sqrt(n)));
-      var rMin=Math.min.apply(null,residuals), rMax=Math.max.apply(null,residuals);
-      var bw=(rMax-rMin)/bins||0.001;
-      var counts=Array(bins).fill(0);
-      residuals.forEach(function(v){var b=Math.min(bins-1,Math.floor((v-rMin)/bw));counts[b]++;});
-      var labels=counts.map(function(_,i){return (rMin+i*bw).toFixed(3);});
-      chartInst.push(new Chart(c3.getContext('2d'),{
-        type:'bar',data:{labels:labels,datasets:[{label:'Count',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#1D3B8A',borderWidth:1}]},
-        options:{responsive:false,animation:false,
-          plugins:{title:{display:true,text:'Histogram of Residuals',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
-          scales:{x:{ticks:{font:{size:8}}},y:{ticks:{font:{size:9}}}}}
-      }));
-    }
-
-    // 4. Residuals vs Order
-    var c4=document.getElementById('doe-res-ord');
-    if(c4){ c4.width=c4.parentElement.offsetWidth||320;
-      chartInst.push(new Chart(c4.getContext('2d'),{
-        type:'line',
-        data:{labels:residuals.map(function(_,i){return i+1;}),
-          datasets:[
-            {label:'Residual',data:residuals.map(function(v){return parseFloat(v.toFixed(4));}),
-              borderColor:'#1D3B8A',borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#1D3B8A',fill:false,tension:0.1},
-            {label:'Zero',data:Array(n).fill(0),borderColor:'#DC2626',borderWidth:1,borderDash:[5,3],pointRadius:0,fill:false}
-          ]},
-        options:{responsive:false,animation:false,
-          plugins:{title:{display:true,text:'Residuals vs Order',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
-          scales:{x:{title:{display:true,text:'Order'},ticks:{font:{size:9}}},
-                  y:{title:{display:true,text:'Residual'},ticks:{font:{size:9}}}}}
-      }));
-    }
-  }, 80);
-}
-
-window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOEResiduals=drawDOEResiduals;window.doeFormatANOVA=doeFormatANOVA;
-window.sipocDraw=sipocDraw;
-window.cusumAnalyze=cusumAnalyze;window.cusumLoadEx=cusumLoadEx;
-window.scatterAnalyze=scatterAnalyze;window.scatterLoadEx=scatterLoadEx;
-window.hyUpdateUI=hyUpdateUI;window.hyAnalyze=hyAnalyze;window.hyLoadEx=hyLoadEx;
-window.boxplotAnalyze=boxplotAnalyze;
-</script>
-
-<script>
-// 備用事件委派 - 確保 onclick 在各種環境都能運作
-document.addEventListener('click', function(e) {
-  var el = e.target.closest('[data-goto]');
-  if(el) {
-    var id = el.getAttribute('data-goto');
-    if(id === 'home') goHome();
-    else goTool(id);
-  }
-});
-</script>
-
-<script id="dmaic-record-enhancements">
-(function(){
-  'use strict';
-  var APP_VER='dmaic-v2-records';
-  function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
-  function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='Offline · Auto-save enabled';},2200);}}
-  function today(){return new Date().toISOString().slice(0,10);}
-  function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
-
-  window.dmaicEnhanceRecords=function(){
-    document.querySelectorAll('.tool-page').forEach(function(tp){
-      if(tp.querySelector('[data-quality-record]')) return;
-      var page=tp.closest('.page');
-      var pid=page?page.id.replace('page-','tool'):'tool';
-      var header=tp.querySelector('.tp-header');
-      var card=document.createElement('div');
-      card.className='card quality-record';
-      card.setAttribute('data-quality-record','1');
-      card.innerHTML=''+
-        '<div class="card-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="dmaicToggleRecord(this)">'+ 
-          '<span style="display:flex;align-items:center;gap:6px"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>📋 分析紀錄 / 報告輸出</span>'+
-          '<span class="record-toggle-icon" style="font-size:12px;color:#6B7280">▼ 展開填寫</span>'+
-        '</div>'+
-        '<div class="record-body" style="display:none">'+
-          '<div class="print-only">DMAIC 工具平台分析報告 - '+(document.title||'')+'</div>'+ 
-          '<div class="record-grid">'+
-            '<div class="field"><label>專案 / 產品</label><input id="'+pid+'-record-project" type="text" placeholder="例：檢體針組 / 親水塗層 / 包裝確效"></div>'+ 
-            '<div class="field"><label>批號 / Lot / 樣品</label><input id="'+pid+'-record-lot" type="text" placeholder="例：P3-001 / Lot A"></div>'+ 
-            '<div class="field"><label>分析日期</label><input id="'+pid+'-record-date" type="date" value="'+today()+'"></div>'+ 
-          '</div>'+ 
-          '<div class="record-grid-2">'+
-            '<div class="field"><label>分析者</label><input id="'+pid+'-record-owner" type="text" placeholder="分析者 / 部門"></div>'+ 
-            '<div class="field"><label>結論</label><select id="'+pid+'-record-result"><option value="未判定">未判定</option><option value="PASS">PASS</option><option value="FAIL">FAIL</option><option value="需調查">需調查</option><option value="僅供參考">僅供參考</option></select></div>'+ 
-          '</div>'+ 
-          '<div class="field"><label>分析目的</label><textarea class="record-note" id="'+pid+'-record-purpose" rows="2" placeholder="本次分析要回答的問題"></textarea></div>'+ 
-          '<div class="field"><label>判讀 / Note / 後續處置</label><textarea class="record-note" id="'+pid+'-record-note" rows="3" placeholder="記錄異常點、改善措施、CAPA編號"></textarea></div>'+ 
-          '<div class="record-actions">'+
-            '<button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存</button>'+
-            '<button class="btn btn-sec" onclick="dmaicExportJSON()">⬇ 匯出 JSON</button>'+
-          '</div>'+
-          '<div id="'+pid+'-save-indicator" style="margin-top:6px;font-size:12px;color:#6B7280">尚未儲存</div>'+
-        '</div>';
-      if(header) header.insertAdjacentElement('afterend',card); else tp.insertBefore(card,tp.firstChild);
-    });
-  };
-
-  function fieldsIn(page){return Array.prototype.slice.call(page.querySelectorAll('input[id],select[id],textarea[id]'));}
-  function collectPage(){var p=activePage();var data={app:APP_VER,page:pageKey(),savedAt:new Date().toISOString(),fields:{}};fieldsIn(p).forEach(function(el){data.fields[el.id]=el.value;});return data;}
-  function applyData(data){if(!data||!data.fields)return;Object.keys(data.fields).forEach(function(id){var el=document.getElementById(id);if(el){el.value=data.fields[id];el.dispatchEvent(new Event('change'));}});}
-  window.dmaicSaveCurrent=function(){try{localStorage.setItem(APP_VER+'::'+pageKey(),JSON.stringify(collectPage()));status('已儲存本頁：'+new Date().toLocaleTimeString());if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(true);}catch(e){alert('儲存失敗：'+e.message);}};
-  window.dmaicRestoreCurrent=function(){try{var raw=localStorage.getItem(APP_VER+'::'+pageKey());if(raw)applyData(JSON.parse(raw));}catch(e){console.warn(e);}};
-  window.dmaicClearCurrent=function(){if(!confirm('確定清除本頁已儲存資料？'))return;try{localStorage.removeItem(APP_VER+'::'+pageKey());status('已清除本頁儲存資料');}catch(e){} };
-  window.dmaicExportJSON=function(){var data=collectPage();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(pageKey()+'_'+(data.fields[pageKey().replace('page-','tool')+'-record-project']||'record'))+'.json';a.click();URL.revokeObjectURL(a.href);status('JSON 已產生');};
-  window.dmaicPrintPDF=function(){
-    var p=activePage();
-    var title=p.querySelector('.tp-title')?.textContent || 'DMAIC 工具平台';
-    document.title=safeName(title+'_分析報告_'+today());
-    window.print();
-  };
-
-  // auto-save, restore on navigation
-  var oldGoTool=window.goTool, oldGoHome=window.goHome;
-  if(typeof oldGoTool==='function') window.goTool=function(id){ oldGoTool(id); window.dmaicEnhanceRecords(); window.dmaicRestoreCurrent(); };
-  if(typeof oldGoHome==='function') window.goHome=function(){ oldGoHome(); window.dmaicRestoreCurrent(); };
-  document.addEventListener('input',function(e){if(e.target && e.target.id){if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(false);clearTimeout(window.__dmaicSaveTimer);window.__dmaicSaveTimer=setTimeout(window.dmaicSaveCurrent,700);}},true);
-  document.addEventListener('change',function(e){if(e.target && e.target.id) window.dmaicSaveCurrent();},true);
-
-  // SPC validation + interpretation
-  window.dmaicSpcConclusion=function(){
-    try{
-      if(typeof SR==='undefined' || !SR || !SR.chartType) return;
-      var host=document.getElementById('spc-auto-conclusion');
-      if(!host){host=document.createElement('div');host.id='spc-auto-conclusion';var out=document.querySelector('#spc-out .card');if(out)out.insertBefore(host,out.firstChild);}
-      var msgs=[],level='success';
-      if(SR.nelson){var r1=(SR.nelson.r1||[]).length,r2=(SR.nelson.r2||[]).length,r3=(SR.nelson.r3||[]).length;if(r1||r2||r3){level='danger';msgs.push('Nelson 規則已觸發，製程可能不在統計管制狀態，需先調查特殊原因。');}else msgs.push('未偵測到 Nelson Rule 1-3 訊號，初步可視為統計管制狀態。');}
-      if(['XBARR','XBARS','IMR'].indexOf(SR.chartType)>=0 && SR.lsl!=null && SR.usl!=null){
-        var cp=(SR.usl-SR.lsl)/(6*SR.sigma);var cpu=(SR.usl-SR.grandMean)/(3*SR.sigma);var cpl=(SR.grandMean-SR.lsl)/(3*SR.sigma);var cpk=Math.min(cpu,cpl);
-        if(cpk>=1.67) msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力優秀。');
-        else if(cpk>=1.33) msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力良好。');
-        else if(cpk>=1.00){level=level==='danger'?'danger':'warn';msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力僅尚可，建議監控中心值與變異。');}
-        else {level='danger';msgs.push('Cpk = '+cpk.toFixed(3)+'，製程能力不足，需改善或重估規格/製程變異來源。');}
-        if(cp>=1.33 && cpk<1.33) msgs.push('Cp 可接受但 Cpk 偏低，代表製程中心可能偏移。');
-      } else if(['NP','P','C','U'].indexOf(SR.chartType)>=0) msgs.push('此為計數型管制圖，不適用 Cp/Cpk；請以管制界限與異常規則判讀。');
-      host.innerHTML='<div class="alert '+level+'"><strong>SPC 自動判讀：</strong><br>'+msgs.map(function(m){return '• '+m;}).join('<br>')+'<br><span style="font-size:12px;color:#6B7280">註：自動判讀僅供工程判斷輔助；正式結論仍需結合抽樣計畫、量測系統、製程變更與原始紀錄。</span></div>';
-    }catch(e){console.warn(e);}
-  };
-  var oldSpc=window.spcAnalyze;
-  if(typeof oldSpc==='function') window.spcAnalyze=function(){
-    var lsl=parseFloat(document.getElementById('spc-lsl')?.value), usl=parseFloat(document.getElementById('spc-usl')?.value);
-    if(!isNaN(lsl)&&!isNaN(usl)&&usl<=lsl){alert('規格輸入錯誤：USL 必須大於 LSL。');return;}
-    var rows=(document.getElementById('spc-raw')?.value||'').trim().split('\n').filter(Boolean).length;
-    if(rows>0 && rows<5){if(!confirm('資料列數少於 5，統計判讀可靠度不足。仍要分析？'))return;}
-    oldSpc();
-    setTimeout(window.dmaicSpcConclusion,120);
-    window.dmaicSaveCurrent();
-  };
-
-  window.dmaicEnhanceRecords();
-  window.dmaicRestoreCurrent();
-  status('Offline · Auto-save enabled');
-})();
-</script>
-
-<section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
-  <div class="card" style="background:#F8FAFC;border-left:4px solid var(--gold);font-size:12px;line-height:1.8;color:#374151">
-    <div class="card-title"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>方法來源與驗算聲明</div>
-    <p><strong>定位：</strong>本工具為內部工程分析與教育訓練輔助工具，不等同第三方軟體認證或法規驗證系統。</p>
-    <p><strong>SPC：</strong>Xbar-R、I-MR、np chart、Cp/Cpk 等公式依 Montgomery《Introduction to Statistical Quality Control》與常用 SPC 手冊公式設計，已以範例資料做初步驗算。</p>
-    <p><strong>MSA：</strong>Gage R&amp;R 支援 ANOVA 法與平均全距法；判斷門檻採常見 AIAG MSA 判讀：%GRR &lt; 10% 優良、10%~30% 條件接受、&gt;30% 不合格，ndc 建議 ≥ 5。正式使用前仍應以公司核准樣本資料與既有統計軟體交叉確認。</p>
-    <p><strong>報告責任：</strong>輸出 PDF/JSON 可作為紀錄草稿，正式品質紀錄仍需依公司文件管制、審查與批准流程執行。</p>
-    <p style="background:#FFF8E1;border-left:3px solid #F59E0B;padding:.5rem .75rem;border-radius:0 4px 4px 0;margin-top:.5rem">
-      <strong>⚠️ 資料輸入注意事項：</strong>本工具輸入之數據將用於統計計算及 AI 判讀分析。請勿輸入以下機密或敏感資訊：
-      <br>• 客戶名稱、醫院名稱、患者資料（含姓名、病歷號）
-      <br>• 公司內部料號、批號完整編碼、供應商機密資訊
-      <br>• 員工姓名、工號、個人識別資料
-      <br>• 合約條款、財務數據、未公開的研發規格
-      <br><span style="color:#92400E">建議以匿名代碼（如 LOT-A、Inspector-1）替代敏感識別資訊後再行輸入。</span>
-    </p>
-  </div>
-</section>
-
-
-<!-- ══ AI 助理浮動按鈕 ══ -->
-<button class="ai-float-btn" onclick="aiDrawerOpen()" id="ai-float-btn" title="AI 分析助理">
-  <span class="afb-dot"></span>
-  🤖 AI 分析助理
-  <span class="afb-badge">推薦工具</span>
-</button>
-
-<!-- 遮罩 -->
-<div class="ai-drawer-overlay" id="ai-overlay" onclick="aiDrawerClose()"></div>
-
-<!-- 側邊抽屜 -->
-<div class="ai-drawer" id="ai-drawer">
-  <div class="ai-drawer-header">
-    <div class="adh-left">
-      <span class="adh-icon">🤖</span>
-      <div>
-        <div class="adh-title">AI 分析助理</div>
-        <div class="adh-sub">描述問題，推薦分析工具路徑</div>
-      </div>
-    </div>
-    <button class="adh-close" onclick="aiDrawerClose()">✕</button>
-  </div>
-  <div class="ai-drawer-messages" id="hc-messages">
-    <div class="hcm-assistant">
-      您好！請描述您的品質問題或分析需求，我推薦合適的工具。
-      <br><span style="font-size:11px;color:#6B7280">您也可以直接點選主頁工具使用，不需要先進行對話。</span>
-    </div>
-  </div>
-  <div class="ai-drawer-input">
-    <textarea id="hc-input" rows="2" placeholder="例如：SPC 發現異常需要 CAPA，或：想了解哪些因子影響良率..." onkeydown="homeChatKeydown(event)"></textarea>
-    <div class="ai-drawer-input-row">
-      <button class="adi-send" id="hc-send" onclick="homeChatSend()">送出 →</button>
-      <button class="adi-reset" onclick="wfReset()">🔄 清除</button>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
