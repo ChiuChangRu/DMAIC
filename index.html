@@ -843,7 +843,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:21</span>
+    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:24</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -5283,7 +5283,18 @@ async function homeChatSend() {
       reply = reply.replace(/\[TOOLS:[^\]]+\]/, '').trim();
     }
 
-    aDiv.innerHTML = renderMarkdown(reply);
+    // 前端過濾：只保留 ①②③ 格式的行
+    var lines = reply.split('\n');
+    var filtered = lines.filter(function(line) {
+      var t = line.trim();
+      return t.match(/^[①②③④⑤⑥⑦⑧⑨]/) || t.match(/^\d+\.\s+[\u4e00-\u9fff]/) || t === '';
+    });
+    var cleanReply = filtered.join('\n').trim();
+    // 如果過濾後沒內容（格式完全不對），顯示通用提示
+    if(!cleanReply && recommendedTools.length === 0) {
+      cleanReply = '請直接點選下方工具開始分析，或換個方式描述您的問題。';
+    }
+    aDiv.innerHTML = renderMarkdown(cleanReply || '');
 
     if(recommendedTools.length > 0) {
       var toolBtns = document.createElement('div');
