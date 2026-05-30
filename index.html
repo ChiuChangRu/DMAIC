@@ -275,6 +275,36 @@ tr:hover td{background:#F9FAFB}
 .claude-input-row textarea:focus{border-color:#1B3A5C}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
+/* Markdown 渲染 */
+.ca-text h2{font-size:14px;font-weight:700;color:#1B3A5C;margin:.6rem 0 .3rem}
+.ca-text h3{font-size:13px;font-weight:600;color:#2A5278;margin:.5rem 0 .2rem}
+.ca-text strong{font-weight:700;color:#1a1a2e}
+.ca-text ul,.ca-text ol{padding-left:1.2rem;margin:.3rem 0}
+.ca-text li{margin:.2rem 0;font-size:13px;line-height:1.65}
+.ca-text p{margin:.3rem 0;font-size:13px;line-height:1.65}
+.ca-text hr{border:none;border-top:1px solid #E2ECF8;margin:.5rem 0}
+.ca-text code{background:#F0F4FF;padding:1px 5px;border-radius:3px;font-family:Courier New,monospace;font-size:12px}
+.claude-msg.assistant h2{font-size:13px;font-weight:700;margin:.4rem 0 .2rem}
+.claude-msg.assistant strong{font-weight:700}
+.claude-msg.assistant ul,.claude-msg.assistant ol{padding-left:1.1rem;margin:.2rem 0}
+.claude-msg.assistant li{margin:.15rem 0;font-size:13px}
+.claude-msg.assistant p{margin:.2rem 0;font-size:13px;line-height:1.6}
+.claude-msg.assistant hr{border:none;border-top:1px solid #E2ECF8;margin:.4rem 0}
+/* 數據設計助理 */
+.design-assistant{background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:10px;margin-bottom:1rem;overflow:hidden}
+.design-assistant-header{background:#92400E;color:#fff;padding:.6rem 1rem;display:flex;align-items:center;justify-content:space-between}
+.design-assistant-header .dah-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.design-assistant-header button{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.design-assistant-body{padding:.75rem 1rem;display:none}
+.design-assistant-body.open{display:block}
+.design-hint{font-size:12px;color:#92400E;background:#FEF3C7;border-radius:6px;padding:.5rem .75rem;margin-bottom:.6rem}
+.design-messages{max-height:250px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.6rem}
+.design-msg.user{background:#92400E;color:#fff;padding:.5rem .8rem;border-radius:7px 7px 2px 7px;font-size:13px;align-self:flex-end;max-width:88%}
+.design-msg.assistant{background:#fff;color:#1a1a2e;border:1px solid #FDE68A;padding:.5rem .8rem;border-radius:7px 7px 7px 2px;font-size:13px;align-self:flex-start;max-width:88%;line-height:1.65}
+.design-msg.assistant strong{font-weight:700}
+.design-msg.assistant ul{padding-left:1.1rem;margin:.2rem 0}
+.design-msg.assistant li{margin:.15rem 0}
+.design-msg.assistant p{margin:.2rem 0}
 
 </style>
 
@@ -656,7 +686,8 @@ tr:hover td{background:#F9FAFB}
       <div class="tp-subtitle">Statistical Process Control — 自動判斷圖型・Nelson 8 條規則・製程能力</div>
     </div>
   </div>
-  <div class="card">
+  <div id="da-container-spc"></div>
+<div class="card">
     <div class="card-title" style="--cc:var(--M)"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 
@@ -789,7 +820,8 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--D)"></div>
     <div><div class="tp-title">柏拉圖 Pareto Chart</div><div class="tp-subtitle">80/20 法則・找出關鍵少數・累積百分比曲線</div></div>
   </div>
-  <div class="card">
+  <div id="da-container-pareto"></div>
+<div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('pareto')">
@@ -929,7 +961,8 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--M)"></div>
     <div><div class="tp-title">直方圖 + 常態檢定</div><div class="tp-subtitle">分佈形態分析・Shapiro-Wilk 常態性檢定・偏態/峰態</div></div>
   </div>
-  <div class="card">
+  <div id="da-container-histogram"></div>
+<div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('histogram')">
@@ -1003,7 +1036,8 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--I)"></div>
     <div><div class="tp-title">DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
   </div>
-  <div class="card">
+  <div id="da-container-doe"></div>
+<div class="card">
     <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>因子設定</div>
 
 <button class="edu-btn" onclick="toggleEdu('doe')">
@@ -1159,7 +1193,8 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--C)"></div>
     <div><div class="tp-title">CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
   </div>
-  <div class="card">
+  <div id="da-container-cusum"></div>
+<div class="card">
     <div class="card-title"><span style="background:var(--C);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料與參數</div>
 
 <button class="edu-btn" onclick="toggleEdu('cusum')">
@@ -1235,7 +1270,8 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--A)"></div>
     <div><div class="tp-title">相關性分析 + 散佈圖</div><div class="tp-subtitle">Pearson r・線性迴歸・決定係數 R²・顯著性檢定</div></div>
   </div>
-  <div class="card">
+  <div id="da-container-scatter"></div>
+<div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('scatter')">
@@ -1310,7 +1346,8 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--A)"></div>
     <div><div class="tp-title">假設檢定</div><div class="tp-subtitle">單樣本 t・雙樣本 t・配對 t・F 檢定・卡方適合度</div></div>
   </div>
-  <div class="card">
+  <div id="da-container-hypothesis"></div>
+<div class="card">
     <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>選擇檢定類型</div>
 
 <button class="edu-btn" onclick="toggleEdu('hypothesis')">
@@ -1386,7 +1423,8 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--M)"></div>
     <div><div class="tp-title">箱型圖 Box Plot</div><div class="tp-subtitle">多組分佈比較・Q1/Q2/Q3・IQR・離群值偵測</div></div>
   </div>
-  <div class="card">
+  <div id="da-container-boxplot"></div>
+<div class="card">
     <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料輸入</div>
 
 <button class="edu-btn" onclick="toggleEdu('boxplot')">
@@ -1509,7 +1547,8 @@ tr:hover td{background:#F9FAFB}
 
     <!-- Gage R&R -->
     <div id="msa-grr-area" style="display:none">
-      <div class="card">
+      <div id="da-container-msa"></div>
+<div class="card">
         <div class="card-title"><span style="background:var(--M);width:3px;height:13px;border-radius:2px;display:inline-block"></span>Gage R&R 數據輸入</div>
         <div class="g3">
           <div class="field"><label>操作員數</label>
@@ -1715,6 +1754,13 @@ function goTool(id){
   if(id==='hypothesis')hyUpdateUI();
   // 顯示工具列（返回按鈕）
   showToolBar(TOOL_NAMES[id]||id);
+  // 初始化數據設計助理
+  setTimeout(function(){
+    var daContainer=document.getElementById('da-container-'+id);
+    if(daContainer&&typeof designAssistantHTML==='function'){
+      daContainer.innerHTML=designAssistantHTML(id);
+    }
+  },100);
   try{window.scrollTo(0,0);}catch(e){}
 }
 
@@ -3927,6 +3973,223 @@ window.claudePanelHTML = function(toolId) {
   '</div>';
 };
 
+// ════════════════════════════════════════════════════
+// Markdown 簡易渲染
+// ════════════════════════════════════════════════════
+function renderMarkdown(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code>$1</code>')
+    .replace(/^---$/gm,'<hr>')
+    .replace(/^\d+\. (.+)$/gm,'<li>$1</li>')
+    .replace(/^- (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
+    .replace(/\n\n/g,'</p><p>')
+    .replace(/^(?!<[hulo]|<\/[hulo]|<hr)(.+)$/gm,'<p>$1</p>')
+    .replace(/<p><\/p>/g,'')
+    .replace(/<p>(<[hulo])/g,'$1')
+    .replace(/(<\/[hulo][^>]*>)<\/p>/g,'$1');
+}
+
+// ════════════════════════════════════════════════════
+// 數據設計助理
+// ════════════════════════════════════════════════════
+var DESIGN_PROMPTS = {
+  spc: {
+    hint: '💡 可以問我：「我的產品是血管內導管，SPC 應該選哪種管制圖？收集幾組數據？」',
+    system: '你是 SPC 統計製程管制的專家。幫助使用者決定：要用哪種管制圖（Xbar-R/I-MR/p/np/c/u）、子組大小、需要幾組數據、量測頻率等。用繁體中文回答，簡潔具體。'
+  },
+  msa: {
+    hint: '💡 可以問我：「我有 3 個操作員、10 個零件，MSA 研究應該怎麼設計？」',
+    system: '你是 MSA 量測系統分析的專家。幫助使用者設計 Gage R&R 研究：操作員數、零件數、重複次數的選擇，以及 AIAG MSA 標準的要求。用繁體中文回答，簡潔具體。'
+  },
+  doe: {
+    hint: '💡 可以問我：「我想優化親水塗層附著力，有溫度、壓力、濃度三個因子，DOE 怎麼設計？」',
+    system: '你是 DOE 實驗設計的專家。幫助使用者設計全因子或部分因子實驗：選擇因子、水準範圍、重複次數、實驗順序。用繁體中文回答，並給出具體的因子設定建議。'
+  },
+  histogram: {
+    hint: '💡 可以問我：「我想確認製程數據是否常態分佈，需要收集幾筆數據？」',
+    system: '你是統計分析的專家。幫助使用者確認直方圖分析需要的樣本數、如何取樣、常態性檢定的注意事項。用繁體中文回答，簡潔具體。'
+  },
+  hypothesis: {
+    hint: '💡 可以問我：「我想比較改善前後的差異，應該用哪種假設檢定？需要幾個樣本？」',
+    system: '你是假設檢定的專家。幫助使用者選擇正確的檢定方法（1-sample t/2-sample t/paired t/F test）、計算所需樣本數、設定 α 和 β。用繁體中文回答，簡潔具體。'
+  },
+  scatter: {
+    hint: '💡 可以問我：「我想分析溫度和良率的關係，數據應該怎麼收集？」',
+    system: '你是相關性和迴歸分析的專家。幫助使用者設計數據收集計畫、需要的樣本數、如何避免混淆變數。用繁體中文回答，簡潔具體。'
+  },
+  boxplot: {
+    hint: '💡 可以問我：「我想比較三台機台的輸出，箱型圖分析需要每台收幾筆？」',
+    system: '你是描述統計和箱型圖分析的專家。幫助使用者規劃多組比較的數據收集。用繁體中文回答，簡潔具體。'
+  },
+  pareto: {
+    hint: '💡 可以問我：「我想做不良品原因的柏拉圖，應該收集哪些類別的數據？」',
+    system: '你是品質問題分類和柏拉圖分析的專家。幫助使用者定義不良類別、收集方法、期間長度。用繁體中文回答，簡潔具體。'
+  },
+  cusum: {
+    hint: '💡 可以問我：「我想監控製程是否有微小偏移，CUSUM 的 k 和 h 應該怎麼設定？」',
+    system: '你是 CUSUM/EWMA 管制圖的專家。幫助使用者設定 k（偏移允許量）、h（決策界限）、λ（EWMA 平滑係數）。用繁體中文回答，簡潔具體。'
+  },
+};
+
+var designHistory = {};
+
+window.designAssistantHTML = function(toolId) {
+  var cfg = DESIGN_PROMPTS[toolId];
+  if(!cfg) return '';
+  return '<div class="design-assistant" id="da-'+toolId+'">'+
+    '<div class="design-assistant-header">'+
+      '<div class="dah-title"><span>🎯</span> 數據設計助理</div>'+
+      '<button onclick="daToggle(\''+toolId+'\')">展開</button>'+
+    '</div>'+
+    '<div class="design-assistant-body" id="da-body-'+toolId+'">'+
+      '<div class="design-hint">'+cfg.hint+'</div>'+
+      '<div class="design-messages" id="da-msgs-'+toolId+'"></div>'+
+      '<div class="claude-input-row">'+
+        '<textarea id="da-input-'+toolId+'" rows="2" placeholder="輸入問題..." onkeydown="daKeydown(event,\''+toolId+'\')"></textarea>'+
+        '<button class="claude-send" id="da-send-'+toolId+'" onclick="daSend(\''+toolId+'\')">送出</button>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+};
+
+window.daToggle = function(toolId) {
+  var body = document.getElementById('da-body-'+toolId);
+  var btn = document.querySelector('#da-'+toolId+' .design-assistant-header button');
+  if(!body) return;
+  var isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if(btn) btn.textContent = isOpen ? '展開' : '收合';
+};
+
+window.daSend = async function(toolId) {
+  var input = document.getElementById('da-input-'+toolId);
+  var msgs = document.getElementById('da-msgs-'+toolId);
+  var btn = document.getElementById('da-send-'+toolId);
+  if(!input || !msgs) return;
+  var q = input.value.trim();
+  if(!q) return;
+
+  // 使用者訊息
+  var uDiv = document.createElement('div');
+  uDiv.className = 'design-msg user';
+  uDiv.textContent = q;
+  msgs.appendChild(uDiv);
+  input.value = ''; btn.disabled = true;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  // 歷史
+  if(!designHistory[toolId]) designHistory[toolId] = [];
+  designHistory[toolId].push({role:'user', content:q});
+
+  // 載入中
+  var aDiv = document.createElement('div');
+  aDiv.className = 'design-msg assistant';
+  aDiv.textContent = '思考中...';
+  msgs.appendChild(aDiv);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    var cfg = DESIGN_PROMPTS[toolId] || {};
+    var response = await fetch(CLAUDE_WORKER, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        messages: designHistory[toolId],
+        system: cfg.system || '你是品質工程助理，用繁體中文回答。'
+      })
+    });
+    var data = await response.json();
+    var reply = data.content[0].text;
+    designHistory[toolId].push({role:'assistant', content:reply});
+    aDiv.innerHTML = renderMarkdown(reply);
+  } catch(err) {
+    aDiv.className = 'design-msg assistant';
+    aDiv.textContent = '⚠️ 錯誤：' + err.message;
+  }
+  btn.disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+};
+
+window.daKeydown = function(event, toolId) {
+  if(event.key==='Enter' && !event.shiftKey) {
+    event.preventDefault();
+    daSend(toolId);
+  }
+};
+
+// 覆寫 claudeAutoAnalyze，加入 Markdown 渲染
+var _origClaudeAutoAnalyze = window.claudeAutoAnalyze;
+window.claudeAutoAnalyze = async function(toolId, statsText) {
+  var panelId = 'claude-panel-' + toolId;
+  var panel = document.getElementById(panelId);
+  if(!panel) return;
+  var autoDiv = panel.querySelector('.ca-text');
+  var loadDiv = panel.querySelector('.ca-loading');
+  if(!autoDiv || !loadDiv) return;
+
+  autoDiv.style.display = 'none';
+  loadDiv.style.display = 'flex';
+  panel.style.display = 'block';
+
+  try {
+    var messages = [{role:'user', content:'以下是分析結果，請給出專業判讀和建議（200字以內）：\n\n'+statsText}];
+    claudeHistory[toolId] = messages;
+    var reply = await callClaude(toolId, messages);
+    claudeHistory[toolId].push({role:'assistant', content:reply});
+    loadDiv.style.display = 'none';
+    autoDiv.style.display = 'block';
+    autoDiv.innerHTML = renderMarkdown(reply);
+  } catch(err) {
+    loadDiv.style.display = 'none';
+    autoDiv.style.display = 'block';
+    autoDiv.textContent = '⚠️ 判讀失敗：' + err.message;
+  }
+};
+
+// 覆寫 claudeSend，加入 Markdown 渲染
+window.claudeSend = async function(toolId) {
+  var input = document.getElementById('claude-input-'+toolId);
+  var messagesDiv = document.getElementById('claude-msgs-'+toolId);
+  var sendBtn = document.getElementById('claude-send-'+toolId);
+  if(!input || !messagesDiv) return;
+  var question = input.value.trim();
+  if(!question) return;
+
+  var userMsg = document.createElement('div');
+  userMsg.className = 'claude-msg user';
+  userMsg.textContent = question;
+  messagesDiv.appendChild(userMsg);
+  input.value = ''; sendBtn.disabled = true;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  if(!claudeHistory[toolId]) claudeHistory[toolId] = [];
+  claudeHistory[toolId].push({role:'user', content:question});
+
+  var loadMsg = document.createElement('div');
+  loadMsg.className = 'claude-msg assistant';
+  loadMsg.textContent = '思考中...';
+  messagesDiv.appendChild(loadMsg);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  try {
+    var reply = await callClaude(toolId, claudeHistory[toolId]);
+    claudeHistory[toolId].push({role:'assistant', content:reply});
+    loadMsg.innerHTML = renderMarkdown(reply);
+  } catch(err) {
+    loadMsg.className = 'claude-msg error';
+    loadMsg.textContent = '⚠️ 錯誤：'+err.message;
+  }
+  sendBtn.disabled = false;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+};
+
+window.daToggle=daToggle;window.daSend=daSend;window.daKeydown=daKeydown;window.designAssistantHTML=designAssistantHTML;
 window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
 window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
