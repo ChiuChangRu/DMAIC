@@ -843,7 +843,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:39</span>
+    <span class="tb-status" id="dmaic-save-status">Offline · v2.0 · 2026-05-31 01:46</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2151,6 +2151,8 @@ function goTool(id){
 
   try{window.scrollTo(0,0);}catch(e){}
 }
+
+window.goTool=goTool;
 
 function scrollToPhase(ph){
   const el=document.getElementById('phase-'+ph);
@@ -3807,6 +3809,8 @@ window.toggleEdu=function(id){
 };
 
 // ── Tool Bar（返回按鈕列）控制 ──
+window.goHome=goHome;
+
 function showToolBar(toolName){
   var bar = document.getElementById('tool-bar');
   var title = document.getElementById('tool-bar-title');
@@ -5071,16 +5075,31 @@ window.hideFormatHint = function() {
   if(el) el.classList.remove('show');
 };
 
-// 初始化（進入工具時）
+// 整合版 goTool（DT初始化 + WF狀態追蹤）
 var _origGoTool = window.goTool;
 window.goTool = function(id) {
-  if(typeof _origGoTool==='function') _origGoTool(id);
+  // 呼叫原始 goTool
+  if(typeof _origGoTool === 'function') _origGoTool(id);
+
+  // 工作流程狀態追蹤
+  var state = wfLoad();
+  if(state.active && state.recommended.indexOf(id) >= 0) {
+    if(state.completed.indexOf(id) < 0) {
+      state.completed.push(id);
+      var nextTool = null;
+      state.recommended.forEach(function(t) {
+        if(!nextTool && state.completed.indexOf(t) < 0) nextTool = t;
+      });
+      state.next = nextTool;
+      wfSave(state);
+    }
+  }
+
   // 初始化決策樹
   setTimeout(function(){
     var daContainer = document.getElementById('da-container-'+id);
-    if(daContainer && DT_CONFIG[id]) {
+    if(daContainer && typeof DT_CONFIG !== 'undefined' && DT_CONFIG[id]) {
       daContainer.innerHTML = dtAssistantHTML(id);
-      // 加入格式提示按鈕到第一個 card
       var firstCard = document.querySelector('#page-'+id+' .card');
       if(firstCard){
         var existing = firstCard.querySelector('.format-hint-btn');
@@ -5093,9 +5112,10 @@ window.goTool = function(id) {
         }
       }
     }
-    hideFormatHint();
+    if(typeof hideFormatHint === 'function') hideFormatHint();
   }, 150);
 };
+;
 
 // ════════════════════════════════════════════════════
 // 工作流程狀態系統 + 主頁聊天助理
@@ -5202,40 +5222,25 @@ function wfApplyStyles(state) {
   });
 }
 
-// 進入工具時記錄（用於自動完成標記）
-var _origGoToolWF = window.goTool;
-window.goTool = function(id) {
-  if(typeof _origGoToolWF === 'function') _origGoToolWF(id);
-  // 自動標記完成（只有在工作流程激活時）
-  var state = wfLoad();
-  if(state.active && state.recommended.indexOf(id) >= 0) {
-    if(state.completed.indexOf(id) < 0) {
-      state.completed.push(id);
-      // 更新下一步（推薦列表中第一個未完成的）
-      var nextTool = null;
-      state.recommended.forEach(function(t) {
-        if(!nextTool && state.completed.indexOf(t) < 0) nextTool = t;
-      });
-      state.next = nextTool;
-      wfSave(state);
-    }
-  }
-};
+;
 
-// 回到主頁時更新視覺狀態
-var _origGoHomeWF = window.goHome;
+// 整合版 goHome
+var _origGoHome = window.goHome;
 window.goHome = function() {
-  if(typeof _origGoHomeWF === 'function') _origGoHomeWF();
+  if(typeof _origGoHome === 'function') _origGoHome();
   setTimeout(function() {
     var state = wfLoad();
     wfApplyStyles(state);
-    // 如果有下一步，滾動到那個工具卡片
     if(state.next) {
       var card = document.querySelector('[data-tool="'+state.next+'"]');
       if(card) setTimeout(function(){card.scrollIntoView({behavior:'smooth',block:'center'});},400);
     }
+    // 顯示 AI 浮動按鈕
+    var fb = document.getElementById('ai-float-btn');
+    if(fb) fb.style.display='flex';
   }, 100);
 };
+;
 
 // ── 主頁聊天助理 ──
 var homeChatHistory = [];
