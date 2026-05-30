@@ -654,7 +654,7 @@ tr:hover td{background:#F9FAFB}
   </h2>
   <div style="font-size:11px;color:rgba(255,255,255,.35);margin-bottom:2rem;letter-spacing:.04em;display:flex;justify-content:center;align-items:center;gap:12px">
     <span>Edit by Chiu Chang Ru / Claude</span>
-    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-31 00:56</span>
+    <span style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:2px 10px;font-family:monospace;font-size:10px">v2.0 · 2026-05-31 01:06</span>
   </div>
   <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
     <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
@@ -5016,148 +5016,7 @@ window.goHome = function() {
 // ── 主頁聊天助理 ──
 var homeChatHistory = [];
 
-var HOME_CHAT_SYSTEM = `你是 MedQA 平台的分析導航助理。
-你的唯一職責是根據使用者描述的品質問題，推薦本平台的工具組合和分析順序。
-
-可推薦的工具（只能推薦這些）：
-- pareto：柏拉圖（找出主要問題類別）
-- fishbone：魚骨圖（找根本原因）
-- spc：SPC 管制圖（製程穩定性監控）
-- msa：MSA 量測系統分析（確認量具可信度）
-- histogram：直方圖（確認數據分佈）
-- hypothesis：假設檢定（比較改善前後）
-- scatter：相關性分析（找變數關係）
-- doe：DOE 實驗設計（最佳化製程參數）
-- boxplot：箱型圖（比較多組數據）
-- cusum：CUSUM/EWMA（監控微小偏移）
-- sipoc：SIPOC（定義製程範疇）
-
-回答格式：
-1. 簡短說明分析方向（1-2句）
-2. 推薦工具順序（每個工具一行）
-3. 格式：[TOOLS: tool1, tool2, tool3]（這行必須有，供系統解析）
-
-絕對禁止：
-- 不輸出任何數值、統計結果、計算
-- 不說「你的 Cpk 大概是...」等估計
-- 不推薦 Minitab、JMP 等外部軟體
-- 不超過 200 字`;
-
-window.homeChatSend = async function() {
-  var input = document.getElementById('hc-input');
-  var msgs  = document.getElementById('hc-messages');
-  var btn   = document.getElementById('hc-send');
-  if(!input || !msgs) return;
-  var q = input.value.trim();
-  if(!q) return;
-
-  // 使用者訊息
-  var uDiv = document.createElement('div');
-  uDiv.className = 'hcm-user';
-  uDiv.textContent = q;
-  msgs.appendChild(uDiv);
-  input.value = ''; btn.disabled = true;
-  msgs.scrollTop = msgs.scrollHeight;
-
-  homeChatHistory.push({role:'user', content:q});
-
-  // 載入中
-  var aDiv = document.createElement('div');
-  aDiv.className = 'hcm-assistant';
-  aDiv.textContent = '分析中...';
-  msgs.appendChild(aDiv);
-  msgs.scrollTop = msgs.scrollHeight;
-
-  try {
-    var response = await fetch(CLAUDE_WORKER, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({messages: homeChatHistory, system: HOME_CHAT_SYSTEM})
-    });
-    var data = await response.json();
-    var reply = data.content[0].text;
-    homeChatHistory.push({role:'assistant', content:reply});
-
-    // 解析推薦工具
-    var toolMatch = reply.match(/\[TOOLS:\s*([^\]]+)\]/);
-    var recommendedTools = [];
-    if(toolMatch) {
-      recommendedTools = toolMatch[1].split(',').map(function(t){return t.trim();})
-        .filter(function(t){return TOOL_DISPLAY[t];});
-      reply = reply.replace(/\[TOOLS:[^\]]+\]/, '').trim();
-    }
-
-    // 渲染回覆
-    var cleanReply = renderMarkdown(reply);
-    aDiv.innerHTML = cleanReply;
-
-    // 加入工具按鈕
-    if(recommendedTools.length > 0) {
-      var toolBtns = document.createElement('div');
-      toolBtns.style.cssText = 'margin-top:.5rem;display:flex;flex-wrap:wrap;gap:4px';
-      recommendedTools.forEach(function(tid, idx) {
-        var btn2 = document.createElement('a');
-        btn2.className = 'tool-link';
-        btn2.innerHTML = (idx+1)+'. '+TOOL_DISPLAY[tid];
-        btn2.onclick = function(e) {
-          e.preventDefault();
-          // 關閉聊天，進入工具
-          homeChatToggle();
-          goTool(tid);
-        };
-        toolBtns.appendChild(btn2);
-      });
-      aDiv.appendChild(toolBtns);
-
-      // 更新工作流程狀態
-      var state = wfLoad();
-      state.active = true;
-      state.recommended = recommendedTools;
-      state.next = recommendedTools.filter(function(t){
-        return state.completed.indexOf(t) < 0;
-      })[0] || null;
-      wfSave(state);
-      wfApplyStyles(state);
-    }
-
-    // 加入重置按鈕
-    var resetBtn = document.createElement('button');
-    resetBtn.className = 'wf-reset-btn';
-    resetBtn.textContent = '🔄 重新開始 / 清除推薦';
-    resetBtn.onclick = wfReset;
-    aDiv.appendChild(resetBtn);
-
-  } catch(err) {
-    aDiv.textContent = '⚠️ 連線失敗：'+err.message;
-  }
-  btn.disabled = false;
-  msgs.scrollTop = msgs.scrollHeight;
-};
-
-window.homeChatToggle = function() {
-  var body = document.getElementById('hc-body');
-  var icon = document.querySelector('.hch-toggle');
-  if(!body) return;
-  var open = body.classList.contains('open');
-  body.classList.toggle('open', !open);
-  if(icon) icon.textContent = open ? '▼ 展開' : '▲ 收合';
-};
-
-window.homeChatKeydown = function(e) {
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeChatSend();}
-};
-
-// 頁面載入時初始化
-document.addEventListener('DOMContentLoaded', function() {
-  // 為所有工具卡片加上 data-tool 屬性
-  Object.keys(TOOL_DISPLAY).forEach(function(tid) {
-    var card = document.querySelector('[onclick="goTool(\''+tid+'\')"]');
-    if(card) card.setAttribute('data-tool', tid);
-  });
-  // 套用初始狀態
-  var state = wfLoad();
-  wfApplyStyles(state);
-});
+var HOME_CHAT_SYSTEM = '你是 MedQA 平台的工具導航助理。\n\n任務只有一件事：告訴使用者要用哪些工具、為什麼。\n\n嚴格輸出格式（不可有任何其他內容）：\n① [工具名稱] — 一句話說明用途\n② [工具名稱] — 一句話說明用途\n[TOOLS: tool1, tool2, tool3]\n\n可用工具 ID：pareto, fishbone, spc, msa, histogram, hypothesis, scatter, doe, boxplot, cusum, sipoc\n\n絕對禁止：\n- 不分析問題、不給改善建議\n- 不說 ISO/FDA/FMEA/文件/風險等\n- 不超過 5 行，只說工具名稱和一句用途\n- 範例：① 柏拉圖 — 找出主要不良原因類別\n        ② 魚骨圖 — 追查根本原因\n        [TOOLS: pareto, fishbone]';
 
 window.homeChatSend=homeChatSend;window.homeChatToggle=homeChatToggle;window.homeChatKeydown=homeChatKeydown;window.wfReset=wfReset;
 window.dtAssistantHTML=dtAssistantHTML;window.dtToggle=dtToggle;window.dtUpdate=dtUpdate;window.dtApply=dtApply;window.showFormatHint=showFormatHint;window.hideFormatHint=hideFormatHint;
@@ -5604,7 +5463,7 @@ document.addEventListener('click', function(e) {
   font-family:monospace;letter-spacing:.04em;backdrop-filter:blur(4px);
   border:1px solid rgba(255,255,255,.12);cursor:default"
   title="v2.0 MedQA · Build 2026-05-30 13:59">
-  v2.0 · 2026-05-31 00:56
+  v2.0 · 2026-05-31 01:06
 </div>
 </body>
 </html>
