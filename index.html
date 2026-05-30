@@ -251,6 +251,31 @@ tr:hover td{background:#F9FAFB}
 .nelson-flag.ok { background: #F0FDF4; color: #166534; border: 1px solid #86EFAC; }
 
 
+
+/* ════ Claude AI 對話框 ════ */
+.claude-panel{background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:10px;margin-top:1rem;overflow:hidden}
+.claude-panel-header{background:#1B3A5C;color:#fff;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.claude-panel-header .ch-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.claude-panel-header .ch-toggle{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.claude-auto{padding:.85rem 1rem;border-bottom:1px solid #E2ECF8}
+.claude-auto .ca-label{font-size:11px;font-weight:600;color:#2A5278;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;display:flex;align-items:center;gap:6px}
+.claude-auto .ca-text{font-size:13px;color:#1a1a2e;line-height:1.75;white-space:pre-wrap}
+.claude-auto .ca-loading{color:#6B7280;font-size:12px;font-style:italic;display:flex;align-items:center;gap:6px}
+.claude-auto .ca-loading::before{content:"";width:12px;height:12px;border:2px solid #C7D9F5;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.claude-chat{padding:.75rem 1rem;display:none}
+.claude-chat.open{display:block}
+.claude-messages{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:.6rem;margin-bottom:.6rem}
+.claude-msg{padding:.6rem .85rem;border-radius:8px;font-size:13px;line-height:1.65;max-width:90%}
+.claude-msg.user{background:#1B3A5C;color:#fff;align-self:flex-end;border-radius:8px 8px 2px 8px}
+.claude-msg.assistant{background:#fff;color:#1a1a2e;border:1px solid #E2ECF8;align-self:flex-start;white-space:pre-wrap}
+.claude-msg.error{background:#FFF1F2;color:#9F1239;border:1px solid #FECDD3}
+.claude-input-row{display:flex;gap:6px}
+.claude-input-row textarea{flex:1;border:1px solid #C7D9F5;border-radius:7px;padding:.5rem .75rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.5}
+.claude-input-row textarea:focus{border-color:#1B3A5C}
+.claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
+
 </style>
 
 <style id="edu-styles">
@@ -754,6 +779,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-spc" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Pareto ══════════════ -->
@@ -824,6 +850,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-pareto" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Fishbone ══════════════ -->
@@ -892,6 +919,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Histogram ══════════════ -->
@@ -965,6 +993,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-histogram" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：DOE ══════════════ -->
@@ -1060,6 +1089,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-doe" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：SIPOC ══════════════ -->
@@ -1119,6 +1149,7 @@ tr:hover td{background:#F9FAFB}
     <div class="card"><div style="overflow-x:auto"><canvas id="si-canvas" height="380"></canvas></div></div>
   </div>
 </div>
+<div id="claude-container-sipoc" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：CUSUM ══════════════ -->
@@ -1194,6 +1225,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-cusum" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Scatter ══════════════ -->
@@ -1268,6 +1300,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-scatter" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Hypothesis ══════════════ -->
@@ -1343,6 +1376,7 @@ tr:hover td{background:#F9FAFB}
     <div class="card" id="hy-result"></div>
   </div>
 </div>
+<div id="claude-container-hypothesis" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Box Plot ══════════════ -->
@@ -1418,6 +1452,7 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
 </div>
+<div id="claude-container-boxplot" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：MSA ══════════════ -->
@@ -1784,6 +1819,16 @@ function spcAnalyze(){
   else if(chartType==='U')calcSPCU();
   calcSPCNelson();
   document.getElementById('spc-out').style.display='block';
+  // Claude AI 自動判讀
+  var spcPanel=document.getElementById('claude-container-spc');
+  if(spcPanel){spcPanel.innerHTML=claudePanelHTML('spc');}
+  var spcStats='SPC 管制圖類型：'+SR.chartType+'\n'+
+    '中心線 CL='+parseFloat((SR.CL_main||0).toFixed(4))+'\n'+
+    'UCL='+parseFloat((SR.UCL_main||0).toFixed(4))+'  LCL='+parseFloat((SR.LCL_main||0).toFixed(4))+'\n'+
+    (SR.Cpk!=null?'Cpk='+SR.Cpk.toFixed(4)+'  Cp='+( SR.Cp||0).toFixed(4):'')+'\n'+
+    (SR.nelson&&Object.values(SR.nelson).some(function(v){return v.length>0;})?
+      'Nelson 規則觸發：'+Object.entries(SR.nelson).filter(function(e){return e[1].length>0;}).map(function(e){return e[0];}).join(', '):'Nelson 規則：均正常');
+  setTimeout(function(){claudeAutoAnalyze('spc',spcStats);},300);
   renderSPCStats();renderSPCCap();renderSPCNelson();
   spcSw('tree');setTimeout(()=>{spcDrawTree();spcDrawCharts();},80);
 }
@@ -2107,6 +2152,14 @@ function histAnalyze(){
   testHTML+='</div>';
   document.getElementById('hi-test').innerHTML=testHTML;
   document.getElementById('hi-out').style.display='block';
+  var histPanel=document.getElementById('claude-container-histogram');
+  if(histPanel){histPanel.innerHTML=claudePanelHTML('histogram');}
+  var histStats='直方圖分析\n樣本數 n='+data.length+'\n'+
+    '均值='+parseFloat(mean(data).toFixed(4))+'  標準差='+parseFloat(stdS(data).toFixed(4))+'\n'+
+    'Shapiro-Wilk W='+W.toFixed(4)+' p='+pW.toFixed(4)+'\n'+
+    (ad&&ad.W?'Anderson-Darling A²='+ad.W.toFixed(4)+' p='+ad.p.toFixed(4):'')+'\n'+
+    '常態性判斷：'+(isNormal?'符合常態分佈':'不符合常態分佈');
+  setTimeout(function(){claudeAutoAnalyze('histogram',histStats);},300);
 }
 function shapiroCoeff(n){
   const a6=[0.6872,0.1677,0.0],a8=[0.6052,0.2117,0.0632,0.0],a10=[0.5739,0.2360,0.0982,0.0344,0.0];
@@ -2234,6 +2287,13 @@ window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,
   document.getElementById('doe-anova-content').innerHTML = anovaResult.html;
 
   document.getElementById('doe-out').style.display='block';
+  var doePanel=document.getElementById('claude-container-doe');
+  if(doePanel){doePanel.innerHTML=claudePanelHTML('doe');}
+  var topEffects=sortedEff.slice(0,5).map(function(e){return e[0]+'='+parseFloat(e[1].toFixed(4));}).join(', ');
+  var doeStats='DOE 全因子實驗\n因子數：'+factors.length+'  重複次數：'+rep+'\n'+
+    '主要效應（前5）：'+topEffects+'\n'+
+    '反應變數：'+yname;
+  setTimeout(function(){claudeAutoAnalyze('doe',doeStats);},300);
 }
 function doeSw(name){
   var allTabs=['effects','pareto','halfnormal','maineff','interaction','anova','residual'];
@@ -2472,6 +2532,12 @@ function scatterAnalyze(){
     '<div class="alert info" style="font-size:12px">迴歸方程式：'+yname2+' = '+r4(b0)+' + '+r4(b1)+' × '+xname+'<br>'+
     'Pearson r 適用線性關係；Spearman ρ 適用非常態或非線性單調關係</div>';
   document.getElementById('sc-result').innerHTML=scResult;
+  var scPanel=document.getElementById('claude-container-scatter');
+  if(scPanel){scPanel.innerHTML=claudePanelHTML('scatter');}
+  var scStats='相關性分析\nPearson r='+r.toFixed(4)+' R²='+r2.toFixed(4)+' p='+pVal.toFixed(4)+'\n'+
+    'Spearman ρ='+sp.rs.toFixed(4)+' p='+sp.p.toFixed(4)+'\n'+
+    '迴歸：Y='+b0.toFixed(4)+'+'+b1.toFixed(4)+'×X';
+  setTimeout(function(){claudeAutoAnalyze('scatter',scStats);},300);
   document.getElementById('sc-out').style.display='block';
 }
 
@@ -2530,6 +2596,10 @@ function hyAnalyze(){
   }
   document.getElementById('hy-result').innerHTML=result;
   document.getElementById('hy-out').style.display='block';
+  var hypPanel=document.getElementById('claude-container-hypothesis');
+  if(hypPanel){hypPanel.innerHTML=claudePanelHTML('hypothesis');}
+  var cleanResult=result.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').substring(0,500);
+  setTimeout(function(){claudeAutoAnalyze('hypothesis','假設檢定結果：\n'+cleanResult);},300);
 }
 
 // ════════════════════════════════════════════
@@ -2793,6 +2863,14 @@ function grrAnalyze(){
   };
 
   document.getElementById('grr-out').style.display='block';
+  var msaPanel=document.getElementById('claude-container-msa');
+  if(msaPanel){msaPanel.innerHTML=claudePanelHTML('msa');}
+  var msaStats='Gage R&R 分析\n%GRR='+parseFloat((R.grrResult.pctGRR||0).toFixed(2))+'%\n'+
+    'EV（重複性）='+parseFloat((R.grrResult.EV||0).toFixed(4))+'\n'+
+    'AV（再現性）='+parseFloat((R.grrResult.AV||0).toFixed(4))+'\n'+
+    'ndc（鑑別力）='+R.grrResult.ndc+'\n'+
+    '判斷：'+R.grrResult.grrLabel;
+  setTimeout(function(){claudeAutoAnalyze('msa',msaStats);},300);
   renderGRRSummary();
   grrSw('summary');
   setTimeout(function(){drawGRRBar();drawGRRCharts();},80);
@@ -3691,6 +3769,165 @@ function calcNotch(q2, iqr, n) {
   return {lo:q2-ci, hi:q2+ci};
 }
 
+// ════════════════════════════════════════════════════════
+// Claude AI 整合
+// Worker URL：muddy-cell-a23a.gogoyankee.workers.dev
+// ════════════════════════════════════════════════════════
+
+var CLAUDE_WORKER = 'https://muddy-cell-a23a.gogoyankee.workers.dev';
+
+// 每個工具的系統提示詞
+var TOOL_PROMPTS = {
+  spc: '你正在分析 SPC 統計製程管制圖的結果。請根據提供的統計數據，用繁體中文給出專業的製程狀態判讀和改善建議，並結合 ISO 13485、FDA 21 CFR Part 820 的要求。',
+  msa: '你正在分析 MSA 量測系統分析的結果。請根據 AIAG MSA 第四版標準，用繁體中文判讀量測系統的可接受性，並給出改善建議。',
+  doe: '你正在分析 DOE 實驗設計的結果。請根據提供的效應分析和 ANOVA 表，用繁體中文判讀哪些因子顯著，並建議最佳製程參數方向。',
+  histogram: '你正在分析直方圖和常態性檢定的結果。請用繁體中文判讀數據分佈特性，並給出後續分析建議。',
+  pareto: '你正在分析柏拉圖的結果。請用繁體中文識別關鍵少數問題，並建議改善優先順序。',
+  fishbone: '你正在分析魚骨圖（石川圖）的結果。請用繁體中文整理根本原因，並建議優先改善的方向。',
+  boxplot: '你正在分析箱型圖的結果。請用繁體中文比較各組的分佈差異，並判斷是否需要進一步統計檢定。',
+  scatter: '你正在分析相關性分析和散佈圖的結果。請用繁體中文判讀變數間的關係強度，並說明實務意義。',
+  hypothesis: '你正在分析假設檢定的結果。請用繁體中文解釋統計結果的實務意義，注意統計顯著不等於實務重要性。',
+  cusum: '你正在分析 CUSUM/EWMA 管制圖的結果。請用繁體中文判讀製程是否有微小偏移，並給出監控建議。',
+  sipoc: '你正在分析 SIPOC 圖的結果。請用繁體中文評估製程範疇定義是否完整，並給出改善建議。',
+};
+
+// 對話歷史（每個工具獨立）
+var claudeHistory = {};
+
+// 呼叫 Claude API（透過 Cloudflare Worker）
+async function callClaude(toolId, messages) {
+  var response = await fetch(CLAUDE_WORKER, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      messages: messages,
+      system: TOOL_PROMPTS[toolId] || TOOL_PROMPTS.spc
+    })
+  });
+  if(!response.ok) throw new Error('Worker 回應錯誤：' + response.status);
+  var data = await response.json();
+  if(data.error) throw new Error(data.error.message || '未知錯誤');
+  return data.content[0].text;
+}
+
+// 自動判讀（分析完成後自動呼叫）
+window.claudeAutoAnalyze = async function(toolId, statsText) {
+  var panelId = 'claude-panel-' + toolId;
+  var panel = document.getElementById(panelId);
+  if(!panel) return;
+
+  var autoDiv = panel.querySelector('.ca-text');
+  var loadDiv = panel.querySelector('.ca-loading');
+  if(!autoDiv || !loadDiv) return;
+
+  // 顯示載入中
+  autoDiv.style.display = 'none';
+  loadDiv.style.display = 'flex';
+  panel.style.display = 'block';
+
+  try {
+    var messages = [{
+      role: 'user',
+      content: '以下是分析結果，請給出專業判讀和建議（200字以內）：\n\n' + statsText
+    }];
+    claudeHistory[toolId] = messages;
+    var reply = await callClaude(toolId, messages);
+    claudeHistory[toolId].push({role:'assistant', content:reply});
+
+    loadDiv.style.display = 'none';
+    autoDiv.style.display = 'block';
+    autoDiv.textContent = reply;
+  } catch(err) {
+    loadDiv.style.display = 'none';
+    autoDiv.style.display = 'block';
+    autoDiv.textContent = '⚠️ 判讀失敗：' + err.message;
+  }
+};
+
+// 開關對話框
+window.claudeToggleChat = function(toolId) {
+  var chat = document.getElementById('claude-chat-' + toolId);
+  if(!chat) return;
+  var isOpen = chat.classList.contains('open');
+  chat.classList.toggle('open', !isOpen);
+  var btn = document.querySelector('#claude-panel-' + toolId + ' .ch-toggle');
+  if(btn) btn.textContent = isOpen ? '💬 追問' : '✕ 關閉';
+};
+
+// 送出問題
+window.claudeSend = async function(toolId) {
+  var input = document.getElementById('claude-input-' + toolId);
+  var messagesDiv = document.getElementById('claude-msgs-' + toolId);
+  var sendBtn = document.getElementById('claude-send-' + toolId);
+  if(!input || !messagesDiv) return;
+
+  var question = input.value.trim();
+  if(!question) return;
+
+  // 顯示使用者訊息
+  var userMsg = document.createElement('div');
+  userMsg.className = 'claude-msg user';
+  userMsg.textContent = question;
+  messagesDiv.appendChild(userMsg);
+  input.value = '';
+  sendBtn.disabled = true;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  // 建立對話歷史
+  if(!claudeHistory[toolId]) claudeHistory[toolId] = [];
+  claudeHistory[toolId].push({role:'user', content:question});
+
+  // 顯示載入
+  var loadMsg = document.createElement('div');
+  loadMsg.className = 'claude-msg assistant ca-loading';
+  loadMsg.textContent = '思考中...';
+  messagesDiv.appendChild(loadMsg);
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+  try {
+    var reply = await callClaude(toolId, claudeHistory[toolId]);
+    claudeHistory[toolId].push({role:'assistant', content:reply});
+    loadMsg.textContent = reply;
+  } catch(err) {
+    loadMsg.className = 'claude-msg error';
+    loadMsg.textContent = '⚠️ 錯誤：' + err.message;
+  }
+
+  sendBtn.disabled = false;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+};
+
+// Enter 鍵送出
+window.claudeKeydown = function(event, toolId) {
+  if(event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    claudeSend(toolId);
+  }
+};
+
+// 產生 Claude 面板 HTML
+window.claudePanelHTML = function(toolId) {
+  return '<div class="claude-panel" id="claude-panel-'+toolId+'" style="display:none">'+
+    '<div class="claude-panel-header">'+
+      '<div class="ch-title"><span>🤖</span> Claude AI 判讀</div>'+
+      '<button class="ch-toggle" onclick="claudeToggleChat(\''+toolId+'\')">💬 追問</button>'+
+    '</div>'+
+    '<div class="claude-auto">'+
+      '<div class="ca-label">📋 自動判讀結果</div>'+
+      '<div class="ca-loading" style="display:none">AI 分析中，請稍候...</div>'+
+      '<div class="ca-text"></div>'+
+    '</div>'+
+    '<div class="claude-chat" id="claude-chat-'+toolId+'">'+
+      '<div class="claude-messages" id="claude-msgs-'+toolId+'"></div>'+
+      '<div class="claude-input-row">'+
+        '<textarea id="claude-input-'+toolId+'" rows="2" placeholder="輸入問題，例如：這個結果符合 ISO 13485 嗎？" onkeydown="claudeKeydown(event,\''+toolId+'\')"></textarea>'+
+        '<button class="claude-send" id="claude-send-'+toolId+'" onclick="claudeSend(\''+toolId+'\')">送出</button>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
+};
+
+window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
 window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
 window.paretoAnalyze=paretoAnalyze;window.paretoLoadEx=paretoLoadEx;
