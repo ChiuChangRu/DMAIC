@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.0 · AI 輔助統計分析平台</title>
+<title>MedQA v3.10 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -587,13 +587,13 @@ tr:hover td{background:#F9FAFB}
 <div class="topbar">
   <div class="topbar-left">
     <div class="logo" data-goto="home" onclick="goHome()" title="返回主目錄">
-      <div class="logo-badge">6σ</div>
-      <div class="logo-title">DMAIC 工具平台</div>
+      <div class="logo-badge" style="font-size:11px;letter-spacing:-.5px">MQ</div>
+      <div class="logo-title">MedQA</div>
     </div>
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:52</span>
+    <span class="tb-status" id="dmaic-save-status">v3.10 · 2026-05-31 21:34</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -610,9 +610,7 @@ tr:hover td{background:#F9FAFB}
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
 <div id="page-home" class="page active">
 
-<!-- ══ 封面導覽列 ══ -->
-<div style="background:#1B3A5C;padding:.8rem 2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-  <!-- ══ Hero ══ -->
+<!-- ══ Hero ══ -->
 <div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
   <div style="max-width:600px;margin:0 auto">
     <h2 style="font-size:30px;font-weight:600;line-height:1.4;margin-bottom:.6rem;letter-spacing:-.01em;color:#fff;text-align:center">
@@ -625,33 +623,24 @@ tr:hover td{background:#F9FAFB}
 <!-- ══ 主內容 ══ -->
 <div class="home-main">
 
-  <!-- DMAIC 流程軸 -->
-  <div id="phase-D" style="margin-bottom:.75rem">
-    </div>
-
-  
-
   <!-- D 工具 -->
   <div id="phase-D" class="tools-section">
     <div class="tools-section-title" style="color:#3B7DD8;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #3B7DD822;margin-bottom:.75rem">D — Define 定義階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('pareto')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📊</div><div class="tc-name">柏拉圖 Pareto</div>
         <div class="tc-desc">80/20 法則・找出關鍵少數問題</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('fishbone')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🐟</div><div class="tc-name">魚骨圖（石川圖）</div>
         <div class="tc-desc">系統化找出根本原因 6M</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('sipoc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🗺️</div><div class="tc-name">SIPOC 圖</div>
         <div class="tc-desc">定義製程範疇・供需關係</div>
         <span class="tc-tag tag-new">可用</span>
@@ -667,21 +656,18 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
         <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
         <span class="tc-tag tag-done">完成</span>
       </div>
       <div class="tool-card" onclick="goTool('histogram')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📉</div><div class="tc-name">直方圖 + 常態檢定</div>
         <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('boxplot')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📦</div><div class="tc-name">箱型圖 Box Plot</div>
         <div class="tc-desc">分組比較・離群值偵測</div>
         <span class="tc-tag tag-new">可用</span>
@@ -695,28 +681,24 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('scatter')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🔗</div><div class="tc-name">相關性 + 散佈圖</div>
         <div class="tc-desc">Pearson r・線性迴歸・R²</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('hypothesis')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🔬</div><div class="tc-name">假設檢定</div>
         <div class="tc-desc">t-test・F-test・卡方檢定</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('fishbone')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#1A9E75">ANALYZE</div>
         <div class="tc-name">魚骨圖 / 5 Why</div>
         <div class="tc-desc">根本原因分析・多層追溯</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('msa')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#1A9CB0">MEASURE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
         <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
         <span class="tc-tag tag-new">可用</span>
@@ -730,14 +712,12 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('doe')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#D4850A">IMPROVE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🧪</div><div class="tc-name">DOE 實驗設計</div>
         <div class="tc-desc">全因子・部分因子・Yates 分析</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" style="opacity:.55;cursor:not-allowed">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#D4850A">IMPROVE</div>
         <div class="tc-name">田口方法 Taguchi</div>
         <div class="tc-desc">L9・L18 直交表・S/N 比</div>
         <span class="tc-tag tag-soon">開發中</span>
@@ -751,34 +731,17 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#7252C8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#7252C8">CONTROL</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
         <div class="tc-desc">持續監控・Nelson 8 條規則</div>
         <span class="tc-tag tag-done">完成</span>
       </div>
-      <div class="tool-card" onclick="goTool('cusum')">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#7252C8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#7252C8">CONTROL</div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🎯</div><div class="tc-name">CUSUM / EWMA</div>
-        <div class="tc-desc">小偏移敏感偵測・累積和圖</div>
-        <span class="tc-tag tag-new">可用</span>
-      </div>
+      
 
     </div>
   </div>
 
 
-  <div class="workflow-box">
-    <div class="workflow-title">建議使用流程：從統計分析到品質紀錄</div>
-    <div style="font-size:13px;color:#6B7280;line-height:1.8">此平台建議作為醫療器材製程分析、設計驗證、異常調查與改善追蹤的前端工具。分析完成後，請填寫紀錄欄位並匯出 PDF / JSON，保留於專案資料夾、PLM 或品質紀錄系統。</div>
-    <div class="workflow-steps">
-      <div class="workflow-step"><strong>1. 選工具</strong>依 DMAIC 階段選擇 SPC、MSA、DOE、Pareto 等工具。</div>
-      <div class="workflow-step"><strong>2. 輸入資料</strong>貼上原始數據，確認單位、批號與規格上下限。</div>
-      <div class="workflow-step"><strong>3. 執行分析</strong>產生圖表、統計摘要、異常點與製程能力結果。</div>
-      <div class="workflow-step"><strong>4. 填寫結論</strong>補上 PASS/FAIL、異常原因、處置與備註。</div>
-      <div class="workflow-step"><strong>5. 匯出保存</strong>列印成 PDF，或匯出 JSON 作為可再編輯紀錄。</div>
-    </div>
-  </div>
+  
 
   <!-- FMEA 工具（開發中）-->
   <div class="tools-section">
@@ -786,7 +749,6 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" style="opacity:.55;cursor:not-allowed">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#6B7280;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#6B7280">ANALYZE / IMPROVE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">⚠️</div>
         <div class="tc-name" style="color:#6B7280">FMEA 失效模式分析</div>
         <div class="tc-desc">ISO 14971・風險矩陣・RPN・FDA MAUDE 整合</div>
@@ -794,7 +756,6 @@ tr:hover td{background:#F9FAFB}
       </div>
       <div class="tool-card" style="opacity:.55;cursor:not-allowed">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#6B7280;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#6B7280">ANALYZE / IMPROVE</div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📋</div>
         <div class="tc-name" style="color:#6B7280">RACT 風險評估表</div>
         <div class="tc-desc">ISO 14971・5×5 風險矩陣・LOF・ACC/NACC 判定</div>
@@ -1341,81 +1302,8 @@ tr:hover td{background:#F9FAFB}
 <div id="claude-container-sipoc" style="padding:0 0 1rem 0"></div>
 </div>
 
-<!-- ══════════════ 子頁面：CUSUM ══════════════ -->
-<div id="page-cusum" class="page">
-<div class="tool-page">
-  <div class="tp-header">
-    <div class="tp-phase-dot" style="background:var(--C)"></div>
-    <div><div class="tp-title">CUSUM / EWMA 管制圖</div><div class="tp-subtitle">累積和 / 指數加權移動平均 — 小偏移高敏感偵測</div></div>
-  </div>
-  <div class="card">
-    <div class="card-title"><span style="background:var(--C);width:3px;height:13px;border-radius:2px;display:inline-block"></span>資料與參數</div>
 
-<button class="edu-btn" onclick="toggleEdu('cusum')">
-  <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
-</button>
-<div class="edu-panel" id="edu-cusum">
-  <div class="edu-hdr">
-    <span style="font-size:22px">📈</span>
-    <div><h3>CUSUM / EWMA 管制圖</h3><p>小偏移高敏感偵測｜Control 階段</p></div>
-  </div>
-  <div class="edu-body">
-    <div class="edu-sec">
-      <div class="edu-stitle when">什麼時候用？</div>
-      <div class="edu-chips"><span class="edu-chip">🔍 偵測微小但持續的製程偏移</span><span class="edu-chip">⚡ 比傳統 Xbar-R 更靈敏</span><span class="edu-chip">📉 長期趨勢監控</span></div>
-      <div class="edu-plain">傳統 SPC 需要數據超出 3σ 才發警報。CUSUM/EWMA 會記住過去數據，即使每次偏移很小，累積起來也能早期發現。</div>
-    </div>
-    <div class="edu-sec">
-      <div class="edu-stitle step">使用步驟</div>
-      <ul class="edu-steps"><li><span class="edu-snum">1</span>設定目標均值 μ₀ 和製程標準差 σ</li><li><span class="edu-snum">2</span>CUSUM：設定 k（偏移允許量）和 h（決策界限）</li><li><span class="edu-snum">3</span>EWMA：設定 λ（平滑係數，越小對小偏移越敏感）</li><li><span class="edu-snum">4</span>超出界限 = 製程均值已發生偏移，需調查</li></ul>
-    </div>
-    <div class="edu-sec">
-      <div class="edu-stitle form">統計公式</div>
-      <div class="edu-fbox">
-          <div class="edu-fname">① CUSUM 累積和</div>
-          <div class="edu-feq">C⁺ᵢ = max[0,  (Xᵢ−μ₀)/σ − k + C⁺ᵢ₋₁]</div>
-          <div class="edu-fexp">持續累加超過目標的偏移，超過 h 就發出警示。<strong>能偵測持續向上偏移。</strong></div>
-        </div><div class="edu-fbox">
-          <div class="edu-fname">② EWMA 指數加權</div>
-          <div class="edu-feq">Zᵢ = λ×Xᵢ + (1−λ)×Zᵢ₋₁</div>
-          <div class="edu-fexp"><strong>λ 越小</strong>：記憶越長，對小偏移越敏感。管制界限 = μ₀ ± 3σ√[λ÷(2−λ)]</div>
-        </div>
-    </div>
-    <div class="edu-sec">
-      <div class="edu-tip">💡 CUSUM/EWMA 和傳統 SPC 搭配使用效果最好：傳統 SPC 抓大異常，CUSUM/EWMA 抓小偏移。</div>
-    </div>
-  </div>
-</div>
 
-    <div class="g3">
-      <div class="field"><label>圖型選擇</label><select id="ce-type"><option value="cusum">CUSUM</option><option value="ewma">EWMA</option><option value="both">兩者並列</option></select></div>
-      <div class="field"><label>目標均值 μ₀</label><input type="text" id="ce-mu" value="25.0"></div>
-      <div class="field"><label>製程標準差 σ</label><input type="text" id="ce-sigma" value="0.15"></div>
-    </div>
-    <div class="g3">
-      <div class="field"><label>CUSUM k（允許偏移）</label><input type="text" id="ce-k" value="0.5"></div>
-      <div class="field"><label>CUSUM h（決策界限）</label><input type="text" id="ce-h" value="4"></div>
-      <div class="field"><label>EWMA λ（平滑係數）</label><input type="text" id="ce-lambda" value="0.2"></div>
-    </div>
-    <div class="field"><label>數據 <span style="font-size:11px;font-weight:400;color:var(--faint)">（空格或逗號分隔）</span></label>
-      <textarea id="ce-data" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.5 25.4 25.6 25.7 25.5 25.8 25.6 25.9 25.7 25.8</textarea>
-    </div>
-    <div class="btn-row">
-      <button class="btn btn-primary" id="cusum-analyze-btn" onclick="cusumAnalyze()">▶ 執行分析</button>
-      <button class="btn btn-sec" onclick="cusumLoadEx()">載入範例</button>
-    </div>
-  </div>
-  <div id="ce-out" style="display:none">
-    <div class="card">
-      <div class="stat-grid" id="ce-stats"></div>
-      <div class="canvas-wrap"><canvas id="ce-c1"></canvas></div>
-      <div class="canvas-wrap" id="ce-c2-wrap" style="margin-top:.75rem"><canvas id="ce-c2"></canvas></div>
-      <div id="ce-result" style="margin-top:.75rem"></div>
-    </div>
-  </div>
-</div>
-<div id="claude-container-cusum" style="padding:0 0 1rem 0"></div>
-</div>
 
 <!-- ══════════════ 子頁面：Scatter ══════════════ -->
 <div id="page-scatter" class="page">
@@ -1885,8 +1773,8 @@ tr:hover td{background:#F9FAFB}
 // ════════════════════════════════════════════
 // 路由系統
 // ════════════════════════════════════════════
-const PHASE_COLORS={spc:'var(--M)',pareto:'var(--D)',fishbone:'var(--D)',sipoc:'var(--D)',histogram:'var(--M)',boxplot:'var(--M)',scatter:'var(--A)',hypothesis:'var(--A)',doe:'var(--I)',cusum:'var(--C)'};
-const TOOL_NAMES={msa:'MSA 量測系統分析',spc:'SPC 管制圖',pareto:'柏拉圖',fishbone:'魚骨圖',sipoc:'SIPOC 圖',histogram:'直方圖+常態檢定',boxplot:'箱型圖',scatter:'相關性分析',hypothesis:'假設檢定',doe:'DOE 實驗設計',cusum:'CUSUM/EWMA'};
+const PHASE_COLORS={spc:'var(--M)',pareto:'var(--D)',fishbone:'var(--D)',sipoc:'var(--D)',histogram:'var(--M)',boxplot:'var(--M)',scatter:'var(--A)',hypothesis:'var(--A)',doe:'var(--I)'};
+const TOOL_NAMES={msa:'MSA 量測系統分析',spc:'SPC 管制圖',pareto:'柏拉圖',fishbone:'魚骨圖',sipoc:'SIPOC 圖',histogram:'直方圖+常態檢定',boxplot:'箱型圖',scatter:'相關性分析',hypothesis:'假設檢定',doe:'DOE 實驗設計'};
 
 function goHome(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1997,13 +1885,14 @@ function destroyCharts(){chartInst.forEach(c=>{try{c.destroy();}catch(e){}});cha
 // ════════════════════════════════════════════
 // SPC 工具（完整版）
 // ════════════════════════════════════════════
-const A2={2:1.880,3:1.023,4:0.729,5:0.577,6:0.483,7:0.419,8:0.373,9:0.337,10:0.308};
-const D4={2:3.267,3:2.574,4:2.282,5:2.114,6:2.004,7:1.924,8:1.864,9:1.816,10:1.777};
-const D3={2:0,3:0,4:0,5:0,6:0,7:0.076,8:0.136,9:0.184,10:0.223};
-const d2={2:1.128,3:1.693,4:2.059,5:2.326,6:2.534,7:2.704,8:2.847,9:2.970,10:3.078};
-const A3={2:2.659,3:1.954,4:1.628,5:1.427,6:1.287,7:1.182,8:1.099,9:1.032,10:0.975};
-const B4={2:3.267,3:2.568,4:2.266,5:2.089,6:1.970,7:1.882,8:1.815,9:1.761,10:1.716};
-const B3={2:0,3:0,4:0,5:0,6:0.030,7:0.118,8:0.185,9:0.239,10:0.284};
+const A2={2:1.880,3:1.023,4:0.729,5:0.577,6:0.483,7:0.419,8:0.373,9:0.337,10:0.308,11:0.285,12:0.266,13:0.249,14:0.235,15:0.223,16:0.212,17:0.203,18:0.194,19:0.187,20:0.180,21:0.173,22:0.167,23:0.162,24:0.157,25:0.153};
+const D4={2:3.267,3:2.574,4:2.282,5:2.114,6:2.004,7:1.924,8:1.864,9:1.816,10:1.777,11:1.744,12:1.717,13:1.693,14:1.672,15:1.653,16:1.637,17:1.622,18:1.608,19:1.597,20:1.585,21:1.575,22:1.566,23:1.557,24:1.548,25:1.541};
+const D3={2:0,3:0,4:0,5:0,6:0,7:0.076,8:0.136,9:0.184,10:0.223,11:0.256,12:0.283,13:0.307,14:0.328,15:0.347,16:0.363,17:0.378,18:0.391,19:0.403,20:0.415,21:0.425,22:0.434,23:0.443,24:0.451,25:0.459};
+const d2={2:1.128,3:1.693,4:2.059,5:2.326,6:2.534,7:2.704,8:2.847,9:2.970,10:3.078,11:3.173,12:3.258,13:3.336,14:3.407,15:3.472,16:3.532,17:3.588,18:3.640,19:3.689,20:3.735,21:3.778,22:3.819,23:3.858,24:3.895,25:3.931};
+const A3={2:2.659,3:1.954,4:1.628,5:1.427,6:1.287,7:1.182,8:1.099,9:1.032,10:0.975,11:0.927,12:0.886,13:0.850,14:0.817,15:0.789,16:0.763,17:0.739,18:0.718,19:0.698,20:0.680,21:0.663,22:0.647,23:0.633,24:0.619,25:0.606};
+const B4={2:3.267,3:2.568,4:2.266,5:2.089,6:1.970,7:1.882,8:1.815,9:1.761,10:1.716,11:1.679,12:1.646,13:1.618,14:1.594,15:1.572,16:1.552,17:1.534,18:1.518,19:1.503,20:1.490,21:1.477,22:1.466,23:1.455,24:1.445,25:1.435};
+const B3={2:0,3:0,4:0,5:0,6:0.030,7:0.118,8:0.185,9:0.239,10:0.284,11:0.321,12:0.354,13:0.382,14:0.406,15:0.428,16:0.448,17:0.466,18:0.482,19:0.497,20:0.510,21:0.523,22:0.534,23:0.545,24:0.555,25:0.565};
+const c4={2:0.7979,3:0.8862,4:0.9213,5:0.9400,6:0.9515,7:0.9594,8:0.9650,9:0.9693,10:0.9727,11:0.9754,12:0.9776,13:0.9794,14:0.9810,15:0.9823,16:0.9835,17:0.9845,18:0.9854,19:0.9862,20:0.9869,21:0.9876,22:0.9882,23:0.9887,24:0.9892,25:0.9896};
 let SR={};
 let R={}; // shared result store for MSA modules (Gage R&R, Attribute MSA, etc.)
 
@@ -2049,10 +1938,10 @@ function autoSPC(data){
 }
 function calcSPCXbar(){
   const{data,chartType}=SR,n=data[0].length;SR.n=n;
-  SR.xbars=data.map(g=>mean(g));SR.ranges=data.map(g=>Math.max(...g)-Math.min(...g));SR.stds=data.map(g=>std(g));
+  SR.xbars=data.map(g=>mean(g));SR.ranges=data.map(g=>Math.max(...g)-Math.min(...g));SR.stds=data.map(g=>stdS(g));
   SR.Xdbar=mean(SR.xbars);SR.Rbar=mean(SR.ranges);SR.Sbar=mean(SR.stds);
   if(chartType==='XBARR'){SR.UCL_main=SR.Xdbar+A2[n]*SR.Rbar;SR.LCL_main=SR.Xdbar-A2[n]*SR.Rbar;SR.CL_main=SR.Xdbar;SR.UCL2=D4[n]*SR.Rbar;SR.LCL2=D3[n]*SR.Rbar;SR.CL2=SR.Rbar;SR.sigma=SR.Rbar/(d2[n]||1.128);SR.chartName='Xbar-R Chart';SR.sub2label='R Chart';SR.sub2Vals=SR.ranges;}
-  else{SR.UCL_main=SR.Xdbar+A3[n]*SR.Sbar;SR.LCL_main=SR.Xdbar-A3[n]*SR.Sbar;SR.CL_main=SR.Xdbar;SR.UCL2=B4[n]*SR.Sbar;SR.LCL2=B3[n]*SR.Sbar;SR.CL2=SR.Sbar;SR.sigma=SR.Sbar/(0.9400);SR.chartName='Xbar-S Chart';SR.sub2label='S Chart';SR.sub2Vals=SR.stds;}
+  else{SR.UCL_main=SR.Xdbar+A3[n]*SR.Sbar;SR.LCL_main=SR.Xdbar-A3[n]*SR.Sbar;SR.CL_main=SR.Xdbar;SR.UCL2=B4[n]*SR.Sbar;SR.LCL2=B3[n]*SR.Sbar;SR.CL2=SR.Sbar;SR.sigma=SR.Sbar/(c4[n]||0.94);SR.chartName='Xbar-S Chart';SR.sub2label='S Chart';SR.sub2Vals=SR.stds;}
   SR.mainVals=SR.xbars;SR.grandMean=SR.Xdbar;SR.allVals=SR.data.flat();SR.sigmaOverall=std(SR.allVals);SR.mainLabel=chartType==='XBARR'?'Xbar Chart':'Xbar Chart';
 }
 function calcSPCIMR(){
@@ -2880,64 +2769,6 @@ function sipocDraw(){
     if(i<4){ctx.fillStyle=colColors[i];ctx.beginPath();const ax=x+cw-4,ay=startY+58;ctx.moveTo(ax,ay);ctx.lineTo(ax+8,ay+8);ctx.lineTo(ax,ay+16);ctx.closePath();ctx.fill();}
   });
   document.getElementById('si-out').style.display='block';
-}
-
-// ════════════════════════════════════════════
-// CUSUM / EWMA
-// ════════════════════════════════════════════
-function cusumLoadEx(){document.getElementById('ce-data').value='25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.5 25.4 25.6 25.7 25.5 25.8 25.6 25.9 25.7 25.8';}
-function cusumAnalyze(){
-  const data=parseNums(document.getElementById('ce-data').value);if(data.length<5)return alert('請輸入至少 5 筆數據');
-  const mu=parseFloat(document.getElementById('ce-mu').value)||mean(data);
-  const sigma=parseFloat(document.getElementById('ce-sigma').value)||stdS(data);
-  const k=parseFloat(document.getElementById('ce-k').value)||0.5;
-  const h=parseFloat(document.getElementById('ce-h').value)||4;
-  const lambda=parseFloat(document.getElementById('ce-lambda').value)||0.2;
-  const type=document.getElementById('ce-type').value;
-  // CUSUM
-  let Cp=0,Cm=0;const cusumP=[],cusumM=[];
-  data.forEach(v=>{Cp=Math.max(0,Cp+(v-mu)/sigma-k);Cm=Math.max(0,Cm-(v-mu)/sigma-k);cusumP.push(parseFloat(Cp.toFixed(4)));cusumM.push(parseFloat(Cm.toFixed(4)));});
-  // EWMA
-  let ewma=mu;const ewmaVals=[mu];
-  data.forEach(v=>{ewma=lambda*v+(1-lambda)*ewma;ewmaVals.push(parseFloat(ewma.toFixed(4)));});
-  const ewmaUCL=mu+3*sigma*Math.sqrt(lambda/(2-lambda));const ewmaLCL=mu-3*sigma*Math.sqrt(lambda/(2-lambda));
-  const alarms=cusumP.map((v,i)=>v>h||cusumM[i]>h);const ewmaAlarms=ewmaVals.slice(1).map(v=>v>ewmaUCL||v<ewmaLCL);
-  document.getElementById('ce-stats').innerHTML=[{v:data.length,l:'樣本數'},{v:r4(mu),l:'目標 μ₀'},{v:r4(sigma),l:'製程 σ'},{v:alarms.filter(Boolean).length,l:'CUSUM 警示'},{v:ewmaAlarms.filter(Boolean).length,l:'EWMA 警示'}].map(c=>`<div class="sc"><div class="v">${c.v}</div><div class="l">${c.l}</div></div>`).join('');
-  destroyCharts();
-  const labels=data.map((_,i)=>`${i+1}`);
-  const mkChart=(id,title,ds)=>{
-    const c=document.getElementById(id);if(!c)return;
-    c.width=c.parentElement.offsetWidth||640;c.height=210;
-    const inst=new Chart(c.getContext('2d'),{
-      type:'line',
-      data:{labels,datasets:ds},
-      options:{responsive:false,animation:false,
-        plugins:{title:{display:true,text:title,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},
-        scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}
-    });
-    chartInst.push(inst);
-  }
-  if(type==='cusum'||type==='both'){
-    mkChart('ce-c1','CUSUM 管制圖',[
-      {label:'C+',data:cusumP,borderColor:'#1D3B8A',borderWidth:2,pointRadius:cusumP.map((v)=>v>h?6:3),pointBackgroundColor:cusumP.map((v)=>v>h?'#DC2626':'#1D3B8A'),fill:false,tension:0.1},
-      {label:'C-',data:cusumM,borderColor:'#7C3AED',borderWidth:2,pointRadius:cusumM.map((v)=>v>h?6:3),pointBackgroundColor:cusumM.map((v)=>v>h?'#DC2626':'#7C3AED'),fill:false,tension:0.1},
-      {label:'UCL='+h,data:Array(data.length).fill(h),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
-    ]);
-  }
-  if(type==='ewma'||type==='both'){
-    document.getElementById('ce-c2-wrap').style.display='block';
-    mkChart('ce-c2','EWMA (lambda='+lambda+')',[
-      {label:'EWMA',data:ewmaVals.slice(1),borderColor:'#059669',borderWidth:2,pointRadius:ewmaVals.slice(1).map(v=>v>ewmaUCL||v<ewmaLCL?6:3),pointBackgroundColor:ewmaVals.slice(1).map(v=>v>ewmaUCL||v<ewmaLCL?'#DC2626':'#059669'),fill:false,tension:0.1},
-      {label:'UCL='+r4(ewmaUCL),data:Array(data.length).fill(parseFloat(r4(ewmaUCL))),borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false},
-      {label:'LCL='+r4(ewmaLCL),data:Array(data.length).fill(parseFloat(r4(ewmaLCL))),borderColor:'#2563EB',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false},
-      {label:'原始值',data:data,borderColor:'#9CA3AF',borderWidth:1,borderDash:[3,3],pointRadius:0,fill:false}
-    ]);
-  } else {
-    document.getElementById('ce-c2-wrap').style.display='none';
-  }
-  const firstAlarm=alarms.findIndex(Boolean)+1;const firstEWMA=ewmaAlarms.findIndex(Boolean)+1;
-  document.getElementById('ce-result').innerHTML=`<div class="alert ${(firstAlarm>0||firstEWMA>0)?'danger':'success'}"><strong>偵測結果：</strong>${firstAlarm>0?`CUSUM 於第 ${firstAlarm} 點發出警示`:'CUSUM 未發現偏移'}${(firstEWMA>0&&(type==='ewma'||type==='both'))?`；EWMA 於第 ${firstEWMA} 點發出警示`:''}。${(firstAlarm===0&&firstEWMA===0)?'製程未見偏移訊號。':''}</div>`;
-  document.getElementById('ce-out').style.display='block';
 }
 
 // ════════════════════════════════════════════
@@ -4236,7 +4067,6 @@ var TOOL_PROMPTS = {
   boxplot: '你正在分析箱型圖的結果。請用繁體中文比較各組的分佈差異，並判斷是否需要進一步統計檢定。',
   scatter: '你正在分析相關性分析和散佈圖的結果。請用繁體中文判讀變數間的關係強度，並說明實務意義。',
   hypothesis: '你正在分析假設檢定的結果。請用繁體中文解釋統計結果的實務意義，注意統計顯著不等於實務重要性。',
-  cusum: '你正在分析 CUSUM/EWMA 管制圖的結果。請用繁體中文判讀製程是否有微小偏移，並給出監控建議。',
   sipoc: '你正在分析 SIPOC 圖的結果。請用繁體中文評估製程範疇定義是否完整，並給出改善建議。',
 };
 
@@ -4745,7 +4575,7 @@ function drawDOEResiduals(){
 
 window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOEResiduals=drawDOEResiduals;window.doeFormatANOVA=doeFormatANOVA;
 window.sipocDraw=sipocDraw;
-window.cusumAnalyze=cusumAnalyze;window.cusumLoadEx=cusumLoadEx;
+
 window.scatterAnalyze=scatterAnalyze;window.scatterLoadEx=scatterLoadEx;
 window.hyUpdateUI=hyUpdateUI;window.hyAnalyze=hyAnalyze;window.hyLoadEx=hyLoadEx;
 window.boxplotAnalyze=boxplotAnalyze;
@@ -4769,7 +4599,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:52enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.10 · 2026-05-31 21:34enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4788,7 +4618,7 @@ document.addEventListener('click', function(e) {
           '<span class="record-toggle-icon" style="font-size:12px;color:#6B7280">▼ 展開填寫</span>'+
         '</div>'+
         '<div class="record-body" style="display:none">'+
-          '<div class="print-only">DMAIC 工具平台分析報告 - '+(document.title||'')+'</div>'+ 
+          '<div class="print-only">MedQA 分析報告 - '+(document.title||'')+'</div>'+ 
           '<div class="record-grid">'+
             '<div class="field"><label>專案 / 產品</label><input id="'+pid+'-record-project" type="text" placeholder="例：檢體針組 / 親水塗層 / 包裝確效"></div>'+ 
             '<div class="field"><label>批號 / Lot / 樣品</label><input id="'+pid+'-record-lot" type="text" placeholder="例：P3-001 / Lot A"></div>'+ 
@@ -4819,7 +4649,7 @@ document.addEventListener('click', function(e) {
   window.dmaicExportJSON=function(){var data=collectPage();var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=safeName(pageKey()+'_'+(data.fields[pageKey().replace('page-','tool')+'-record-project']||'record'))+'.json';a.click();URL.revokeObjectURL(a.href);status('JSON 已產生');};
   window.dmaicPrintPDF=function(){
     var p=activePage();
-    var title=p.querySelector('.tp-title')?.textContent || 'DMAIC 工具平台';
+    var title=p.querySelector('.tp-title')?.textContent || 'MedQA';
     document.title=safeName(title+'_分析報告_'+today());
     window.print();
   };
@@ -4863,7 +4693,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.0 · 2026-05-31 18:52enabled');
+  status('v3.10 · 2026-05-31 21:34enabled');
 })();
 
 
@@ -5679,6 +5509,11 @@ window.doeUpdateFactors = function() {
 <section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
   <div class="card" style="background:#F8FAFC;border-left:4px solid var(--gold);font-size:12px;line-height:1.8;color:#374151">
     <div class="card-title"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>方法來源與驗算聲明</div>
+    <div style="background:#FFF1F2;border:1.5px solid #FECDD3;border-radius:8px;padding:.75rem 1rem;margin:.5rem 0 1rem;font-size:13px;color:#9F1239;line-height:1.7">
+      <strong>⚠️ 使用限制（Engineering / Training Use Only）</strong><br>
+      本平台適用於工程輔助分析、教育訓練、初步篩選與會議討論。<strong>正式品質判定、設計驗證結論、CAPA 關閉依據</strong>前，須由已驗證之統計軟體（Minitab / JMP）或經核准的 Excel 模板交叉確認。<br>
+      <span style="font-size:12px;color:#BE6E7E">目前已知限制：Xbar-S（n&gt;10）、Nelson 部分規則、DOE ANOVA 與 MSA 仍需標準資料集驗證。</span>
+    </div>
     <p><strong>定位：</strong>本工具為內部工程分析與教育訓練輔助工具，不等同第三方軟體認證或法規驗證系統。</p>
     <p><strong>SPC：</strong>Xbar-R、I-MR、np chart、Cp/Cpk 等公式依 Montgomery《Introduction to Statistical Quality Control》與常用 SPC 手冊公式設計，已以範例資料做初步驗算。</p>
     <p><strong>MSA：</strong>Gage R&amp;R 支援 ANOVA 法與平均全距法；判斷門檻採常見 AIAG MSA 判讀：%GRR &lt; 10% 優良、10%~30% 條件接受、&gt;30% 不合格，ndc 建議 ≥ 5。正式使用前仍應以公司核准樣本資料與既有統計軟體交叉確認。</p>
@@ -5730,7 +5565,6 @@ window.doeUpdateFactors = function() {
     { fn: 'hyAnalyze',       msg: '假設檢定中',          btn: 'hy-analyze-btn'    },
     { fn: 'scatterAnalyze',  msg: '相關性分析中',        btn: 'scatter-analyze-btn'},
     { fn: 'boxplotAnalyze',  msg: '箱型圖分析中',        btn: 'boxplot-analyze-btn'},
-    { fn: 'cusumAnalyze',    msg: 'CUSUM/EWMA 分析中',   btn: 'cusum-analyze-btn' },
     { fn: 'paretoAnalyze',   msg: '柏拉圖分析中',        btn: 'pareto-analyze-btn'},
     { fn: 'claudeStartAnalyze', msg: 'AI 判讀中',        btn: null                },
   ];
@@ -5799,7 +5633,6 @@ window.doeUpdateFactors = function() {
     scatter:    '🔗 相關性分析',
     doe:        '🧪 DOE 實驗設計',
     boxplot:    '📦 箱型圖',
-    cusum:      '🎯 CUSUM/EWMA',
     sipoc:      '🗺️ SIPOC',
   };
 
