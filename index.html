@@ -327,6 +327,162 @@ tr:hover td{background:#F9FAFB}
   pointer-events: none !important;
 }
 
+/* ════ CAPA 主頁助理 ════ */
+#capa-assistant {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9990;
+}
+
+/* 浮動按鈕 */
+#capa-fab {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #BE185D, #DB2777);
+  border: none;
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(190,24,93,.45);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .2s, box-shadow .2s;
+}
+#capa-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(190,24,93,.55);
+}
+#capa-fab .fab-dot {
+  position: absolute;
+  top: 2px; right: 2px;
+  width: 10px; height: 10px;
+  background: #4ADE80;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  animation: fab-pulse 2s ease-in-out infinite;
+}
+@keyframes fab-pulse {
+  0%,100%{ transform:scale(1);opacity:1; }
+  50%{ transform:scale(.8);opacity:.6; }
+}
+
+/* 對話視窗 */
+#capa-window {
+  position: fixed;
+  bottom: 84px;
+  right: 20px;
+  width: 340px;
+  max-height: 500px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #E8EDF5;
+}
+#capa-window.open { display: flex; }
+
+#capa-header {
+  background: linear-gradient(135deg, #BE185D, #DB2777);
+  color: #fff;
+  padding: .75rem 1rem;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+#capa-header .ch-left {
+  display: flex; align-items: center; gap: 8px;
+}
+#capa-header .ch-title {
+  font-size: 13px; font-weight: 600;
+}
+#capa-header .ch-sub {
+  font-size: 10px; color: rgba(255,255,255,.6); margin-top: 1px;
+}
+#capa-header .ch-close {
+  background: rgba(255,255,255,.15); border: none; color: #fff;
+  border-radius: 50%; width: 26px; height: 26px;
+  font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+#capa-messages {
+  flex: 1; overflow-y: auto;
+  padding: .75rem 1rem;
+  display: flex; flex-direction: column; gap: .5rem;
+}
+.capa-msg-ai {
+  background: #F8FAFF;
+  border: 1px solid #E2ECF8;
+  border-radius: 8px 8px 8px 2px;
+  padding: .55rem .8rem;
+  font-size: 13px; line-height: 1.65;
+  color: #1a1a2e;
+  align-self: flex-start;
+  max-width: 95%;
+}
+.capa-msg-user {
+  background: #BE185D;
+  color: #fff;
+  border-radius: 8px 8px 2px 8px;
+  padding: .5rem .8rem;
+  font-size: 13px;
+  align-self: flex-end;
+  max-width: 88%;
+}
+.capa-tools {
+  display: flex; flex-wrap: wrap; gap: 4px; margin-top: .4rem;
+}
+.capa-tool-btn {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px; font-weight: 600;
+  color: #1D3B8A;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+.capa-tool-btn:hover { background: #DBEAFE; }
+
+#capa-input-area {
+  padding: .6rem .75rem .75rem;
+  border-top: 1px solid #E8EDF5;
+  flex-shrink: 0;
+}
+#capa-input {
+  width: 100%;
+  border: 1px solid #D1D5DB;
+  border-radius: 8px;
+  padding: .5rem .75rem;
+  font-size: 13px; font-family: inherit;
+  resize: none; outline: none;
+  line-height: 1.5;
+  margin-bottom: 5px;
+}
+#capa-input:focus { border-color: #BE185D; }
+.capa-btn-row {
+  display: flex; gap: 5px;
+}
+#capa-send {
+  flex: 1;
+  background: #BE185D; color: #fff;
+  border: none; border-radius: 7px;
+  padding: 7px; font-size: 13px;
+  font-weight: 500; cursor: pointer;
+  font-family: inherit;
+}
+#capa-send:disabled { background: #9CA3AF; cursor: not-allowed; }
+#capa-reset {
+  background: transparent;
+  border: 1px solid #E2ECF8;
+  border-radius: 7px;
+  padding: 7px 10px; font-size: 11px;
+  color: #6B7280; cursor: pointer;
+  font-family: inherit;
+}
+
 </style>
 
 <style id="edu-styles">
@@ -435,7 +591,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:13</span>
+    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:26</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -4584,7 +4740,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:13enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:26enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4678,7 +4834,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.0 · 2026-05-31 18:13enabled');
+  status('v3.0 · 2026-05-31 18:26enabled');
 })();
 
 
@@ -5592,6 +5748,218 @@ window.doeUpdateFactors = function() {
       };
     }
   });
+
+})();
+
+</script>
+<script>
+// ════════════════════════════════════════════════════════
+// CAPA 主頁助理（獨立元件，不與工具頁面關聯）
+// ════════════════════════════════════════════════════════
+
+(function() {
+
+  // 工具顯示名稱
+  var TOOL_NAMES = {
+    pareto:     '📊 柏拉圖',
+    fishbone:   '🐟 魚骨圖',
+    spc:        '📈 SPC 管制圖',
+    msa:        '📐 MSA 量測分析',
+    histogram:  '📉 直方圖',
+    hypothesis: '🔬 假設檢定',
+    scatter:    '🔗 相關性分析',
+    doe:        '🧪 DOE 實驗設計',
+    boxplot:    '📦 箱型圖',
+    cusum:      '🎯 CUSUM/EWMA',
+    sipoc:      '🗺️ SIPOC',
+  };
+
+  var capaHistory = [];
+
+  // 初始歡迎訊息
+  var WELCOME = '您好！請描述您遇到的品質問題或失效情形，我幫您找出分析方向。';
+
+  // ── 建立 HTML 結構 ──
+  function buildUI() {
+    // 浮動按鈕
+    var fab = document.createElement('div');
+    fab.id = 'capa-assistant';
+    fab.innerHTML =
+      '<button id="capa-fab" onclick="capaToggle()" title="CAPA 分析助理">' +
+        '<span>🤖</span>' +
+        '<span class="fab-dot"></span>' +
+      '</button>' +
+      '<div id="capa-window">' +
+        '<div id="capa-header">' +
+          '<div class="ch-left">' +
+            '<span style="font-size:20px">🤖</span>' +
+            '<div>' +
+              '<div class="ch-title">CAPA 分析助理</div>' +
+              '<div class="ch-sub">描述問題，引導分析路徑</div>' +
+            '</div>' +
+          '</div>' +
+          '<button class="ch-close" onclick="capaToggle()">✕</button>' +
+        '</div>' +
+        '<div id="capa-messages"></div>' +
+        '<div id="capa-input-area">' +
+          '<textarea id="capa-input" rows="2" placeholder="例：檢體針取樣長度不足，良率下降..." onkeydown="capaKeydown(event)"></textarea>' +
+          '<div class="capa-btn-row">' +
+            '<button id="capa-send" onclick="capaSend()">送出 →</button>' +
+            '<button id="capa-reset" onclick="capaReset()">🔄 重新開始</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(fab);
+
+    // 顯示歡迎訊息
+    appendAIMsg(WELCOME);
+  }
+
+  // ── 訊息顯示 ──
+  function appendAIMsg(text, tools) {
+    var msgs = document.getElementById('capa-messages');
+    if(!msgs) return;
+
+    var div = document.createElement('div');
+    div.className = 'capa-msg-ai';
+    div.textContent = text;
+
+    // 工具按鈕
+    if(tools && tools.length > 0) {
+      var toolsDiv = document.createElement('div');
+      toolsDiv.className = 'capa-tools';
+      tools.forEach(function(toolId) {
+        var btn = document.createElement('button');
+        btn.className = 'capa-tool-btn';
+        btn.textContent = TOOL_NAMES[toolId] || toolId;
+        btn.onclick = function() {
+          // 只做跳轉，不關聯任何工具狀態
+          capaToggle();
+          if(typeof goTool === 'function') goTool(toolId);
+        };
+        toolsDiv.appendChild(btn);
+      });
+      div.appendChild(toolsDiv);
+    }
+
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function appendUserMsg(text) {
+    var msgs = document.getElementById('capa-messages');
+    if(!msgs) return;
+    var div = document.createElement('div');
+    div.className = 'capa-msg-user';
+    div.textContent = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // ── 開關視窗 ──
+  window.capaToggle = function() {
+    var win = document.getElementById('capa-window');
+    if(!win) return;
+    win.classList.toggle('open');
+    if(win.classList.contains('open')) {
+      var input = document.getElementById('capa-input');
+      if(input) setTimeout(function(){ input.focus(); }, 200);
+    }
+  };
+
+  // ── 送出訊息 ──
+  window.capaSend = async function() {
+    var input = document.getElementById('capa-input');
+    var sendBtn = document.getElementById('capa-send');
+    if(!input) return;
+    var q = input.value.trim();
+    if(!q) return;
+
+    appendUserMsg(q);
+    input.value = '';
+    if(sendBtn) sendBtn.disabled = true;
+
+    capaHistory.push({ role: 'user', content: q });
+
+    // 顯示 loading
+    var msgs = document.getElementById('capa-messages');
+    var loading = document.createElement('div');
+    loading.className = 'capa-msg-ai';
+    loading.textContent = '思考中...';
+    loading.id = 'capa-loading';
+    if(msgs) { msgs.appendChild(loading); msgs.scrollTop = msgs.scrollHeight; }
+
+    try {
+      var resp = await fetch(CLAUDE_WORKER, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'navigate',
+          messages: capaHistory
+        })
+      });
+      var data = await resp.json();
+
+      // 移除 loading
+      var loadEl = document.getElementById('capa-loading');
+      if(loadEl) loadEl.remove();
+
+      var text = data.text || '';
+      var tools = data.tools || [];
+
+      capaHistory.push({ role: 'assistant', content: text + (tools.length ? ' [TOOLS: '+tools.join(',')+']' : '') });
+
+      appendAIMsg(text, tools);
+
+    } catch(err) {
+      var loadEl2 = document.getElementById('capa-loading');
+      if(loadEl2) loadEl2.remove();
+      appendAIMsg('⚠️ 連線失敗：' + err.message);
+    }
+
+    if(sendBtn) sendBtn.disabled = false;
+  };
+
+  // ── 重新開始 ──
+  window.capaReset = function() {
+    capaHistory = [];
+    var msgs = document.getElementById('capa-messages');
+    if(msgs) msgs.innerHTML = '';
+    appendAIMsg(WELCOME);
+  };
+
+  // ── Enter 送出 ──
+  window.capaKeydown = function(e) {
+    if(e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      capaSend();
+    }
+  };
+
+  // ── 只在主頁顯示 ──
+  // 監聽頁面切換，工具頁隱藏浮動按鈕
+  var _origGoTool_capa = window.goTool;
+  window.goTool = function(id) {
+    if(typeof _origGoTool_capa === 'function') _origGoTool_capa(id);
+    var fab = document.getElementById('capa-assistant');
+    var win = document.getElementById('capa-window');
+    if(fab) fab.style.display = 'none';
+    if(win) win.classList.remove('open');
+  };
+
+  var _origGoHome_capa = window.goHome;
+  window.goHome = function() {
+    if(typeof _origGoHome_capa === 'function') _origGoHome_capa();
+    var fab = document.getElementById('capa-assistant');
+    if(fab) fab.style.display = 'block';
+  };
+
+  // DOM 就緒後建立 UI
+  if(document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', buildUI);
+  } else {
+    buildUI();
+  }
 
 })();
 
