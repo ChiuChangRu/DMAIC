@@ -593,7 +593,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:50</span>
+    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:52</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -1252,7 +1252,7 @@ tr:hover td{background:#F9FAFB}
     <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>實驗矩陣與結果輸入</div>
     <div id="doe-matrix-wrap" style="overflow-x:auto;margin-bottom:10px"></div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="doeAnalyze()">▶ 分析效應</button>
+      <button class="btn btn-primary" id="doe-analyze-btn" onclick="doeAnalyze()">▶ 分析效應</button>
       <button class="btn btn-sec" onclick="doeLoadEx()">載入範例數據</button>
       <button class="btn btn-sec" onclick="doeUpdateFactors()">重新產生矩陣</button>
     </div>
@@ -4769,7 +4769,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:50enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:52enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4863,7 +4863,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.0 · 2026-05-31 18:50enabled');
+  status('v3.0 · 2026-05-31 18:52enabled');
 })();
 
 
