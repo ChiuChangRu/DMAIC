@@ -386,7 +386,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:59</span>
+    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 17:07</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2302,6 +2302,7 @@ function doeAnalyze(){
     }
   }
   window._doeEffects=Object.fromEntries(sortedEff);
+  window._doeSortedEff=sortedEff;
 window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,runs:runs,rep:rep,yMeans:yMeans,grandMean:grandMean};
 
   // ── ANOVA 終端機格式輸出（含 LOF）──
@@ -2317,6 +2318,69 @@ window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,
     '反應變數：'+yname;
   setTimeout(function(){claudeAutoAnalyze('doe',doeStats);},300);
 }
+function drawDOEPareto() {
+  var sortedEff = window._doeSortedEff;
+  if(!sortedEff || sortedEff.length === 0) return;
+  var canvas = document.getElementById('doe-pareto-canvas');
+  if(!canvas) return;
+  // 重設寬度（此時 tab 已顯示，offsetWidth 正確）
+  canvas.width = canvas.parentElement.offsetWidth || 640;
+  canvas.height = 300;
+
+  var absEff = sortedEff.map(function(e){ return Math.abs(e[1]); });
+  var total = absEff.reduce(function(s,v){return s+v;}, 0);
+  var cumPct = 0;
+  var cpcts = absEff.map(function(v){
+    cumPct += v/total*100;
+    return parseFloat(cumPct.toFixed(1));
+  });
+
+  // 移除舊圖
+  if(window._doeChartPareto) { try{window._doeChartPareto.destroy();}catch(e){} }
+
+  window._doeChartPareto = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: sortedEff.map(function(e){ return e[0]; }),
+      datasets: [
+        {
+          type: 'bar',
+          label: '|效應值|',
+          data: absEff,
+          backgroundColor: absEff.map(function(v,i){
+            return i===0?'rgba(220,38,38,.75)':i===1?'rgba(37,99,235,.65)':'rgba(107,114,128,.5)';
+          }),
+          borderRadius: 3,
+          yAxisID: 'y'
+        },
+        {
+          type: 'line',
+          label: '累積%',
+          data: cpcts,
+          borderColor: '#F59E0B',
+          borderWidth: 2,
+          pointRadius: 4,
+          fill: false,
+          yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      animation: false,
+      plugins: {
+        title: {display:true, text:'效應柏拉圖', font:{size:13,weight:'600'}, padding:{bottom:6}},
+        legend: {labels:{font:{size:11}}}
+      },
+      scales: {
+        y:  {beginAtZero:true, title:{display:true,text:'|效應值|'}, ticks:{font:{size:10}}},
+        y2: {min:0, max:100, position:'right', title:{display:true,text:'累積%'},
+             ticks:{font:{size:10}}, grid:{drawOnChartArea:false}}
+      }
+    }
+  });
+}
+
 function doeSw(name){
   var allTabs=['effects','pareto','halfnormal','maineff','interaction','anova','residual'];
   document.querySelectorAll('#page-doe .tab').forEach(function(t,i){t.classList.toggle('active',allTabs[i]===name);});
@@ -2326,6 +2390,7 @@ function doeSw(name){
   if(name==='halfnormal')setTimeout(function(){drawHalfNormalPlot(window._doeEffects||{},'doe-hn-content');},50);
   if(name==='maineff')setTimeout(function(){drawDOEMainEffects();},50);
   if(name==='residual')setTimeout(function(){drawDOEResiduals();},50);
+  if(name==='pareto')setTimeout(function(){drawDOEPareto();},50);
 }
 
 function drawDOEMainEffects(){
@@ -2534,6 +2599,13 @@ function scatterAnalyze(){
   const alpha=parseFloat(document.getElementById('sc-alpha').value)||0.05;
   document.getElementById('sc-stats').innerHTML=[{v:n,l:'樣本數 n'},{v:r4(r),l:'Pearson r'},{v:r4(r2),l:'R² 決定係數'},{v:r4(b1),l:'斜率 b₁'},{v:r4(b0),l:'截距 b₀'},{v:pVal.toFixed(4),l:'p-value'}].map(c=>`<div class="sc"><div class="v">${c.v}</div><div class="l">${c.l}</div></div>`).join('');
   const canvas=document.getElementById('sc-canvas');canvas.width=canvas.parentElement.offsetWidth||640;
+  var dpr=window.devicePixelRatio||1;
+  if(dpr>1){
+    var w=canvas.width,h=canvas.height;
+    canvas.width=w*dpr;canvas.height=h*dpr;
+    canvas.style.width=w+'px';canvas.style.height=h+'px';
+    canvas.getContext('2d').scale(dpr,dpr);
+  }
   destroyCharts();
   const xMin=Math.min(...X),xMax=Math.max(...X);const regX=[xMin,xMax],regY=[b0+b1*xMin,b0+b1*xMax];
   const inst=new Chart(canvas.getContext('2d'),{type:'scatter',data:{datasets:[{label:'觀測值',data:X.map((x,i)=>({x,y:Y[i]})),backgroundColor:'#1D3B8A',pointRadius:5},{label:`迴歸線 y=${r4(b0)}+${r4(b1)}x`,data:regX.map((x,i)=>({x,y:regY[i]})),type:'line',borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('sc-xname').value} vs ${document.getElementById('sc-yname').value}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{title:{display:true,text:document.getElementById('sc-xname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{title:{display:true,text:document.getElementById('sc-yname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
@@ -3972,7 +4044,10 @@ window.claudePanelHTML = function(toolId) {
   return '<div class="claude-panel" id="claude-panel-'+t+'" style="display:none">' +
     '<div class="claude-panel-header">' +
       '<div class="ch-title"><span>🤖</span> Claude AI 判讀</div>' +
-      '<button class="ch-toggle" onclick="claudeToggleChat(\''+t+'\')">💬 追問</button>' +
+      '<div style="display:flex;gap:6px">' +
+        '<button class="ch-toggle" style="background:rgba(255,255,255,.1);padding:3px 9px" onclick="claudeResetPanel(\''+t+'\')" title="重新判讀">🔄</button>' +
+        '<button class="ch-toggle" onclick="claudeToggleChat(\''+t+'\')">💬 追問</button>' +
+      '</div>' +
     '</div>' +
     '<div class="claude-auto">' +
       '<div class="ca-label">📋 AI 判讀</div>' +
@@ -3995,6 +4070,22 @@ window.claudePanelHTML = function(toolId) {
 
 
 // claudeStartAnalyze (duplicate removed)
+
+window.claudeResetPanel = function(toolId) {
+  var panel = document.getElementById('claude-panel-'+toolId);
+  if(!panel) return;
+  var askDiv = document.getElementById('ca-ask-'+toolId);
+  var autoDiv = panel.querySelector('.ca-text');
+  var loadDiv = panel.querySelector('.ca-loading');
+  var chat = document.getElementById('claude-chat-'+toolId);
+  var msgs = document.getElementById('claude-msgs-'+toolId);
+  if(askDiv) askDiv.style.display = 'flex';
+  if(autoDiv) { autoDiv.innerHTML=''; autoDiv.style.display='none'; }
+  if(loadDiv) loadDiv.style.display = 'none';
+  if(chat) chat.classList.remove('open');
+  if(msgs) msgs.innerHTML = '';
+  if(window.claudeHistory) delete window.claudeHistory[toolId];
+};
 window.claudeStartAnalyze=claudeStartAnalyze;
 window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
@@ -4285,7 +4376,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:59enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 17:07enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4379,7 +4470,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v2.1 · 2026-05-31 16:59enabled');
+  status('v2.1 · 2026-05-31 17:07enabled');
 })();
 
 
