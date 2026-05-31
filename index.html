@@ -253,7 +253,8 @@ tr:hover td{background:#F9FAFB}
 
 
 /* ════ Claude AI 對話框 ════ */
-.claude-panel{background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:10px;margin-top:1rem;overflow:hidden}
+.claude-panel{background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:10px;margin:1rem auto;overflow:hidden;max-width:760px}
+.ca-ask{display:flex;flex-direction:column;align-items:center;padding:.75rem 0;text-align:center}
 .claude-panel-header{background:#1B3A5C;color:#fff;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .claude-panel-header .ch-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
 .claude-panel-header .ch-toggle{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
@@ -384,7 +385,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v2.1-dev · 2026-05-31 14:08</span>
+    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:35</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -412,24 +413,15 @@ tr:hover td{background:#F9FAFB}
 
 <!-- ══ Hero ══ -->
 <div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
-  <div style="display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;font-size:11px;padding:4px 16px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:1.25rem">Six Sigma · DMAIC · 品質工程</div>
-  <h2 style="font-size:28px;font-weight:600;line-height:1.4;margin-bottom:.5rem;letter-spacing:-.01em;color:#fff">
-    六標準差 <span style="color:#A8D8EA">DMAIC</span><br>分析工具平台
+
+  <h2 style="font-size:30px;font-weight:600;line-height:1.4;margin-bottom:.5rem;letter-spacing:-.01em;color:#fff">
+    <span style="color:#A8D8EA">AI 輔助</span>統計分析平台
   </h2>
   <div style="font-size:12px;color:rgba(255,255,255,.38);margin-bottom:1.5rem;letter-spacing:.04em">Edit by Chiu Chang Ru &nbsp;/&nbsp; Claude</div>
-  <p style="font-size:13px;color:rgba(255,255,255,.62);max-width:460px;margin:0 auto 2rem;line-height:1.8">完整 DMAIC 五階段工具・純離線運行・無需帳號<br>從定義問題到持續管制，協助製程持續改善</p>
-  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-    <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 24px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
-    <button onclick="scrollToPhase('D')" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:10px 24px;font-size:13px;cursor:pointer;font-family:inherit">📋 工具總覽</button>
-  </div>
-</div>
 
-<!-- ══ 統計列 ══ -->
-<div style="background:#1B3A5C;padding:1rem 2rem;display:flex;justify-content:center;flex-wrap:wrap">
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">10</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">分析工具</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">5</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">DMAIC 階段</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center;border-right:1px solid rgba(255,255,255,.1)"><div style="font-size:22px;font-weight:600;color:#7EC8E3">8</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">Nelson 規則</div></div>
-  <div style="padding:.5rem 1.75rem;text-align:center"><div style="font-size:22px;font-weight:600;color:#7EC8E3">100%</div><div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;text-transform:uppercase;letter-spacing:.07em">離線運行</div></div>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:1.5rem">
+    <button onclick="scrollToPhase('D')" style="background:#fff;color:#2A5278;border:none;border-radius:8px;padding:10px 28px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">▶ 開始使用</button>
+  </div>
 </div>
 
 <!-- ══ 主內容 ══ -->
@@ -437,62 +429,12 @@ tr:hover td{background:#F9FAFB}
 
   <!-- DMAIC 流程軸 -->
   <div id="phase-D" style="margin-bottom:.75rem">
-    <div style="font-size:11px;font-weight:600;color:#2A5278;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:.4rem">工具架構</div>
-    <div style="font-size:18px;font-weight:600;color:#1B3A5C;text-align:center;margin-bottom:.3rem">DMAIC 五階段流程</div>
-    <div style="font-size:13px;color:#9CA3AF;text-align:center;margin-bottom:1.25rem">點選工具卡片直接進入</div>
-  </div>
+    </div>
 
-  <div class="dmaic-flow">
-    <div class="phase-header" style="background:linear-gradient(135deg,#2563EB,#3B82F6)" onclick="scrollToPhase('D')">
-      <div class="ph-inner"><div class="ph-letter" style="color:#fff">D</div><div class="ph-word" style="color:rgba(255,255,255,.9)">DEFINE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">定義</div></div>
-      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #3B82F6"></div>
-    </div>
-    <div class="phase-header" style="background:linear-gradient(135deg,#0E7490,#1A9CB0)" onclick="scrollToPhase('M')">
-      <div class="ph-inner"><div class="ph-letter" style="color:#fff">M</div><div class="ph-word" style="color:rgba(255,255,255,.9)">MEASURE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">量測</div></div>
-      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #1A9CB0"></div>
-    </div>
-    <div class="phase-header" style="background:linear-gradient(135deg,#047857,#1A9E75)" onclick="scrollToPhase('A')">
-      <div class="ph-inner"><div class="ph-letter" style="color:#fff">A</div><div class="ph-word" style="color:rgba(255,255,255,.9)">ANALYZE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">分析</div></div>
-      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #1A9E75"></div>
-    </div>
-    <div class="phase-header" style="background:linear-gradient(135deg,#B45309,#D4850A)" onclick="scrollToPhase('I')">
-      <div class="ph-inner"><div class="ph-letter" style="color:#fff">I</div><div class="ph-word" style="color:rgba(255,255,255,.9)">IMPROVE</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">改善</div></div>
-      <div class="phase-arrow" style="border-width:28px 0 28px 14px;border-color:transparent transparent transparent #D4850A"></div>
-    </div>
-    <div class="phase-header" style="background:linear-gradient(135deg,#5B21B6,#7252C8)" onclick="scrollToPhase('C')">
-      <div class="ph-inner"><div class="ph-letter" style="color:#fff">C</div><div class="ph-word" style="color:rgba(255,255,255,.9)">CONTROL</div><div class="ph-zh" style="color:rgba(255,255,255,.7)">管制</div></div>
-    </div>
-  </div>
+  
 
   <!-- D 工具 -->
-  <div id="phase-D" class="tools-section">
-    <div class="tools-section-title" style="color:#3B7DD8">D — Define 定義階段</div>
-    <div class="tools-grid">
-      <div class="tool-card" onclick="goTool('pareto')">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📊</div><div class="tc-name">柏拉圖 Pareto</div>
-        <div class="tc-desc">80/20 法則・找出關鍵少數問題</div>
-        <span class="tc-tag tag-new">可用</span>
-      </div>
-      <div class="tool-card" onclick="goTool('fishbone')">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🐟</div><div class="tc-name">魚骨圖（石川圖）</div>
-        <div class="tc-desc">系統化找出根本原因 6M</div>
-        <span class="tc-tag tag-new">可用</span>
-      </div>
-      <div class="tool-card" onclick="goTool('sipoc')">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🗺️</div><div class="tc-name">SIPOC 圖</div>
-        <div class="tc-desc">定義製程範疇・供需關係</div>
-        <span class="tc-tag tag-new">可用</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- M 工具 -->
+    <!-- M 工具 -->
   <div id="phase-M" class="tools-section">
     <div class="tools-section-title" style="color:#1A9CB0">M — Measure 量測階段</div>
     <div class="tools-grid">
@@ -637,12 +579,10 @@ tr:hover td{background:#F9FAFB}
 </div>
 
 <!-- Footer -->
-<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
-  <div>醫療器材品質管理工具・Six Sigma DMAIC 平台</div>
-  <div style="display:inline-flex;align-items:center;gap:5px;background:rgba(126,200,227,.12);border:1px solid rgba(126,200,227,.3);border-radius:20px;padding:3px 12px;font-size:11px;color:#7EC8E3">
-    <div style="width:6px;height:6px;border-radius:50%;background:#4ADE80;flex-shrink:0"></div>完全離線・免費使用
-  </div>
+<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
+  <div>MedQA · AI 輔助醫療器材品質管理平台</div>
   <div>Edit by Chiu Chang Ru / Claude</div>
+</div>
 </div>
 
 </div>
@@ -910,8 +850,7 @@ tr:hover td{background:#F9FAFB}
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button></div>
   </div>
-  <div id="fb-to-doe" style="display:none"></div>
-<div id="fb-out" style="display:none">
+  <div id="fb-out" style="display:none">
     <div class="card">
       <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
       <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
@@ -2106,31 +2045,6 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
-
-  // F01: 收集魚骨圖所有原因，供 DOE 使用
-  var fbCauses = [];
-  var fbCatIds = ['fb-man','fb-machine','fb-material','fb-method','fb-measure','fb-env'];
-  fbCatIds.forEach(function(cid){
-    var el = document.getElementById(cid);
-    if(!el||!el.value.trim()) return;
-    el.value.trim().split('\n').forEach(function(line){
-      var name = line.split(',')[0].trim();
-      if(name) fbCauses.push(name);
-    });
-  });
-  window._fbCauses = fbCauses;
-
-  // 顯示「帶入 DOE」按鈕（如果有原因）
-  var fbDoeDiv = document.getElementById('fb-to-doe');
-  if(fbDoeDiv && fbCauses.length > 0){
-    fbDoeDiv.style.display='block';
-    fbDoeDiv.innerHTML =
-      '<div style="margin-top:.75rem;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.75rem 1rem">' +
-      '<div style="font-size:12px;font-weight:600;color:#1D3B8A;margin-bottom:.4rem">🧪 偵測到 '+fbCauses.length+' 個潛在因子</div>' +
-      '<div style="font-size:12px;color:#374151;margin-bottom:.6rem">'+fbCauses.slice(0,6).join('・')+(fbCauses.length>6?'...':'')+'</div>' +
-      '<button onclick="fbToDOE()" style="background:#1B3A5C;color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">→ 選擇因子帶入 DOE 實驗設計</button>' +
-      '</div>';
-  }
 }
 
 // ════════════════════════════════════════════
@@ -3837,40 +3751,57 @@ async function callClaude(toolId, messages) {
 }
 
 // 自動判讀（分析完成後自動呼叫）
-window.claudeAutoAnalyze = async function(toolId, statsText) {
-  var panelId = 'claude-panel-' + toolId;
-  var panel = document.getElementById(panelId);
+
+window.claudeStartAnalyze = async function(toolId) {
+  var askDiv = document.getElementById('ca-ask-'+toolId);
+  var panel = document.getElementById('claude-panel-'+toolId);
   if(!panel) return;
-
-  var autoDiv = panel.querySelector('.ca-text');
   var loadDiv = panel.querySelector('.ca-loading');
-  if(!autoDiv || !loadDiv) return;
+  var autoDiv = panel.querySelector('.ca-text');
 
-  // 顯示載入中
-  autoDiv.style.display = 'none';
-  loadDiv.style.display = 'flex';
-  panel.style.display = 'block';
+  if(askDiv) askDiv.style.display = 'none';
+  if(loadDiv) loadDiv.style.display = 'flex';
+
+  var stats = window._lastStats && window._lastStats[toolId];
+  if(!stats) {
+    if(loadDiv) loadDiv.style.display = 'none';
+    if(askDiv) askDiv.style.display = 'flex';
+    return;
+  }
 
   try {
-    var messages = [{
-      role: 'user',
-      content: '以下是分析結果，請給出專業判讀和建議（200字以內）：\n\n' + statsText
-    }];
-    claudeHistory[toolId] = messages;
-    var reply = await callClaude(toolId, messages);
-    claudeHistory[toolId].push({role:'assistant', content:reply});
-
-    loadDiv.style.display = 'none';
-    autoDiv.style.display = 'block';
-    autoDiv.textContent = reply;
+    var messages = [{role:'user', content:'以下是分析結果，請給出專業判讀和建議（200字以內）：\n\n'+stats}];
+    var response = await fetch(CLAUDE_WORKER, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({messages: messages, system: TOOL_PROMPTS[toolId]||TOOL_PROMPTS['spc']})
+    });
+    var data = await response.json();
+    var reply = data.content[0].text;
+    if(loadDiv) loadDiv.style.display = 'none';
+    if(autoDiv) { autoDiv.innerHTML = renderMarkdown ? renderMarkdown(reply) : reply; autoDiv.style.display = 'block'; }
   } catch(err) {
-    loadDiv.style.display = 'none';
-    autoDiv.style.display = 'block';
-    autoDiv.textContent = '⚠️ 判讀失敗：' + err.message;
+    if(loadDiv) loadDiv.style.display = 'none';
+    if(autoDiv) { autoDiv.textContent = '⚠️ 判讀失敗：'+err.message; autoDiv.style.display = 'block'; }
   }
 };
 
-// 開關對話框
+window.claudeAutoAnalyze = async function(toolId, statsText) {
+  // 儲存統計數據供點擊時使用
+  if(!window._lastStats) window._lastStats = {};
+  window._lastStats[toolId] = statsText;
+
+  var panel = document.getElementById('claude-panel-'+toolId);
+  if(!panel) return;
+
+  // 只顯示面板含「點擊判讀」按鈕，不自動執行
+  panel.style.display = 'block';
+  var askDiv = document.getElementById('ca-ask-'+toolId);
+  var loadDiv = panel.querySelector('.ca-loading');
+  var autoDiv = panel.querySelector('.ca-text');
+  if(askDiv) askDiv.style.display = 'flex';
+  if(loadDiv) loadDiv.style.display = 'none';
+  if(autoDiv) { autoDiv.innerHTML=''; autoDiv.style.display='none'; }
+}
 window.claudeToggleChat = function(toolId) {
   var chat = document.getElementById('claude-chat-' + toolId);
   if(!chat) return;
@@ -3933,26 +3864,41 @@ window.claudeKeydown = function(event, toolId) {
 
 // 產生 Claude 面板 HTML
 window.claudePanelHTML = function(toolId) {
-  return '<div class="claude-panel" id="claude-panel-'+toolId+'" style="display:none">'+
-    '<div class="claude-panel-header">'+
-      '<div class="ch-title"><span>🤖</span> Claude AI 判讀</div>'+
-      '<button class="ch-toggle" onclick="claudeToggleChat(\''+toolId+'\')">💬 追問</button>'+
-    '</div>'+
-    '<div class="claude-auto">'+
-      '<div class="ca-label">📋 自動判讀結果</div>'+
-      '<div class="ca-loading" style="display:none">AI 分析中，請稍候...</div>'+
-      '<div class="ca-text"></div>'+
-    '</div>'+
-    '<div class="claude-chat" id="claude-chat-'+toolId+'">'+
-      '<div class="claude-messages" id="claude-msgs-'+toolId+'"></div>'+
-      '<div class="claude-input-row">'+
-        '<textarea id="claude-input-'+toolId+'" rows="2" placeholder="輸入問題，例如：這個結果符合 ISO 13485 嗎？" onkeydown="claudeKeydown(event,\''+toolId+'\')"></textarea>'+
-        '<button class="claude-send" id="claude-send-'+toolId+'" onclick="claudeSend(\''+toolId+'\')">送出</button>'+
-      '</div>'+
-    '</div>'+
+  var t = toolId;
+  return '<div class="claude-panel" id="claude-panel-'+t+'" style="display:none">' +
+    '<div class="claude-panel-header">' +
+      '<div class="ch-title"><span>🤖</span> Claude AI 判讀</div>' +
+      '<button class="ch-toggle" onclick="claudeToggleChat(\''+t+'\')">💬 追問</button>' +
+    '</div>' +
+    '<div class="claude-auto">' +
+      '<div class="ca-label">📋 AI 判讀</div>' +
+      '<div class="ca-ask" id="ca-ask-'+t+'" style="display:flex;flex-direction:column;align-items:center;padding:.75rem 0;text-align:center">' +
+        '<button onclick="claudeStartAnalyze(\''+t+'\')" style="background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:8px 22px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">🤖 點擊取得 AI 判讀建議</button>' +
+        '<div style="font-size:11px;color:#9CA3AF;margin-top:5px">分析結果將傳送給 Claude AI 進行判讀</div>' +
+      '</div>' +
+      '<div class="ca-loading" style="display:none">AI 分析中，請稍候...</div>' +
+      '<div class="ca-text" style="display:none"></div>' +
+    '</div>' +
+    '<div class="claude-chat" id="claude-chat-'+t+'">' +
+      '<div class="claude-messages" id="claude-msgs-'+t+'"></div>' +
+      '<div class="claude-input-row">' +
+        '<textarea id="claude-input-'+t+'" rows="2" placeholder="輸入問題..." onkeydown="claudeKeydown(event,\''+t+'\')"></textarea>' +
+        '<button class="claude-send" id="claude-send-'+t+'" onclick="claudeSend(\''+t+'\')">送出</button>' +
+      '</div>' +
+    '</div>' +
   '</div>';
 };
 
+
+window.claudeStartAnalyze = function(toolId) {
+  var askDiv = document.getElementById('ca-ask-'+toolId);
+  var loadDiv = document.querySelector('#claude-panel-'+toolId+' .ca-loading');
+  if(askDiv) askDiv.style.display = 'none';
+  if(loadDiv) loadDiv.style.display = 'flex';
+  // 從 _lastStats 取上次的統計數據
+  var stats = window._lastStats && window._lastStats[toolId];
+  if(stats) claudeAutoAnalyze(toolId, stats);
+};
 window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
 window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
@@ -4242,7 +4188,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1-dev · 2026-05-31 14:08enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:35enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4336,51 +4282,8 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v2.1-dev · 2026-05-31 14:08enabled');
+  status('v2.1 · 2026-05-31 16:35enabled');
 })();
-
-// ════════════════════════════════════════════════════════
-// F01: 魚骨圖 → DOE 因子傳遞
-// ════════════════════════════════════════════════════════
-
-window.fbToDOE = function() {
-  var causes = window._fbCauses || [];
-  if(causes.length === 0) { alert('請先完成魚骨圖分析'); return; }
-
-  // 最多選 4 個因子（DOE 限制）
-  var selected = causes.slice(0, 4);
-
-  // 跳轉到 DOE 工具
-  goTool('doe');
-
-  setTimeout(function(){
-    // 設定因子數量
-    var nfEl = document.getElementById('doe-nfactors');
-    if(nfEl){
-      nfEl.value = Math.min(selected.length, 4);
-      if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
-    }
-
-    setTimeout(function(){
-      // 填入因子名稱
-      selected.forEach(function(name, i){
-        var nameEl = document.getElementById('doe-f'+(i+1)+'-name');
-        if(nameEl) nameEl.value = name;
-      });
-
-      // 顯示提示
-      var msg = document.createElement('div');
-      msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
-      msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.join('、')+
-        '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
-
-      var doeCard = document.querySelector('#page-doe .card');
-      if(doeCard) doeCard.insertBefore(msg, doeCard.firstChild);
-
-    }, 300);
-  }, 200);
-};
-
 </script>
 
 <section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
