@@ -386,7 +386,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 17:42</span>
+    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 17:56</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2253,10 +2253,65 @@ function doeGenMatrix(){
   window._doeMatrix=matrix;window._doeFacs=factors;window._doeRuns=runs;window._doeRep=rep;
 }
 function doeLoadEx(){
-  const nf=parseInt(document.getElementById('doe-nf').value)||3;const runs=2**nf;const rep=parseInt(document.getElementById('doe-rep').value)||2;
-  const examples={3:{r1:[82,80,73,75,85,83,76,78],r2:[83,81,74,76,86,84,77,79]}};
-  const ex=examples[nf]||{r1:Array(runs).fill(75),r2:Array(runs).fill(76)};
-  for(let r=0;r<runs;r++){for(let rp=0;rp<rep;rp++){const el=document.getElementById(`doe-y-${r}-${rp}`);if(el)el.value=(ex[`r${rp+1}`]?.[r]||75)+((Math.random()-.5)*2).toFixed(1)*1;}}
+  var dtype = document.getElementById('doe-design-type')?.value || 'full';
+
+  // 部分因子設計範例
+  if(dtype === 'frac') {
+    var key = document.getElementById('doe-frac-design')?.value;
+    if(!key || !FRAC_DESIGNS[key]) { alert('請先選擇部分因子設計'); return; }
+    var d = FRAC_DESIGNS[key];
+    var n = d.runs;
+    // 部分因子範例：Montgomery 射出成型案例（溫度、壓力、時間、濃度）
+    // 已知：溫度效應最大，壓力次之
+    var fracExamples = {
+      '4-1': [82.1,78.3,74.2,85.6,79.4,83.1,76.8,88.2],
+      '5-1': [82,78,74,86,79,83,77,88,80,76,72,84,78,81,75,87],
+      '5-2': [82,78,74,86,79,83,77,88],
+      '6-2': [82,78,74,86,79,83,77,88,80,76,72,84,78,81,75,87],
+      '7-3': [82,78,74,86,79,83,77,88,80,76,72,84,78,81,75,87],
+    };
+    var ex = fracExamples[key] || Array(n).fill(0).map(function(){return 75+(Math.random()-0.5)*10;});
+    for(var r=0; r<n; r++){
+      var el = document.getElementById('frac-y-'+r);
+      if(el) el.value = (ex[r]||75).toFixed(1);
+    }
+    // 填入因子名稱
+    var fracNames = ['溫度','壓力','時間','濃度','速度','壓力2','模具溫'];
+    var nf2 = parseInt(document.getElementById('doe-nf').value)||4;
+    for(var i=0; i<nf2; i++){
+      var nel = document.getElementById('doe-f'+(i+1));
+      var lel = document.getElementById('doe-l'+(i+1));
+      var hel = document.getElementById('doe-h'+(i+1));
+      if(nel) nel.value = fracNames[i]||'因子'+(i+1);
+      if(lel) lel.value = ['180','2.0','30','5%','10','1.5','60'][i]||'低';
+      if(hel) hel.value = ['220','4.0','60','15%','30','3.5','80'][i]||'高';
+    }
+    alert('已載入部分因子範例數據（Montgomery 射出成型案例，溫度和壓力為主要顯著因子）');
+    return;
+  }
+
+  // PB 設計範例
+  if(dtype === 'pb') {
+    var nf3 = parseInt(document.getElementById('doe-nf').value)||5;
+    var pbEx = [82.1,78.3,74.2,85.6,79.4,83.1,76.8,88.2,80.5,77.1,73.8,84.9];
+    var n3 = nf3<=7 ? 8 : 12;
+    for(var r=0; r<n3; r++){
+      var el2 = document.getElementById('pb-y-'+r);
+      if(el2) el2.value = (pbEx[r]||75).toFixed(1);
+    }
+    var pbNames = ['溫度','壓力','時間','濃度','速度','壓力2','模具溫','冷卻','轉速','進料','背壓'];
+    for(var i=0; i<nf3; i++){
+      var nel2 = document.getElementById('doe-f'+(i+1));
+      if(nel2) nel2.value = pbNames[i]||'因子'+(i+1);
+    }
+    return;
+  }
+
+  // 全因子範例（原本）
+  var nfFull=parseInt(document.getElementById('doe-nf').value)||3;var runsFull=Math.pow(2,nfFull);var repFull=parseInt(document.getElementById('doe-rep').value)||2;
+  var examplesFull={3:{r1:[82,80,73,75,85,83,76,78],r2:[83,81,74,76,86,84,77,79]}};
+  var exFull=examplesFull[nfFull]||{r1:Array(runsFull).fill(75),r2:Array(runsFull).fill(76)};
+  for(var rr=0;rr<runsFull;rr++){for(var rrp=0;rrp<repFull;rrp++){var elFull=document.getElementById('doe-y-'+rr+'-'+rrp);if(elFull)elFull.value=((exFull['r'+(rrp+1)]?.[rr]||75)+((Math.random()-.5)*2)).toFixed(1);}}
 }
 function doeAnalyze(){
   const nf=parseInt(document.getElementById('doe-nf').value)||3;const runs=2**nf;const rep=parseInt(document.getElementById('doe-rep').value)||2;
@@ -2297,6 +2352,8 @@ function doeAnalyze(){
     intHtml=`<div class="alert info" style="margin-bottom:.75rem">顯示 ${f1} × ${f2} 交互作用圖。平行線 = 無交互作用；交叉線 = 有顯著交互作用。</div>`;
     intHtml+=`<div class="canvas-wrap"><canvas id="doe-int-canvas" height="260"></canvas></div>`;
     document.getElementById('doe-interaction-content').innerHTML=intHtml;
+    // 儲存交互作用數據供重繪
+    window._doeIntData = {f1:f1,f2:f2,lolo:lolo,lohi:lohi,hilo:hilo,hihi:hihi};
     setTimeout(()=>{
       const ic=document.getElementById('doe-int-canvas');if(!ic)return;ic.width=ic.parentElement.offsetWidth||640;
       const ii=new Chart(ic.getContext('2d'),{type:'line',data:{labels:[`${f2} 低`,`${f2} 高`],datasets:[{label:`${f1} 低`,data:[mean(lolo)||0,mean(lohi)||0],borderColor:'#1D3B8A',borderWidth:2,pointRadius:5,fill:false},{label:`${f1} 高`,data:[mean(hilo)||0,mean(hihi)||0],borderColor:'#DC2626',borderWidth:2,pointRadius:5,fill:false,borderDash:[6,3]}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`交互作用圖：${f1} × ${f2}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:12}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'}},y:{grid:{color:'rgba(0,0,0,.05)'},title:{display:true,text:yname}}}}});
@@ -2348,6 +2405,50 @@ window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,
     '反應變數：'+yname;
   setTimeout(function(){claudeAutoAnalyze('doe',doeStats);},300);
 }
+function drawDOEInteractionPlot() {
+  var d = window._doeIntData;
+  if(!d) return;
+  var ic = document.getElementById('doe-int-canvas');
+  if(!ic) {
+    // canvas 不存在，重建 HTML
+    var intDiv = document.getElementById('doe-interaction-content');
+    if(!intDiv) return;
+    intDiv.innerHTML = '<div class="alert info" style="margin-bottom:.75rem">顯示 '+d.f1+' × '+d.f2+
+      ' 交互作用圖。平行線 = 無交互作用；交叉線 = 有顯著交互作用。</div>'+
+      '<div class="canvas-wrap"><canvas id="doe-int-canvas" height="260"></canvas></div>';
+    ic = document.getElementById('doe-int-canvas');
+    if(!ic) return;
+  }
+  ic.width = ic.parentElement.offsetWidth || 640;
+  ic.height = 260;
+  var dpr = window.devicePixelRatio||1;
+  if(dpr>1){var w=ic.width,h=ic.height;ic.width=w*dpr;ic.height=h*dpr;ic.style.width=w+'px';ic.style.height=h+'px';ic.getContext('2d').scale(dpr,dpr);}
+
+  function m(arr){ return arr&&arr.length?arr.reduce(function(s,v){return s+v;},0)/arr.length:0; }
+  if(window._doeChartInt){try{window._doeChartInt.destroy();}catch(e){}}
+  window._doeChartInt = new Chart(ic.getContext('2d'),{
+    type:'line',
+    data:{
+      labels:[d.f2+' 低', d.f2+' 高'],
+      datasets:[
+        {label:d.f1+' 低', data:[m(d.lolo), m(d.lohi)], borderColor:'#1D3B8A', borderWidth:2.5, pointRadius:6, fill:false},
+        {label:d.f1+' 高', data:[m(d.hilo), m(d.hihi)], borderColor:'#DC2626', borderWidth:2.5, pointRadius:6, fill:false}
+      ]
+    },
+    options:{
+      responsive:false, animation:false,
+      plugins:{
+        title:{display:true, text:d.f1+' × '+d.f2+' 交互作用圖', font:{size:13,weight:'600'}, padding:{bottom:6}},
+        legend:{labels:{font:{size:11}}}
+      },
+      scales:{
+        x:{title:{display:true, text:d.f2}, ticks:{font:{size:11}}},
+        y:{title:{display:true, text:'Y 均值'}, ticks:{font:{size:10}}}
+      }
+    }
+  });
+}
+
 function drawDOEPareto() {
   var sortedEff = window._doeSortedEff;
   if(!sortedEff || sortedEff.length === 0) return;
@@ -2421,6 +2522,7 @@ function doeSw(name){
   if(name==='maineff')setTimeout(function(){drawDOEMainEffects();},50);
   if(name==='residual')setTimeout(function(){drawDOEResiduals();},50);
   if(name==='pareto')setTimeout(function(){drawDOEPareto();},50);
+  if(name==='interaction')setTimeout(function(){drawDOEInteractionPlot();},50);
 }
 
 function drawDOEMainEffects(){
@@ -4406,7 +4508,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 17:42enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 17:56enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4500,7 +4602,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.0 · 2026-05-31 17:42enabled');
+  status('v3.0 · 2026-05-31 17:56enabled');
 })();
 
 
