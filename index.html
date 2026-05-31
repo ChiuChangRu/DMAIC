@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.23 · AI 輔助統計分析平台</title>
+<title>MedQA v3.30 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -593,7 +593,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.23 · 2026-05-31 22:28</span>
+    <span class="tb-status" id="dmaic-save-status">v3.30 · 2026-05-31 22:51</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -1438,6 +1438,7 @@ tr:hover td{background:#F9FAFB}
           <option value="pair">配對樣本 t 檢定</option>
           <option value="f">F 檢定（變異數比較）</option>
         </select>
+        <div id="hy-method-info" style="margin-top:.6rem;background:#F0F9FF;border-left:3px solid #0891B2;border-radius:0 6px 6px 0;padding:.6rem .85rem;font-size:12px;color:#374151;line-height:1.7"></div>
       </div>
       <div class="field"><label>顯著水準 α</label>
         <select id="hy-alpha"><option value="0.05">0.05</option><option value="0.01">0.01</option><option value="0.10">0.10</option></select>
@@ -2910,6 +2911,15 @@ function scatterAnalyze(){
 // ════════════════════════════════════════════
 function hyUpdateUI(){
   const type=document.getElementById('hy-type').value;
+  // 方法說明（適用資料型態與目的）
+  var HY_INFO={
+    '1t':'<strong>單樣本 t 檢定</strong>　目的：檢驗「一組連續數據的平均值」是否等於某個目標值。<br>適用：1 組連續型資料 vs 規格中心/目標值（例：產品尺寸平均是否達 25.0mm）。前提：數據近似常態。',
+    '2t':'<strong>獨立雙樣本 t 檢定</strong>　目的：比較「兩組獨立資料的平均值」是否有差異。<br>適用：2 組互不相關的連續型資料（例：A 機台 vs B 機台的良率）。前提：兩組各自近似常態。',
+    'pair':'<strong>配對樣本 t 檢定</strong>　目的：比較「同一對象前後/兩種條件」的平均差異。<br>適用：成對的連續型資料（例：同一批產品改善前 vs 改善後）。前提：差值近似常態。',
+    'f':'<strong>F 檢定（變異數比較）</strong>　目的：比較「兩組資料的變異數（離散程度）」是否相等。<br>適用：2 組連續型資料的變異比較（例：兩供應商的尺寸一致性）。常用於 t 檢定前確認變異是否同質。'
+  };
+  var infoEl=document.getElementById('hy-method-info');
+  if(infoEl) infoEl.innerHTML=HY_INFO[type]||'';
   let html='';
   if(type==='1t'){html=`<div class="g3"><div class="field"><label>樣本數據</label><textarea id="hy-d1" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3</textarea></div><div class="field"><label>假設均值 μ₀</label><input id="hy-mu0" value="25.0"></div><div class="field"><label>對立假設</label><select id="hy-tail"><option value="two">雙尾 μ ≠ μ₀</option><option value="right">右尾 μ > μ₀</option><option value="left">左尾 μ < μ₀</option></select></div></div>`;}
   else if(type==='2t'){html=`<div class="g2"><div class="field"><label>樣本 1</label><textarea id="hy-d1" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3</textarea></div><div class="field"><label>樣本 2</label><textarea id="hy-d2" rows="4">24.8 25.3 25.5 24.6 25.1 24.9 25.4 25.2 24.7 25.0</textarea></div></div>`;}
@@ -3177,6 +3187,20 @@ function grrAnalyze(){
 
   var EV=studyVar*stdv(VarRepeat),AV=studyVar*stdv(VarReprod),GRR_sv=studyVar*stdv(VarGRR),PV=studyVar*stdv(VarPart),TV=studyVar*stdv(VarTotal);
   var methodLabel='ANOVA 法';
+  // 儲存 ANOVA 表資料供 grr-anova-content 渲染
+  window._grrAnova = {
+    rows: [
+      {src:'操作員 (Operator)', df:dfop, ss:SSop, ms:MSop},
+      {src:'零件 (Part)', df:dfpart, ss:SSpart, ms:MSpart},
+      {src:'操作員×零件', df:dfoppart, ss:SSoppart, ms:MSoppart},
+      {src:'量測誤差 (Repeatability)', df:dferr, ss:SSerr, ms:MSerr},
+      {src:'總計 (Total)', df:dftotal, ss:SStotal, ms:null}
+    ],
+    F_op: MSoppart>0?MSop/MSoppart:null,
+    F_part: MSoppart>0?MSpart/MSoppart:null,
+    F_oppart: MSerr>0?MSoppart/MSerr:null,
+    method: method
+  };
 
   if(method==='xbarr'){
     var d2={2:1.128,3:1.693,4:2.059,5:2.326};
@@ -3526,6 +3550,35 @@ function grrSw(name){
   var target=document.getElementById('grr-tab-'+name);
   if(target)target.classList.add('show');
   if(name==='sixpack')setTimeout(function(){drawGRRSixpack();},50);
+  if(name==='anova')setTimeout(function(){renderGRRAnova();},50);
+}
+
+function renderGRRAnova(){
+  var A=window._grrAnova;
+  var c=document.getElementById('grr-anova-content');
+  if(!c) return;
+  if(!A){ c.innerHTML='<div style="padding:1rem;color:#9CA3AF">請先執行 Gage R&R 分析</div>'; return; }
+  if(A.method==='xbarr'){
+    c.innerHTML='<div style="padding:1.2rem;text-align:center;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px"><div style="font-size:13px;font-weight:700;margin-bottom:.3rem">⚠️ 平均全距法不提供 ANOVA 表</div><div style="font-size:12px;color:#78716C">ANOVA 表僅適用於「ANOVA 法（完整）」。請在分析方法選擇 ANOVA 法後重新分析。</div></div>';
+    return;
+  }
+  var r5=function(x){return x==null?'—':(Math.round(x*100000)/100000);};
+  var html='<div class="mt-session"><div class="mt-title">變異數分析表（ANOVA，含操作員×零件交互作用）</div>';
+  html+='<table><thead><tr><th style="text-align:left">變異來源</th><th>df</th><th>SS</th><th>MS</th><th>F</th></tr></thead><tbody>';
+  var Fmap={'操作員 (Operator)':A.F_op,'零件 (Part)':A.F_part,'操作員×零件':A.F_oppart};
+  A.rows.forEach(function(row){
+    var F=Fmap[row.src];
+    html+='<tr'+(row.src.indexOf('總計')>=0?' class="mt-total"':'')+'>'+
+      '<td class="mt-kw" style="text-align:left">'+row.src+'</td>'+
+      '<td class="mt-num">'+row.df+'</td>'+
+      '<td class="mt-num">'+r5(row.ss)+'</td>'+
+      '<td class="mt-num">'+r5(row.ms)+'</td>'+
+      '<td class="mt-num">'+(F!=null?r5(F):'—')+'</td></tr>';
+  });
+  html+='</tbody></table>';
+  html+='<div style="font-size:11px;color:#6B7280;margin-top:.5rem;line-height:1.6">F 值大表示該來源變異顯著。操作員×零件交互作用不顯著（F 小）時，可考慮用簡化模型（不含交互作用）。</div>';
+  html+='</div>';
+  c.innerHTML=html;
 }
 
 // ── Bias 分析 ──
@@ -4693,7 +4746,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.23 · 2026-05-31 22:28enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.30 · 2026-05-31 22:51enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4787,7 +4840,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.23 · 2026-05-31 22:28enabled');
+  status('v3.30 · 2026-05-31 22:51enabled');
 })();
 
 
@@ -5934,6 +5987,41 @@ window.doeUpdateFactors = function() {
     buildUI();
   }
 
+})();
+
+
+// 重新輸入數據時，自動清除舊的分析結果與 AI 判讀
+(function(){
+  var INPUT_TO_OUTPUT = {
+    'spc-data': ['spc-out'],
+    'grr-data': ['grr-out'],
+    'hy-d1': ['hy-out'], 'hy-d2': ['hy-out'],
+    'doe-yname': ['doe-out']
+  };
+  function clearOutputs(outIds, toolId){
+    outIds.forEach(function(oid){
+      var el=document.getElementById(oid);
+      if(el) el.style.display='none';
+    });
+    // 清 AI 判讀面板
+    if(toolId){
+      var panel=document.getElementById('claude-panel-'+toolId);
+      if(panel) panel.style.display='none';
+      if(window._lastStats) delete window._lastStats[toolId];
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    Object.keys(INPUT_TO_OUTPUT).forEach(function(inId){
+      var el=document.getElementById(inId);
+      if(!el) return;
+      var toolId = inId.split('-')[0];
+      if(toolId==='hy') toolId='hypothesis';
+      if(toolId==='grr') toolId='msa';
+      el.addEventListener('input', function(){
+        clearOutputs(INPUT_TO_OUTPUT[inId], toolId);
+      });
+    });
+  });
 })();
 
 </script>
