@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.20 · AI 輔助統計分析平台</title>
+<title>MedQA v3.21 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -593,7 +593,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.20 · 2026-05-31 21:49</span>
+    <span class="tb-status" id="dmaic-save-status">v3.21 · 2026-05-31 22:10</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2426,6 +2426,8 @@ function doeLoadEx(){
   for(var rr=0;rr<runsFull;rr++){for(var rrp=0;rrp<repFull;rrp++){var elFull=document.getElementById('doe-y-'+rr+'-'+rrp);if(elFull)elFull.value=((exFull['r'+(rrp+1)]?.[rr]||75)+((Math.random()-.5)*2)).toFixed(1);}}
 }
 function doeAnalyze(){
+  var _dt=document.getElementById('doe-design-type');
+  if(_dt){ if(_dt.value==='pb'){ if(typeof pbAnalyze==='function') pbAnalyze(); return; } if(_dt.value==='frac'){ if(typeof fracAnalyze==='function') fracAnalyze(); return; } }
   const nf=parseInt(document.getElementById('doe-nf').value)||3;const runs=2**nf;const rep=parseInt(document.getElementById('doe-rep').value)||2;
   const matrix=window._doeMatrix||[];const factors=window._doeFacs||[];
   const yMeans=[];let valid=true;
@@ -4609,7 +4611,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.20 · 2026-05-31 21:49enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.21 · 2026-05-31 22:10enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4703,7 +4705,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.20 · 2026-05-31 21:49enabled');
+  status('v3.21 · 2026-05-31 22:10enabled');
 })();
 
 
@@ -4902,9 +4904,7 @@ function pbGenMatrix(nf) {
 window.pbAnalyze = function() {
   var dtype = document.getElementById('doe-design-type');
   if(!dtype || dtype.value !== 'pb') {
-    // 全因子模式，用原本的 doeAnalyze
-    if(typeof doeAnalyze === 'function') doeAnalyze();
-    return;
+    return; // 非 PB 模式不處理（路由由 doeAnalyze 負責，避免迴圈）
   }
 
   var nf = parseInt(document.getElementById('doe-nf').value) || 5;
