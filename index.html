@@ -386,7 +386,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:49</span>
+    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:55</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -435,7 +435,36 @@ tr:hover td{background:#F9FAFB}
   
 
   <!-- D 工具 -->
-    <!-- M 工具 -->
+  <div id="phase-D" class="tools-section">
+    <div class="tools-section-title" style="color:#3B7DD8">D — Define 定義階段</div>
+    <div class="tools-grid">
+      <div class="tool-card" onclick="goTool('pareto')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📊</div><div class="tc-name">柏拉圖 Pareto</div>
+        <div class="tc-desc">80/20 法則・找出關鍵少數問題</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('fishbone')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🐟</div><div class="tc-name">魚骨圖（石川圖）</div>
+        <div class="tc-desc">系統化找出根本原因 6M</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('sipoc')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
+        <div class="tc-phase" style="color:#3B7DD8">DEFINE</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🗺️</div><div class="tc-name">SIPOC 圖</div>
+        <div class="tc-desc">定義製程範疇・供需關係</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- M 工具 -->
+  
+  <!-- M 工具 -->
   <div id="phase-M" class="tools-section">
     <div class="tools-section-title" style="color:#1A9CB0">M — Measure 量測階段</div>
     <div class="tools-grid">
@@ -3805,6 +3834,28 @@ async function callClaude(toolId, messages) {
 
 // 自動判讀（分析完成後自動呼叫）
 
+
+
+
+function renderMarkdown(text) {
+  if(!text) return '';
+  var html = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // 標題
+  html = html.replace(/^## (.+)$/gm,'<strong style="display:block;font-size:14px;color:#1B3A5C;margin:.5rem 0 .2rem">$1</strong>');
+  html = html.replace(/^### (.+)$/gm,'<strong style="display:block;margin:.3rem 0 .1rem">$1</strong>');
+  // 粗體
+  html = html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  // 清單
+  html = html.replace(/^[-•] (.+)$/gm,'<span style="display:block;padding-left:1rem;position:relative"><span style="position:absolute;left:.2rem">•</span>$1</span>');
+  html = html.replace(/^(\d+)\. (.+)$/gm,'<span style="display:block;padding-left:1.2rem">$1. $2</span>');
+  // 分隔線
+  html = html.replace(/---/g,'<hr style="border:none;border-top:1px solid #E2ECF8;margin:.4rem 0">');
+  // 換行
+  html = html.replace(/\n/g,'<br>');
+  return html;
+}
+
 window.claudeStartAnalyze = async function(toolId) {
   var askDiv = document.getElementById('ca-ask-'+toolId);
   var panel = document.getElementById('claude-panel-'+toolId);
@@ -3952,6 +4003,7 @@ window.claudeStartAnalyze = function(toolId) {
   var stats = window._lastStats && window._lastStats[toolId];
   if(stats) claudeAutoAnalyze(toolId, stats);
 };
+window.claudeStartAnalyze=claudeStartAnalyze;
 window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
 window.spcAnalyze=spcAnalyze;window.spcLoadEx=spcLoadEx;window.spcSw=spcSw;
@@ -4241,7 +4293,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:49enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:55enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4335,7 +4387,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v2.1 · 2026-05-31 16:49enabled');
+  status('v2.1 · 2026-05-31 16:55enabled');
 })();
 
 
