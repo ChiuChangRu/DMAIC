@@ -386,7 +386,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:55</span>
+    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:59</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -3994,15 +3994,7 @@ window.claudePanelHTML = function(toolId) {
 };
 
 
-window.claudeStartAnalyze = function(toolId) {
-  var askDiv = document.getElementById('ca-ask-'+toolId);
-  var loadDiv = document.querySelector('#claude-panel-'+toolId+' .ca-loading');
-  if(askDiv) askDiv.style.display = 'none';
-  if(loadDiv) loadDiv.style.display = 'flex';
-  // 從 _lastStats 取上次的統計數據
-  var stats = window._lastStats && window._lastStats[toolId];
-  if(stats) claudeAutoAnalyze(toolId, stats);
-};
+// claudeStartAnalyze (duplicate removed)
 window.claudeStartAnalyze=claudeStartAnalyze;
 window.claudeAutoAnalyze=claudeAutoAnalyze;window.claudeToggleChat=claudeToggleChat;window.claudeSend=claudeSend;window.claudeKeydown=claudeKeydown;window.claudePanelHTML=claudePanelHTML;
 window.goHome=goHome;window.goTool=goTool;window.scrollToPhase=scrollToPhase;
@@ -4293,7 +4285,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:55enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:59enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4387,7 +4379,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v2.1 · 2026-05-31 16:55enabled');
+  status('v2.1 · 2026-05-31 16:59enabled');
 })();
 
 
