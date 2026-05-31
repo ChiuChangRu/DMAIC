@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.10 · AI 輔助統計分析平台</title>
+<title>MedQA v3.20 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -593,7 +593,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.10 · 2026-05-31 21:34</span>
+    <span class="tb-status" id="dmaic-save-status">v3.20 · 2026-05-31 21:49</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -4134,7 +4134,7 @@ window.claudeStartAnalyze = async function(toolId) {
     var messages = [{role:'user', content:'以下是統計分析結果，請進行三個面向的判讀：\n\n'+stats}];
     var response = await fetch(CLAUDE_WORKER, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({mode:'analyze', messages: messages})
+      body: JSON.stringify({mode:'analyze', toolId: toolId, messages: messages})
     });
     var data = await response.json();
 
@@ -4142,19 +4142,26 @@ window.claudeStartAnalyze = async function(toolId) {
 
     if(data.mode === 'analyze' && data.result) {
       var r = data.result;
+      var lbl = data.labels || {};
+      // 每個工具用自己的三問題標籤（Worker 回傳）
+      var t1 = lbl.q1 || '數據品質';
+      var t2 = lbl.q2 || '顯著性分析';
+      var t3 = lbl.q3 || '建議';
+      // 標籤過長時取重點（前 14 字）
+      function shortLabel(s){ return s.length > 16 ? s.slice(0,15)+'…' : s; }
       var html =
         '<div style="display:flex;flex-direction:column;gap:.75rem">' +
           '<div style="background:#F0F9FF;border-left:3px solid #0891B2;border-radius:0 6px 6px 0;padding:.6rem .85rem">' +
-            '<div style="font-size:11px;font-weight:700;color:#0891B2;margin-bottom:.25rem">① 數據品質與常態性</div>' +
-            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q1_distribution||'—')+'</div>' +
+            '<div style="font-size:11px;font-weight:700;color:#0891B2;margin-bottom:.25rem">① '+shortLabel(t1)+'</div>' +
+            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q1||'—')+'</div>' +
           '</div>' +
           '<div style="background:#F0FDF4;border-left:3px solid #059669;border-radius:0 6px 6px 0;padding:.6rem .85rem">' +
-            '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:.25rem">② 因子顯著性</div>' +
-            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q2_significance||'—')+'</div>' +
+            '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:.25rem">② '+shortLabel(t2)+'</div>' +
+            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q2||'—')+'</div>' +
           '</div>' +
           '<div style="background:#FFF8E1;border-left:3px solid #D97706;border-radius:0 6px 6px 0;padding:.6rem .85rem">' +
-            '<div style="font-size:11px;font-weight:700;color:#D97706;margin-bottom:.25rem">③ 製程建議</div>' +
-            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q3_recommendation||'—')+'</div>' +
+            '<div style="font-size:11px;font-weight:700;color:#D97706;margin-bottom:.25rem">③ '+shortLabel(t3)+'</div>' +
+            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q3||'—')+'</div>' +
           '</div>' +
         '</div>';
       if(autoDiv) { autoDiv.innerHTML = html; autoDiv.style.display = 'block'; }
@@ -4599,7 +4606,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.10 · 2026-05-31 21:34enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.20 · 2026-05-31 21:49enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4693,7 +4700,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.10 · 2026-05-31 21:34enabled');
+  status('v3.20 · 2026-05-31 21:49enabled');
 })();
 
 
@@ -5481,7 +5488,6 @@ window.doeUpdateFactors = function() {
   var dtype = document.getElementById('doe-design-type')?.value;
   if(dtype==='frac') {
     doeUpdateFracOptions();
-    // 產生因子輸入欄
     var nf = parseInt(document.getElementById('doe-nf').value)||4;
     var fw='';
     for(var i=0;i<nf;i++){
@@ -5499,6 +5505,21 @@ window.doeUpdateFactors = function() {
     }
     document.getElementById('doe-factors-wrap').innerHTML=fw;
     doeGenFracMatrix();
+    return;
+  }
+  if(dtype==='pb') {
+    // PB 模式：直接處理（不依賴覆寫鏈）
+    var nfp = parseInt(document.getElementById('doe-nf').value)||5;
+    var fwp='';
+    for(var j=0;j<nfp;j++){
+      fwp+='<div class="g3" style="margin-bottom:8px">'+
+        '<div class="field"><label>因子 '+(j+1)+' 名稱</label><input type="text" id="doe-f'+(j+1)+'" value="因子'+(j+1)+'"></div>'+
+        '<div class="field"><label>低水準 (−1)</label><input type="text" id="doe-l'+(j+1)+'" value="低"></div>'+
+        '<div class="field"><label>高水準 (+1)</label><input type="text" id="doe-h'+(j+1)+'" value="高"></div>'+
+        '</div>';
+    }
+    document.getElementById('doe-factors-wrap').innerHTML=fwp;
+    if(typeof pbGenMatrix==='function') pbGenMatrix(nfp);
     return;
   }
   if(typeof _origDoeUpdateFactors2==='function') _origDoeUpdateFactors2();
