@@ -278,6 +278,55 @@ tr:hover td{background:#F9FAFB}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
 .mt-sig{color:#DC2626!important;font-weight:700}
+/* ════ 全域 Loading 指示器 ════ */
+#global-loading {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99999;
+  background: rgba(27,58,92,.92);
+  color: #fff;
+  border-radius: 24px;
+  padding: 8px 20px 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.15);
+  pointer-events: none;
+  white-space: nowrap;
+}
+#global-loading.show { display: flex; }
+.loading-spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #7EC8E3;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-dots::after {
+  content: '';
+  animation: dots 1.2s steps(4,end) infinite;
+}
+@keyframes dots {
+  0%,20%  { content: ''; }
+  40%     { content: '.'; }
+  60%     { content: '..'; }
+  80%,100%{ content: '...'; }
+}
+/* 按鈕按下去的視覺回饋 */
+.btn-loading {
+  opacity: .65 !important;
+  cursor: wait !important;
+  pointer-events: none !important;
+}
+
 </style>
 
 <style id="edu-styles">
@@ -386,7 +435,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 17:56</span>
+    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:03</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -714,7 +763,7 @@ tr:hover td{background:#F9FAFB}
       <div class="field"><label>樣本數 n</label><input type="text" id="spc-n" value="100"></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="spcAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-primary" id="spc-analyze-btn" onclick="spcAnalyze()">▶ 執行分析</button>
       <button class="btn btn-sec" onclick="spcLoadEx('xbarr')">範例 Xbar-R</button>
       <button class="btn btn-sec" onclick="spcLoadEx('imr')">範例 I-MR</button>
       <button class="btn btn-sec" onclick="spcLoadEx('np')">範例 np</button>
@@ -808,7 +857,7 @@ tr:hover td{background:#F9FAFB}
 其他, 5</textarea>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="paretoAnalyze()">▶ 產生柏拉圖</button>
+      <button class="btn btn-primary" id="pareto-analyze-btn" onclick="paretoAnalyze()">▶ 產生柏拉圖</button>
       <button class="btn btn-sec" onclick="paretoLoadEx()">載入範例</button>
     </div>
   </div>
@@ -952,7 +1001,7 @@ tr:hover td{background:#F9FAFB}
       <textarea id="hi-data" rows="5">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.1 24.6 25.2 25.0 25.4 24.9 25.3 25.5 24.8 25.2 25.0 24.7 25.1 25.3 24.9 25.4 25.2 24.8 25.1 25.0</textarea>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="histAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-primary" id="hist-analyze-btn" onclick="histAnalyze()">▶ 執行分析</button>
       <button class="btn btn-sec" onclick="histLoadEx()">載入範例</button>
     </div>
   </div>
@@ -1204,7 +1253,7 @@ tr:hover td{background:#F9FAFB}
       <textarea id="ce-data" rows="4">25.1 24.9 25.2 25.4 24.8 25.1 25.6 24.7 25.0 25.3 25.5 25.4 25.6 25.7 25.5 25.8 25.6 25.9 25.7 25.8</textarea>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="cusumAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-primary" id="cusum-analyze-btn" onclick="cusumAnalyze()">▶ 執行分析</button>
       <button class="btn btn-sec" onclick="cusumLoadEx()">載入範例</button>
     </div>
   </div>
@@ -1280,7 +1329,7 @@ tr:hover td{background:#F9FAFB}
       <div class="field"><label>Y 數值</label><textarea id="sc-y" rows="5">92 91 93 94 95 95 96 94 93 91 89 87</textarea></div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="scatterAnalyze()">▶ 執行分析</button>
+      <button class="btn btn-primary" id="scatter-analyze-btn" onclick="scatterAnalyze()">▶ 執行分析</button>
       <button class="btn btn-sec" onclick="scatterLoadEx()">載入範例</button>
     </div>
   </div>
@@ -1360,7 +1409,7 @@ tr:hover td{background:#F9FAFB}
     </div>
     <div id="hy-input-wrap"></div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="hyAnalyze()">▶ 執行檢定</button>
+      <button class="btn btn-primary" id="hy-analyze-btn" onclick="hyAnalyze()">▶ 執行檢定</button>
       <button class="btn btn-sec" onclick="hyLoadEx()">載入範例</button>
     </div>
   </div>
@@ -1433,7 +1482,7 @@ tr:hover td{background:#F9FAFB}
 機台C: 25.4, 25.6, 25.8, 25.2, 25.5, 25.7, 25.3, 25.9, 25.1, 25.6</textarea>
     </div>
     <div class="btn-row">
-      <button class="btn btn-primary" onclick="boxplotAnalyze()">▶ 產生箱型圖</button>
+      <button class="btn btn-primary" id="boxplot-analyze-btn" onclick="boxplotAnalyze()">▶ 產生箱型圖</button>
     </div>
   </div>
   <div id="bp-out" style="display:none">
@@ -1559,7 +1608,7 @@ tr:hover td{background:#F9FAFB}
           </div>
         </div>
         <div class="btn-row">
-          <button class="btn btn-primary" onclick="grrAnalyze()">▶ 執行 Gage R&R 分析</button>
+          <button class="btn btn-primary" id="msa-analyze-btn" onclick="grrAnalyze()">▶ 執行 Gage R&R 分析</button>
           <button class="btn btn-sec" onclick="grrLoadEx()">載入範例</button>
         </div>
       </div>
@@ -2271,11 +2320,7 @@ function doeLoadEx(){
       '7-3': [82,78,74,86,79,83,77,88,80,76,72,84,78,81,75,87],
     };
     var ex = fracExamples[key] || Array(n).fill(0).map(function(){return 75+(Math.random()-0.5)*10;});
-    for(var r=0; r<n; r++){
-      var el = document.getElementById('frac-y-'+r);
-      if(el) el.value = (ex[r]||75).toFixed(1);
-    }
-    // 填入因子名稱
+    // 先填因子名稱（順序重要：名稱→矩陣→Y值）
     var fracNames = ['溫度','壓力','時間','濃度','速度','壓力2','模具溫'];
     var nf2 = parseInt(document.getElementById('doe-nf').value)||4;
     for(var i=0; i<nf2; i++){
@@ -2286,7 +2331,16 @@ function doeLoadEx(){
       if(lel) lel.value = ['180','2.0','30','5%','10','1.5','60'][i]||'低';
       if(hel) hel.value = ['220','4.0','60','15%','30','3.5','80'][i]||'高';
     }
-    alert('已載入部分因子範例數據（Montgomery 射出成型案例，溫度和壓力為主要顯著因子）');
+    // 重新生成矩陣（確保 frac-y- inputs 存在）
+    if(typeof doeGenFracMatrix === 'function') doeGenFracMatrix();
+    // 再填 Y 值（矩陣建立後才填，避免被清空）
+    setTimeout(function(){
+      for(var r=0; r<n; r++){
+        var el = document.getElementById('frac-y-'+r);
+        if(el) el.value = (ex[r]||75).toFixed(1);
+      }
+      alert('已載入部分因子範例數據（Montgomery 射出成型案例，溫度和壓力為主要顯著因子）');
+    }, 100);
     return;
   }
 
@@ -4508,7 +4562,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 17:56enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:03enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4602,7 +4656,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.0 · 2026-05-31 17:56enabled');
+  status('v3.0 · 2026-05-31 18:03enabled');
 })();
 
 
@@ -5426,5 +5480,99 @@ window.doeUpdateFactors = function() {
 </section>
 
 
+<script>
+// ════════════════════════════════════════════════════════
+// 全域 Loading 指示器
+// ════════════════════════════════════════════════════════
+
+(function(){
+  // 建立 Loading DOM
+  var el = document.createElement('div');
+  el.id = 'global-loading';
+  el.innerHTML = '<div class="loading-spinner"></div><span id="loading-msg">計算中</span><span class="loading-dots"></span>';
+  document.body.appendChild(el);
+
+  var _timer = null;
+  var _btnEl = null;
+
+  window.showLoading = function(msg, btnEl) {
+    var msgEl = document.getElementById('loading-msg');
+    if(msgEl) msgEl.textContent = msg || '計算中';
+    el.classList.add('show');
+    // 按鈕視覺 disabled
+    if(btnEl) { _btnEl = btnEl; btnEl.classList.add('btn-loading'); }
+    // 安全超時（30秒強制關閉）
+    if(_timer) clearTimeout(_timer);
+    _timer = setTimeout(function(){ hideLoading(); }, 30000);
+  };
+
+  window.hideLoading = function() {
+    el.classList.remove('show');
+    if(_btnEl) { _btnEl.classList.remove('btn-loading'); _btnEl = null; }
+    if(_timer) { clearTimeout(_timer); _timer = null; }
+  };
+
+  // 包裝所有分析函式，自動加 loading
+  var ANALYZE_WRAPPERS = [
+    { fn: 'spcAnalyze',      msg: 'SPC 管制圖分析中',    btn: 'spc-analyze-btn'   },
+    { fn: 'grrAnalyze',      msg: 'Gage R&R 分析中',     btn: 'msa-analyze-btn'   },
+    { fn: 'histAnalyze',     msg: '直方圖常態檢定中',    btn: 'hist-analyze-btn'  },
+    { fn: 'doeAnalyze',      msg: 'DOE 效應分析中',      btn: 'doe-analyze-btn'   },
+    { fn: 'pbAnalyze',       msg: 'PB/DOE 分析中',       btn: 'doe-analyze-btn'   },
+    { fn: 'fracAnalyze',     msg: '部分因子分析中',      btn: 'doe-analyze-btn'   },
+    { fn: 'hyAnalyze',       msg: '假設檢定中',          btn: 'hy-analyze-btn'    },
+    { fn: 'scatterAnalyze',  msg: '相關性分析中',        btn: 'scatter-analyze-btn'},
+    { fn: 'boxplotAnalyze',  msg: '箱型圖分析中',        btn: 'boxplot-analyze-btn'},
+    { fn: 'cusumAnalyze',    msg: 'CUSUM/EWMA 分析中',   btn: 'cusum-analyze-btn' },
+    { fn: 'paretoAnalyze',   msg: '柏拉圖分析中',        btn: 'pareto-analyze-btn'},
+    { fn: 'claudeStartAnalyze', msg: 'AI 判讀中',        btn: null                },
+  ];
+
+  ANALYZE_WRAPPERS.forEach(function(w) {
+    // 等 DOMContentLoaded 後再包裝，確保函式已定義
+    document.addEventListener('DOMContentLoaded', function() {
+      if(typeof window[w.fn] !== 'function') return;
+      var orig = window[w.fn];
+      window[w.fn] = function() {
+        var btn = w.btn ? document.getElementById(w.btn) : null;
+        showLoading(w.msg, btn);
+        var args = arguments;
+        // 用 setTimeout 讓 Loading 畫面先顯示
+        setTimeout(function() {
+          try {
+            var result = orig.apply(this, args);
+            // 如果是 Promise（async），等完成後再關閉
+            if(result && typeof result.then === 'function') {
+              result.then(hideLoading, hideLoading);
+            } else {
+              // 同步函式：延遲一點關閉（讓圖表渲染完）
+              setTimeout(hideLoading, 500);
+            }
+          } catch(e) {
+            hideLoading();
+            throw e;
+          }
+        }, 30);
+      };
+    });
+  });
+
+  // 魚骨圖繪製
+  document.addEventListener('DOMContentLoaded', function() {
+    if(typeof window.fishboneDraw === 'function') {
+      var origFB = window.fishboneDraw;
+      window.fishboneDraw = function() {
+        showLoading('魚骨圖繪製中');
+        setTimeout(function() {
+          origFB.apply(this, arguments);
+          setTimeout(hideLoading, 300);
+        }, 30);
+      };
+    }
+  });
+
+})();
+
+</script>
 </body>
 </html>
