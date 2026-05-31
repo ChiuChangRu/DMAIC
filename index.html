@@ -277,6 +277,7 @@ tr:hover td{background:#F9FAFB}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
+.mt-sig{color:#DC2626!important;font-weight:700}
 </style>
 
 <style id="edu-styles">
@@ -385,7 +386,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:35</span>
+    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 16:49</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -850,7 +851,8 @@ tr:hover td{background:#F9FAFB}
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button></div>
   </div>
-  <div id="fb-out" style="display:none">
+  <div id="fb-factor-selector" style="display:none"></div>
+<div id="fb-out" style="display:none">
     <div class="card">
       <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
       <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
@@ -987,6 +989,12 @@ tr:hover td{background:#F9FAFB}
 </div>
 
     <div class="g3">
+      <div class="field"><label>設計方法</label>
+        <select id="doe-design-type" onchange="doeUpdateDesignType()">
+          <option value="full">全因子設計 2ᵏ（≤4因子）</option>
+          <option value="pb">Plackett-Burman（5-11因子篩選）</option>
+        </select>
+      </div>
       <div class="field"><label>因子數量</label>
         <select id="doe-nf" onchange="doeUpdateFactors()">
           <option value="2">2 個因子（4 次實驗）</option>
@@ -1000,6 +1008,11 @@ tr:hover td{background:#F9FAFB}
       <div class="field"><label>反應變數名稱</label><input type="text" id="doe-yname" value="良率 (%)"></div>
     </div>
     <div id="doe-factors-wrap" style="margin-bottom:11px"></div>
+    <div id="pb-warning" style="display:none;background:#FFFBEB;border:1px solid #FDE68A;border-radius:7px;padding:.65rem 1rem;margin-bottom:.75rem;font-size:12px;color:#92400E">
+      <strong>⚠️ Plackett-Burman 篩選設計</strong><br>
+      僅能估計<strong>主效應</strong>，無法估計交互作用（交互作用與主效應混淆）。<br>
+      用途：快速從多個因子中篩選顯著因子，再用全因子 DOE 深入分析。
+    </div>
     <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>實驗矩陣與結果輸入</div>
     <div id="doe-matrix-wrap" style="overflow-x:auto;margin-bottom:10px"></div>
     <div class="btn-row">
@@ -2045,6 +2058,46 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
+
+  // 收集所有魚骨圖原因
+  var fbCauses = [];
+  var fbCatIds = ['fb-man','fb-machine','fb-material','fb-method','fb-measure','fb-env'];
+  var fbCatNames = {'fb-man':'人員','fb-machine':'機器','fb-material':'材料',
+                    'fb-method':'方法','fb-measure':'量測','fb-env':'環境'};
+  fbCatIds.forEach(function(cid){
+    var el = document.getElementById(cid);
+    if(!el||!el.value.trim()) return;
+    el.value.trim().split('\n').forEach(function(line){
+      var name = line.split(',')[0].trim();
+      if(name) fbCauses.push({name:name, cat:fbCatNames[cid]||''});
+    });
+  });
+  window._fbCauses = fbCauses;
+
+  // 渲染因子選擇面板
+  var selectorDiv = document.getElementById('fb-factor-selector');
+  if(selectorDiv && fbCauses.length > 0){
+    var html = '<div style="margin-top:1rem;background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:10px;overflow:hidden">';
+    html += '<div style="background:#1B3A5C;color:#fff;padding:.65rem 1rem;font-size:13px;font-weight:600">🧪 選擇實驗因子 → 帶入 DOE 設計</div>';
+    html += '<div style="padding:.75rem 1rem">';
+    html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 4 個因子（DOE 全因子設計限制），選完後按帶入按鈕</div>';
+    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem">';
+    fbCauses.forEach(function(f, i){
+      html += '<label style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #DDE2EC;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">';
+      html += '<input type="checkbox" value="'+i+'" onchange="fbUpdateCount()" style="cursor:pointer">';
+      html += '<span style="color:#374151">'+f.name+'</span>';
+      html += '<span style="color:#9CA3AF;font-size:10px">'+f.cat+'</span>';
+      html += '</label>';
+    });
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:10px">';
+    html += '<span id="fb-count" style="font-size:12px;color:#6B7280">已選 0 / 4 個</span>';
+    html += '<button onclick="fbToDOE()" style="background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:7px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">→ 帶入 DOE 實驗設計</button>';
+    html += '</div>';
+    html += '</div></div>';
+    selectorDiv.innerHTML = html;
+    selectorDiv.style.display = 'block';
+  }
 }
 
 // ════════════════════════════════════════════
@@ -4188,7 +4241,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:35enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 16:49enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4282,8 +4335,386 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v2.1 · 2026-05-31 16:35enabled');
+  status('v2.1 · 2026-05-31 16:49enabled');
 })();
+
+
+// ════ F01: 魚骨圖 → DOE 因子傳遞 ════
+window.fbUpdateCount = function() {
+  var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
+  var count = checked.length;
+  var countEl = document.getElementById('fb-count');
+  if(countEl) countEl.textContent = '已選 '+count+' / 4 個';
+  // 超過 4 個時禁用未選的
+  var all = document.querySelectorAll('#fb-factor-list input[type=checkbox]');
+  all.forEach(function(cb){
+    if(!cb.checked) cb.disabled = count >= 4;
+  });
+  // 顏色提示
+  if(countEl) countEl.style.color = count > 0 ? '#059669' : '#6B7280';
+};
+
+window.fbToDOE = function() {
+  var causes = window._fbCauses || [];
+  var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
+  if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
+  if(checked.length > 4){ alert('最多選 4 個因子'); return; }
+
+  var selected = [];
+  checked.forEach(function(cb){ selected.push(causes[parseInt(cb.value)]); });
+
+  // 跳到 DOE
+  goTool('doe');
+
+  setTimeout(function(){
+    // 根據因子數量自動決定設計類型
+    var dtype = document.getElementById('doe-design-type');
+    if(selected.length > 4) {
+      if(dtype) { dtype.value = 'pb'; doeUpdateDesignType(); }
+    } else {
+      if(dtype) { dtype.value = 'full'; doeUpdateDesignType(); }
+    }
+
+    var nfEl = document.getElementById('doe-nf');
+    if(nfEl){
+      nfEl.value = selected.length;
+      if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
+    }
+    setTimeout(function(){
+      // 正確 ID：doe-f1, doe-f2...（因子名稱）
+      selected.forEach(function(f, i){
+        var nameEl = document.getElementById('doe-f'+(i+1));
+        if(nameEl) nameEl.value = f.name;
+      });
+      // 重新渲染矩陣
+      if(typeof doeGenMatrix === 'function') doeGenMatrix();
+
+      // 成功提示
+      var msg = document.createElement('div');
+      msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+      msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：' +
+        selected.map(function(f){return f.name;}).join('、') +
+        '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
+      var doeCard = document.querySelector('#page-doe .card');
+      if(doeCard){
+        var existing = doeCard.querySelector('.fb-import-msg');
+        if(existing) existing.remove();
+        msg.className = 'fb-import-msg';
+        doeCard.insertBefore(msg, doeCard.firstChild);
+      }
+    }, 400);
+  }, 300);
+};
+
+
+// ════════════════════════════════════════════════════════
+// Plackett-Burman Design 實作
+// 驗效：Montgomery DOE 8th Ed. + Plackett & Burman (1946)
+// 正交性 PASS（55對 PB12、21對 PB8 全部通過）
+// ════════════════════════════════════════════════════════
+
+// PB N=12 基礎行（循環移位產生完整矩陣）
+var PB12_ROW1 = [1,1,-1,1,1,1,-1,-1,-1,1,-1];
+// PB N=8 基礎行
+var PB8_ROW1  = [1,1,1,-1,1,-1,-1];
+
+function genPBMatrix(rowTemplate, n_runs, n_cols) {
+  var row = rowTemplate.slice();
+  var matrix = [];
+  for(var i = 0; i < n_runs-1; i++){
+    matrix.push(row.slice(0, n_cols));
+    var last = row[row.length-1];
+    row = [last].concat(row.slice(0, -1));
+  }
+  matrix.push(new Array(n_cols).fill(-1));
+  return matrix;
+}
+
+// 根據因子數決定設計
+function getPBDesign(nf) {
+  if(nf <= 7)  return { matrix: genPBMatrix(PB8_ROW1,  8,  nf), n_runs:  8, label: 'PB N=8'  };
+  if(nf <= 11) return { matrix: genPBMatrix(PB12_ROW1, 12, nf), n_runs: 12, label: 'PB N=12' };
+  return null;
+}
+
+// 設計類型切換
+window.doeUpdateDesignType = function() {
+  var dtype = document.getElementById('doe-design-type').value;
+  var nfSelect = document.getElementById('doe-nf');
+  var pbWarn = document.getElementById('pb-warning');
+
+  if(dtype === 'pb') {
+    // PB 模式：因子數選項改為 5-11
+    nfSelect.innerHTML =
+      '<option value="5">5 個因子（PB8，8次實驗）</option>' +
+      '<option value="6">6 個因子（PB8，8次實驗）</option>' +
+      '<option value="7">7 個因子（PB8，8次實驗）</option>' +
+      '<option value="8">8 個因子（PB12，12次實驗）</option>' +
+      '<option value="9">9 個因子（PB12，12次實驗）</option>' +
+      '<option value="10">10 個因子（PB12，12次實驗）</option>' +
+      '<option value="11">11 個因子（PB12，12次實驗）</option>';
+    nfSelect.value = '5';
+    if(pbWarn) pbWarn.style.display = 'block';
+  } else {
+    // 全因子模式
+    nfSelect.innerHTML =
+      '<option value="2">2 個因子（4次實驗）</option>' +
+      '<option value="3" selected>3 個因子（8次實驗）</option>' +
+      '<option value="4">4 個因子（16次實驗）</option>';
+    nfSelect.value = '3';
+    if(pbWarn) pbWarn.style.display = 'none';
+  }
+  doeUpdateFactors();
+};
+
+// 覆寫 doeUpdateFactors 支援 PB 模式
+var _origDoeUpdateFactors = window.doeUpdateFactors;
+window.doeUpdateFactors = function() {
+  var dtype = document.getElementById('doe-design-type');
+  if(!dtype || dtype.value !== 'pb') {
+    if(typeof _origDoeUpdateFactors === 'function') _origDoeUpdateFactors();
+    return;
+  }
+  // PB 模式：產生因子輸入欄（無重複次數）
+  var nf = parseInt(document.getElementById('doe-nf').value) || 5;
+  var fw = '';
+  for(var i = 0; i < nf; i++){
+    fw += '<div class="g3" style="margin-bottom:8px">' +
+      '<div class="field"><label>因子 '+(i+1)+' 名稱</label>' +
+      '<input type="text" id="doe-f'+(i+1)+'" value="因子'+(i+1)+'"></div>' +
+      '<div class="field"><label>低水準 (−1)</label>' +
+      '<input type="text" id="doe-l'+(i+1)+'" value="低"></div>' +
+      '<div class="field"><label>高水準 (+1)</label>' +
+      '<input type="text" id="doe-h'+(i+1)+'" value="高"></div>' +
+      '</div>';
+  }
+  document.getElementById('doe-factors-wrap').innerHTML = fw;
+  pbGenMatrix(nf);
+};
+
+// 產生 PB 實驗矩陣表格
+function pbGenMatrix(nf) {
+  var pb = getPBDesign(nf);
+  if(!pb) return;
+
+  var factorNames = [];
+  for(var i = 0; i < nf; i++){
+    var el = document.getElementById('doe-f'+(i+1));
+    factorNames.push(el ? el.value : 'F'+(i+1));
+  }
+
+  var html = '<div style="overflow-x:auto;margin-top:.5rem">';
+  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.4rem">'+pb.label+' 實驗矩陣（+1=高水準，-1=低水準）</div>';
+  html += '<table style="font-size:11px;border-collapse:collapse;width:100%">';
+  html += '<thead><tr style="background:#1B3A5C;color:#fff">';
+  html += '<th style="padding:5px 8px;text-align:center">Run</th>';
+  factorNames.forEach(function(n){ html += '<th style="padding:5px 8px;text-align:center">'+n+'</th>'; });
+  html += '<th style="padding:5px 8px;text-align:center;background:#2A5278">Y（填入）</th>';
+  html += '</tr></thead><tbody>';
+
+  pb.matrix.forEach(function(row, ri){
+    html += '<tr style="background:'+(ri%2===0?'#F8FAFF':'#fff')+'">';
+    html += '<td style="padding:4px 8px;text-align:center;color:#6B7280">'+(ri+1)+'</td>';
+    row.forEach(function(v){
+      html += '<td style="padding:4px 8px;text-align:center;color:'+(v>0?'#1D3B8A':'#DC2626')+';font-weight:600">'+
+        (v>0?'+1':'-1')+'</td>';
+    });
+    html += '<td style="padding:2px 4px"><input type="number" id="pb-y-'+ri+'" step="any" '+
+      'style="width:80px;border:1px solid #DDE2EC;border-radius:4px;padding:3px 6px;font-size:12px"></td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  var matWrap = document.getElementById('doe-matrix-wrap');
+  if(matWrap) matWrap.innerHTML = html;
+}
+
+// PB 分析主函式
+window.pbAnalyze = function() {
+  var dtype = document.getElementById('doe-design-type');
+  if(!dtype || dtype.value !== 'pb') {
+    // 全因子模式，用原本的 doeAnalyze
+    if(typeof doeAnalyze === 'function') doeAnalyze();
+    return;
+  }
+
+  var nf = parseInt(document.getElementById('doe-nf').value) || 5;
+  var pb = getPBDesign(nf);
+  if(!pb) return;
+
+  var factorNames = [];
+  for(var i = 0; i < nf; i++){
+    var el = document.getElementById('doe-f'+(i+1));
+    factorNames.push(el ? el.value : 'F'+(i+1));
+  }
+
+  // 讀取 Y 值
+  var y = [];
+  for(var k = 0; k < pb.n_runs; k++){
+    var val = parseFloat(document.getElementById('pb-y-'+k)?.value);
+    if(isNaN(val)){ alert('第 '+(k+1)+' 組的 Y 值未填'); return; }
+    y.push(val);
+  }
+
+  var n = pb.n_runs;
+  var grandMean = y.reduce(function(s,v){return s+v;},0) / n;
+
+  // 主效應計算：effect_i = Σ(y_k × x_ik) / (n/2)
+  var effects = [];
+  for(var j = 0; j < nf; j++){
+    var eff = 0;
+    for(var k2 = 0; k2 < n; k2++) eff += y[k2] * pb.matrix[k2][j];
+    eff /= (n / 2);
+    effects.push({ name: factorNames[j], effect: eff, ss: n * eff * eff / 4 });
+  }
+
+  // 排序（依 |effect| 大小）
+  var sorted = effects.slice().sort(function(a,b){ return Math.abs(b.effect)-Math.abs(a.effect); });
+
+  // SS Error
+  var ssTotal = y.reduce(function(s,v){return s+(v-grandMean)*(v-grandMean);},0);
+  var ssModel = effects.reduce(function(s,e){return s+e.ss;},0);
+  var ssError = ssTotal - ssModel;
+
+  // ── 渲染結果 ──
+  var outHTML = '<div class="mt-session">';
+  outHTML += '<div class="mt-title">'+pb.label+' 主效應分析</div>';
+  outHTML += '<div style="color:#888;font-size:10px;margin-bottom:6px">'+
+    'n='+n+' 次實驗 | '+nf+' 個因子 | Grand Mean='+grandMean.toFixed(4)+
+    ' | ⚠️ 交互作用無法估計（PB 設計特性）</div>';
+  outHTML += '<table><thead><tr>'+
+    '<th style="text-align:left">因子</th>'+
+    '<th>效應值</th><th>SS</th><th>%貢獻</th><th>排名</th>'+
+    '</tr></thead><tbody>';
+
+  sorted.forEach(function(e, rank){
+    var pct = ssTotal > 0 ? (e.ss/ssTotal*100).toFixed(1) : '0.0';
+    var isLarge = Math.abs(e.effect) > 2 * Math.sqrt(ssError/n);
+    outHTML += '<tr>';
+    outHTML += '<td class="mt-kw">'+e.name+'</td>';
+    outHTML += '<td class="mt-num '+(isLarge?'mt-sig':'')+'">'+e.effect.toFixed(4)+'</td>';
+    outHTML += '<td class="mt-num">'+e.ss.toFixed(4)+'</td>';
+    outHTML += '<td class="mt-num">'+pct+'%</td>';
+    outHTML += '<td style="text-align:center">'+(rank+1)+(isLarge?' <span style="color:#DC2626">★</span>':'')+'</td>';
+    outHTML += '</tr>';
+  });
+
+  outHTML += '<tr class="mt-total"><td class="mt-kw">Error</td>'+
+    '<td></td><td class="mt-num">'+ssError.toFixed(4)+'</td><td></td><td></td></tr>';
+  outHTML += '</tbody></table>';
+
+  // 顯著因子提示
+  var sigFactors = sorted.filter(function(e){
+    return Math.abs(e.effect) > 2 * Math.sqrt(ssError > 0 ? ssError/n : 0.01);
+  });
+
+  if(sigFactors.length > 0 && sigFactors.length <= 4) {
+    outHTML += '<div style="margin-top:8px;padding:6px 10px;background:#F0FDF4;border-radius:5px;font-size:11px;color:#166534">';
+    outHTML += '★ 顯著因子（'+sigFactors.length+'個）：'+sigFactors.map(function(e){return e.name;}).join('、');
+    outHTML += '<br>建議將以上因子帶入全因子 DOE 進行深入分析。';
+    outHTML += '<button onclick="pbToFullDOE('+JSON.stringify(sigFactors.map(function(e){return e.name;}))+')'+
+      '" style="margin-left:8px;background:#1B3A5C;color:#fff;border:none;border-radius:4px;'+
+      'padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">→ 帶入全因子 DOE</button>';
+    outHTML += '</div>';
+  }
+
+  outHTML += '</div>';
+
+  // 效應柏拉圖
+  outHTML += '<div class="canvas-wrap" style="margin-top:.75rem"><canvas id="pb-pareto-canvas" height="200"></canvas></div>';
+
+  var doeOut = document.getElementById('doe-out');
+  var effContent = document.getElementById('doe-effects-content');
+  if(effContent) effContent.innerHTML = outHTML;
+  if(doeOut) doeOut.style.display = 'block';
+
+  // 切換到效應分析 tab
+  if(typeof doeSw === 'function') doeSw('effects');
+
+  // 畫柏拉圖
+  setTimeout(function(){
+    var c = document.getElementById('pb-pareto-canvas');
+    if(!c) return;
+    c.width = c.parentElement.offsetWidth || 600;
+    var absEffects = sorted.map(function(e){return Math.abs(e.effect);});
+    var maxEff = Math.max.apply(null, absEffects) * 1.15;
+    new Chart(c.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: sorted.map(function(e){return e.name;}),
+        datasets:[{
+          label:'|效應值|',
+          data: absEffects,
+          backgroundColor: sorted.map(function(e){
+            return Math.abs(e.effect) > 2*Math.sqrt(ssError>0?ssError/n:0.01) ?
+              'rgba(220,38,38,.75)' : 'rgba(29,59,138,.55)';
+          }),
+          borderRadius: 3,
+        }]
+      },
+      options:{
+        responsive:false, animation:false,
+        plugins:{
+          title:{display:true,text:'主效應柏拉圖（紅色=顯著）',font:{size:12,weight:'600'},padding:{bottom:4}},
+          legend:{display:false}
+        },
+        scales:{
+          x:{ticks:{font:{size:11}}},
+          y:{min:0,max:maxEff,title:{display:true,text:'|效應值|'},ticks:{font:{size:10}}}
+        }
+      }
+    });
+  }, 100);
+
+  // 儲存統計數據供 Claude 判讀
+  if(!window._lastStats) window._lastStats = {};
+  window._lastStats['doe'] = pb.label+' 篩選分析\n因子數：'+nf+'\n'+
+    '主要效應排序：'+sorted.slice(0,3).map(function(e){
+      return e.name+'='+e.effect.toFixed(3);
+    }).join(', ')+'\n顯著因子：'+sigFactors.map(function(e){return e.name;}).join('、');
+};
+
+// PB 顯著因子帶入全因子 DOE
+window.pbToFullDOE = function(factorNames) {
+  var dtype = document.getElementById('doe-design-type');
+  if(dtype) dtype.value = 'full';
+
+  var nfSelect = document.getElementById('doe-nf');
+  var pbWarn = document.getElementById('pb-warning');
+  if(pbWarn) pbWarn.style.display = 'none';
+
+  if(nfSelect){
+    nfSelect.innerHTML =
+      '<option value="2">2 個因子（4次實驗）</option>' +
+      '<option value="3" selected>3 個因子（8次實驗）</option>' +
+      '<option value="4">4 個因子（16次實驗）</option>';
+    nfSelect.value = Math.min(factorNames.length, 4);
+  }
+
+  if(typeof _origDoeUpdateFactors === 'function') _origDoeUpdateFactors();
+
+  setTimeout(function(){
+    factorNames.forEach(function(name, i){
+      var el = document.getElementById('doe-f'+(i+1));
+      if(el) el.value = name;
+    });
+    if(typeof doeGenMatrix === 'function') doeGenMatrix();
+
+    var msg = document.createElement('div');
+    msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+    msg.innerHTML = '✅ PB 篩選完成！已帶入 <strong>'+factorNames.length+'</strong> 個顯著因子：'+
+      factorNames.join('、')+'<br><span style="font-size:11px;color:#4B7A5E">請填入高低水準值和實驗結果，進行全因子 DOE 深入分析。</span>';
+    var doeCard = document.querySelector('#page-doe .card');
+    if(doeCard){
+      var existing = doeCard.querySelector('.pb-import-msg');
+      if(existing) existing.remove();
+      msg.className = 'pb-import-msg';
+      doeCard.insertBefore(msg, doeCard.firstChild);
+    }
+  }, 300);
+};
+
 </script>
 
 <section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
