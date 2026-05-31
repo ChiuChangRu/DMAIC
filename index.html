@@ -435,7 +435,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:03</span>
+    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 18:13</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -4132,15 +4132,37 @@ window.claudeStartAnalyze = async function(toolId) {
   }
 
   try {
-    var messages = [{role:'user', content:'以下是分析結果，請給出專業判讀和建議（200字以內）：\n\n'+stats}];
+    var messages = [{role:'user', content:'以下是統計分析結果，請進行三個面向的判讀：\n\n'+stats}];
     var response = await fetch(CLAUDE_WORKER, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({messages: messages, system: TOOL_PROMPTS[toolId]||TOOL_PROMPTS['spc']})
+      body: JSON.stringify({mode:'analyze', messages: messages})
     });
     var data = await response.json();
-    var reply = data.content[0].text;
+
     if(loadDiv) loadDiv.style.display = 'none';
-    if(autoDiv) { autoDiv.innerHTML = renderMarkdown ? renderMarkdown(reply) : reply; autoDiv.style.display = 'block'; }
+
+    if(data.mode === 'analyze' && data.result) {
+      var r = data.result;
+      var html =
+        '<div style="display:flex;flex-direction:column;gap:.75rem">' +
+          '<div style="background:#F0F9FF;border-left:3px solid #0891B2;border-radius:0 6px 6px 0;padding:.6rem .85rem">' +
+            '<div style="font-size:11px;font-weight:700;color:#0891B2;margin-bottom:.25rem">① 數據品質與常態性</div>' +
+            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q1_distribution||'—')+'</div>' +
+          '</div>' +
+          '<div style="background:#F0FDF4;border-left:3px solid #059669;border-radius:0 6px 6px 0;padding:.6rem .85rem">' +
+            '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:.25rem">② 因子顯著性</div>' +
+            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q2_significance||'—')+'</div>' +
+          '</div>' +
+          '<div style="background:#FFF8E1;border-left:3px solid #D97706;border-radius:0 6px 6px 0;padding:.6rem .85rem">' +
+            '<div style="font-size:11px;font-weight:700;color:#D97706;margin-bottom:.25rem">③ 製程建議</div>' +
+            '<div style="font-size:13px;color:#1a1a2e;line-height:1.7">'+(r.q3_recommendation||'—')+'</div>' +
+          '</div>' +
+        '</div>';
+      if(autoDiv) { autoDiv.innerHTML = html; autoDiv.style.display = 'block'; }
+    } else {
+      var reply = data.content && data.content[0] && data.content[0].text || '判讀失敗，請重試';
+      if(autoDiv) { autoDiv.innerHTML = renderMarkdown ? renderMarkdown(reply) : reply; autoDiv.style.display = 'block'; }
+    }
   } catch(err) {
     if(loadDiv) loadDiv.style.display = 'none';
     if(autoDiv) { autoDiv.textContent = '⚠️ 判讀失敗：'+err.message; autoDiv.style.display = 'block'; }
@@ -4562,7 +4584,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:03enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 18:13enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4656,7 +4678,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.0 · 2026-05-31 18:03enabled');
+  status('v3.0 · 2026-05-31 18:13enabled');
 })();
 
 
