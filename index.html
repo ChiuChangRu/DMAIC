@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.22 · AI 輔助統計分析平台</title>
+<title>MedQA v3.23 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -593,7 +593,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.22 · 2026-05-31 22:22</span>
+    <span class="tb-status" id="dmaic-save-status">v3.23 · 2026-05-31 22:28</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2628,12 +2628,50 @@ function drawDOEPareto() {
 
 
 // PB/部分因子：淡化不適用的 tab
+
+// PB/部分因子 主效應圖（用 PB 資料，非全因子）
+function drawPBMainEffects(){
+  var R = window._pbResult || window._fracResult;
+  if(!R || !R.effects) return;
+  var container = document.getElementById('doe-maineff-content');
+  if(!container) return;
+
+  var html = '<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">各因子主效應（低水準→高水準的反應變化，斜率越大效應越強）</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">';
+  R.effects.forEach(function(e, i){
+    html += '<div style="border:1px solid #E8EDF5;border-radius:8px;padding:.5rem"><canvas id="pb-me-'+i+'" height="140"></canvas></div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+
+  setTimeout(function(){
+    R.effects.forEach(function(e, i){
+      var c = document.getElementById('pb-me-'+i);
+      if(!c) return;
+      c.width = c.parentElement.offsetWidth || 180;
+      var dpr = window.devicePixelRatio||1;
+      if(dpr>1){var w=c.width,h=c.height;c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';c.getContext('2d').scale(dpr,dpr);}
+      // 低/高水準平均反應 = grandMean ∓ effect/2
+      var lowMean = R.grandMean - e.effect/2;
+      var highMean = R.grandMean + e.effect/2;
+      new Chart(c.getContext('2d'), {
+        type:'line',
+        data:{ labels:['−1','+1'], datasets:[{ label:e.name, data:[lowMean, highMean],
+          borderColor:'#1D3B8A', borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#1D3B8A', fill:false }] },
+        options:{ responsive:false, animation:false,
+          plugins:{ title:{display:true,text:e.name,font:{size:12,weight:'600'}}, legend:{display:false} },
+          scales:{ x:{title:{display:true,text:'水準',font:{size:9}}}, y:{ticks:{font:{size:9}}} } }
+      });
+    });
+  }, 80);
+}
+
 function doeUpdateTabVisibility(){
   var _dt=document.getElementById('doe-design-type');
   var dmode=_dt?_dt.value:'full';
   var tabs=document.querySelectorAll('#page-doe .tab');
   // tab 順序：效應分析,效應柏拉圖,Half-Normal,主效應圖,交互作用圖,ANOVA,殘差分析
-  var naIdx=[2,3,4,5,6]; // PB/frac 不適用
+  var naIdx=[4,5,6]; // PB/frac 不適用（交互作用/ANOVA/殘差），主效應圖與Half-Normal可用
   tabs.forEach(function(t,i){
     if((dmode==='pb'||dmode==='frac') && naIdx.indexOf(i)>=0){
       t.style.opacity='0.4';
@@ -2652,16 +2690,28 @@ function doeSw(name){
   var target=document.getElementById('doe-tab-'+name);
   if(target)target.classList.add('show');
 
-  // PB / 部分因子模式：只有「效應分析」「效應柏拉圖」適用
+  // PB / 部分因子模式：主效應圖、Half-Normal、柏拉圖可用；交互作用/ANOVA/殘差不可用
   var _dt=document.getElementById('doe-design-type');
   var dmode=_dt?_dt.value:'full';
-  if((dmode==='pb'||dmode==='frac') && ['halfnormal','maineff','interaction','anova','residual'].indexOf(name)>=0){
-    var note=dmode==='pb'?'Plackett-Burman 篩選設計':'部分因子設計';
-    var reason = (name==='interaction'||name==='anova')
-      ? '此設計無法估計交互作用（主效應與交互作用混淆），故不提供此圖表。'
-      : '此設計為篩選用途，僅提供「效應分析」與「效應柏拉圖」。請改用這兩個分頁查看結果。';
-    if(target) target.innerHTML='<div style="padding:1.5rem;text-align:center;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin:.5rem 0"><div style="font-size:14px;font-weight:700;margin-bottom:.4rem">⚠️ '+note+'不適用此圖表</div><div style="font-size:13px;color:#78716C;line-height:1.7">'+reason+'</div></div>';
-    return;
+  if(dmode==='pb'||dmode==='frac'){
+    if(name==='maineff'){ setTimeout(function(){ if(typeof drawPBMainEffects==='function') drawPBMainEffects(); },50); return; }
+    if(name==='halfnormal'){
+      var R=window._pbResult||window._fracResult;
+      var effObj={};
+      if(R&&R.effects){ R.effects.forEach(function(e){ effObj[e.name]=e.effect; }); }
+      setTimeout(function(){ drawHalfNormalPlot(effObj,'doe-hn-content'); },50);
+      return;
+    }
+    if(['interaction','anova','residual'].indexOf(name)>=0){
+      var reason = (name==='interaction')
+        ? '此設計無法估計交互作用（主效應與交互作用混淆），故不提供交互作用圖。'
+        : (name==='anova'
+            ? '篩選設計的自由度有限，ANOVA 顯著性僅供參考，建議改看「效應柏拉圖」與「Half-Normal Plot」判斷顯著因子。'
+            : '篩選設計的殘差分析意義有限，建議篩出顯著因子後改用全因子 DOE 進行殘差診斷。');
+      var note=dmode==='pb'?'Plackett-Burman 篩選設計':'部分因子設計';
+      if(target) target.innerHTML='<div style="padding:1.5rem;text-align:center;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin:.5rem 0"><div style="font-size:14px;font-weight:700;margin-bottom:.4rem">⚠️ '+note+'不適用此圖表</div><div style="font-size:13px;color:#78716C;line-height:1.7">'+reason+'</div></div>';
+      return;
+    }
   }
 
   if(name==='halfnormal')setTimeout(function(){drawHalfNormalPlot(window._doeEffects||{},'doe-hn-content');},50);
@@ -4643,7 +4693,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.22 · 2026-05-31 22:22enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.23 · 2026-05-31 22:28enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4737,7 +4787,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.22 · 2026-05-31 22:22enabled');
+  status('v3.23 · 2026-05-31 22:28enabled');
 })();
 
 
@@ -5069,6 +5119,7 @@ window.pbAnalyze = function() {
   }, 100);
 
   // 儲存統計數據供 Claude 判讀
+  window._pbResult = { effects: effects, y: y, matrix: pb.matrix, factorNames: factorNames, n: n, grandMean: grandMean };
   if(!window._lastStats) window._lastStats = {};
   window._lastStats['doe'] = pb.label+' 篩選分析\n因子數：'+nf+'\n'+
     '主要效應排序：'+sorted.slice(0,3).map(function(e){
@@ -5458,6 +5509,8 @@ window.fracAnalyze = function() {
   window._fracSorted = sorted;
   window._fracSsError = ssError;
   window._fracN = n;
+  // 主效應圖用：只取主效應（排除交互作用 name 含 ×）
+  window._fracResult = { effects: effects.filter(function(e){return e.name.indexOf('×')<0;}), n: n, grandMean: grandMean };
   if(!window._lastStats) window._lastStats={};
   window._lastStats['doe'] = '部分因子 2^'+key+' Resolution '+d.res+'\n主要效應：'+
     sorted.slice(0,3).map(function(e){return e.name+'='+e.effect.toFixed(3);}).join(', ');
