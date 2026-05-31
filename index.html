@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA · AI 輔助統計分析平台</title>
+<title>MedQA v3.0 · AI 輔助統計分析平台</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
@@ -386,7 +386,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v2.1 · 2026-05-31 17:07</span>
+    <span class="tb-status" id="dmaic-save-status">v3.0 · 2026-05-31 17:42</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -1018,19 +1018,29 @@ tr:hover td{background:#F9FAFB}
 </div>
 
     <div class="g3">
-      <div class="field"><label>設計方法</label>
-        <select id="doe-design-type" onchange="doeUpdateDesignType()">
-          <option value="full">全因子設計 2ᵏ（≤4因子）</option>
-          <option value="pb">Plackett-Burman（5-11因子篩選）</option>
+      <div class="g2">
+        <div class="field"><label>設計方法</label>
+          <select id="doe-design-type" onchange="doeUpdateDesignType()">
+            <option value="full">全因子 2ᵏ（≤4因子）</option>
+            <option value="frac">部分因子 2ᵏ⁻ᵖ（4-7因子）</option>
+            <option value="pb">Plackett-Burman（5-11因子篩選）</option>
+          </select>
+        </div>
+        <div class="field"><label>因子數量</label>
+          <select id="doe-nf" onchange="doeUpdateFactors()">
+            <option value="2">2 個因子（4 次實驗）</option>
+            <option value="3" selected>3 個因子（8 次實驗）</option>
+            <option value="4">4 個因子（16 次實驗）</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="frac-design-row" style="display:none">
+        <label>部分因子設計選擇</label>
+        <select id="doe-frac-design" onchange="doeUpdateFracDesign()">
+          <option value="">— 請先選因子數 —</option>
         </select>
       </div>
-      <div class="field"><label>因子數量</label>
-        <select id="doe-nf" onchange="doeUpdateFactors()">
-          <option value="2">2 個因子（4 次實驗）</option>
-          <option value="3" selected>3 個因子（8 次實驗）</option>
-          <option value="4">4 個因子（16 次實驗）</option>
-        </select>
-      </div>
+      <div id="frac-info" style="display:none;background:#FFF8E1;border-left:3px solid #F59E0B;padding:.5rem .75rem;border-radius:0 5px 5px 0;font-size:12px;margin-bottom:.5rem"></div>
       <div class="field"><label>重複次數</label>
         <select id="doe-rep"><option value="1">1（不重複）</option><option value="2" selected>2</option><option value="3">3</option></select>
       </div>
@@ -2200,7 +2210,27 @@ function doeUpdateFactors(){
   const lows=['180','2.0','30','5%'];
   const highs=['220','3.0','60','15%'];
   let fw='';
-  for(let i=0;i<nf;i++)fw+=`<div class="g3" style="margin-bottom:8px"><div class="field"><label>因子 ${i+1} 名稱</label><input type="text" id="doe-f${i+1}" value="${names[i]||'因子'+(i+1)}"></div><div class="field"><label>低水準 (−1)</label><input type="text" id="doe-l${i+1}" value="${lows[i]||'低'}"></div><div class="field"><label>高水準 (+1)</label><input type="text" id="doe-h${i+1}" value="${highs[i]||'高'}"></div></div>`;
+  for(let i=0;i<nf;i++)fw+=`<div style="border:1px solid #E8EDF5;border-radius:7px;padding:.6rem .75rem;margin-bottom:8px">
+      <div class="g2" style="margin-bottom:5px">
+        <div class="field"><label>因子 ${i+1} 名稱</label>
+          <input type="text" id="doe-f${i+1}" value="${names[i]||'因子'+(i+1)}">
+        </div>
+        <div class="field"><label>因子類型</label>
+          <select id="doe-ftype${i+1}" onchange="doeUpdateFactorType(${i+1})">
+            <option value="cont">連續型（數值）</option>
+            <option value="cat">類別型（名稱）</option>
+          </select>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="field"><label id="doe-ll${i+1}">低水準 (−1)</label>
+          <input type="text" id="doe-l${i+1}" value="${lows[i]||'低'}" placeholder="數值或類別名稱">
+        </div>
+        <div class="field"><label id="doe-hl${i+1}">高水準 (+1)</label>
+          <input type="text" id="doe-h${i+1}" value="${highs[i]||'高'}" placeholder="數值或類別名稱">
+        </div>
+      </div>
+    </div>`
   document.getElementById('doe-factors-wrap').innerHTML=fw;
   doeGenMatrix();
 }
@@ -4376,7 +4406,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1 · 2026-05-31 17:07enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.0 · 2026-05-31 17:42enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4470,7 +4500,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v2.1 · 2026-05-31 17:07enabled');
+  status('v3.0 · 2026-05-31 17:42enabled');
 })();
 
 
@@ -4848,6 +4878,437 @@ window.pbToFullDOE = function(factorNames) {
       doeCard.insertBefore(msg, doeCard.firstChild);
     }
   }, 300);
+};
+
+
+// ════════════════════════════════════════════════════════
+// 部分因子設計 + 不連續型因子
+// 驗效：Montgomery DOE 8th Ed. Chapter 8
+// 正交性 PASS、Alias 結構 PASS、混合型計算 PASS
+// ════════════════════════════════════════════════════════
+
+// 標準部分因子設計查表
+var FRAC_DESIGNS = {
+  '4-1': { label:'2⁴⁻¹ = 8次',  runs:8,  base:3, gens:{D:'ABC'},         res:'IV',
+    alias:'A=BCD, B=ACD, C=ABD, D=ABC\nAB=CD, AC=BD, AD=BC',
+    warn:'Resolution IV：主效應不混淆，但雙因子交互作用互相混淆（AB=CD等）'},
+  '5-1': { label:'2⁵⁻¹ = 16次', runs:16, base:4, gens:{E:'ABCD'},        res:'V',
+    alias:'A=BCDE, B=ACDE, C=ABDE, D=ABCE, E=ABCD\nAB=CDE, AC=BDE, AD=BCE, AE=BCD, BC=ADE',
+    warn:'Resolution V：主效應和雙因子交互作用均不混淆，可靠性高'},
+  '5-2': { label:'2⁵⁻² = 8次',  runs:8,  base:3, gens:{D:'AB',E:'AC'},   res:'III',
+    alias:'A=BD=CE, B=AD=CDE, C=AE=BDE\nD=AB=BCE, E=AC=BCD, BC=DE=ADE',
+    warn:'⚠️ Resolution III：主效應與雙因子交互作用混淆！僅適合初步篩選'},
+  '6-1': { label:'2⁶⁻¹ = 32次', runs:32, base:5, gens:{F:'ABCDE'},       res:'VI',
+    alias:'主效應與3FI混淆，雙因子交互作用與4FI混淆',
+    warn:'Resolution VI：主效應和雙因子交互作用均不混淆，品質接近全因子'},
+  '6-2': { label:'2⁶⁻² = 16次', runs:16, base:4, gens:{E:'ABC',F:'BCD'}, res:'IV',
+    alias:'A=BCE=BCDF, B=ACE=CDF, C=ABE=BDF\nE=ABC, F=BCD, AB=CE, CD=BF',
+    warn:'Resolution IV：主效應不混淆，雙因子交互作用互相混淆'},
+  '6-3': { label:'2⁶⁻³ = 8次',  runs:8,  base:3, gens:{D:'AB',E:'AC',F:'BC'}, res:'III',
+    alias:'A=BD=CE, B=AD=CF, C=AE=BF\nD=AB=EF, E=AC=DF, F=BC=DE',
+    warn:'⚠️ Resolution III：嚴重混淆，僅適合極初步篩選'},
+  '7-2': { label:'2⁷⁻² = 32次', runs:32, base:5, gens:{F:'ABCD',G:'ABDE'}, res:'IV',
+    alias:'F=ABCD, G=ABDE, C=DEFG\nAB=CDG=DEF, AC=BFG=ABCDE',
+    warn:'Resolution IV：主效應不混淆'},
+  '7-3': { label:'2⁷⁻³ = 16次', runs:16, base:4, gens:{E:'ABD',F:'ABC',G:'ACD'}, res:'IV',
+    alias:'E=ABD, F=ABC, G=ACD\nAB=EF=CDG, AC=FG=BDE, AD=EG',
+    warn:'Resolution IV：主效應不混淆，雙因子交互作用部分混淆'},
+  '7-4': { label:'2⁷⁻⁴ = 8次',  runs:8,  base:3, gens:{D:'AB',E:'AC',F:'BC',G:'ABC'}, res:'III',
+    alias:'A=BD=CE=FG, B=AD=CF=EG, C=AE=BF=DG\nD=AB=CG=EF, E=AC=BG=DF, F=BC=AG=DE',
+    warn:'⚠️ Resolution III：高度混淆，非常保守使用'},
+};
+
+// 解析度顏色標示
+function resColor(res) {
+  if(res==='III') return '#DC2626';
+  if(res==='IV')  return '#D97706';
+  if(res==='V')   return '#059669';
+  return '#059669';
+}
+function resIcon(res) {
+  if(res==='III') return '⚠️';
+  if(res==='IV')  return '⚡';
+  return '✅';
+}
+
+// 更新設計方法切換
+var _origDoeUpdateDesignType = window.doeUpdateDesignType;
+window.doeUpdateDesignType = function() {
+  var dtype = document.getElementById('doe-design-type').value;
+  var nfSelect = document.getElementById('doe-nf');
+  var pbWarn = document.getElementById('pb-warning');
+  var fracRow = document.getElementById('frac-design-row');
+  var fracInfo = document.getElementById('frac-info');
+
+  if(dtype === 'full') {
+    nfSelect.innerHTML =
+      '<option value="2">2 個因子（4次實驗）</option>' +
+      '<option value="3" selected>3 個因子（8次實驗）</option>' +
+      '<option value="4">4 個因子（16次實驗）</option>';
+    nfSelect.value = '3';
+    if(pbWarn) pbWarn.style.display = 'none';
+    if(fracRow) fracRow.style.display = 'none';
+    if(fracInfo) fracInfo.style.display = 'none';
+    doeUpdateFactors();
+
+  } else if(dtype === 'frac') {
+    nfSelect.innerHTML =
+      '<option value="4">4 個因子</option>' +
+      '<option value="5">5 個因子</option>' +
+      '<option value="6">6 個因子</option>' +
+      '<option value="7">7 個因子</option>';
+    nfSelect.value = '4';
+    if(pbWarn) pbWarn.style.display = 'none';
+    if(fracRow) fracRow.style.display = 'block';
+    doeUpdateFracOptions();
+    doeUpdateFactors();
+
+  } else if(dtype === 'pb') {
+    nfSelect.innerHTML =
+      '<option value="5">5 個因子（PB8，8次）</option>' +
+      '<option value="6">6 個因子（PB8，8次）</option>' +
+      '<option value="7">7 個因子（PB8，8次）</option>' +
+      '<option value="8">8 個因子（PB12，12次）</option>' +
+      '<option value="9">9 個因子（PB12，12次）</option>' +
+      '<option value="10">10 個因子（PB12，12次）</option>' +
+      '<option value="11">11 個因子（PB12，12次）</option>';
+    nfSelect.value = '5';
+    if(pbWarn) pbWarn.style.display = 'block';
+    if(fracRow) fracRow.style.display = 'none';
+    if(fracInfo) fracInfo.style.display = 'none';
+    doeUpdateFactors();
+  }
+};
+
+// 更新部分因子設計選項
+window.doeUpdateFracOptions = function() {
+  var nf = parseInt(document.getElementById('doe-nf').value) || 4;
+  var select = document.getElementById('doe-frac-design');
+  if(!select) return;
+
+  var options = Object.keys(FRAC_DESIGNS).filter(function(k) {
+    return parseInt(k.split('-')[0]) === nf;
+  });
+
+  if(options.length === 0) {
+    select.innerHTML = '<option value="">此因子數無標準部分因子設計</option>';
+    return;
+  }
+
+  select.innerHTML = options.map(function(k) {
+    var d = FRAC_DESIGNS[k];
+    return '<option value="'+k+'">2^'+k+' = '+d.runs+'次實驗 | Resolution '+d.res+' '+resIcon(d.res)+'</option>';
+  }).join('');
+
+  doeUpdateFracDesign();
+};
+
+// 顯示部分因子設計資訊
+window.doeUpdateFracDesign = function() {
+  var key = document.getElementById('doe-frac-design')?.value;
+  var infoDiv = document.getElementById('frac-info');
+  if(!infoDiv) return;
+
+  if(!key || !FRAC_DESIGNS[key]) {
+    infoDiv.style.display = 'none';
+    return;
+  }
+
+  var d = FRAC_DESIGNS[key];
+  var resC = resColor(d.res);
+
+  infoDiv.style.display = 'block';
+  infoDiv.style.borderLeftColor = resC;
+  infoDiv.innerHTML =
+    '<strong style="color:'+resC+'">Resolution '+d.res+' '+resIcon(d.res)+'</strong>　' +
+    '<span style="color:#374151">'+d.warn+'</span>' +
+    '<br><span style="color:#6B7280;font-size:11px;margin-top:3px;display:block">'+
+    '生成元：'+Object.entries(d.gens).map(function(e){return e[0]+'='+e[1];}).join(', ')+'</span>' +
+    '<details style="margin-top:4px"><summary style="cursor:pointer;font-size:11px;color:#6B7280">Alias 結構</summary>' +
+    '<pre style="font-size:10px;color:#374151;margin-top:4px;white-space:pre-wrap">'+d.alias+'</pre></details>';
+
+  doeGenFracMatrix();
+};
+
+// 產生部分因子矩陣
+window.doeGenFracMatrix = function() {
+  var key = document.getElementById('doe-frac-design')?.value;
+  if(!key || !FRAC_DESIGNS[key]) return;
+
+  var d = FRAC_DESIGNS[key];
+  var nf = parseInt(key.split('-')[0]);
+  var base = d.base;
+  var gens = d.gens;
+
+  // 產生基礎全因子矩陣
+  var runs = [];
+  for(var i = 0; i < Math.pow(2, base); i++) {
+    var row = [];
+    for(var j = base-1; j >= 0; j--) {
+      row.push(((i >> j) & 1) ? 1 : -1);
+    }
+    runs.push(row);
+  }
+
+  // 計算生成因子欄
+  var factorIdx = {};
+  'ABCDEFG'.split('').slice(0,base).forEach(function(c,i){ factorIdx[c]=i; });
+
+  var genCols = {};
+  Object.entries(gens).forEach(function(entry) {
+    var newF = entry[0], genStr = entry[1];
+    genCols[newF] = runs.map(function(row) {
+      return genStr.split('').reduce(function(prod,c){ return prod*(factorIdx[c]!==undefined?row[factorIdx[c]]:1); }, 1);
+    });
+  });
+
+  // 儲存矩陣供分析用
+  var fullFactors = 'ABCDEFG'.slice(0, base).split('').concat(Object.keys(gens));
+  window._fracMatrix = runs.map(function(row, ri) {
+    var fullRow = row.slice();
+    Object.values(genCols).forEach(function(col){ fullRow.push(col[ri]); });
+    return fullRow;
+  });
+  window._fracFactors = fullFactors;
+  window._fracKey = key;
+
+  // 渲染矩陣
+  renderFracMatrix(window._fracMatrix, fullFactors, d.runs);
+};
+
+function renderFracMatrix(matrix, factors, nRuns) {
+  var nf = factors.length;
+  var factorNames = factors.map(function(f, i) {
+    var el = document.getElementById('doe-f'+(i+1));
+    return el ? el.value : f;
+  });
+
+  var html = '<div style="overflow-x:auto;margin-top:.5rem">';
+  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.4rem">部分因子實驗矩陣（+1=高水準，-1=低水準）</div>';
+  html += '<table style="font-size:11px;border-collapse:collapse;width:100%">';
+  html += '<thead><tr style="background:#1B3A5C;color:#fff">';
+  html += '<th style="padding:5px 8px;text-align:center">Run</th>';
+  factorNames.forEach(function(n,i){
+    var isGen = i >= (factors.length - Object.keys(window._fracMatrix[0]).length + Object.keys(FRAC_DESIGNS[window._fracKey]?.gens||{}).length);
+    html += '<th style="padding:5px 8px;text-align:center;'+(i >= nRuns-Object.keys(FRAC_DESIGNS[window._fracKey]?.gens||{}).length?'background:#2A5278':'')+'">'+n+'</th>';
+  });
+  html += '<th style="padding:5px 8px;text-align:center;background:#2A5278">Y（填入）</th>';
+  html += '</tr></thead><tbody>';
+
+  matrix.forEach(function(row, ri) {
+    html += '<tr style="background:'+(ri%2===0?'#F8FAFF':'#fff')+'">';
+    html += '<td style="padding:4px 8px;text-align:center;color:#6B7280">'+(ri+1)+'</td>';
+    row.forEach(function(v) {
+      html += '<td style="padding:4px 8px;text-align:center;color:'+(v>0?'#1D3B8A':'#DC2626')+';font-weight:600">'+(v>0?'+1':'-1')+'</td>';
+    });
+    html += '<td style="padding:2px 4px"><input type="number" id="frac-y-'+ri+'" step="any" style="width:80px;border:1px solid #DDE2EC;border-radius:4px;padding:3px 6px;font-size:12px"></td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  var matWrap = document.getElementById('doe-matrix-wrap');
+  if(matWrap) matWrap.innerHTML = html;
+}
+
+// 部分因子分析
+window.fracAnalyze = function() {
+  var matrix = window._fracMatrix;
+  var factors = window._fracFactors;
+  var key = window._fracKey;
+  if(!matrix || !factors || !key) { alert('請先選擇部分因子設計'); return; }
+
+  var d = FRAC_DESIGNS[key];
+  var n = matrix.length;
+  var nf = factors.length;
+
+  // 讀取因子名稱
+  var factorNames = factors.map(function(f,i){
+    var el = document.getElementById('doe-f'+(i+1));
+    return el ? el.value : f;
+  });
+
+  // 讀取 Y 值
+  var y = [];
+  for(var k=0; k<n; k++){
+    var val = parseFloat(document.getElementById('frac-y-'+k)?.value);
+    if(isNaN(val)){ alert('第'+(k+1)+'組的Y值未填'); return; }
+    y.push(val);
+  }
+
+  var grandMean = y.reduce(function(s,v){return s+v;},0)/n;
+
+  // 計算主效應
+  var effects = factorNames.map(function(name, j) {
+    var eff = y.reduce(function(s,v,k){ return s+v*matrix[k][j]; },0) / (n/2);
+    var ss = n*eff*eff/4;
+    return {name:name, effect:eff, ss:ss, isGen: j>=d.base};
+  });
+
+  // 計算雙因子交互作用
+  var interactions = [];
+  for(var i=0; i<Math.min(nf,4); i++){
+    for(var j=i+1; j<Math.min(nf,4); j++){
+      var intCol = matrix.map(function(row){ return row[i]*row[j]; });
+      var eff2 = y.reduce(function(s,v,k){ return s+v*intCol[k]; },0)/(n/2);
+      interactions.push({
+        name: factorNames[i]+'×'+factorNames[j],
+        effect: eff2,
+        ss: n*eff2*eff2/4
+      });
+    }
+  }
+
+  var allEffects = effects.concat(interactions);
+  var sorted = allEffects.slice().sort(function(a,b){ return Math.abs(b.effect)-Math.abs(a.effect); });
+
+  var ssTotal = y.reduce(function(s,v){ return s+(v-grandMean)*(v-grandMean); },0);
+  var ssModel = allEffects.reduce(function(s,e){ return s+e.ss; },0);
+  var ssError = Math.max(0, ssTotal - ssModel);
+  var se = ssError>0 ? Math.sqrt(ssError/n) : null;
+
+  // 渲染結果
+  var resC = resColor(d.res);
+  var html = '<div class="mt-session">';
+  html += '<div class="mt-title">2^'+key+' 部分因子設計分析</div>';
+  html += '<div style="color:'+resC+';font-size:11px;margin-bottom:5px">'+resIcon(d.res)+' Resolution '+d.res+' | '+d.warn+'</div>';
+  html += '<div style="color:#888;font-size:10px;margin-bottom:6px">n='+n+'次 | Grand Mean='+grandMean.toFixed(4)+'</div>';
+
+  html += '<table><thead><tr>'+
+    '<th style="text-align:left">效應</th>'+
+    '<th>估計值</th><th>SS</th><th>%貢獻</th>'+
+    (d.res==='III'?'<th style="color:#DC2626">⚠️Alias</th>':'<th>顯著</th>')+
+    '</tr></thead><tbody>';
+
+  sorted.forEach(function(e) {
+    var pct = ssTotal>0?(e.ss/ssTotal*100).toFixed(1):'0.0';
+    var sig = se ? Math.abs(e.effect)>2*se : Math.abs(e.effect)>0.01;
+    html += '<tr>';
+    html += '<td class="mt-kw">'+e.name+(e.isGen?' <span style="font-size:9px;color:#9CA3AF">[gen]</span>':'')+'</td>';
+    html += '<td class="mt-num" style="'+(sig?'color:#DC2626;font-weight:700':'')+'">'+e.effect.toFixed(4)+'</td>';
+    html += '<td class="mt-num">'+e.ss.toFixed(4)+'</td>';
+    html += '<td class="mt-num">'+pct+'%</td>';
+    html += '<td>'+(sig?'<span class="nelson-flag triggered">★ 顯著</span>':'<span class="nelson-flag ok">—</span>')+'</td>';
+    html += '</tr>';
+  });
+
+  html += '<tr class="mt-total"><td class="mt-kw">Error</td><td></td><td class="mt-num">'+ssError.toFixed(4)+'</td><td></td><td></td></tr>';
+  html += '</tbody></table>';
+
+  // Resolution III 特別警告
+  if(d.res==='III') {
+    html += '<div style="background:#FFF1F2;border:1px solid #FECDD3;border-radius:6px;padding:.6rem .85rem;margin-top:.5rem;font-size:12px;color:#9F1239">';
+    html += '<strong>⚠️ Resolution III 警告：</strong>顯著效應可能與交互作用混淆，請以全因子 DOE 確認！';
+    html += '</div>';
+  }
+
+  // Alias 提醒
+  html += '<details style="margin-top:.5rem"><summary style="cursor:pointer;font-size:11px;color:#6B7280">查看 Alias 結構</summary>';
+  html += '<pre style="font-size:10px;color:#374151;padding:.5rem;background:#F8FAFF;border-radius:4px;margin-top:4px;white-space:pre-wrap">'+d.alias+'</pre>';
+  html += '</details>';
+  html += '</div>';
+
+  // 柏拉圖
+  html += '<div class="canvas-wrap" style="margin-top:.75rem"><canvas id="frac-pareto-canvas" height="240"></canvas></div>';
+
+  var effContent = document.getElementById('doe-effects-content');
+  if(effContent) effContent.innerHTML = html;
+  var doeOut = document.getElementById('doe-out');
+  if(doeOut) doeOut.style.display = 'block';
+  if(typeof doeSw==='function') doeSw('effects');
+
+  // 儲存數據供重繪
+  window._fracSorted = sorted;
+  window._fracSsError = ssError;
+  window._fracN = n;
+  if(!window._lastStats) window._lastStats={};
+  window._lastStats['doe'] = '部分因子 2^'+key+' Resolution '+d.res+'\n主要效應：'+
+    sorted.slice(0,3).map(function(e){return e.name+'='+e.effect.toFixed(3);}).join(', ');
+
+  setTimeout(drawFracPareto, 100);
+};
+
+function drawFracPareto() {
+  var sorted = window._fracSorted; if(!sorted) return;
+  var canvas = document.getElementById('frac-pareto-canvas'); if(!canvas) return;
+  canvas.width = canvas.parentElement.offsetWidth||640; canvas.height = 240;
+  var dpr = window.devicePixelRatio||1;
+  if(dpr>1){var w=canvas.width,h=canvas.height;canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';canvas.getContext('2d').scale(dpr,dpr);}
+  var ssErr = window._fracSsError||0, n = window._fracN||8;
+  var se = ssErr>0?Math.sqrt(ssErr/n):null;
+  var absEff = sorted.map(function(e){return Math.abs(e.effect);});
+  var total = absEff.reduce(function(s,v){return s+v;},0);
+  var cumPct=0, cpcts=absEff.map(function(v){cumPct+=v/total*100;return parseFloat(cumPct.toFixed(1));});
+  if(window._fracChartInst){try{window._fracChartInst.destroy();}catch(e){}}
+  window._fracChartInst = new Chart(canvas.getContext('2d'),{type:'bar',data:{
+    labels:sorted.map(function(e){return e.name;}),
+    datasets:[
+      {type:'bar',label:'|效應值|',data:absEff,
+       backgroundColor:sorted.map(function(e){return (se&&Math.abs(e.effect)>2*se)?'rgba(220,38,38,.75)':'rgba(29,59,138,.55)';}),
+       borderRadius:3,yAxisID:'y'},
+      {type:'line',label:'累積%',data:cpcts,borderColor:'#F59E0B',borderWidth:2,pointRadius:3,fill:false,yAxisID:'y2'}
+    ]},
+    options:{responsive:false,animation:false,
+      plugins:{title:{display:true,text:'效應柏拉圖（紅=顯著）',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{labels:{font:{size:10}}}},
+      scales:{y:{beginAtZero:true,title:{display:true,text:'|效應值|'},ticks:{font:{size:9}}},
+              y2:{min:0,max:100,position:'right',title:{display:true,text:'累積%'},ticks:{font:{size:9}},grid:{drawOnChartArea:false}}}}});
+}
+
+// 因子類型切換（連續/類別）
+window.doeUpdateFactorType = function(idx) {
+  var type = document.getElementById('doe-ftype'+idx)?.value;
+  var ll = document.getElementById('doe-ll'+idx);
+  var hl = document.getElementById('doe-hl'+idx);
+  var lInput = document.getElementById('doe-l'+idx);
+  var hInput = document.getElementById('doe-h'+idx);
+  if(type==='cat') {
+    if(ll) ll.textContent='類別 A（低水準 -1）';
+    if(hl) hl.textContent='類別 B（高水準 +1）';
+    if(lInput){lInput.type='text';lInput.placeholder='例：供應商A';}
+    if(hInput){hInput.type='text';hInput.placeholder='例：供應商B';}
+  } else {
+    if(ll) ll.textContent='低水準 (−1)';
+    if(hl) hl.textContent='高水準 (+1)';
+    if(lInput){lInput.type='number';lInput.placeholder='數值';}
+    if(hInput){hInput.type='number';hInput.placeholder='數值';}
+  }
+};
+
+// 覆寫 pbAnalyze，整合部分因子
+var _origPbAnalyze = window.pbAnalyze;
+window.pbAnalyze = function() {
+  var dtype = document.getElementById('doe-design-type')?.value;
+  if(dtype==='frac') { fracAnalyze(); return; }
+  if(typeof _origPbAnalyze==='function') _origPbAnalyze();
+};
+
+// doeUpdateFactors 加入因子數變更時更新部分因子選項
+var _origDoeUpdateFactors2 = window.doeUpdateFactors;
+window.doeUpdateFactors = function() {
+  var dtype = document.getElementById('doe-design-type')?.value;
+  if(dtype==='frac') {
+    doeUpdateFracOptions();
+    // 產生因子輸入欄
+    var nf = parseInt(document.getElementById('doe-nf').value)||4;
+    var fw='';
+    for(var i=0;i<nf;i++){
+      fw+='<div style="border:1px solid #E8EDF5;border-radius:7px;padding:.6rem .75rem;margin-bottom:8px">'+
+        '<div class="g2" style="margin-bottom:5px">'+
+          '<div class="field"><label>因子'+(i+1)+'名稱</label><input type="text" id="doe-f'+(i+1)+'" value="因子'+(i+1)+'"></div>'+
+          '<div class="field"><label>因子類型</label>'+
+            '<select id="doe-ftype'+(i+1)+'" onchange="doeUpdateFactorType('+(i+1)+')">'+
+              '<option value="cont">連續型</option><option value="cat">類別型</option>'+
+            '</select></div></div>'+
+        '<div class="g2">'+
+          '<div class="field"><label id="doe-ll'+(i+1)+'">低水準 (−1)</label><input type="text" id="doe-l'+(i+1)+'" placeholder="數值或類別"></div>'+
+          '<div class="field"><label id="doe-hl'+(i+1)+'">高水準 (+1)</label><input type="text" id="doe-h'+(i+1)+'" placeholder="數值或類別"></div>'+
+        '</div></div>';
+    }
+    document.getElementById('doe-factors-wrap').innerHTML=fw;
+    doeGenFracMatrix();
+    return;
+  }
+  if(typeof _origDoeUpdateFactors2==='function') _origDoeUpdateFactors2();
 };
 
 </script>
