@@ -384,7 +384,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v2.0 · 2026-05-31 02:02</span>
+    <span class="tb-status" id="dmaic-save-status">v2.1-dev · 2026-05-31 14:08</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -910,7 +910,8 @@ tr:hover td{background:#F9FAFB}
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button></div>
   </div>
-  <div id="fb-out" style="display:none">
+  <div id="fb-to-doe" style="display:none"></div>
+<div id="fb-out" style="display:none">
     <div class="card">
       <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
       <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
@@ -2105,6 +2106,31 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
+
+  // F01: 收集魚骨圖所有原因，供 DOE 使用
+  var fbCauses = [];
+  var fbCatIds = ['fb-man','fb-machine','fb-material','fb-method','fb-measure','fb-env'];
+  fbCatIds.forEach(function(cid){
+    var el = document.getElementById(cid);
+    if(!el||!el.value.trim()) return;
+    el.value.trim().split('\n').forEach(function(line){
+      var name = line.split(',')[0].trim();
+      if(name) fbCauses.push(name);
+    });
+  });
+  window._fbCauses = fbCauses;
+
+  // 顯示「帶入 DOE」按鈕（如果有原因）
+  var fbDoeDiv = document.getElementById('fb-to-doe');
+  if(fbDoeDiv && fbCauses.length > 0){
+    fbDoeDiv.style.display='block';
+    fbDoeDiv.innerHTML =
+      '<div style="margin-top:.75rem;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.75rem 1rem">' +
+      '<div style="font-size:12px;font-weight:600;color:#1D3B8A;margin-bottom:.4rem">🧪 偵測到 '+fbCauses.length+' 個潛在因子</div>' +
+      '<div style="font-size:12px;color:#374151;margin-bottom:.6rem">'+fbCauses.slice(0,6).join('・')+(fbCauses.length>6?'...':'')+'</div>' +
+      '<button onclick="fbToDOE()" style="background:#1B3A5C;color:#fff;border:none;border-radius:6px;padding:6px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">→ 選擇因子帶入 DOE 實驗設計</button>' +
+      '</div>';
+  }
 }
 
 // ════════════════════════════════════════════
@@ -4216,7 +4242,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.0 · 2026-05-31 02:02 enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v2.1-dev · 2026-05-31 14:08enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -4310,8 +4336,51 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v2.0 · 2026-05-31 02:02 enabled');
+  status('v2.1-dev · 2026-05-31 14:08enabled');
 })();
+
+// ════════════════════════════════════════════════════════
+// F01: 魚骨圖 → DOE 因子傳遞
+// ════════════════════════════════════════════════════════
+
+window.fbToDOE = function() {
+  var causes = window._fbCauses || [];
+  if(causes.length === 0) { alert('請先完成魚骨圖分析'); return; }
+
+  // 最多選 4 個因子（DOE 限制）
+  var selected = causes.slice(0, 4);
+
+  // 跳轉到 DOE 工具
+  goTool('doe');
+
+  setTimeout(function(){
+    // 設定因子數量
+    var nfEl = document.getElementById('doe-nfactors');
+    if(nfEl){
+      nfEl.value = Math.min(selected.length, 4);
+      if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
+    }
+
+    setTimeout(function(){
+      // 填入因子名稱
+      selected.forEach(function(name, i){
+        var nameEl = document.getElementById('doe-f'+(i+1)+'-name');
+        if(nameEl) nameEl.value = name;
+      });
+
+      // 顯示提示
+      var msg = document.createElement('div');
+      msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+      msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.join('、')+
+        '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
+
+      var doeCard = document.querySelector('#page-doe .card');
+      if(doeCard) doeCard.insertBefore(msg, doeCard.firstChild);
+
+    }, 300);
+  }, 200);
+};
+
 </script>
 
 <section id="method-certification" style="max-width:1120px;margin:1.5rem auto 2.5rem;padding:0 1rem">
