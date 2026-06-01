@@ -2452,12 +2452,8 @@ function doeAnalyze(){
   sortedEff.forEach(([name,val])=>{const ss=val**2*runs*rep/4;const pct=ssTotal>0?(ss/ssTotal*100):0;effHtml+=`<tr><td style="font-weight:600">${name}</td><td style="${Math.abs(val)>1?'color:#1D3B8A;font-weight:700':''}">${r4(val)}</td><td>${r4(ss)}</td><td>${pct.toFixed(1)}%</td><td>${Math.abs(val)>2?'<span class="badge-r blue">顯著</span>':Math.abs(val)>1?'<span class="badge-r amber">中等</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">微弱</span>'}</td></tr>`;});
   effHtml+='</tbody></table></div>';
   document.getElementById('doe-effects-content').innerHTML=effHtml;
-  // 效應柏拉圖
-  const canvas=document.getElementById('doe-pareto-canvas');canvas.width=canvas.parentElement.offsetWidth||640;
+  // 效應柏拉圖：資料存於 window._doeSortedEff，切到柏拉圖分頁時由 drawDOEPareto() 繪製（避免隱藏 tab offsetWidth=0 畫不出）
   destroyCharts();
-  const absEff=sortedEff.map(([n,v])=>Math.abs(v));let cumPct=0;const cpcts=absEff.map(v=>{cumPct+=v/sum(absEff)*100;return parseFloat(cumPct.toFixed(1));});
-  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:sortedEff.map(([n])=>n),datasets:[{type:'bar',label:'|效應值|',data:absEff,backgroundColor:absEff.map(v=>v>2?'#1D3B8A':v>1?'#2E5FCF':'#93C5FD'),yAxisID:'y'},{type:'line',label:'累積%',data:cpcts,borderColor:'#DC2626',borderWidth:2,pointRadius:4,pointBackgroundColor:'#DC2626',fill:false,tension:0.1,yAxisID:'y2'}]},options:{responsive:false,animation:false,indexAxis:'y',plugins:{title:{display:true,text:'DOE 效應柏拉圖',font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y2:{position:'right',min:0,max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{display:false}}}}});
-  chartInst.push(inst);
   // 交互作用圖（取第一對交互）
   let intHtml='';
   if(nf>=2){
@@ -2520,6 +2516,105 @@ window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,
     '反應變數：'+yname;
   setTimeout(function(){claudeAutoAnalyze('doe',doeStats);},300);
 }
+// Minitab 風格交互作用矩陣圖（所有因子兩兩配對）
+function drawDOEInteractionMatrix(){
+  var factors = window._doeFacs || [];
+  var matrix = window._doeMatrix || [];
+  var runs = window._doeRuns || 0;
+  var rep = window._doeRep || 1;
+  var nf = factors.length;
+  var container = document.getElementById('doe-interaction-content');
+  if(!container) return;
+
+  if(nf < 2){
+    container.innerHTML = '<div style="padding:1rem;color:#9CA3AF">需至少 2 個因子才能顯示交互作用圖</div>';
+    return;
+  }
+
+  // 重算 yMeans
+  var yMeans = [];
+  for(var r=0;r<runs;r++){
+    var ys=[];
+    for(var rp=0;rp<rep;rp++){
+      var el=document.getElementById('doe-y-'+r+'-'+rp);
+      if(el)ys.push(parseFloat(el.value)||0);
+    }
+    yMeans.push(ys.length?ys.reduce(function(s,v){return s+v;},0)/ys.length:0);
+  }
+
+  // 因子名稱
+  var fnames = factors.map(function(f,i){
+    var el=document.getElementById('doe-f'+(i+1));
+    return el?el.value:('因子'+(i+1));
+  });
+
+  // 計算某因子 fi 在水準 lvl 下、fj 在水準 ljv 下的 y 平均
+  function cellMean(fi, li, fj, lj){
+    var sum=0, cnt=0;
+    for(var r=0;r<runs;r++){
+      if(matrix[r][fi]===li && matrix[r][fj]===lj){ sum+=yMeans[r]; cnt++; }
+    }
+    return cnt?sum/cnt:null;
+  }
+
+  // 建立 nf×nf 矩陣佈局（上三角放交互作用圖）
+  var yname = (document.getElementById('doe-yname')||{}).value || '反應變數';
+  var html = '<div style="font-size:12px;color:#6B7280;margin-bottom:.6rem">交互作用矩陣圖（Minitab 格式）：每格顯示兩因子的交互作用。線條平行=無交互作用，交叉=有交互作用。</div>';
+  html += '<div style="overflow-x:auto"><div style="display:grid;grid-template-columns:repeat('+nf+',minmax(150px,1fr));gap:6px;min-width:'+(nf*150)+'px">';
+
+  var cellId = 0;
+  var cellMeta = [];
+  for(var i=0;i<nf;i++){
+    for(var j=0;j<nf;j++){
+      if(i===j){
+        // 對角線：因子名稱
+        html += '<div style="display:flex;align-items:center;justify-content:center;background:#1B3A5C;color:#fff;border-radius:6px;font-size:13px;font-weight:700;min-height:120px">'+fnames[i]+'</div>';
+      } else if(j>i){
+        // 上三角：交互作用圖（fi 為 X 軸，fj 為線條分組）
+        var cid='doe-int-cell-'+cellId;
+        html += '<div style="border:1px solid #E8EDF5;border-radius:6px;padding:4px"><canvas id="'+cid+'" height="120"></canvas></div>';
+        cellMeta.push({id:cid, fx:j, fline:i});
+        cellId++;
+      } else {
+        // 下三角：留白
+        html += '<div></div>';
+      }
+    }
+  }
+  html += '</div></div>';
+  container.innerHTML = html;
+
+  // 繪製各交互作用圖
+  setTimeout(function(){
+    cellMeta.forEach(function(meta){
+      var c = document.getElementById(meta.id);
+      if(!c) return;
+      c.width = c.parentElement.offsetWidth || 150;
+      c.height = 120;
+      var dpr = window.devicePixelRatio||1;
+      if(dpr>1){var w=c.width,h=c.height;c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';c.getContext('2d').scale(dpr,dpr);}
+
+      var fx=meta.fx, fline=meta.fline;
+      // X 軸：fx 的低/高；線條：fline 的低/高
+      var lineLoLo=cellMean(fline,-1,fx,-1), lineLoHi=cellMean(fline,-1,fx,1);
+      var lineHiLo=cellMean(fline,1,fx,-1), lineHiHi=cellMean(fline,1,fx,1);
+
+      new Chart(c.getContext('2d'),{
+        type:'line',
+        data:{ labels:[fnames[fx]+' −', fnames[fx]+' +'],
+          datasets:[
+            {label:fnames[fline]+' −', data:[lineLoLo,lineLoHi], borderColor:'#1D3B8A', borderWidth:2, pointRadius:4, fill:false},
+            {label:fnames[fline]+' +', data:[lineHiLo,lineHiHi], borderColor:'#DC2626', borderWidth:2, pointRadius:4, fill:false}
+          ]},
+        options:{ responsive:false, animation:false,
+          plugins:{ title:{display:true, text:fnames[fline]+' × '+fnames[fx], font:{size:10,weight:'600'}, padding:{bottom:2}},
+                    legend:{display:true, labels:{font:{size:8}, boxWidth:12}} },
+          scales:{ x:{ticks:{font:{size:8}}}, y:{ticks:{font:{size:8}}} } }
+      });
+    });
+  }, 80);
+}
+
 function drawDOEInteractionPlot() {
   var d = window._doeIntData;
   if(!d) return;
@@ -2719,7 +2814,7 @@ function doeSw(name){
   if(name==='maineff')setTimeout(function(){drawDOEMainEffects();},50);
   if(name==='residual')setTimeout(function(){drawDOEResiduals();},50);
   if(name==='pareto')setTimeout(function(){drawDOEPareto();},50);
-  if(name==='interaction')setTimeout(function(){drawDOEInteractionPlot();},50);
+  if(name==='interaction')setTimeout(function(){drawDOEInteractionMatrix();},50);
 }
 
 function drawDOEMainEffects(){
