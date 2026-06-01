@@ -5961,7 +5961,7 @@ window.doeUpdateFactors = function() {
           capaToggle();
           if(typeof goTool === 'function') goTool(toolId);
         };
-        // 魚骨圖特殊：帶入問題描述
+        // 魚骨圖特殊：帶入問題描述 + 呼叫 Claude 生成 6M 建議
         if(toolId === 'fishbone') {
           btn.onclick = function() {
             // 抓第一則用戶輸入（問題描述）
@@ -5971,23 +5971,74 @@ window.doeUpdateFactors = function() {
             }
             capaToggle();
             if(typeof goTool === 'function') goTool('fishbone');
-            // setTimeout 確保在 resetToolPanel 執行完後再帶入
+
             setTimeout(function(){
+              // 帶入問題欄
               var fbProbEl = document.getElementById('fb-problem');
               if(fbProbEl && firstUser) fbProbEl.value = firstUser;
-              // 顯示帶入提示
-              if(firstUser) {
-                var hint = document.createElement('div');
-                hint.style.cssText='background:#F0FDF4;border:1px solid #86EFAC;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#166534;margin-bottom:.5rem';
-                hint.innerHTML='✅ 已從主頁問題帶入魚骨圖問題欄，請補充各類原因後點擊「產生魚骨圖」';
-                hint.className='fb-import-hint';
-                var fbCard=document.querySelector('#page-fishbone .card');
-                if(fbCard){
-                  var existing=fbCard.querySelector('.fb-import-hint');
-                  if(existing) existing.remove();
-                  fbCard.insertBefore(hint, fbCard.querySelector('.btn-row'));
-                }
+
+              // 顯示 AI 生成中提示
+              var hint = document.createElement('div');
+              hint.className = 'fb-import-hint';
+              hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
+              hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在為您生成 6M 根本原因建議，請稍候...';
+              var fbCard = document.querySelector('#page-fishbone .card');
+              if(fbCard){
+                var existing = fbCard.querySelector('.fb-import-hint');
+                if(existing) existing.remove();
+                fbCard.insertBefore(hint, fbCard.querySelector('.btn-row'));
               }
+
+              // 呼叫 Worker fishbone_generate
+              if(!firstUser) {
+                hint.innerHTML = '⚠️ 未偵測到問題描述，請手動填寫各欄位';
+                hint.style.background = '#FFFBEB';
+                hint.style.borderColor = '#FDE68A';
+                hint.style.color = '#92400E';
+                return;
+              }
+
+              fetch(CLAUDE_WORKER, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                  mode: 'fishbone_generate',
+                  messages: [{ role: 'user', content: '問題描述：' + firstUser + '\n\n請根據此問題，為魚骨圖 6M 各類別提供可能的根本原因建議。' }]
+                })
+              })
+              .then(function(r){ return r.json(); })
+              .then(function(data){
+                if(data.result){
+                  var r = data.result;
+                  var fields = {
+                    'fb-man':      r.man      || '',
+                    'fb-machine':  r.machine  || '',
+                    'fb-material': r.material || '',
+                    'fb-method':   r.method   || '',
+                    'fb-measure':  r.measure  || '',
+                    'fb-env':      r.env      || '',
+                  };
+                  Object.keys(fields).forEach(function(id){
+                    var el = document.getElementById(id);
+                    if(el && fields[id]) el.value = fields[id];
+                  });
+                  hint.innerHTML = '✅ AI 已帶入 6M 根本原因建議（來源：主頁問題描述），內容僅供參考，請自行確認與修改後產生魚骨圖';
+                  hint.style.background = '#F0FDF4';
+                  hint.style.borderColor = '#86EFAC';
+                  hint.style.color = '#166534';
+                } else {
+                  hint.innerHTML = '⚠️ AI 建議生成失敗，請手動填寫各欄位';
+                  hint.style.background = '#FFFBEB';
+                  hint.style.borderColor = '#FDE68A';
+                  hint.style.color = '#92400E';
+                }
+              })
+              .catch(function(){
+                hint.innerHTML = '⚠️ 連線失敗，請手動填寫各欄位';
+                hint.style.background = '#FEF2F2';
+                hint.style.borderColor = '#FECACA';
+                hint.style.color = '#991B1B';
+              });
             }, 500);
           };
         }
