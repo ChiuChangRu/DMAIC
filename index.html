@@ -2221,6 +2221,18 @@ function fishboneDraw(){
   });
   window._fbCauses = fbCauses;
 
+  // Claude AI 判讀
+  var fbPanel=document.getElementById('claude-container-fishbone');
+  if(fbPanel){fbPanel.innerHTML=claudePanelHTML('fishbone');}
+  var catSummary=cats.map(function(c){
+    var el=document.getElementById(c.id);
+    var count=el&&el.value.trim()?el.value.trim().split('\n').filter(function(l){return l.trim();}).length:0;
+    return c.label.split(' ')[0]+'('+count+')';
+  }).join(' ');
+  var fbStats='魚骨圖根因分析\n問題：'+problem+'\n各類原因數：'+catSummary+'\n'+
+    '全部原因：'+fbCauses.slice(0,8).map(function(c){return c.name;}).join('、')+(fbCauses.length>8?'..等':'');
+  setTimeout(function(){claudeAutoAnalyze('fishbone',fbStats);},300);
+
   // 渲染因子選擇面板
   var selectorDiv = document.getElementById('fb-factor-selector');
   if(selectorDiv && fbCauses.length > 0){
@@ -2508,10 +2520,13 @@ window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,
   document.getElementById('doe-anova-content').innerHTML = anovaResult.html;
 
   document.getElementById('doe-out').style.display='block';
+  // Claude AI 判讀
   var doePanel=document.getElementById('claude-container-doe');
   if(doePanel){doePanel.innerHTML=claudePanelHTML('doe');}
   var topEffects=sortedEff.slice(0,5).map(function(e){return e[0]+'='+parseFloat(e[1].toFixed(4));}).join(', ');
-  var doeStats='DOE 全因子實驗\n因子數：'+factors.length+'  重複次數：'+rep+'\n'+
+  var dtype=document.getElementById('doe-design-type')?document.getElementById('doe-design-type').value:'full';
+  var designLabel=dtype==='full'?'全因子':dtype==='frac'?'部分因子(Fractional)':'Plackett-Burman';
+  var doeStats='DOE '+designLabel+'設計\n因子數：'+factors.length+'  重複次數：'+rep+'\n'+
     '主要效應（前5）：'+topEffects+'\n'+
     '反應變數：'+yname;
   setTimeout(function(){claudeAutoAnalyze('doe',doeStats);},300);
@@ -3140,6 +3155,12 @@ function boxplotAnalyze(){
   });
   document.getElementById('bp-table').innerHTML=`<thead><tr><th>組別</th><th>n</th><th>平均</th><th>中位數</th><th>Q1</th><th>Q3</th><th>IQR</th><th>標準差</th><th>離群值</th></tr></thead><tbody>${stats.map(s=>`<tr><td style="font-weight:600">${s.name}</td><td>${s.n}</td><td>${r4(s.mean)}</td><td>${r4(s.q2)}</td><td>${r4(s.q1)}</td><td>${r4(s.q3)}</td><td>${r4(s.iqr)}</td><td>${r4(s.std)}</td><td>${s.outliers.length?s.outliers.map(v=>r4(v)).join(', '):'—'}</td></tr>`).join('')}</tbody>`;
   document.getElementById('bp-out').style.display='block';
+  // Claude AI 判讀
+  var bpPanel=document.getElementById('claude-container-boxplot');
+  if(bpPanel){bpPanel.innerHTML=claudePanelHTML('boxplot');}
+  var bpStats='箱型圖分析\n組數：'+stats.length+'\n'+
+    stats.map(function(s){return s.name+': 中位數='+r4(s.q2)+' IQR='+r4(s.iqr)+(s.outliers.length?' 離群值:'+s.outliers.length+'個':'');}).join('\n');
+  setTimeout(function(){claudeAutoAnalyze('boxplot',bpStats);},300);
 }
 
 // 初始化
@@ -4295,7 +4316,7 @@ var TOOL_PROMPTS = {
   doe: '你正在分析 DOE 實驗設計的結果。請根據提供的效應分析和 ANOVA 表，用繁體中文判讀哪些因子顯著，並建議最佳製程參數方向。',
   histogram: '你正在分析直方圖和常態性檢定的結果。請用繁體中文判讀數據分佈特性，並給出後續分析建議。',
   pareto: '你正在分析柏拉圖的結果。請用繁體中文識別關鍵少數問題，並建議改善優先順序。',
-  fishbone: '你正在分析魚骨圖（石川圖）的結果。請用繁體中文整理根本原因，並建議優先改善的方向。',
+  fishbone: '你正在分析魚骨圖（石川圖）的結果。請根據問題描述和6M各類原因，用繁體中文：①整理出最可能的根本原因（優先順序）；②評估哪個類別（人/機/料/法/測/環）的問題最集中；③建議下一步驗證或改善方向。若問題敘述含有製程或設計資訊，請結合產業實務給出具體建議。',
   boxplot: '你正在分析箱型圖的結果。請用繁體中文比較各組的分佈差異，並判斷是否需要進一步統計檢定。',
   scatter: '你正在分析相關性分析和散佈圖的結果。請用繁體中文判讀變數間的關係強度，並說明實務意義。',
   hypothesis: '你正在分析假設檢定的結果。請用繁體中文解釋統計結果的實務意義，注意統計顯著不等於實務重要性。',
@@ -5269,10 +5290,14 @@ window.pbAnalyze = function() {
   // 儲存統計數據供 Claude 判讀
   window._pbResult = { effects: effects, y: y, matrix: pb.matrix, factorNames: factorNames, n: n, grandMean: grandMean };
   if(!window._lastStats) window._lastStats = {};
-  window._lastStats['doe'] = pb.label+' 篩選分析\n因子數：'+nf+'\n'+
+  window._lastStats['doe'] = pb.label+' 篩選分析（Plackett-Burman）\n因子數：'+nf+'\n'+
     '主要效應排序：'+sorted.slice(0,3).map(function(e){
       return e.name+'='+e.effect.toFixed(3);
     }).join(', ')+'\n顯著因子：'+sigFactors.map(function(e){return e.name;}).join('、');
+  // 顯示 DOE Claude panel
+  var doePanel=document.getElementById('claude-container-doe');
+  if(doePanel){doePanel.innerHTML=claudePanelHTML('doe');}
+  setTimeout(function(){claudeAutoAnalyze('doe',window._lastStats['doe']);},300);
 };
 
 // PB 顯著因子帶入全因子 DOE
@@ -5660,8 +5685,13 @@ window.fracAnalyze = function() {
   // 主效應圖用：只取主效應（排除交互作用 name 含 ×）
   window._fracResult = { effects: effects.filter(function(e){return e.name.indexOf('×')<0;}), n: n, grandMean: grandMean };
   if(!window._lastStats) window._lastStats={};
-  window._lastStats['doe'] = '部分因子 2^'+key+' Resolution '+d.res+'\n主要效應：'+
-    sorted.slice(0,3).map(function(e){return e.name+'='+e.effect.toFixed(3);}).join(', ');
+  window._lastStats['doe'] = '部分因子(Fractional) 2^'+key+' Resolution '+d.res+'\n主要效應：'+
+    sorted.slice(0,3).map(function(e){return e.name+'='+e.effect.toFixed(3);}).join(', ')+
+    '\nAlias警告：'+d.warn;
+  // 顯示 DOE Claude panel
+  var doePanel=document.getElementById('claude-container-doe');
+  if(doePanel){doePanel.innerHTML=claudePanelHTML('doe');}
+  setTimeout(function(){claudeAutoAnalyze('doe',window._lastStats['doe']);},300);
 
   setTimeout(drawFracPareto, 100);
 };
@@ -5883,22 +5913,19 @@ window.doeUpdateFactors = function() {
 
   // 工具顯示名稱
   var TOOL_NAMES = {
-    pareto:     '📊 柏拉圖',
     fishbone:   '🐟 魚骨圖',
     spc:        '📈 SPC 管制圖',
     msa:        '📐 MSA 量測分析',
     histogram:  '📉 直方圖',
     hypothesis: '🔬 假設檢定',
     scatter:    '🔗 相關性分析',
-    doe:        '🧪 DOE 實驗設計',
     boxplot:    '📦 箱型圖',
-    sipoc:      '🗺️ SIPOC',
   };
 
   var capaHistory = [];
 
   // 初始歡迎訊息
-  var WELCOME = '您好！請描述您遇到的品質問題或失效情形，我幫您找出分析方向。';
+  var WELCOME = '您好！請描述您遇到的品質問題或失效情形，我幫您找出分析方向。\n\n💡 小技巧：描述的問題可直接帶入魚骨圖，協助找出根本原因！';
 
   // ── 建立 HTML 結構 ──
   function buildUI() {
@@ -5958,6 +5985,29 @@ window.doeUpdateFactors = function() {
           capaToggle();
           if(typeof goTool === 'function') goTool(toolId);
         };
+        // 魚骨圖特殊：帶入問題描述
+        if(toolId === 'fishbone') {
+          btn.onclick = function() {
+            // 把用戶最後描述的問題帶入魚骨圖問題欄
+            var lastUser = '';
+            for(var ci=capaHistory.length-1;ci>=0;ci--){
+              if(capaHistory[ci].role==='user'){ lastUser=capaHistory[ci].content; break; }
+            }
+            capaToggle();
+            if(typeof goTool === 'function') goTool('fishbone');
+            setTimeout(function(){
+              var fbProbEl = document.getElementById('fb-problem');
+              if(fbProbEl && lastUser && lastUser.length <= 40) fbProbEl.value = lastUser;
+              else if(fbProbEl && lastUser) fbProbEl.value = lastUser.slice(0,40);
+              // 顯示帶入提示
+              var hint = document.createElement('div');
+              hint.style.cssText='background:#F0FDF4;border:1px solid #86EFAC;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#166534;margin-bottom:.5rem';
+              hint.innerHTML='✅ 已從主頁問題帶入魚骨圖問題欄，請補充各類原因後點擊「產生魚骨圖」';
+              var fbCard=document.querySelector('#page-fishbone .card');
+              if(fbCard){var existing=fbCard.querySelector('.fb-import-hint');if(existing)existing.remove();hint.className='fb-import-hint';fbCard.insertBefore(hint,fbCard.querySelector('.btn-row'));}
+            }, 300);
+          };
+        }
         toolsDiv.appendChild(btn);
       });
       div.appendChild(toolsDiv);
@@ -6049,6 +6099,9 @@ window.doeUpdateFactors = function() {
     appendAIMsg(WELCOME);
   };
 
+  // ── 自動 reset：重新開啟視窗時，若已有對話則保留但提示 ──
+  // （不強制清空，讓用戶自己按重新開始）
+
   // ── Enter 送出 ──
   window.capaKeydown = function(e) {
     if(e.key === 'Enter' && !e.shiftKey) {
@@ -6087,35 +6140,72 @@ window.doeUpdateFactors = function() {
 
 // 重新輸入數據時，自動清除舊的分析結果與 AI 判讀
 (function(){
+  // 輸入 → 輸出 div 的對應
   var INPUT_TO_OUTPUT = {
-    'spc-data': ['spc-out'],
-    'grr-data': ['grr-out'],
-    'hy-d1': ['hy-out'], 'hy-d2': ['hy-out'],
-    'doe-yname': ['doe-out']
+    'spc-raw':    ['spc-out'],
+    'grr-data':   ['grr-out'],
+    'hy-d1':      ['hy-out'], 'hy-d2': ['hy-out'],
+    'pa-data':    ['pa-out'],
+    'bp-data':    ['bp-out'],
+    'hi-data':    ['hi-out'],
+    'sc-xdata':   ['sc-out'], 'sc-ydata': ['sc-out'],
+    'fb-man':     ['fb-out'], 'fb-machine':['fb-out'], 'fb-material':['fb-out'],
+    'fb-method':  ['fb-out'], 'fb-measure':['fb-out'], 'fb-env':['fb-out'],
+    'fb-problem': ['fb-out'],
   };
-  function clearOutputs(outIds, toolId){
-    outIds.forEach(function(oid){
+
+  // 每個工具對應的 toolId（用於 claude panel）
+  var INPUT_TO_TOOL = {
+    'spc-raw':'spc', 'grr-data':'msa',
+    'hy-d1':'hypothesis','hy-d2':'hypothesis',
+    'pa-data':'pareto', 'bp-data':'boxplot', 'hi-data':'histogram',
+    'sc-xdata':'scatter','sc-ydata':'scatter',
+    'fb-man':'fishbone','fb-machine':'fishbone','fb-material':'fishbone',
+    'fb-method':'fishbone','fb-measure':'fishbone','fb-env':'fishbone','fb-problem':'fishbone',
+  };
+
+  function resetToolPanel(toolId){
+    // 隱藏輸出 div
+    var outMap = {
+      'spc':['spc-out'],'msa':['grr-out'],'hypothesis':['hy-out'],
+      'pareto':['pa-out'],'boxplot':['bp-out'],'histogram':['hi-out'],
+      'scatter':['sc-out'],'fishbone':['fb-out'],
+    };
+    (outMap[toolId]||[]).forEach(function(oid){
       var el=document.getElementById(oid);
       if(el) el.style.display='none';
     });
-    // 清 AI 判讀面板
-    if(toolId){
-      var panel=document.getElementById('claude-panel-'+toolId);
-      if(panel) panel.style.display='none';
-      if(window._lastStats) delete window._lastStats[toolId];
-    }
+    // 重置 Claude panel
+    var container=document.getElementById('claude-container-'+toolId);
+    if(container) container.innerHTML='';
+    var panel=document.getElementById('claude-panel-'+toolId);
+    if(panel) panel.style.display='none';
+    if(window._lastStats) delete window._lastStats[toolId];
+    if(window.claudeHistory) delete window.claudeHistory[toolId];
   }
+
   document.addEventListener('DOMContentLoaded', function(){
+    // 輸入變化 → reset
     Object.keys(INPUT_TO_OUTPUT).forEach(function(inId){
       var el=document.getElementById(inId);
       if(!el) return;
-      var toolId = inId.split('-')[0];
-      if(toolId==='hy') toolId='hypothesis';
-      if(toolId==='grr') toolId='msa';
+      var toolId=INPUT_TO_TOOL[inId];
       el.addEventListener('input', function(){
-        clearOutputs(INPUT_TO_OUTPUT[inId], toolId);
+        (INPUT_TO_OUTPUT[inId]||[]).forEach(function(oid){
+          var o=document.getElementById(oid); if(o) o.style.display='none';
+        });
+        if(toolId) resetToolPanel(toolId);
       });
     });
+
+    // 進入工具頁 → reset AI 面板（避免殘留舊資料）
+    var origGoTool = window.goTool;
+    if(typeof origGoTool==='function'){
+      window.goTool = function(id){
+        origGoTool(id);
+        resetToolPanel(id);
+      };
+    }
   });
 })();
 
