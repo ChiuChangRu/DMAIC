@@ -842,27 +842,6 @@ tr:hover td{background:#F9FAFB}
 
   
 
-  <!-- FMEA 工具（開發中）-->
-  <div class="tools-section">
-    <div class="tools-section-title" style="color:#6B7280">⚠️ 開發中 — 即將推出</div>
-    <div class="tools-grid">
-      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#6B7280;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">⚠️</div>
-        <div class="tc-name" style="color:#6B7280">FMEA 失效模式分析</div>
-        <div class="tc-desc">ISO 14971・風險矩陣・RPN・FDA MAUDE 整合</div>
-        <span class="tc-tag tag-soon">開發中</span>
-      </div>
-      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#6B7280;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📋</div>
-        <div class="tc-name" style="color:#6B7280">RACT 風險評估表</div>
-        <div class="tc-desc">ISO 14971・5×5 風險矩陣・LOF・ACC/NACC 判定</div>
-        <span class="tc-tag tag-soon">開發中</span>
-      </div>
-    </div>
-  </div>
-
 </div>
 
 <!-- Footer -->
@@ -2385,25 +2364,41 @@ function fishboneDraw(){
     var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
     html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">🧪 選擇實驗因子 → 帶入實驗設計</div>';
 
-    // 設計方法選擇
+    // 設計方法選擇（依因子數動態推薦）
+    var factorCount = fbCauses.length;
+    var suggestPB = factorCount > 4;
     html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.75rem 1rem;margin-bottom:.85rem">';
-    html += '<div style="font-size:12px;font-weight:600;color:#1E40AF;margin-bottom:.5rem">選擇實驗設計方法</div>';
+    html += '<div style="font-size:12px;font-weight:600;color:#1E40AF;margin-bottom:.5rem">選擇實驗設計方法';
+    html += '<span style="font-size:11px;font-weight:400;color:#6B7280;margin-left:8px">'+
+      (suggestPB ? '（因子數 > 4，建議先用 PB 篩選）' : '（因子數 ≤ 4，可直接用全因子 DOE）')+
+      '</span></div>';
     html += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
-    html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #BFDBFE;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-pb-label">';
-    html += '<input type="radio" name="fb-doe-method" value="pb" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
-    html += '<div><div style="font-size:13px;font-weight:600;color:#1D4ED8">🔎 PB 因子篩選</div>';
-    html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子快速篩選，找出主要影響因子，再帶入 DOE 全因子深入分析</div></div>';
-    html += '</label>';
-    html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #BFDBFE;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-doe-label">';
-    html += '<input type="radio" name="fb-doe-method" value="doe" onchange="fbUpdateMethodUI()" style="margin-top:2px">';
-    html += '<div><div style="font-size:13px;font-weight:600;color:#D97706">🧪 DOE 全因子／部分因子</div>';
-    html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">已知關鍵因子（≤4個），直接進行全因子實驗，分析主效應與交互作用</div></div>';
-    html += '</label>';
-    html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
-    html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
-    html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi</div>';
-    html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">建議用於製程改善優化，L9/L18 直交表・S/N 比分析（開發中）</div></div>';
-    html += '</label>';
+
+    if(suggestPB) {
+      // 因子 > 4：顯示 PB（預設）+ 田口
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #2563EB;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-pb-label">';
+      html += '<input type="radio" name="fb-doe-method" value="pb" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#1D4ED8">🔎 PB 因子篩選 <span style="font-size:10px;background:#DBEAFE;color:#1D4ED8;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子快速篩選主要影響因子，找出關鍵 2-4 個後再進全因子 DOE</div></div>';
+      html += '</label>';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
+      html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
+      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
+      html += '</label>';
+    } else {
+      // 因子 ≤ 4：顯示 DOE 全因子（預設）+ 田口
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #D97706;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-doe-label">';
+      html += '<input type="radio" name="fb-doe-method" value="doe" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#D97706">🧪 DOE 全因子／部分因子 <span style="font-size:10px;background:#FEF3C7;color:#D97706;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">≤ 4 個關鍵因子，完整估計主效應與所有交互作用，結果最可靠</div></div>';
+      html += '</label>';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
+      html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
+      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
+      html += '</label>';
+    }
     html += '</div></div>';
 
     // 因子上限提示（依方法動態更新）
@@ -5701,9 +5696,8 @@ window.fbUpdateMethodUI = function() {
   var maxCount = val === 'doe' ? 4 : 11;
   var maxEl = document.getElementById('fb-max-count');
   if(maxEl) maxEl.textContent = maxCount;
-  // 更新計數限制
   fbUpdateCount();
-  // 高亮選中的方法
+  // 高亮選中的方法邊框
   ['pb','doe'].forEach(function(m){
     var lbl = document.getElementById('fb-method-'+m+'-label');
     if(lbl) lbl.style.borderColor = (val===m) ? (m==='pb'?'#2563EB':'#D97706') : '#BFDBFE';
