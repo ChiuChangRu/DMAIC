@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.30 · AI 輔助統計分析平台</title>
+<title>MedQA v3.40 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -563,7 +563,7 @@ tr:hover td{background:#F9FAFB}
 .topbar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .tb-btn{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.22);border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit}
 .tb-btn:hover{background:rgba(255,255,255,.16)}
-.tb-status{font-size:11px;color:rgba(255,255,255,.42);white-space:nowrap}
+.tb-status{font-size:14px;color:rgba(255,255,255,.7);white-space:nowrap;font-weight:500}
 .record-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px}
 .record-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .record-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -633,7 +633,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.30 · 2026-05-31 22:51</span>
+    <span class="tb-status" id="dmaic-save-status">v3.40 · 2026-06-01</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -5022,23 +5022,32 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     wrap.innerHTML = '';
     var grid = document.createElement('div');
     grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px';
+    var hasAnyEmpty = FB_CATS.some(function(cat){ return !(window._fbData[cat.id]||[]).length; });
     FB_CATS.forEach(function(cat) {
+      var factors = window._fbData[cat.id] || [];
+      // 空類別：若有任何類別被排除，顯示已排除標記；初始預設時全部顯示
+      if(factors.length === 0 && hasAnyEmpty) {
+        // 顯示「已排除」小標示
+        var excluded = document.createElement('div');
+        excluded.style.cssText = 'border:1px dashed #E5E7EB;border-radius:7px;padding:.5rem .75rem;display:flex;align-items:center;gap:8px;opacity:.5';
+        excluded.innerHTML = '<span style="font-size:12px;font-weight:600;color:#9CA3AF">'+cat.label+'</span>'+
+          '<span style="font-size:11px;color:#9CA3AF">— 已從對話中排除</span>'+
+          '<button onclick="fbRestoreCat(\''+cat.id+'\')" style="margin-left:auto;font-size:11px;color:#6B7280;background:none;border:1px solid #D1D5DB;border-radius:5px;padding:2px 8px;cursor:pointer;font-family:inherit">恢復</button>';
+        grid.appendChild(excluded);
+        return;
+      }
       var section = document.createElement('div');
       section.className = 'fb-cat-section';
-      // 標題列
       var hdr = document.createElement('div');
       hdr.className = 'fb-cat-header';
       hdr.style.cssText = 'background:'+cat.bg+';border:1px solid '+cat.color+'33';
       hdr.innerHTML = '<span style="color:'+cat.color+'">'+cat.label+'</span>';
       section.appendChild(hdr);
-      // 因子列表
       var body = document.createElement('div');
       body.className = 'fb-cat-body';
-      var factors = window._fbData[cat.id] || [];
       factors.forEach(function(f, idx) {
         body.appendChild(makeCard(cat.id, idx, f));
       });
-      // 新增按鈕
       var addBtn = document.createElement('button');
       addBtn.className = 'fb-add-btn';
       addBtn.textContent = '＋ 新增原因';
@@ -5101,6 +5110,16 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     renderAll();
   }
 
+  // 恢復被排除的類別
+  window.fbRestoreCat = function(catId) {
+    window._fbData[catId] = [{name:'', risk:'medium'}];
+    renderAll();
+    setTimeout(function(){
+      var inputs = document.querySelectorAll('[data-cat="'+catId+'"] .fb-factor-name');
+      if(inputs.length) inputs[0].focus();
+    }, 50);
+  };
+
   // 同步到隱藏 textarea 並呼叫 fishboneDraw
   window.fbSyncAndDraw = function() {
     var cats = ['man','machine','material','method','measure','env'];
@@ -5119,10 +5138,12 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     var cats = ['man','machine','material','method','measure','env'];
     cats.forEach(function(cid){
       var arr = result[cid];
-      if(!arr || !arr.length) return;
-      // 支援新格式（array）與舊格式（string）
+      if(!arr || !arr.length) {
+        // 空類別：清空該類別資料（不渲染）
+        window._fbData[cid] = [];
+        return;
+      }
       if(typeof arr === 'string') {
-        // 舊格式相容：解析 "原因, 強度" 字串
         window._fbData[cid] = arr.split('\n').filter(Boolean).map(function(line){
           var parts = line.split(',');
           var name = parts[0].trim();
@@ -5227,7 +5248,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate',
-            messages:[{role:'user',content:'問題描述：'+firstUser+'\n\n請根據此問題，為魚骨圖 6M 各類別提供可能的根本原因建議。'}]
+            messages: homeHistory.concat([{role:'user',content:'請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。'}])
           })
         }).then(function(r){return r.json();}).then(function(data){
           if(data.result){
@@ -5545,7 +5566,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.30 · 2026-05-31 22:51enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.40 · 2026-06-01 enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -5639,7 +5660,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.30 · 2026-05-31 22:51enabled');
+  status('v3.40 · 2026-06-01 enabled');
 })();
 
 
@@ -6711,7 +6732,7 @@ window.doeUpdateFactors = function() {
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
                   mode: 'fishbone_generate',
-                  messages: [{ role: 'user', content: '問題描述：' + firstUser + '\n\n請根據此問題，為魚骨圖 6M 各類別提供可能的根本原因建議。' }]
+                  messages: capaHistory.concat([{ role: 'user', content: '請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。' }])
                 })
               })
               .then(function(r){ return r.json(); })
