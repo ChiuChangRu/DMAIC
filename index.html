@@ -659,14 +659,9 @@ tr:hover td{background:#F9FAFB}
   <div style="max-width:720px;margin:0 auto;position:relative;z-index:1">
     <!-- 標題 -->
     <div style="text-align:center;margin-bottom:2rem">
-      <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:30px;padding:5px 16px;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.6);margin-bottom:1rem;text-transform:uppercase">
-        MedQA · AI 輔助統計分析平台
-      </div>
-      <h2 style="font-size:26px;font-weight:700;line-height:1.35;margin-bottom:.4rem;letter-spacing:-.01em">
-        描述您的品質問題<br>
-        <span style="color:#7EC8E3">AI 引導分析路徑</span>
+      <h2 style="font-size:32px;font-weight:700;line-height:1.3;letter-spacing:-.01em">
+        AI 輔助品質分析平台
       </h2>
-      <p style="font-size:13px;color:rgba(255,255,255,.5);margin-top:.3rem">依照 DMAIC 流程，從根本原因找起</p>
     </div>
 
     <!-- 問題輸入框 -->
@@ -728,7 +723,7 @@ tr:hover td{background:#F9FAFB}
 
   <!-- D 工具 -->
   <div id="phase-D" class="tools-section">
-    <div class="tools-section-title" style="color:#3B7DD8;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #3B7DD822;margin-bottom:.75rem">D — Define 定義階段</div>
+    <div class="tools-section-title" style="color:#3B7DD8;font-size:18px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #3B7DD822;margin-bottom:.75rem">D — Define 定義階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('fishbone')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
@@ -736,18 +731,12 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-desc">系統化找出根本原因 6M</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
-      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">⚠️</div><div class="tc-name">FMEA 失效模式分析</div>
-        <div class="tc-desc">失效模式・風險矩陣・RPN</div>
-        <span class="tc-tag tag-soon">開發中</span>
-      </div>
     </div>
   </div>
 
   <!-- M 工具 -->
   <div id="phase-M" class="tools-section">
-    <div class="tools-section-title" style="color:#1A9CB0;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #1A9CB022;margin-bottom:.75rem">M — Measure 量測階段</div>
+    <div class="tools-section-title" style="color:#1A9CB0;font-size:18px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #1A9CB022;margin-bottom:.75rem">M — Measure 量測階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('boxplot')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
@@ -778,7 +767,7 @@ tr:hover td{background:#F9FAFB}
 
   <!-- A 工具 -->
   <div id="phase-A" class="tools-section">
-    <div class="tools-section-title" style="color:#1A9E75;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #1A9E7522;margin-bottom:.75rem">A — Analyze 分析階段</div>
+    <div class="tools-section-title" style="color:#1A9E75;font-size:18px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #1A9E7522;margin-bottom:.75rem">A — Analyze 分析階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('scatter')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
@@ -809,7 +798,7 @@ tr:hover td{background:#F9FAFB}
 
   <!-- I 工具 -->
   <div id="phase-I" class="tools-section">
-    <div class="tools-section-title" style="color:#D4850A;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #D4850A22;margin-bottom:.75rem">I — Improve 改善階段</div>
+    <div class="tools-section-title" style="color:#D4850A;font-size:18px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #D4850A22;margin-bottom:.75rem">I — Improve 改善階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('doe')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
@@ -817,18 +806,12 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-desc">全因子・部分因子・主效應 + 交互作用</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
-      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
-        <div class="tc-name">田口方法 Taguchi</div>
-        <div class="tc-desc">L9・L18 直交表・S/N 比</div>
-        <span class="tc-tag tag-soon">開發中</span>
-      </div>
     </div>
   </div>
 
   <!-- C 工具 -->
   <div id="phase-C" class="tools-section">
-    <div class="tools-section-title" style="color:#7252C8;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #7252C822;margin-bottom:.75rem">C — Control 管制階段</div>
+    <div class="tools-section-title" style="color:#7252C8;font-size:18px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #7252C822;margin-bottom:.75rem">C — Control 管制階段</div>
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#7252C8;border-radius:3px 0 0 3px"></div>
