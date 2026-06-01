@@ -373,8 +373,8 @@ tr:hover td{background:#F9FAFB}
   position: fixed;
   bottom: 84px;
   right: 20px;
-  width: 340px;
-  max-height: 500px;
+  width: 420px;
+  max-height: 620px;
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0,0,0,.18);
@@ -633,11 +633,15 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-desc">系統化找出根本原因 6M</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
+      <div class="tool-card" style="opacity:.55;cursor:not-allowed">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">⚠️</div><div class="tc-name">FMEA 失效模式分析</div>
+        <div class="tc-desc">失效模式・風險矩陣・RPN</div>
+        <span class="tc-tag tag-soon">開發中</span>
+      </div>
     </div>
   </div>
 
-  <!-- M 工具 -->
-  
   <!-- M 工具 -->
   <div id="phase-M" class="tools-section">
     <div class="tools-section-title" style="color:#1A9CB0;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #1A9CB022;margin-bottom:.75rem">M — Measure 量測階段</div>
@@ -679,16 +683,16 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-desc">t-test・F-test・卡方檢定</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
-      <div class="tool-card" onclick="goTool('fishbone')">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div class="tc-name">魚骨圖 / 5 Why</div>
-        <div class="tc-desc">根本原因分析・多層追溯</div>
-        <span class="tc-tag tag-new">可用</span>
-      </div>
       <div class="tool-card" onclick="goTool('msa')">
-        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
         <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('pb')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">🔎</div><div class="tc-name">PB 因子篩選</div>
+        <div class="tc-desc">Plackett-Burman・5-11因子快速篩選</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
     </div>
@@ -701,7 +705,7 @@ tr:hover td{background:#F9FAFB}
       <div class="tool-card" onclick="goTool('doe')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
         <div style="font-size:28px;line-height:1;margin-bottom:6px">🧪</div><div class="tc-name">DOE 實驗設計</div>
-        <div class="tc-desc">全因子・部分因子・Yates 分析</div>
+        <div class="tc-desc">全因子・部分因子・主效應 + 交互作用</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" style="opacity:.55;cursor:not-allowed">
@@ -723,8 +727,6 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-desc">持續監控・Nelson 8 條規則</div>
         <span class="tc-tag tag-done">完成</span>
       </div>
-      
-
     </div>
   </div>
 
@@ -1118,7 +1120,7 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--I)"></div>
-    <div><div class="tp-title">DOE 實驗設計</div><div class="tp-subtitle">全因子實驗設計・主效應 + 交互作用・Yates 演算法分析</div></div>
+    <div><div class="tp-title">DOE 實驗設計</div><div class="tp-subtitle">全因子 2ᵏ・部分因子 2ᵏ⁻ᵖ・主效應 + 交互作用分析</div></div>
   </div>
   <div class="card">
     <div class="card-title"><span style="background:var(--I);width:3px;height:13px;border-radius:2px;display:inline-block"></span>因子設定</div>
@@ -1169,7 +1171,6 @@ tr:hover td{background:#F9FAFB}
           <select id="doe-design-type" onchange="doeUpdateDesignType()">
             <option value="full">全因子 2ᵏ（≤4因子）</option>
             <option value="frac">部分因子 2ᵏ⁻ᵖ（4-7因子）</option>
-            <option value="pb">Plackett-Burman（5-11因子篩選）</option>
           </select>
         </div>
         <div class="field"><label>因子數量</label>
@@ -1228,6 +1229,60 @@ tr:hover td{background:#F9FAFB}
   </div>
 </div>
 <div id="claude-container-doe" style="padding:0 0 1rem 0"></div>
+</div>
+
+<!-- ══════════════ 子頁面：PB 因子篩選 ══════════════ -->
+<div id="page-pb" class="page">
+<div class="tool-page">
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--A)"></div>
+    <div><div class="tp-title">PB 因子篩選</div><div class="tp-subtitle">Plackett-Burman Design・5–11 因子快速篩選・主效應分析</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>因子設定</div>
+    <div class="alert warn" style="margin-bottom:.75rem;font-size:12px">
+      <strong>⚠️ Plackett-Burman 篩選設計</strong><br>
+      僅能估計<strong>主效應</strong>，無法估計交互作用（交互作用與主效應混淆）。<br>
+      用途：從多個潛在因子中快速篩出顯著因子，再帶入全因子 DOE 深入分析。
+    </div>
+    <div class="g2">
+      <div class="field"><label>因子數量</label>
+        <select id="pb-nf" onchange="pbPageUpdateFactors()">
+          <option value="5">5 個因子（PB8，8次實驗）</option>
+          <option value="6">6 個因子（PB8，8次實驗）</option>
+          <option value="7">7 個因子（PB8，8次實驗）</option>
+          <option value="8">8 個因子（PB12，12次實驗）</option>
+          <option value="9">9 個因子（PB12，12次實驗）</option>
+          <option value="10">10 個因子（PB12，12次實驗）</option>
+          <option value="11">11 個因子（PB12，12次實驗）</option>
+        </select>
+      </div>
+      <div class="field"><label>反應變數名稱</label><input type="text" id="pb-yname" value="良率 (%)"></div>
+    </div>
+    <div id="pb-factors-wrap" style="margin-bottom:11px"></div>
+    <div class="card-title" style="margin-top:.5rem"><span style="background:var(--A);width:3px;height:13px;border-radius:2px;display:inline-block"></span>實驗矩陣與結果輸入</div>
+    <div id="pb-matrix-wrap" style="overflow-x:auto;margin-bottom:10px"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="pb-analyze-btn" onclick="pbPageAnalyze()">▶ 分析主效應</button>
+      <button class="btn btn-sec" onclick="pbPageUpdateFactors()">重新產生矩陣</button>
+    </div>
+  </div>
+  <div id="pb-page-out" style="display:none">
+    <div class="card">
+      <div class="tab-bar">
+        <div class="tab active" onclick="pbPageSw('effects')">效應分析</div>
+        <div class="tab" onclick="pbPageSw('pareto')">效應柏拉圖</div>
+        <div class="tab" onclick="pbPageSw('halfnormal')">Half-Normal Plot</div>
+        <div class="tab" onclick="pbPageSw('maineff')">主效應圖</div>
+      </div>
+      <div id="pb-tab-effects" class="tab-c show"><div id="pb-effects-content"></div></div>
+      <div id="pb-tab-pareto" class="tab-c"><div class="canvas-wrap"><canvas id="pb-page-pareto-canvas" height="260"></canvas></div></div>
+      <div id="pb-tab-halfnormal" class="tab-c"><div id="pb-hn-content"></div></div>
+      <div id="pb-tab-maineff" class="tab-c"><div id="pb-maineff-content"></div></div>
+    </div>
+  </div>
+</div>
+<div id="claude-container-pb" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：SIPOC ══════════════ -->
@@ -1762,8 +1817,8 @@ tr:hover td{background:#F9FAFB}
 // ════════════════════════════════════════════
 // 路由系統
 // ════════════════════════════════════════════
-const PHASE_COLORS={spc:'var(--M)',pareto:'var(--D)',fishbone:'var(--D)',sipoc:'var(--D)',histogram:'var(--M)',boxplot:'var(--M)',scatter:'var(--A)',hypothesis:'var(--A)',doe:'var(--I)'};
-const TOOL_NAMES={msa:'MSA 量測系統分析',spc:'SPC 管制圖',pareto:'柏拉圖',fishbone:'魚骨圖',sipoc:'SIPOC 圖',histogram:'直方圖+常態檢定',boxplot:'箱型圖',scatter:'相關性分析',hypothesis:'假設檢定',doe:'DOE 實驗設計'};
+const PHASE_COLORS={spc:'var(--M)',pareto:'var(--D)',fishbone:'var(--D)',sipoc:'var(--D)',histogram:'var(--M)',boxplot:'var(--M)',scatter:'var(--A)',hypothesis:'var(--A)',doe:'var(--I)',pb:'var(--A)',msa:'var(--A)'};
+const TOOL_NAMES={msa:'MSA 量測系統分析',spc:'SPC 管制圖',pareto:'柏拉圖',fishbone:'魚骨圖',sipoc:'SIPOC 圖',histogram:'直方圖+常態檢定',boxplot:'箱型圖',scatter:'相關性分析',hypothesis:'假設檢定',doe:'DOE 實驗設計',pb:'PB 因子篩選'};
 
 function goHome(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -4813,9 +4868,238 @@ function drawDOEResiduals(){
 }
 
 window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOEResiduals=drawDOEResiduals;window.doeFormatANOVA=doeFormatANOVA;
-window.sipocDraw=sipocDraw;
+// ════════════════════════════════════════════════════════
+// PB 獨立頁面 JS
+// ════════════════════════════════════════════════════════
 
-window.scatterAnalyze=scatterAnalyze;window.scatterLoadEx=scatterLoadEx;
+window.pbPageUpdateFactors = function() {
+  var nf = parseInt(document.getElementById('pb-nf').value) || 5;
+  var fw = '';
+  for(var i = 0; i < nf; i++){
+    fw += '<div class="g3" style="margin-bottom:8px">' +
+      '<div class="field"><label>因子 '+(i+1)+' 名稱</label>' +
+      '<input type="text" id="pbp-f'+(i+1)+'" value="因子'+(i+1)+'"></div>' +
+      '<div class="field"><label>低水準 (−1)</label>' +
+      '<input type="text" id="pbp-l'+(i+1)+'" value="低"></div>' +
+      '<div class="field"><label>高水準 (+1)</label>' +
+      '<input type="text" id="pbp-h'+(i+1)+'" value="高"></div>' +
+      '</div>';
+  }
+  document.getElementById('pb-factors-wrap').innerHTML = fw;
+  pbPageGenMatrix(nf);
+};
+
+window.pbPageGenMatrix = function(nf) {
+  var pb = getPBDesign(nf);
+  if(!pb) return;
+  var factorNames = [];
+  for(var i = 0; i < nf; i++){
+    var el = document.getElementById('pbp-f'+(i+1));
+    factorNames.push(el ? el.value : 'F'+(i+1));
+  }
+  var html = '<div style="overflow-x:auto;margin-top:.5rem">';
+  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.4rem">'+pb.label+' 實驗矩陣（+1=高水準，-1=低水準）</div>';
+  html += '<table style="font-size:11px;border-collapse:collapse;width:100%">';
+  html += '<thead><tr style="background:#1A9E75;color:#fff">';
+  html += '<th style="padding:5px 8px;text-align:center">Run</th>';
+  factorNames.forEach(function(n){ html += '<th style="padding:5px 8px;text-align:center">'+n+'</th>'; });
+  html += '<th style="padding:5px 8px;text-align:center;background:#148060">Y（填入）</th>';
+  html += '</tr></thead><tbody>';
+  pb.matrix.forEach(function(row, ri){
+    html += '<tr style="background:'+(ri%2===0?'#F0FDF9':'#fff')+'">';
+    html += '<td style="padding:4px 8px;text-align:center;color:#6B7280">'+(ri+1)+'</td>';
+    row.forEach(function(v){
+      html += '<td style="padding:4px 8px;text-align:center;color:'+(v>0?'#1A9E75':'#DC2626')+';font-weight:600">'+(v>0?'+1':'-1')+'</td>';
+    });
+    html += '<td style="padding:2px 4px"><input type="number" id="pbp-y-'+ri+'" step="any" style="width:80px;border:1px solid #DDE2EC;border-radius:4px;padding:3px 6px;font-size:12px"></td>';
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  document.getElementById('pb-matrix-wrap').innerHTML = html;
+};
+
+window.pbPageSw = function(name) {
+  var tabs = ['effects','pareto','halfnormal','maineff'];
+  document.querySelectorAll('#page-pb .tab').forEach(function(t,i){ t.classList.toggle('active', tabs[i]===name); });
+  tabs.forEach(function(t){ var el=document.getElementById('pb-tab-'+t); if(el) el.classList.remove('show'); });
+  var target = document.getElementById('pb-tab-'+name);
+  if(target) target.classList.add('show');
+  if(name==='halfnormal'){
+    var R = window._pbPageResult;
+    var effObj = {};
+    if(R&&R.effects) R.effects.forEach(function(e){ effObj[e.name]=e.effect; });
+    setTimeout(function(){ drawHalfNormalPlotPB(effObj,'pb-hn-content'); }, 50);
+  }
+  if(name==='maineff') setTimeout(function(){ pbPageDrawMainEffects(); }, 50);
+  if(name==='pareto') setTimeout(function(){ pbPageDrawPareto(); }, 50);
+};
+
+function drawHalfNormalPlotPB(effects, containerId) {
+  // 複用原有 drawHalfNormalPlot（已在全域）
+  if(typeof drawHalfNormalPlot === 'function') drawHalfNormalPlot(effects, containerId);
+}
+
+function pbPageDrawPareto() {
+  var canvas = document.getElementById('pb-page-pareto-canvas');
+  if(!canvas) return;
+  canvas.width = canvas.parentElement.offsetWidth || 600;
+  var R = window._pbPageResult; if(!R) return;
+  var sorted = R.sorted;
+  var ssError = R.ssError, n = R.n;
+  var absEffects = sorted.map(function(e){ return Math.abs(e.effect); });
+  var maxEff = Math.max.apply(null, absEffects) * 1.15;
+  new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: sorted.map(function(e){ return e.name; }),
+      datasets:[{ label:'|效應值|', data: absEffects,
+        backgroundColor: sorted.map(function(e){
+          return Math.abs(e.effect) > 2*Math.sqrt(ssError>0?ssError/n:0.01) ? 'rgba(26,158,117,.8)' : 'rgba(107,114,128,.5)';
+        }), borderRadius: 3 }]
+    },
+    options:{ responsive:false, animation:false,
+      plugins:{ title:{display:true,text:'主效應柏拉圖（綠色=顯著）',font:{size:12,weight:'600'},padding:{bottom:4}}, legend:{display:false} },
+      scales:{ x:{ticks:{font:{size:11}}}, y:{min:0,max:maxEff,title:{display:true,text:'|效應值|'},ticks:{font:{size:10}}} }
+    }
+  });
+}
+
+function pbPageDrawMainEffects() {
+  var R = window._pbPageResult; if(!R) return;
+  var container = document.getElementById('pb-maineff-content'); if(!container) return;
+  var effects = R.effects, y = R.y, matrix = R.matrix, n = R.n;
+  var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">';
+  effects.forEach(function(eff, fi){
+    var hiIdx=[], loIdx=[];
+    for(var ri=0;ri<n;ri++){ if(matrix[ri][fi]>0) hiIdx.push(ri); else loIdx.push(ri); }
+    var hiMean = hiIdx.reduce(function(s,i){return s+y[i];},0)/hiIdx.length;
+    var loMean = loIdx.reduce(function(s,i){return s+y[i];},0)/loIdx.length;
+    html += '<div class="canvas-wrap"><canvas id="pb-me-'+fi+'" height="150"></canvas></div>';
+    setTimeout(function(f, hm, lm, nm){
+      var c = document.getElementById('pb-me-'+f); if(!c) return;
+      c.width = c.parentElement.offsetWidth || 220;
+      new Chart(c.getContext('2d'), {
+        type:'line',
+        data:{ labels:['低水準','高水準'],
+          datasets:[{ data:[lm,hm], borderColor:'#1A9E75', borderWidth:2.5, pointRadius:6, pointBackgroundColor:'#1A9E75', fill:false }]},
+        options:{ responsive:false, animation:false,
+          plugins:{ title:{display:true,text:nm,font:{size:11,weight:'600'},padding:{bottom:2}}, legend:{display:false} },
+          scales:{ x:{ticks:{font:{size:10}}}, y:{ticks:{font:{size:9}}} }}
+      });
+    }, 60, fi, hiMean, loMean, eff.name);
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+window.pbPageAnalyze = function() {
+  var nf = parseInt(document.getElementById('pb-nf').value) || 5;
+  var pb = getPBDesign(nf);
+  if(!pb) return;
+  var factorNames = [];
+  for(var i = 0; i < nf; i++){
+    var el = document.getElementById('pbp-f'+(i+1));
+    factorNames.push(el ? el.value : 'F'+(i+1));
+  }
+  var y = [];
+  for(var k = 0; k < pb.n_runs; k++){
+    var val = parseFloat(document.getElementById('pbp-y-'+k)?.value);
+    if(isNaN(val)){ alert('第 '+(k+1)+' 組的 Y 值未填'); return; }
+    y.push(val);
+  }
+  var n = pb.n_runs;
+  var grandMean = y.reduce(function(s,v){return s+v;},0)/n;
+  var effects = [];
+  for(var j = 0; j < nf; j++){
+    var eff = 0;
+    for(var k2 = 0; k2 < n; k2++) eff += y[k2] * pb.matrix[k2][j];
+    eff /= (n/2);
+    effects.push({ name: factorNames[j], effect: eff, ss: n*eff*eff/4 });
+  }
+  var sorted = effects.slice().sort(function(a,b){ return Math.abs(b.effect)-Math.abs(a.effect); });
+  var ssTotal = y.reduce(function(s,v){return s+(v-grandMean)*(v-grandMean);},0);
+  var ssModel = effects.reduce(function(s,e){return s+e.ss;},0);
+  var ssError = ssTotal - ssModel;
+  var sigFactors = sorted.filter(function(e){
+    return Math.abs(e.effect) > 2*Math.sqrt(ssError>0?ssError/n:0.01);
+  });
+
+  // 儲存結果
+  window._pbPageResult = { effects: effects, sorted: sorted, y: y, matrix: pb.matrix,
+    factorNames: factorNames, n: n, grandMean: grandMean, ssError: ssError };
+
+  // 渲染效應分析
+  var yname = document.getElementById('pb-yname').value || 'Y';
+  var outHTML = '<div class="mt-session">';
+  outHTML += '<div class="mt-title">'+pb.label+' 主效應分析　<span style="font-size:11px;color:#9CDCFE">反應變數：'+yname+'</span></div>';
+  outHTML += '<div style="color:#888;font-size:10px;margin-bottom:6px">n='+n+' 次實驗 | '+nf+' 個因子 | Grand Mean='+grandMean.toFixed(4)+' | ⚠️ 交互作用無法估計</div>';
+  outHTML += '<table><thead><tr><th style="text-align:left">因子</th><th>效應值</th><th>SS</th><th>%貢獻</th><th>排名</th></tr></thead><tbody>';
+  sorted.forEach(function(e, rank){
+    var pct = ssTotal>0?(e.ss/ssTotal*100).toFixed(1):'0.0';
+    var isSig = Math.abs(e.effect) > 2*Math.sqrt(ssError>0?ssError/n:0.01);
+    outHTML += '<tr><td class="mt-kw">'+e.name+'</td>';
+    outHTML += '<td class="mt-num '+(isSig?'mt-sig':'')+'">'+e.effect.toFixed(4)+'</td>';
+    outHTML += '<td class="mt-num">'+e.ss.toFixed(4)+'</td>';
+    outHTML += '<td class="mt-num">'+pct+'%</td>';
+    outHTML += '<td style="text-align:center">'+(rank+1)+(isSig?' <span style="color:#1A9E75">★</span>':'')+'</td></tr>';
+  });
+  outHTML += '<tr class="mt-total"><td class="mt-kw">Error</td><td></td><td class="mt-num">'+ssError.toFixed(4)+'</td><td></td><td></td></tr>';
+  outHTML += '</tbody></table>';
+  if(sigFactors.length>0 && sigFactors.length<=4){
+    outHTML += '<div style="margin-top:8px;padding:6px 10px;background:#F0FDF9;border-radius:5px;font-size:11px;color:#166534">';
+    outHTML += '★ 顯著因子（'+sigFactors.length+'個）：'+sigFactors.map(function(e){return e.name;}).join('、');
+    outHTML += '<br>建議將以上因子帶入全因子 DOE 進行深入分析。';
+    outHTML += '<button onclick="pbPageToFullDOE('+JSON.stringify(sigFactors.map(function(e){return e.name;}))+')'+
+      '" style="margin-left:8px;background:#1A9E75;color:#fff;border:none;border-radius:4px;'+
+      'padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">→ 帶入 DOE 全因子分析</button>';
+    outHTML += '</div>';
+  }
+  outHTML += '</div>';
+  document.getElementById('pb-effects-content').innerHTML = outHTML;
+  document.getElementById('pb-page-out').style.display = 'block';
+  pbPageSw('effects');
+
+  // Claude AI 判讀
+  var pbPanel = document.getElementById('claude-container-pb');
+  if(pbPanel){ pbPanel.innerHTML = claudePanelHTML('pb'); }
+  if(!window._lastStats) window._lastStats = {};
+  window._lastStats['pb'] = pb.label+' 因子篩選（Plackett-Burman）\n因子數：'+nf+'\n反應變數：'+yname+
+    '\n主要效應排序：'+sorted.slice(0,3).map(function(e){return e.name+'='+e.effect.toFixed(3);}).join(', ')+
+    '\n顯著因子：'+(sigFactors.length?sigFactors.map(function(e){return e.name;}).join('、'):'無明顯顯著因子');
+  setTimeout(function(){ claudeAutoAnalyze('pb', window._lastStats['pb']); }, 300);
+};
+
+window.pbPageToFullDOE = function(factorNames) {
+  if(typeof goTool === 'function') goTool('doe');
+  setTimeout(function(){
+    var dtype = document.getElementById('doe-design-type');
+    if(dtype){ dtype.value = 'full'; if(typeof doeUpdateDesignType==='function') doeUpdateDesignType(); }
+    var nfSelect = document.getElementById('doe-nf');
+    if(nfSelect){ nfSelect.value = Math.min(factorNames.length, 4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
+    setTimeout(function(){
+      factorNames.forEach(function(name, i){
+        var el = document.getElementById('doe-f'+(i+1));
+        if(el) el.value = name;
+      });
+      var msg = document.createElement('div');
+      msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+      msg.innerHTML = '✅ PB 篩選完成！已帶入 <strong>'+factorNames.length+'</strong> 個顯著因子：'+
+        factorNames.join('、')+'<br><span style="font-size:11px;color:#4B7A5E">請填入高低水準值和實驗結果，進行全因子 DOE 深入分析。</span>';
+      var doeCard = document.querySelector('#page-doe .card');
+      if(doeCard){
+        var existing = doeCard.querySelector('.pb-import-msg');
+        if(existing) existing.remove();
+        msg.className = 'pb-import-msg';
+        doeCard.insertBefore(msg, doeCard.firstChild);
+      }
+    }, 350);
+  }, 300);
+};
+
+// DOM ready 後初始化 PB 頁面
+document.addEventListener('DOMContentLoaded', function(){
+  if(document.getElementById('pb-nf')) pbPageUpdateFactors();
+});
 window.hyUpdateUI=hyUpdateUI;window.hyAnalyze=hyAnalyze;window.hyLoadEx=hyLoadEx;
 window.boxplotAnalyze=boxplotAnalyze;
 </script>
@@ -5896,6 +6180,7 @@ window.doeUpdateFactors = function() {
     hypothesis: '🔬 假設檢定',
     scatter:    '🔗 相關性分析',
     boxplot:    '📦 箱型圖',
+    pb:         '🔎 PB 因子篩選',
   };
 
   var capaHistory = [];
