@@ -1145,7 +1145,6 @@ tr:hover td{background:#F9FAFB}
 
     <div class="btn-row"><button class="btn btn-primary" onclick="fbSyncAndDraw()">▶ 產生魚骨圖</button></div>
   </div>
-  <div id="fb-factor-selector" style="display:none"></div>
 <div id="fb-out" style="display:none">
     <div class="card">
       <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
@@ -1154,6 +1153,7 @@ tr:hover td{background:#F9FAFB}
       </div>
     </div>
   </div>
+  <div id="fb-factor-selector" style="display:none"></div>
 </div>
 <div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
 </div>
@@ -2366,44 +2366,74 @@ function fishboneDraw(){
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
 
-  // 收集所有魚骨圖原因
+  // 從卡片資料收集所有因子（含風險等級）
   var fbCauses = [];
-  var fbCatIds = ['fb-man','fb-machine','fb-material','fb-method','fb-measure','fb-env'];
-  var fbCatNames = {'fb-man':'人員','fb-machine':'機器','fb-material':'材料',
-                    'fb-method':'方法','fb-measure':'量測','fb-env':'環境'};
-  fbCatIds.forEach(function(cid){
-    var el = document.getElementById(cid);
-    if(!el||!el.value.trim()) return;
-    el.value.trim().split('\n').forEach(function(line){
-      var name = line.split(',')[0].trim();
-      if(name) fbCauses.push({name:name, cat:fbCatNames[cid]||''});
+  var FB_CAT_NAMES = {man:'人員',machine:'機器',material:'材料',method:'方法',measure:'量測',env:'環境'};
+  var FB_CAT_IDS = ['man','machine','material','method','measure','env'];
+  FB_CAT_IDS.forEach(function(cid){
+    var factors = window._fbData && window._fbData[cid];
+    if(!factors||!factors.length) return;
+    factors.forEach(function(f){
+      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', risk:f.risk||'medium'});
     });
   });
   window._fbCauses = fbCauses;
 
-  // 渲染因子選擇面板
+  // 渲染因子選擇面板（魚骨圖下方）
   var selectorDiv = document.getElementById('fb-factor-selector');
   if(selectorDiv && fbCauses.length > 0){
-    var html = '<div style="margin-top:1rem;background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:10px;overflow:hidden">';
-    html += '<div style="background:#1B3A5C;color:#fff;padding:.65rem 1rem;font-size:13px;font-weight:600">🧪 選擇實驗因子 → 帶入 DOE 設計</div>';
-    html += '<div style="padding:.75rem 1rem">';
-    html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 4 個因子（DOE 全因子設計限制），選完後按帶入按鈕</div>';
-    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.75rem">';
+    var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
+    html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">🧪 選擇實驗因子 → 帶入實驗設計</div>';
+
+    // 設計方法選擇
+    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.75rem 1rem;margin-bottom:.85rem">';
+    html += '<div style="font-size:12px;font-weight:600;color:#1E40AF;margin-bottom:.5rem">選擇實驗設計方法</div>';
+    html += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
+    html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #BFDBFE;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-pb-label">';
+    html += '<input type="radio" name="fb-doe-method" value="pb" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
+    html += '<div><div style="font-size:13px;font-weight:600;color:#1D4ED8">🔎 PB 因子篩選</div>';
+    html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子快速篩選，找出主要影響因子，再帶入 DOE 全因子深入分析</div></div>';
+    html += '</label>';
+    html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #BFDBFE;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-doe-label">';
+    html += '<input type="radio" name="fb-doe-method" value="doe" onchange="fbUpdateMethodUI()" style="margin-top:2px">';
+    html += '<div><div style="font-size:13px;font-weight:600;color:#D97706">🧪 DOE 全因子／部分因子</div>';
+    html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">已知關鍵因子（≤4個），直接進行全因子實驗，分析主效應與交互作用</div></div>';
+    html += '</label>';
+    html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
+    html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
+    html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi</div>';
+    html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">建議用於製程改善優化，L9/L18 直交表・S/N 比分析（開發中）</div></div>';
+    html += '</label>';
+    html += '</div></div>';
+
+    // 因子上限提示（依方法動態更新）
+    html += '<div id="fb-factor-limit-hint" style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 <strong id="fb-max-count">11</strong> 個因子，選完後按帶入按鈕</div>';
+
+    // 因子列表（高風險紅字粗體）
+    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem">';
     fbCauses.forEach(function(f, i){
-      html += '<label style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #DDE2EC;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">';
+      var isHigh = f.risk === 'high';
+      var nameStyle = isHigh ? 'color:#DC2626;font-weight:700' : 'color:#374151';
+      var borderStyle = isHigh ? 'border:1.5px solid #FECACA;background:#FEF2F2' : 'border:1px solid #DDE2EC;background:#fff';
+      html += '<label style="display:inline-flex;align-items:center;gap:5px;'+borderStyle+';border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">';
       html += '<input type="checkbox" value="'+i+'" onchange="fbUpdateCount()" style="cursor:pointer">';
-      html += '<span style="color:#374151">'+f.name+'</span>';
-      html += '<span style="color:#9CA3AF;font-size:10px">'+f.cat+'</span>';
+      html += '<span style="'+nameStyle+'">'+f.name+'</span>';
+      html += '<span style="font-size:10px;color:#9CA3AF">'+f.cat+'</span>';
+      if(isHigh) html += '<span style="font-size:10px;color:#DC2626">●</span>';
       html += '</label>';
     });
     html += '</div>';
-    html += '<div style="display:flex;align-items:center;gap:10px">';
-    html += '<span id="fb-count" style="font-size:12px;color:#6B7280">已選 0 / 4 個</span>';
-    html += '<button onclick="fbToDOE()" style="background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:7px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">→ 帶入 DOE 實驗設計</button>';
+
+    html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+    html += '<span id="fb-count" style="font-size:12px;color:#6B7280">已選 0 個</span>';
+    html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(27,58,92,.3)">→ 帶入實驗設計</button>';
+    html += '<span style="font-size:11px;color:#DC2626">🔴 = 高風險因子（建議優先選取）</span>';
     html += '</div>';
-    html += '</div></div>';
+    html += '</div>';
     selectorDiv.innerHTML = html;
     selectorDiv.style.display = 'block';
+    // 初始化方法 UI
+    if(typeof fbUpdateMethodUI === 'function') setTimeout(fbUpdateMethodUI, 50);
   }
 }
 
@@ -5665,71 +5695,96 @@ document.addEventListener('click', function(e) {
 
 
 // ════ F01: 魚骨圖 → DOE 因子傳遞 ════
+window.fbUpdateMethodUI = function() {
+  var method = document.querySelector('input[name="fb-doe-method"]:checked');
+  var val = method ? method.value : 'pb';
+  var maxCount = val === 'doe' ? 4 : 11;
+  var maxEl = document.getElementById('fb-max-count');
+  if(maxEl) maxEl.textContent = maxCount;
+  // 更新計數限制
+  fbUpdateCount();
+  // 高亮選中的方法
+  ['pb','doe'].forEach(function(m){
+    var lbl = document.getElementById('fb-method-'+m+'-label');
+    if(lbl) lbl.style.borderColor = (val===m) ? (m==='pb'?'#2563EB':'#D97706') : '#BFDBFE';
+  });
+};
+
 window.fbUpdateCount = function() {
+  var method = document.querySelector('input[name="fb-doe-method"]:checked');
+  var maxCount = (method && method.value === 'doe') ? 4 : 11;
   var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
   var count = checked.length;
   var countEl = document.getElementById('fb-count');
-  if(countEl) countEl.textContent = '已選 '+count+' / 4 個';
-  // 超過 4 個時禁用未選的
+  if(countEl){ countEl.textContent = '已選 '+count+' / '+maxCount+' 個'; countEl.style.color = count > 0 ? '#059669' : '#6B7280'; }
   var all = document.querySelectorAll('#fb-factor-list input[type=checkbox]');
-  all.forEach(function(cb){
-    if(!cb.checked) cb.disabled = count >= 4;
-  });
-  // 顏色提示
-  if(countEl) countEl.style.color = count > 0 ? '#059669' : '#6B7280';
+  all.forEach(function(cb){ if(!cb.checked) cb.disabled = count >= maxCount; });
 };
 
-window.fbToDOE = function() {
+window.fbToExperiment = function() {
   var causes = window._fbCauses || [];
   var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
   if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
-  if(checked.length > 4){ alert('最多選 4 個因子'); return; }
-
+  var method = document.querySelector('input[name="fb-doe-method"]:checked');
+  var val = method ? method.value : 'pb';
   var selected = [];
   checked.forEach(function(cb){ selected.push(causes[parseInt(cb.value)]); });
 
-  // 跳到 DOE
-  goTool('doe');
-
-  setTimeout(function(){
-    // 根據因子數量自動決定設計類型
-    var dtype = document.getElementById('doe-design-type');
-    if(selected.length > 4) {
-      if(dtype) { dtype.value = 'pb'; doeUpdateDesignType(); }
-    } else {
-      if(dtype) { dtype.value = 'full'; doeUpdateDesignType(); }
-    }
-
-    var nfEl = document.getElementById('doe-nf');
-    if(nfEl){
-      nfEl.value = selected.length;
-      if(typeof doeUpdateFactors === 'function') doeUpdateFactors();
-    }
+  if(val === 'pb') {
+    // 帶入 PB 頁面
+    goTool('pb');
     setTimeout(function(){
-      // 正確 ID：doe-f1, doe-f2...（因子名稱）
-      selected.forEach(function(f, i){
-        var nameEl = document.getElementById('doe-f'+(i+1));
-        if(nameEl) nameEl.value = f.name;
-      });
-      // 重新渲染矩陣
-      if(typeof doeGenMatrix === 'function') doeGenMatrix();
-
-      // 成功提示
-      var msg = document.createElement('div');
-      msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
-      msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：' +
-        selected.map(function(f){return f.name;}).join('、') +
-        '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
-      var doeCard = document.querySelector('#page-doe .card');
-      if(doeCard){
-        var existing = doeCard.querySelector('.fb-import-msg');
-        if(existing) existing.remove();
-        msg.className = 'fb-import-msg';
-        doeCard.insertBefore(msg, doeCard.firstChild);
+      var nfEl = document.getElementById('pb-nf');
+      if(nfEl){
+        // 找最接近的合法因子數（5-11）
+        var nf = Math.max(5, Math.min(11, selected.length));
+        nfEl.value = nf;
+        if(typeof pbPageUpdateFactors==='function') pbPageUpdateFactors();
       }
-    }, 400);
-  }, 300);
+      setTimeout(function(){
+        selected.forEach(function(f, i){
+          var el = document.getElementById('pbp-f'+(i+1));
+          if(el) el.value = f.name;
+        });
+        if(typeof pbPageGenMatrix==='function') pbPageGenMatrix(parseInt(document.getElementById('pb-nf').value)||5);
+        var msg = document.createElement('div');
+        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
+          '<br><span style="font-size:11px;color:#4B7A5E">請填入高低水準值，再輸入實驗結果執行篩選分析。</span>';
+        msg.className = 'fb-import-msg';
+        var pbCard = document.querySelector('#page-pb .card');
+        if(pbCard){ var ex=pbCard.querySelector('.fb-import-msg');if(ex)ex.remove(); pbCard.insertBefore(msg,pbCard.firstChild); }
+      }, 350);
+    }, 300);
+
+  } else {
+    // 帶入 DOE 全因子
+    goTool('doe');
+    setTimeout(function(){
+      var dtype = document.getElementById('doe-design-type');
+      if(dtype){ dtype.value = 'full'; if(typeof doeUpdateDesignType==='function') doeUpdateDesignType(); }
+      var nfEl = document.getElementById('doe-nf');
+      if(nfEl){ nfEl.value = Math.min(selected.length, 4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
+      setTimeout(function(){
+        selected.forEach(function(f, i){
+          var el = document.getElementById('doe-f'+(i+1));
+          if(el) el.value = f.name;
+        });
+        if(typeof doeGenMatrix==='function') doeGenMatrix();
+        var msg = document.createElement('div');
+        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
+          '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
+        msg.className = 'fb-import-msg';
+        var doeCard = document.querySelector('#page-doe .card');
+        if(doeCard){ var ex=doeCard.querySelector('.fb-import-msg');if(ex)ex.remove(); doeCard.insertBefore(msg,doeCard.firstChild); }
+      }, 400);
+    }, 300);
+  }
 };
+
+// 保留舊的 fbToDOE 作為相容
+window.fbToDOE = window.fbToExperiment;
 
 
 // ════════════════════════════════════════════════════════
