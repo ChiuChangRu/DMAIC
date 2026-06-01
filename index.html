@@ -279,6 +279,46 @@ tr:hover td{background:#F9FAFB}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
+/* ════ 魚骨圖因子卡片 ════ */
+.fb-cat-section { margin-bottom: 1.1rem; }
+.fb-cat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .45rem .7rem; border-radius: 7px 7px 0 0;
+  font-size: 12px; font-weight: 700; letter-spacing: .04em;
+}
+.fb-cat-body { border: 1px solid #E5E7EB; border-top: none; border-radius: 0 0 7px 7px; padding: .5rem .6rem; display: flex; flex-direction: column; gap: .4rem; }
+.fb-factor-card {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff; border: 1px solid #E5E7EB; border-radius: 7px;
+  padding: .4rem .6rem; transition: border-color .15s;
+}
+.fb-factor-card:hover { border-color: #C7D9F5; }
+.fb-factor-name {
+  flex: 1; font-size: 13px; color: #1a1a2e; border: none; outline: none;
+  background: transparent; font-family: inherit; min-width: 0;
+}
+.fb-risk-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px;
+  cursor: pointer; white-space: nowrap; border: none; font-family: inherit;
+  transition: opacity .15s;
+}
+.fb-risk-badge:hover { opacity: .8; }
+.fb-risk-high   { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+.fb-risk-medium { background: #FFFBEB; color: #92400E; border: 1px solid #FDE68A; }
+.fb-risk-low    { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
+.fb-del-btn {
+  background: none; border: none; cursor: pointer; color: #9CA3AF;
+  font-size: 15px; padding: 2px 4px; border-radius: 4px; line-height: 1;
+  transition: color .15s, background .15s; flex-shrink: 0;
+}
+.fb-del-btn:hover { color: #DC2626; background: #FEF2F2; }
+.fb-add-btn {
+  font-size: 12px; color: #6B7280; background: #F9FAFB; border: 1px dashed #D1D5DB;
+  border-radius: 6px; padding: .3rem .7rem; cursor: pointer; width: 100%;
+  text-align: left; font-family: inherit; transition: background .15s, border-color .15s;
+}
+.fb-add-btn:hover { background: #F3F4F6; border-color: #9CA3AF; color: #374151; }
+
 .mt-sig{color:#DC2626!important;font-weight:700}
 /* ════ 全域 Loading 指示器 ════ */
 #global-loading {
@@ -610,13 +650,76 @@ tr:hover td{background:#F9FAFB}
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
 <div id="page-home" class="page active">
 
-<!-- ══ Hero ══ -->
-<div style="background:#2A5278;color:#fff;padding:3.5rem 2rem 3rem;text-align:center">
-  <div style="max-width:600px;margin:0 auto">
-    <h2 style="font-size:30px;font-weight:600;line-height:1.4;margin-bottom:.6rem;letter-spacing:-.01em;color:#fff;text-align:center">
-      <span style="color:#A8D8EA">AI 輔助</span>統計分析平台
-    </h2>
-    <div style="font-size:12px;color:rgba(255,255,255,.38);letter-spacing:.04em;text-align:center">Edit by Chiu Chang Ru &nbsp;/&nbsp; Claude</div>
+<!-- ══ Hero + 問題輸入對話框 ══ -->
+<div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:2.5rem 2rem 0;min-height:320px;position:relative;overflow:hidden">
+  <!-- 裝飾背景圓 -->
+  <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
+  <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
+
+  <div style="max-width:720px;margin:0 auto;position:relative;z-index:1">
+    <!-- 標題 -->
+    <div style="text-align:center;margin-bottom:2rem">
+      <div style="display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:30px;padding:5px 16px;font-size:11px;letter-spacing:.08em;color:rgba(255,255,255,.6);margin-bottom:1rem;text-transform:uppercase">
+        MedQA · AI 輔助統計分析平台
+      </div>
+      <h2 style="font-size:26px;font-weight:700;line-height:1.35;margin-bottom:.4rem;letter-spacing:-.01em">
+        描述您的品質問題<br>
+        <span style="color:#7EC8E3">AI 引導分析路徑</span>
+      </h2>
+      <p style="font-size:13px;color:rgba(255,255,255,.5);margin-top:.3rem">依照 DMAIC 流程，從根本原因找起</p>
+    </div>
+
+    <!-- 問題輸入框 -->
+    <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:1.25rem 1.5rem;backdrop-filter:blur(8px)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
+        <span style="font-size:18px">🤖</span>
+        <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,.9)">CAPA 分析助理</span>
+        <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:4px">· 描述問題，引導分析路徑</span>
+        <span style="margin-left:auto;width:8px;height:8px;background:#4ADE80;border-radius:50%;animation:fab-pulse 2s ease-in-out infinite;flex-shrink:0"></span>
+      </div>
+
+      <!-- AI 歡迎訊息 -->
+      <div id="home-ai-welcome" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px 10px 10px 3px;padding:.75rem 1rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:.85rem">
+        您好！請描述您遇到的品質問題或失效情形，例如：<span style="color:#7EC8E3">「塗層耐磨不足，每批都發生」</span>、<span style="color:#7EC8E3">「檢體針取樣長度不足，良率下降」</span>。<br>
+        <span style="font-size:11px;color:rgba(255,255,255,.4)">AI 將透過 2-3 輪對話引導您找出根本原因，並推薦適合的分析工具。</span>
+      </div>
+
+      <!-- 對話區（展開後顯示） -->
+      <div id="home-chat-history" style="display:none;max-height:200px;overflow-y:auto;display:none;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
+
+      <!-- 輸入區 -->
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <textarea id="home-problem-input" rows="2"
+          placeholder="例：檢體針取樣長度不足，良率從 95% 下降至 88%，問題約兩週前開始..."
+          onkeydown="homeCapaKeydown(event)"
+          style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
+          onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
+          onblur="this.style.borderColor='rgba(255,255,255,.2)'"
+        ></textarea>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button onclick="homeCapaSend()" id="home-send-btn"
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4);transition:transform .15s"
+            onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+            送出 →
+          </button>
+          <button onclick="homeCapaReset()"
+            style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.35rem .7rem;font-size:11px;cursor:pointer;font-family:inherit;text-align:center">
+            🔄 重設
+          </button>
+        </div>
+      </div>
+
+      <!-- 工具推薦按鈕區 -->
+      <div id="home-tool-buttons" style="display:none;margin-top:.85rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.1)">
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:.5rem;letter-spacing:.04em">▸ 推薦分析工具</div>
+        <div id="home-tool-btn-list" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+      </div>
+    </div>
+
+    <!-- 底部小字 -->
+    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,.25);padding:.75rem 0 1.25rem">
+      或直接從下方 DMAIC 工具卡片進入各分析工具
+    </div>
   </div>
 </div>
 
@@ -646,11 +749,17 @@ tr:hover td{background:#F9FAFB}
   <div id="phase-M" class="tools-section">
     <div class="tools-section-title" style="color:#1A9CB0;font-size:17px;font-weight:700;letter-spacing:.02em;padding:6px 0 10px;border-bottom:2px solid #1A9CB022;margin-bottom:.75rem">M — Measure 量測階段</div>
     <div class="tools-grid">
-      <div class="tool-card" onclick="goTool('spc')">
+      <div class="tool-card" onclick="goTool('boxplot')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
-        <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
-        <span class="tc-tag tag-done">完成</span>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📦</div><div class="tc-name">箱型圖 Box Plot</div>
+        <div class="tc-desc">分組比較・離群值偵測</div>
+        <span class="tc-tag tag-new">可用</span>
+      </div>
+      <div class="tool-card" onclick="goTool('msa')">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
+        <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
+        <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('histogram')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
@@ -658,11 +767,11 @@ tr:hover td{background:#F9FAFB}
         <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
-      <div class="tool-card" onclick="goTool('boxplot')">
+      <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📦</div><div class="tc-name">箱型圖 Box Plot</div>
-        <div class="tc-desc">分組比較・離群值偵測</div>
-        <span class="tc-tag tag-new">可用</span>
+        <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
+        <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
+        <span class="tc-tag tag-done">完成</span>
       </div>
     </div>
   </div>
@@ -1018,22 +1127,30 @@ tr:hover td{background:#F9FAFB}
       <strong>範例：</strong><code style="background:#DBEAFE;padding:1px 6px;border-radius:4px;font-size:12px">操作技能不足, 4</code>　<span style="color:#6B7280;font-size:12px">（省略強度預設 3）</span>
     </div>
     <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" value="產品不良率偏高"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
-      <div class="field"><label style="color:#1D4ED8">人員 (Man)</label><textarea id="fb-man" rows="4" placeholder="原因, 強度(1-5)">操作技能不足, 4&#10;疲勞作業, 2&#10;SOP 未遵循, 5</textarea></div>
-      <div class="field"><label style="color:#0891B2">機器 (Machine)</label><textarea id="fb-machine" rows="4" placeholder="原因, 強度(1-5)">設備老化, 5&#10;精度不足, 4&#10;未定期保養, 3</textarea></div>
-      <div class="field"><label style="color:#059669">材料 (Material)</label><textarea id="fb-material" rows="4" placeholder="原因, 強度(1-5)">原料品質不穩, 5&#10;供應商變更, 3&#10;儲存不當, 2</textarea></div>
-      <div class="field"><label style="color:#D97706">方法 (Method)</label><textarea id="fb-method" rows="4" placeholder="原因, 強度(1-5)">製程參數偏移, 5&#10;作業標準不明, 3&#10;換線程序不當, 2</textarea></div>
-      <div class="field"><label style="color:#7C3AED">量測 (Measurement)</label><textarea id="fb-measure" rows="4" placeholder="原因, 強度(1-5)">量具精度不夠, 4&#10;校正頻率不足, 3&#10;量測方法不一, 2</textarea></div>
-      <div class="field"><label style="color:#BE185D">環境 (Mother Nature)</label><textarea id="fb-env" rows="4" placeholder="原因, 強度(1-5)">溫濕度變化, 3&#10;粉塵污染, 4&#10;振動干擾, 2</textarea></div>
+
+    <!-- 6M 結構化因子卡片區 -->
+    <div id="fb-cards-wrap" style="margin-top:1rem">
+      <!-- 每個 6M 類別由 JS 動態渲染 -->
     </div>
-    <div class="btn-row"><button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button></div>
+
+    <!-- 隱藏的 textarea（供 fishboneDraw 讀取，由 JS 同步） -->
+    <div style="display:none">
+      <textarea id="fb-man"></textarea>
+      <textarea id="fb-machine"></textarea>
+      <textarea id="fb-material"></textarea>
+      <textarea id="fb-method"></textarea>
+      <textarea id="fb-measure"></textarea>
+      <textarea id="fb-env"></textarea>
+    </div>
+
+    <div class="btn-row"><button class="btn btn-primary" onclick="fbSyncAndDraw()">▶ 產生魚骨圖</button></div>
   </div>
   <div id="fb-factor-selector" style="display:none"></div>
 <div id="fb-out" style="display:none">
     <div class="card">
       <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
       <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
-        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（1～5）
+        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（高風險=5 / 中風險=3 / 低風險=1）
       </div>
     </div>
   </div>
@@ -4869,7 +4986,313 @@ function drawDOEResiduals(){
 
 window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOEResiduals=drawDOEResiduals;window.doeFormatANOVA=doeFormatANOVA;
 // ════════════════════════════════════════════════════════
-// PB 獨立頁面 JS
+// 魚骨圖結構化因子卡片 UI
+// ════════════════════════════════════════════════════════
+(function(){
+  var FB_CATS = [
+    { id:'man',      label:'人員 Man',         color:'#1D4ED8', bg:'#EFF6FF' },
+    { id:'machine',  label:'機器 Machine',      color:'#0891B2', bg:'#ECFEFF' },
+    { id:'material', label:'材料 Material',     color:'#059669', bg:'#ECFDF5' },
+    { id:'method',   label:'方法 Method',       color:'#D97706', bg:'#FFFBEB' },
+    { id:'measure',  label:'量測 Measurement',  color:'#7C3AED', bg:'#F5F3FF' },
+    { id:'env',      label:'環境 Environment',  color:'#BE185D', bg:'#FDF2F8' },
+  ];
+
+  // 預設資料
+  var FB_DEFAULT = {
+    man:      [{name:'操作技能不足',risk:'high'},{name:'疲勞作業',risk:'low'},{name:'SOP 未遵循',risk:'high'}],
+    machine:  [{name:'設備老化',risk:'high'},{name:'精度不足',risk:'medium'},{name:'未定期保養',risk:'medium'}],
+    material: [{name:'原料品質不穩',risk:'high'},{name:'供應商變更',risk:'medium'},{name:'儲存不當',risk:'low'}],
+    method:   [{name:'製程參數偏移',risk:'high'},{name:'作業標準不明',risk:'medium'},{name:'換線程序不當',risk:'low'}],
+    measure:  [{name:'量具精度不夠',risk:'high'},{name:'校正頻率不足',risk:'medium'},{name:'量測方法不一',risk:'low'}],
+    env:      [{name:'溫濕度變化',risk:'medium'},{name:'粉塵污染',risk:'medium'},{name:'振動干擾',risk:'low'}],
+  };
+
+  // 目前的因子資料
+  window._fbData = JSON.parse(JSON.stringify(FB_DEFAULT));
+
+  var RISK_LABEL = { high:'🔴 高風險', medium:'🟡 中風險', low:'🟢 低風險' };
+  var RISK_NEXT  = { high:'medium', medium:'low', low:'high' };
+  var RISK_CLASS = { high:'fb-risk-high', medium:'fb-risk-medium', low:'fb-risk-low' };
+  var RISK_TO_STRENGTH = { high:5, medium:3, low:1 };
+
+  function renderAll() {
+    var wrap = document.getElementById('fb-cards-wrap');
+    if(!wrap) return;
+    wrap.innerHTML = '';
+    var grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px';
+    FB_CATS.forEach(function(cat) {
+      var section = document.createElement('div');
+      section.className = 'fb-cat-section';
+      // 標題列
+      var hdr = document.createElement('div');
+      hdr.className = 'fb-cat-header';
+      hdr.style.cssText = 'background:'+cat.bg+';border:1px solid '+cat.color+'33';
+      hdr.innerHTML = '<span style="color:'+cat.color+'">'+cat.label+'</span>';
+      section.appendChild(hdr);
+      // 因子列表
+      var body = document.createElement('div');
+      body.className = 'fb-cat-body';
+      var factors = window._fbData[cat.id] || [];
+      factors.forEach(function(f, idx) {
+        body.appendChild(makeCard(cat.id, idx, f));
+      });
+      // 新增按鈕
+      var addBtn = document.createElement('button');
+      addBtn.className = 'fb-add-btn';
+      addBtn.textContent = '＋ 新增原因';
+      addBtn.onclick = (function(cid){ return function(){ addFactor(cid); }; })(cat.id);
+      body.appendChild(addBtn);
+      section.appendChild(body);
+      grid.appendChild(section);
+    });
+    wrap.appendChild(grid);
+  }
+
+  function makeCard(catId, idx, factor) {
+    var card = document.createElement('div');
+    card.className = 'fb-factor-card';
+    card.setAttribute('data-cat', catId);
+    card.setAttribute('data-idx', idx);
+    // 名稱輸入
+    var nameInput = document.createElement('input');
+    nameInput.className = 'fb-factor-name';
+    nameInput.value = factor.name;
+    nameInput.placeholder = '輸入原因';
+    nameInput.oninput = (function(cid, i){ return function(){ window._fbData[cid][i].name = this.value; }; })(catId, idx);
+    card.appendChild(nameInput);
+    // 風險等級按鈕（點擊循環切換）
+    var riskBtn = document.createElement('button');
+    riskBtn.className = 'fb-risk-badge ' + RISK_CLASS[factor.risk];
+    riskBtn.textContent = RISK_LABEL[factor.risk];
+    riskBtn.title = '點擊切換風險等級';
+    riskBtn.onclick = (function(cid, i, btn){ return function(){
+      var cur = window._fbData[cid][i].risk;
+      var next = RISK_NEXT[cur];
+      window._fbData[cid][i].risk = next;
+      btn.textContent = RISK_LABEL[next];
+      btn.className = 'fb-risk-badge ' + RISK_CLASS[next];
+    }; })(catId, idx, riskBtn);
+    card.appendChild(riskBtn);
+    // 刪除按鈕
+    var delBtn = document.createElement('button');
+    delBtn.className = 'fb-del-btn';
+    delBtn.innerHTML = '🗑';
+    delBtn.title = '刪除此原因';
+    delBtn.onclick = (function(cid, i){ return function(){ deleteFactor(cid, i); }; })(catId, idx);
+    card.appendChild(delBtn);
+    return card;
+  }
+
+  function addFactor(catId) {
+    if(!window._fbData[catId]) window._fbData[catId] = [];
+    window._fbData[catId].push({name:'', risk:'medium'});
+    renderAll();
+    // focus 到新增的輸入框
+    setTimeout(function(){
+      var cards = document.querySelectorAll('[data-cat="'+catId+'"] .fb-factor-name');
+      if(cards.length) cards[cards.length-1].focus();
+    }, 50);
+  }
+
+  function deleteFactor(catId, idx) {
+    window._fbData[catId].splice(idx, 1);
+    renderAll();
+  }
+
+  // 同步到隱藏 textarea 並呼叫 fishboneDraw
+  window.fbSyncAndDraw = function() {
+    var cats = ['man','machine','material','method','measure','env'];
+    cats.forEach(function(cid){
+      var factors = window._fbData[cid] || [];
+      var lines = factors.filter(function(f){ return f.name.trim(); })
+        .map(function(f){ return f.name.trim() + ', ' + RISK_TO_STRENGTH[f.risk||'medium']; });
+      var el = document.getElementById('fb-'+cid);
+      if(el) el.value = lines.join('\n');
+    });
+    if(typeof fishboneDraw === 'function') fishboneDraw();
+  };
+
+  // 從 AI JSON 填入因子卡片（新格式：array of {name, risk}）
+  window.fbFillFromAI = function(result) {
+    var cats = ['man','machine','material','method','measure','env'];
+    cats.forEach(function(cid){
+      var arr = result[cid];
+      if(!arr || !arr.length) return;
+      // 支援新格式（array）與舊格式（string）
+      if(typeof arr === 'string') {
+        // 舊格式相容：解析 "原因, 強度" 字串
+        window._fbData[cid] = arr.split('\n').filter(Boolean).map(function(line){
+          var parts = line.split(',');
+          var name = parts[0].trim();
+          var strength = parseInt(parts[1]) || 3;
+          var risk = strength >= 4 ? 'high' : strength >= 3 ? 'medium' : 'low';
+          return {name: name, risk: risk};
+        });
+      } else {
+        window._fbData[cid] = arr.map(function(item){
+          return { name: item.name||'', risk: item.risk||'medium' };
+        });
+      }
+    });
+    renderAll();
+  };
+
+  // 初始化
+  document.addEventListener('DOMContentLoaded', function(){
+    renderAll();
+  });
+
+  // goTool('fishbone') 時重新渲染
+  var _origGoTool_fb = window.goTool;
+  if(typeof _origGoTool_fb === 'function'){
+    window.goTool = function(id){
+      _origGoTool_fb(id);
+      if(id === 'fishbone') setTimeout(renderAll, 100);
+    };
+  }
+
+})();
+
+// ════════════════════════════════════════════════════════
+// 主頁嵌入式 CAPA 對話框
+// ════════════════════════════════════════════════════════
+(function(){
+  var homeHistory = [];
+  var TOOL_NAMES_HOME = {
+    fishbone:'🐟 魚骨圖', spc:'📈 SPC 管制圖', msa:'📐 MSA 量測分析',
+    histogram:'📉 直方圖', hypothesis:'🔬 假設檢定', scatter:'🔗 相關性分析',
+    boxplot:'📦 箱型圖', pb:'🔎 PB 因子篩選',
+  };
+
+  function appendHomeAI(text, tools) {
+    var hist = document.getElementById('home-chat-history');
+    if(!hist) return;
+    hist.style.display = 'flex';
+    var div = document.createElement('div');
+    div.style.cssText = 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;white-space:pre-wrap';
+    div.textContent = text;
+    if(tools && tools.length > 0) {
+      var tbDiv = document.getElementById('home-tool-btn-list');
+      var tbWrap = document.getElementById('home-tool-buttons');
+      if(tbDiv && tbWrap) {
+        tbDiv.innerHTML = '';
+        tbWrap.style.display = 'block';
+        tools.forEach(function(toolId) {
+          var btn = document.createElement('button');
+          btn.style.cssText = 'background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s';
+          btn.textContent = TOOL_NAMES_HOME[toolId] || toolId;
+          btn.onmouseover = function(){ this.style.background='rgba(255,255,255,.22)'; };
+          btn.onmouseout  = function(){ this.style.background='rgba(255,255,255,.12)'; };
+          btn.onclick = function() { homeGoTool(toolId); };
+          tbDiv.appendChild(btn);
+        });
+      }
+    }
+    hist.appendChild(div);
+    hist.scrollTop = hist.scrollHeight;
+  }
+
+  function appendHomeUser(text) {
+    var hist = document.getElementById('home-chat-history');
+    if(!hist) return;
+    hist.style.display = 'flex';
+    var div = document.createElement('div');
+    div.style.cssText = 'background:rgba(190,24,93,.25);border:1px solid rgba(190,24,93,.35);border-radius:10px 10px 3px 10px;padding:.55rem .85rem;font-size:13px;color:#fff;line-height:1.6;align-self:flex-end;max-width:85%';
+    div.textContent = text;
+    hist.appendChild(div);
+    hist.scrollTop = hist.scrollHeight;
+    document.getElementById('home-ai-welcome').style.display = 'none';
+  }
+
+  function homeGoTool(toolId) {
+    // 魚骨圖：帶入問題 + 生成 6M
+    if(toolId === 'fishbone') {
+      var firstUser = '';
+      for(var i=0;i<homeHistory.length;i++){
+        if(homeHistory[i].role==='user'){ firstUser=homeHistory[i].content; break; }
+      }
+      if(typeof goTool==='function') goTool('fishbone');
+      setTimeout(function(){
+        var fbProbEl = document.getElementById('fb-problem');
+        if(fbProbEl && firstUser) fbProbEl.value = firstUser;
+        var hint = document.createElement('div');
+        hint.className = 'fb-import-hint';
+        hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
+        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在為您生成 6M 根本原因建議...';
+        var fbCard = document.querySelector('#page-fishbone .card');
+        if(fbCard){ var ex=fbCard.querySelector('.fb-import-hint');if(ex)ex.remove(); fbCard.insertBefore(hint,fbCard.querySelector('.btn-row')); }
+        if(!firstUser){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
+        fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ mode:'fishbone_generate',
+            messages:[{role:'user',content:'問題描述：'+firstUser+'\n\n請根據此問題，為魚骨圖 6M 各類別提供可能的根本原因建議。'}]
+          })
+        }).then(function(r){return r.json();}).then(function(data){
+          if(data.result){
+            if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
+            hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
+            hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
+          } else { hint.innerHTML='⚠️ AI 建議生成失敗，請手動填寫各欄位'; hint.style.background='#FFFBEB'; hint.style.borderColor='#FDE68A'; hint.style.color='#92400E'; }
+        }).catch(function(){ hint.innerHTML='⚠️ 連線失敗，請手動填寫各欄位'; hint.style.background='#FEF2F2'; hint.style.borderColor='#FECACA'; hint.style.color='#991B1B'; });
+      }, 500);
+    } else {
+      if(typeof goTool==='function') goTool(toolId);
+    }
+  }
+
+  window.homeCapaSend = async function() {
+    var input = document.getElementById('home-problem-input');
+    var sendBtn = document.getElementById('home-send-btn');
+    if(!input) return;
+    var q = input.value.trim();
+    if(!q) return;
+    appendHomeUser(q);
+    input.value = '';
+    if(sendBtn) sendBtn.disabled = true;
+    homeHistory.push({role:'user', content:q});
+    // 顯示 loading
+    var loadDiv = document.createElement('div');
+    loadDiv.style.cssText = 'color:rgba(255,255,255,.4);font-size:12px;font-style:italic;padding:.4rem .5rem';
+    loadDiv.textContent = '思考中...';
+    loadDiv.id = 'home-loading';
+    var hist = document.getElementById('home-chat-history');
+    if(hist){ hist.style.display='flex'; hist.appendChild(loadDiv); hist.scrollTop=hist.scrollHeight; }
+    try {
+      var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'navigate', messages: homeHistory })
+      });
+      var data = await resp.json();
+      var el = document.getElementById('home-loading'); if(el) el.remove();
+      var text = data.text || '';
+      var tools = data.tools || [];
+      homeHistory.push({role:'assistant', content: text});
+      appendHomeAI(text, tools);
+    } catch(err) {
+      var el2 = document.getElementById('home-loading'); if(el2) el2.remove();
+      appendHomeAI('⚠️ 連線失敗：' + err.message);
+    }
+    if(sendBtn) sendBtn.disabled = false;
+  };
+
+  window.homeCapaKeydown = function(e) {
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); homeCapaSend(); }
+  };
+
+  window.homeCapaReset = function() {
+    homeHistory = [];
+    var hist = document.getElementById('home-chat-history');
+    if(hist){ hist.innerHTML=''; hist.style.display='none'; }
+    var welcome = document.getElementById('home-ai-welcome');
+    if(welcome) welcome.style.display='block';
+    var tbWrap = document.getElementById('home-tool-buttons');
+    if(tbWrap) tbWrap.style.display='none';
+    var input = document.getElementById('home-problem-input');
+    if(input) input.value='';
+  };
+})();
 // ════════════════════════════════════════════════════════
 
 window.pbPageUpdateFactors = function() {
@@ -6294,20 +6717,8 @@ window.doeUpdateFactors = function() {
               .then(function(r){ return r.json(); })
               .then(function(data){
                 if(data.result){
-                  var r = data.result;
-                  var fields = {
-                    'fb-man':      r.man      || '',
-                    'fb-machine':  r.machine  || '',
-                    'fb-material': r.material || '',
-                    'fb-method':   r.method   || '',
-                    'fb-measure':  r.measure  || '',
-                    'fb-env':      r.env      || '',
-                  };
-                  Object.keys(fields).forEach(function(id){
-                    var el = document.getElementById(id);
-                    if(el && fields[id]) el.value = fields[id];
-                  });
-                  hint.innerHTML = '✅ AI 已帶入 6M 根本原因建議（來源：主頁問題描述），內容僅供參考，請自行確認與修改後產生魚骨圖';
+                  if(typeof fbFillFromAI === 'function') fbFillFromAI(data.result);
+                  hint.innerHTML = '✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
                   hint.style.background = '#F0FDF4';
                   hint.style.borderColor = '#86EFAC';
                   hint.style.color = '#166534';
