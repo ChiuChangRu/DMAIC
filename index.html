@@ -2136,9 +2136,9 @@ function fishboneDraw(){
     causes: parseCauses(document.getElementById(c.id).value)
   }));
 
-  const VW=700, VH=500;
+  const VW=760, VH=500;
   const spineY=250;
-  const spineEndX=575;
+  const spineEndX=590;
   const BONE_DX=75, BONE_DY=130;  // 固定60°，長150px
   const CAUSE_LEN=30;              // 中骨長度（原來60的一半）
   const joints=[160,330,500];
@@ -2151,13 +2151,21 @@ function fishboneDraw(){
   // 脊骨
   s.push(`<line x1="40" y1="${spineY}" x2="${spineEndX}" y2="${spineY}" stroke="#1a1a2e" stroke-width="3"/>`);
 
-  // 魚頭 — 最大字體
-  const hw=96, hh=60;
-  const plines=problem.length>6?[problem.slice(0,6),problem.slice(6)]:[problem];
-  s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="8" fill="#1D3B8A"/>`);
+  // 魚頭 — 放大框，文字自動分行處理
+  const hw=130, hh=72;
+  // 文字處理：最多兩行，每行最多7字
+  let plines;
+  if(problem.length <= 7){
+    plines = [problem];
+  } else if(problem.length <= 14){
+    plines = [problem.slice(0,7), problem.slice(7)];
+  } else {
+    plines = [problem.slice(0,7), problem.slice(7,13)+'…'];
+  }
+  s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="10" fill="#1D3B8A"/>`);
   plines.forEach((l,i)=>{
-    const ty=spineY+(i-(plines.length-1)/2)*20;
-    s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="16" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
+    const ty=spineY+(i-(plines.length-1)/2)*22;
+    s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="15" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
   });
 
   function renderBone(jx, endY, cat, isTop){
@@ -2170,7 +2178,7 @@ function fishboneDraw(){
     const lblX=(jx-BONE_DX)-lblW/2;
     const lblY=isTop ? endY-lblH-6 : endY+6;
     s.push(`<rect x="${lblX}" y="${lblY}" width="${lblW}" height="${lblH}" rx="5" fill="none" stroke="${cat.color}" stroke-width="1.5"/>`);
-    s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="${cat.color}" font-size="14" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
+    s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="#1a1a2e" font-size="14" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
 
     // 中骨等間距（t=0.25, 0.50, 0.75）
     const ddx=BONE_DX, ddy=isTop?BONE_DY:-BONE_DY;
@@ -2182,9 +2190,12 @@ function fishboneDraw(){
       const t=ts[Math.min(ci,ts.length-1)];
       const bx=(jx-BONE_DX)+ddx*t;
       const by=endY+ddy*t;
+      // 文字顏色依風險等級：高=紅、中=褐色、低=黑
+      const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#1a1a2e';
+      const riskWeight = cause.risk==='high' ? '700' : '400';
       // 中骨：從 bx-CAUSE_LEN 到 bx，箭頭在右端
       s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${cat.color}" stroke-width="1.4" marker-end="url(#fb-ar)"/>`);
-      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="#374151" font-size="11" font-family="-apple-system,sans-serif">${cause.name}</text>`);
+      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="11" font-weight="${riskWeight}" font-family="-apple-system,sans-serif">${cause.name}</text>`);
     });
   }
 
