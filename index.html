@@ -82,8 +82,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--navy2);box-shadow:0 0
 textarea{resize:vertical;font-family:'Courier New',monospace;font-size:12px;line-height:1.55}
 .btn{border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,transform .1s;font-family:inherit}
 .btn:active{transform:scale(.98)}
-.btn-primary{background:var(--navy2);color:#fff}.btn-primary:hover{background:#162d6e}
-.btn-sec{background:#fff;color:#374151;border:1px solid #D1D5DB}.btn-sec:hover{background:#F9FAFB}
+.btn-primary{background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35);letter-spacing:.02em}.btn-primary:hover{background:linear-gradient(135deg,#162d4a,#1d4ed8);box-shadow:0 4px 14px rgba(37,99,235,.45);transform:translateY(-1px)}
+.btn-sec{background:#fff;color:#1B3A5C;border:1.5px solid #C7D9F5;font-weight:600}.btn-sec:hover{background:#EFF6FF;border-color:#93C5FD}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:11px}
@@ -367,162 +367,6 @@ tr:hover td{background:#F9FAFB}
   opacity: .65 !important;
   cursor: wait !important;
   pointer-events: none !important;
-}
-
-/* ════ CAPA 主頁助理 ════ */
-#capa-assistant {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9990;
-}
-
-/* 浮動按鈕 */
-#capa-fab {
-  width: 52px; height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #BE185D, #DB2777);
-  border: none;
-  color: #fff;
-  font-size: 22px;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(190,24,93,.45);
-  display: flex; align-items: center; justify-content: center;
-  transition: transform .2s, box-shadow .2s;
-}
-#capa-fab:hover {
-  transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(190,24,93,.55);
-}
-#capa-fab .fab-dot {
-  position: absolute;
-  top: 2px; right: 2px;
-  width: 10px; height: 10px;
-  background: #4ADE80;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  animation: fab-pulse 2s ease-in-out infinite;
-}
-@keyframes fab-pulse {
-  0%,100%{ transform:scale(1);opacity:1; }
-  50%{ transform:scale(.8);opacity:.6; }
-}
-
-/* 對話視窗 */
-#capa-window {
-  position: fixed;
-  bottom: 84px;
-  right: 20px;
-  width: 420px;
-  max-height: 620px;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 8px 32px rgba(0,0,0,.18);
-  display: none;
-  flex-direction: column;
-  overflow: hidden;
-  border: 1px solid #E8EDF5;
-}
-#capa-window.open { display: flex; }
-
-#capa-header {
-  background: linear-gradient(135deg, #BE185D, #DB2777);
-  color: #fff;
-  padding: .75rem 1rem;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0;
-}
-#capa-header .ch-left {
-  display: flex; align-items: center; gap: 8px;
-}
-#capa-header .ch-title {
-  font-size: 13px; font-weight: 600;
-}
-#capa-header .ch-sub {
-  font-size: 10px; color: rgba(255,255,255,.6); margin-top: 1px;
-}
-#capa-header .ch-close {
-  background: rgba(255,255,255,.15); border: none; color: #fff;
-  border-radius: 50%; width: 26px; height: 26px;
-  font-size: 14px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-
-#capa-messages {
-  flex: 1; overflow-y: auto;
-  padding: .75rem 1rem;
-  display: flex; flex-direction: column; gap: .5rem;
-}
-.capa-msg-ai {
-  background: #F8FAFF;
-  border: 1px solid #E2ECF8;
-  border-radius: 8px 8px 8px 2px;
-  padding: .55rem .8rem;
-  font-size: 13px; line-height: 1.65;
-  color: #1a1a2e;
-  align-self: flex-start;
-  max-width: 95%;
-}
-.capa-msg-user {
-  background: #BE185D;
-  color: #fff;
-  border-radius: 8px 8px 2px 8px;
-  padding: .5rem .8rem;
-  font-size: 13px;
-  align-self: flex-end;
-  max-width: 88%;
-}
-.capa-tools {
-  display: flex; flex-wrap: wrap; gap: 4px; margin-top: .4rem;
-}
-.capa-tool-btn {
-  background: #EFF6FF;
-  border: 1px solid #BFDBFE;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 12px; font-weight: 600;
-  color: #1D3B8A;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background .15s;
-}
-.capa-tool-btn:hover { background: #DBEAFE; }
-
-#capa-input-area {
-  padding: .6rem .75rem .75rem;
-  border-top: 1px solid #E8EDF5;
-  flex-shrink: 0;
-}
-#capa-input {
-  width: 100%;
-  border: 1px solid #D1D5DB;
-  border-radius: 8px;
-  padding: .5rem .75rem;
-  font-size: 13px; font-family: inherit;
-  resize: none; outline: none;
-  line-height: 1.5;
-  margin-bottom: 5px;
-}
-#capa-input:focus { border-color: #BE185D; }
-.capa-btn-row {
-  display: flex; gap: 5px;
-}
-#capa-send {
-  flex: 1;
-  background: #BE185D; color: #fff;
-  border: none; border-radius: 7px;
-  padding: 7px; font-size: 13px;
-  font-weight: 500; cursor: pointer;
-  font-family: inherit;
-}
-#capa-send:disabled { background: #9CA3AF; cursor: not-allowed; }
-#capa-reset {
-  background: transparent;
-  border: 1px solid #E2ECF8;
-  border-radius: 7px;
-  padding: 7px 10px; font-size: 11px;
-  color: #6B7280; cursor: pointer;
-  font-family: inherit;
 }
 
 </style>
@@ -1090,6 +934,19 @@ tr:hover td{background:#F9FAFB}
     </div>
     <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" value="產品不良率偏高"></div>
 
+    <!-- AI 模型選擇 -->
+    <div style="display:flex;align-items:center;gap:10px;margin:.5rem 0;flex-wrap:wrap">
+      <span style="font-size:12px;color:#6B7280;font-weight:600">AI 生成模型：</span>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+        <input type="radio" name="fb-model" value="opus" checked> 
+        <span>Opus <span style="color:#7C3AED;font-size:10px">（高品質・耗費較多）</span></span>
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
+        <input type="radio" name="fb-model" value="sonnet">
+        <span>Sonnet <span style="color:#059669;font-size:10px">（省 token・速度較快）</span></span>
+      </label>
+    </div>
+
     <!-- 6M 結構化因子卡片區 -->
     <div id="fb-cards-wrap" style="margin-top:1rem">
       <!-- 每個 6M 類別由 JS 動態渲染 -->
@@ -1116,6 +973,31 @@ tr:hover td{background:#F9FAFB}
     </div>
   </div>
   <div id="fb-factor-selector" style="display:none"></div>
+
+  <!-- 魚骨圖嵌入式問答助理 -->
+  <div id="fb-chat-wrap" style="display:none;margin-top:.75rem">
+    <div class="card" style="background:#F8FAFF;border:1.5px solid #C7D9F5">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">🤖</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1B3A5C">魚骨圖分析助理</div>
+            <div style="font-size:11px;color:#6B7280">可追問、調整因子、確認根因方向</div>
+          </div>
+        </div>
+        <button onclick="fbChatReset()" style="font-size:11px;color:#6B7280;background:none;border:1px solid #D1D5DB;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">🔄 重設對話</button>
+      </div>
+      <div id="fb-chat-history" style="display:flex;flex-direction:column;gap:.5rem;max-height:280px;overflow-y:auto;margin-bottom:.75rem"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <textarea id="fb-chat-input" rows="2" placeholder="例：為什麼人員類別的原因還是要保留？/ 針頭內徑偏小應該算設計還是機器？"
+          onkeydown="fbChatKeydown(event)"
+          style="flex:1;border:1.5px solid #C7D9F5;border-radius:8px;padding:.55rem .8rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.5;transition:border-color .2s"
+          onfocus="this.style.borderColor='#3B7DD8'" onblur="this.style.borderColor='#C7D9F5'"
+        ></textarea>
+        <button onclick="fbChatSend()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:8px;padding:.6rem 1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">送出</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
 </div>
@@ -1344,6 +1226,7 @@ tr:hover td{background:#F9FAFB}
     <div class="btn-row">
       <button class="btn btn-primary" id="pb-analyze-btn" onclick="pbPageAnalyze()">▶ 分析主效應</button>
       <button class="btn btn-sec" onclick="pbPageUpdateFactors()">重新產生矩陣</button>
+      <button class="btn btn-sec" onclick="pbPageLoadExample()">📋 載入範例</button>
     </div>
   </div>
   <div id="pb-page-out" style="display:none">
@@ -5139,6 +5022,15 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       if(el) el.value = lines.join('\n');
     });
     if(typeof fishboneDraw === 'function') fishboneDraw();
+    // 啟動魚骨圖助理
+    var problem = (document.getElementById('fb-problem')||{}).value||'';
+    setTimeout(function(){ if(typeof fbChatInit==='function') fbChatInit(problem); }, 300);
+  };
+
+  // 取得使用者選擇的模型
+  window.fbGetSelectedModel = function() {
+    var sel = document.querySelector('input[name="fb-model"]:checked');
+    return sel ? sel.value : 'opus';
   };
 
   // 從 AI JSON 填入因子卡片（新格式：array of {name, risk}）
@@ -5182,6 +5074,110 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     };
   }
 
+})();
+
+// ════════════════════════════════════════════════════════
+// 魚骨圖嵌入式問答助理
+// ════════════════════════════════════════════════════════
+(function(){
+  // 共用主頁對話歷史（由 homeCapaSend 寫入 window._homeHistory）
+  window._fbChatHistory = [];
+
+  function appendFbMsg(role, text) {
+    var hist = document.getElementById('fb-chat-history');
+    if(!hist) return;
+    var div = document.createElement('div');
+    if(role === 'ai') {
+      div.style.cssText = 'background:#fff;border:1px solid #E2ECF8;border-radius:8px 8px 8px 2px;padding:.6rem .9rem;font-size:13px;line-height:1.7;color:#1a1a2e;white-space:pre-wrap';
+    } else {
+      div.style.cssText = 'background:#1B3A5C;color:#fff;border-radius:8px 8px 2px 8px;padding:.55rem .85rem;font-size:13px;line-height:1.6;align-self:flex-end;max-width:85%';
+    }
+    div.textContent = text;
+    hist.appendChild(div);
+    hist.scrollTop = hist.scrollHeight;
+  }
+
+  // 產生魚骨圖後顯示助理並打招呼
+  window.fbChatInit = function(problem) {
+    var wrap = document.getElementById('fb-chat-wrap');
+    if(!wrap) return;
+    wrap.style.display = 'block';
+    var hist = document.getElementById('fb-chat-history');
+    if(hist && hist.children.length === 0) {
+      // 繼承主頁歷史或用問題描述初始化
+      var homeCtx = window._homeHistory && window._homeHistory.length ?
+        '（已從主頁對話取得問題背景）' : '';
+      appendFbMsg('ai', '魚骨圖已產生！'+homeCtx+'\n\n您可以繼續詢問：\n・某個因子為何重要？\n・哪個類別應該優先調查？\n・某個原因應歸在哪個類別？\n・還有哪些可能被遺漏的原因？');
+    }
+  };
+
+  window.fbChatSend = async function() {
+    var input = document.getElementById('fb-chat-input');
+    if(!input) return;
+    var q = input.value.trim();
+    if(!q) return;
+    input.value = '';
+    appendFbMsg('user', q);
+
+    // 組合 context：主頁歷史 + 魚骨圖當前狀態 + 本地對話
+    var problem = (document.getElementById('fb-problem') || {}).value || '';
+    var fbSummary = '目前魚骨圖問題：' + problem + '\n因子摘要：';
+    var FB_CAT_NAMES = {man:'人員',machine:'機器',material:'材料',method:'方法',measure:'量測',env:'環境'};
+    Object.keys(FB_CAT_NAMES).forEach(function(cid){
+      var factors = window._fbData && window._fbData[cid];
+      if(factors && factors.length) fbSummary += '\n・'+FB_CAT_NAMES[cid]+'：'+factors.map(function(f){return f.name+'('+f.risk+')'}).join('、');
+    });
+
+    var messages = [];
+    // 加入主頁對話歷史作為背景
+    if(window._homeHistory && window._homeHistory.length) {
+      messages = messages.concat(window._homeHistory);
+    }
+    // 加入魚骨圖摘要
+    messages.push({role:'user', content: fbSummary + '\n\n請根據以上背景回答我的問題。'});
+    messages.push({role:'assistant', content: '好的，我了解目前的分析背景，請問您的問題。'});
+    // 加入本地對話歷史
+    messages = messages.concat(window._fbChatHistory);
+    messages.push({role:'user', content: q});
+
+    // loading
+    var loadDiv = document.createElement('div');
+    loadDiv.style.cssText = 'color:#9CA3AF;font-size:12px;font-style:italic;padding:.3rem .5rem';
+    loadDiv.textContent = '思考中...';
+    loadDiv.id = 'fb-chat-loading';
+    document.getElementById('fb-chat-history').appendChild(loadDiv);
+
+    try {
+      var resp = await fetch(window.CLAUDE_WORKER || 'https://muddy-cell-a23a.gogoyankee.workers.dev', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          mode: 'chat',
+          system: '你是醫療器材品質工程師的根本原因分析專家，正在協助使用者分析魚骨圖。根據對話歷史和魚骨圖內容，用繁體中文給出專業、具體的建議（150字以內）。',
+          messages: messages
+        })
+      });
+      var data = await resp.json();
+      var el = document.getElementById('fb-chat-loading'); if(el) el.remove();
+      var text = data.content && data.content[0] ? data.content[0].text : '⚠️ 無法取得回應';
+      window._fbChatHistory.push({role:'user', content:q});
+      window._fbChatHistory.push({role:'assistant', content:text});
+      appendFbMsg('ai', text);
+    } catch(err) {
+      var el2 = document.getElementById('fb-chat-loading'); if(el2) el2.remove();
+      appendFbMsg('ai', '⚠️ 連線失敗：' + err.message);
+    }
+  };
+
+  window.fbChatKeydown = function(e) {
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); fbChatSend(); }
+  };
+
+  window.fbChatReset = function() {
+    window._fbChatHistory = [];
+    var hist = document.getElementById('fb-chat-history');
+    if(hist) hist.innerHTML = '';
+    fbChatInit((document.getElementById('fb-problem')||{}).value||'');
+  };
 })();
 
 // ════════════════════════════════════════════════════════
@@ -5253,9 +5249,12 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         var fbCard = document.querySelector('#page-fishbone .card');
         if(fbCard){ var ex=fbCard.querySelector('.fb-import-hint');if(ex)ex.remove(); fbCard.insertBefore(hint,fbCard.querySelector('.btn-row')); }
         if(!firstUser){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
+        // 儲存主頁對話歷史供魚骨圖助理繼承
+        window._homeHistory = homeHistory.slice();
+        var fbModel = typeof fbGetSelectedModel==='function' ? fbGetSelectedModel() : 'opus';
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ mode:'fishbone_generate',
+          body:JSON.stringify({ mode:'fishbone_generate', fbModel: fbModel,
             messages: homeHistory.concat([{role:'user',content:'請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。'}])
           })
         }).then(function(r){return r.json();}).then(function(data){
@@ -5298,6 +5297,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       var text = data.text || '';
       var tools = data.tools || [];
       homeHistory.push({role:'assistant', content: text});
+      window._homeHistory = homeHistory.slice();
       appendHomeAI(text, tools);
     } catch(err) {
       var el2 = document.getElementById('home-loading'); if(el2) el2.remove();
@@ -5552,6 +5552,54 @@ window.pbPageToFullDOE = function(factorNames) {
 document.addEventListener('DOMContentLoaded', function(){
   if(document.getElementById('pb-nf')) pbPageUpdateFactors();
 });
+
+window.pbPageLoadExample = function() {
+  // 隨機選一個情境
+  var examples = [
+    {
+      title: '塗層耐磨不足',
+      nf: 7, yname: '耐磨次數',
+      factors: ['塗料濃度','固化溫度','塗佈速度','底材處理','塗層厚度','固化時間','環境濕度'],
+      y: [1250,980,1320,870,1180,1050,1380,750,1420,1100,890,960]
+    },
+    {
+      title: '焊接拉力不足',
+      nf: 5, yname: '拉力(N)',
+      factors: ['焊接電流','焊接時間','加壓力','電極溫度','表面清潔度'],
+      y: [85,72,91,68,88,79,94,65]
+    },
+    {
+      title: '尺寸偏差過大',
+      nf: 6, yname: 'Cpk',
+      factors: ['模具溫度','射出壓力','冷卻時間','材料批次','射出速度','保壓時間'],
+      y: [1.12,0.89,1.28,0.76,1.35,0.95,1.18,0.82,1.42,0.71,1.05,0.91]
+    },
+  ];
+  var ex = examples[Math.floor(Math.random() * examples.length)];
+  // 設定因子數
+  var nfEl = document.getElementById('pb-nf');
+  if(nfEl){ nfEl.value = ex.nf; pbPageUpdateFactors(); }
+  setTimeout(function(){
+    // 填入因子名稱
+    ex.factors.forEach(function(name, i){
+      var el = document.getElementById('pbp-f'+(i+1)); if(el) el.value = name;
+    });
+    // 填入反應變數名稱
+    var ynEl = document.getElementById('pb-yname'); if(ynEl) ynEl.value = ex.yname;
+    // 重新產生矩陣
+    pbPageGenMatrix(ex.nf);
+    // 填入 Y 值（加入 ±5% 隨機擾動讓每次不同）
+    setTimeout(function(){
+      var pb = getPBDesign(ex.nf); if(!pb) return;
+      for(var i=0;i<pb.n_runs;i++){
+        var baseY = ex.y[i] || ex.y[i % ex.y.length];
+        var jitter = 1 + (Math.random()-.5)*.1;
+        var el = document.getElementById('pbp-y-'+i);
+        if(el) el.value = (baseY * jitter).toFixed(1);
+      }
+    }, 100);
+  }, 200);
+};
 window.hyUpdateUI=hyUpdateUI;window.hyAnalyze=hyAnalyze;window.hyLoadEx=hyLoadEx;
 window.boxplotAnalyze=boxplotAnalyze;
 </script>
@@ -6640,285 +6688,6 @@ window.doeUpdateFactors = function() {
 })();
 
 </script>
-<script>
-// ════════════════════════════════════════════════════════
-// CAPA 主頁助理（獨立元件，不與工具頁面關聯）
-// ════════════════════════════════════════════════════════
-
-(function() {
-
-  // 工具顯示名稱
-  var TOOL_NAMES = {
-    fishbone:   '🐟 魚骨圖',
-    spc:        '📈 SPC 管制圖',
-    msa:        '📐 MSA 量測分析',
-    histogram:  '📉 直方圖',
-    hypothesis: '🔬 假設檢定',
-    scatter:    '🔗 相關性分析',
-    boxplot:    '📦 箱型圖',
-    pb:         '🔎 PB 因子篩選',
-  };
-
-  var capaHistory = [];
-
-  // 初始歡迎訊息
-  var WELCOME = '您好！請描述您遇到的品質問題或失效情形，我幫您找出分析方向。\n\n💡 小技巧：描述的問題可直接帶入魚骨圖，協助找出根本原因！';
-
-  // ── 建立 HTML 結構 ──
-  function buildUI() {
-    // 浮動按鈕
-    var fab = document.createElement('div');
-    fab.id = 'capa-assistant';
-    fab.innerHTML =
-      '<button id="capa-fab" onclick="capaToggle()" title="CAPA 分析助理">' +
-        '<span>🤖</span>' +
-        '<span class="fab-dot"></span>' +
-      '</button>' +
-      '<div id="capa-window">' +
-        '<div id="capa-header">' +
-          '<div class="ch-left">' +
-            '<span style="font-size:20px">🤖</span>' +
-            '<div>' +
-              '<div class="ch-title">CAPA 分析助理</div>' +
-              '<div class="ch-sub">描述問題，引導分析路徑</div>' +
-            '</div>' +
-          '</div>' +
-          '<button class="ch-close" onclick="capaToggle()">✕</button>' +
-        '</div>' +
-        '<div id="capa-messages"></div>' +
-        '<div id="capa-input-area">' +
-          '<textarea id="capa-input" rows="2" placeholder="例：檢體針取樣長度不足，良率下降..." onkeydown="capaKeydown(event)"></textarea>' +
-          '<div class="capa-btn-row">' +
-            '<button id="capa-send" onclick="capaSend()">送出 →</button>' +
-            '<button id="capa-reset" onclick="capaReset()">🔄 重新開始</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-    document.body.appendChild(fab);
-
-    // 顯示歡迎訊息
-    appendAIMsg(WELCOME);
-  }
-
-  // ── 訊息顯示 ──
-  function appendAIMsg(text, tools) {
-    var msgs = document.getElementById('capa-messages');
-    if(!msgs) return;
-
-    var div = document.createElement('div');
-    div.className = 'capa-msg-ai';
-    div.textContent = text;
-
-    // 工具按鈕
-    if(tools && tools.length > 0) {
-      var toolsDiv = document.createElement('div');
-      toolsDiv.className = 'capa-tools';
-      tools.forEach(function(toolId) {
-        var btn = document.createElement('button');
-        btn.className = 'capa-tool-btn';
-        btn.textContent = TOOL_NAMES[toolId] || toolId;
-        btn.onclick = function() {
-          // 只做跳轉，不關聯任何工具狀態
-          capaToggle();
-          if(typeof goTool === 'function') goTool(toolId);
-        };
-        // 魚骨圖特殊：帶入問題描述 + 呼叫 Claude 生成 6M 建議
-        if(toolId === 'fishbone') {
-          btn.onclick = function() {
-            // 抓第一則用戶輸入（問題描述）
-            var firstUser = '';
-            for(var ci=0;ci<capaHistory.length;ci++){
-              if(capaHistory[ci].role==='user'){ firstUser=capaHistory[ci].content; break; }
-            }
-            capaToggle();
-            if(typeof goTool === 'function') goTool('fishbone');
-
-            setTimeout(function(){
-              // 帶入問題欄
-              var fbProbEl = document.getElementById('fb-problem');
-              if(fbProbEl && firstUser) fbProbEl.value = firstUser;
-
-              // 顯示 AI 生成中提示
-              var hint = document.createElement('div');
-              hint.className = 'fb-import-hint';
-              hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
-              hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在為您生成 6M 根本原因建議，請稍候...';
-              var fbCard = document.querySelector('#page-fishbone .card');
-              if(fbCard){
-                var existing = fbCard.querySelector('.fb-import-hint');
-                if(existing) existing.remove();
-                fbCard.insertBefore(hint, fbCard.querySelector('.btn-row'));
-              }
-
-              // 呼叫 Worker fishbone_generate
-              if(!firstUser) {
-                hint.innerHTML = '⚠️ 未偵測到問題描述，請手動填寫各欄位';
-                hint.style.background = '#FFFBEB';
-                hint.style.borderColor = '#FDE68A';
-                hint.style.color = '#92400E';
-                return;
-              }
-
-              fetch(CLAUDE_WORKER, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                  mode: 'fishbone_generate',
-                  messages: capaHistory.concat([{ role: 'user', content: '請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。' }])
-                })
-              })
-              .then(function(r){ return r.json(); })
-              .then(function(data){
-                if(data.result){
-                  if(typeof fbFillFromAI === 'function') fbFillFromAI(data.result);
-                  hint.innerHTML = '✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
-                  hint.style.background = '#F0FDF4';
-                  hint.style.borderColor = '#86EFAC';
-                  hint.style.color = '#166534';
-                } else {
-                  hint.innerHTML = '⚠️ AI 建議生成失敗，請手動填寫各欄位';
-                  hint.style.background = '#FFFBEB';
-                  hint.style.borderColor = '#FDE68A';
-                  hint.style.color = '#92400E';
-                }
-              })
-              .catch(function(){
-                hint.innerHTML = '⚠️ 連線失敗，請手動填寫各欄位';
-                hint.style.background = '#FEF2F2';
-                hint.style.borderColor = '#FECACA';
-                hint.style.color = '#991B1B';
-              });
-            }, 500);
-          };
-        }
-        toolsDiv.appendChild(btn);
-      });
-      div.appendChild(toolsDiv);
-    }
-
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-
-  function appendUserMsg(text) {
-    var msgs = document.getElementById('capa-messages');
-    if(!msgs) return;
-    var div = document.createElement('div');
-    div.className = 'capa-msg-user';
-    div.textContent = text;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-
-  // ── 開關視窗 ──
-  window.capaToggle = function() {
-    var win = document.getElementById('capa-window');
-    if(!win) return;
-    win.classList.toggle('open');
-    if(win.classList.contains('open')) {
-      var input = document.getElementById('capa-input');
-      if(input) setTimeout(function(){ input.focus(); }, 200);
-    }
-  };
-
-  // ── 送出訊息 ──
-  window.capaSend = async function() {
-    var input = document.getElementById('capa-input');
-    var sendBtn = document.getElementById('capa-send');
-    if(!input) return;
-    var q = input.value.trim();
-    if(!q) return;
-
-    appendUserMsg(q);
-    input.value = '';
-    if(sendBtn) sendBtn.disabled = true;
-
-    capaHistory.push({ role: 'user', content: q });
-
-    // 顯示 loading
-    var msgs = document.getElementById('capa-messages');
-    var loading = document.createElement('div');
-    loading.className = 'capa-msg-ai';
-    loading.textContent = '思考中...';
-    loading.id = 'capa-loading';
-    if(msgs) { msgs.appendChild(loading); msgs.scrollTop = msgs.scrollHeight; }
-
-    try {
-      var resp = await fetch(CLAUDE_WORKER, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: 'navigate',
-          messages: capaHistory
-        })
-      });
-      var data = await resp.json();
-
-      // 移除 loading
-      var loadEl = document.getElementById('capa-loading');
-      if(loadEl) loadEl.remove();
-
-      var text = data.text || '';
-      var tools = data.tools || [];
-
-      capaHistory.push({ role: 'assistant', content: text + (tools.length ? ' [TOOLS: '+tools.join(',')+']' : '') });
-
-      appendAIMsg(text, tools);
-
-    } catch(err) {
-      var loadEl2 = document.getElementById('capa-loading');
-      if(loadEl2) loadEl2.remove();
-      appendAIMsg('⚠️ 連線失敗：' + err.message);
-    }
-
-    if(sendBtn) sendBtn.disabled = false;
-  };
-
-  // ── 重新開始 ──
-  window.capaReset = function() {
-    capaHistory = [];
-    var msgs = document.getElementById('capa-messages');
-    if(msgs) msgs.innerHTML = '';
-    appendAIMsg(WELCOME);
-  };
-
-  // ── 自動 reset：重新開啟視窗時，若已有對話則保留但提示 ──
-  // （不強制清空，讓用戶自己按重新開始）
-
-  // ── Enter 送出 ──
-  window.capaKeydown = function(e) {
-    if(e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      capaSend();
-    }
-  };
-
-  // ── 只在主頁顯示 ──
-  // 監聽頁面切換，工具頁隱藏浮動按鈕
-  var _origGoTool_capa = window.goTool;
-  window.goTool = function(id) {
-    if(typeof _origGoTool_capa === 'function') _origGoTool_capa(id);
-    var fab = document.getElementById('capa-assistant');
-    var win = document.getElementById('capa-window');
-    if(fab) fab.style.display = 'none';
-    if(win) win.classList.remove('open');
-  };
-
-  var _origGoHome_capa = window.goHome;
-  window.goHome = function() {
-    if(typeof _origGoHome_capa === 'function') _origGoHome_capa();
-    var fab = document.getElementById('capa-assistant');
-    if(fab) fab.style.display = 'block';
-  };
-
-  // DOM 就緒後建立 UI
-  if(document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', buildUI);
-  } else {
-    buildUI();
-  }
-
-})();
 
 
 // 重新輸入數據時，自動清除舊的分析結果與 AI 判讀
