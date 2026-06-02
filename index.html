@@ -5258,7 +5258,6 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       }
       if(typeof goTool==='function') goTool('fishbone');
       setTimeout(function(){
-        // 帶入問題欄
         var fbProbEl = document.getElementById('fb-problem');
         if(fbProbEl && firstUser) fbProbEl.value = firstUser;
 
@@ -5294,7 +5293,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           hint.innerHTML='⚠️ 連線失敗，請手動填寫各欄位';
           hint.style.background='#FEF2F2'; hint.style.borderColor='#FECACA'; hint.style.color='#991B1B';
         });
-      }, 500);
+      }, 800);
     } else {
       if(typeof goTool==='function') goTool(toolId);
     }
