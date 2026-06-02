@@ -929,19 +929,6 @@ tr:hover td{background:#F9FAFB}
 
     <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" placeholder="請描述問題，例：PVC點滴袋注射口插入前漏液" value=""></div>
 
-    <!-- AI 模型選擇 -->
-    <div style="display:flex;align-items:center;gap:10px;margin:.5rem 0;flex-wrap:wrap">
-      <span style="font-size:12px;color:#6B7280;font-weight:600">AI 生成模型：</span>
-      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
-        <input type="radio" name="fb-model" value="opus" checked> 
-        <span>Opus <span style="color:#7C3AED;font-size:10px">（高品質・耗費較多）</span></span>
-      </label>
-      <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer">
-        <input type="radio" name="fb-model" value="sonnet">
-        <span>Sonnet <span style="color:#059669;font-size:10px">（省 token・速度較快）</span></span>
-      </label>
-    </div>
-
     <!-- 6M 結構化因子卡片區 -->
     <div id="fb-cards-wrap" style="margin-top:1rem">
       <!-- 每個 6M 類別由 JS 動態渲染 -->
@@ -5026,11 +5013,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     setTimeout(function(){ if(typeof fbChatInit==='function') fbChatInit(problem); }, 300);
   };
 
-  // 取得使用者選擇的模型
-  window.fbGetSelectedModel = function() {
-    var sel = document.querySelector('input[name="fb-model"]:checked');
-    return sel ? sel.value : 'opus';
-  };
+  // 固定使用高階模型 Opus
+  window.fbGetSelectedModel = function() { return 'opus'; };
 
   // 從 AI JSON 填入因子卡片（新格式：array of {name, risk}）
   window.fbFillFromAI = function(result) {
@@ -5292,16 +5276,20 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
             messages: compressedMessages
           })
         }).then(function(r){return r.json();}).then(function(data){
+          console.log('[fishbone_generate] response:', JSON.stringify(data).slice(0,300));
           if(data.result){
             if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
             hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
             hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
           } else {
-            hint.innerHTML='⚠️ AI 建議生成失敗，請手動填寫各欄位';
+            var errMsg = data.error || 'result 為空';
+            console.error('[fishbone_generate] failed:', errMsg);
+            hint.innerHTML='⚠️ AI 建議生成失敗（'+errMsg+'），請手動填寫各欄位';
             hint.style.background='#FFFBEB'; hint.style.borderColor='#FDE68A'; hint.style.color='#92400E';
           }
-        }).catch(function(){
-          hint.innerHTML='⚠️ 連線失敗，請手動填寫各欄位';
+        }).catch(function(err){
+          console.error('[fishbone_generate] fetch error:', err);
+          hint.innerHTML='⚠️ 連線失敗：'+err.message+'，請手動填寫各欄位';
           hint.style.background='#FEF2F2'; hint.style.borderColor='#FECACA'; hint.style.color='#991B1B';
         });
       }, 800);
