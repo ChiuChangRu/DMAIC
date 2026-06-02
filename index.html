@@ -927,7 +927,7 @@ tr:hover td{background:#F9FAFB}
   </div>
 </div>
 
-    <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" value="產品不良率偏高"></div>
+    <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" placeholder="請描述問題，例：PVC點滴袋注射口插入前漏液" value=""></div>
 
     <!-- AI 模型選擇 -->
     <div style="display:flex;align-items:center;gap:10px;margin:.5rem 0;flex-wrap:wrap">
@@ -5239,8 +5239,16 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     // 魚骨圖：帶入問題 + 生成 6M（僅在有對話歷史時）
     if(toolId === 'fishbone') {
       var firstUser = '';
+      // 抓用戶的第一則簡短回覆（排除很長的 AI 問題）
       for(var i=0;i<homeHistory.length;i++){
-        if(homeHistory[i].role==='user'){ firstUser=homeHistory[i].content; break; }
+        if(homeHistory[i].role==='user' && homeHistory[i].content.length < 100){
+          firstUser=homeHistory[i].content; break;
+        }
+      }
+      // 若第一則太短（單一字），用所有用戶回答組合
+      if(!firstUser || firstUser.length < 4){
+        firstUser = homeHistory.filter(function(m){return m.role==='user';})
+          .map(function(m){return m.content;}).join('；');
       }
       if(typeof goTool==='function') goTool('fishbone');
       setTimeout(function(){
