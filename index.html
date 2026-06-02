@@ -4887,6 +4887,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
   // 目前的因子資料
   window._fbData = JSON.parse(JSON.stringify(FB_DEFAULT));
+  window.FB_DEFAULT_DATA = FB_DEFAULT; // 供 resetToolPanel 使用
 
   var RISK_LABEL = { high:'🔴 高風險', medium:'🟡 中風險', low:'🟢 低風險' };
   var RISK_NEXT  = { high:'medium', medium:'low', low:'high' };
@@ -6750,6 +6751,8 @@ window.doeUpdateFactors = function() {
       if(chatWrap) chatWrap.style.display = 'none';
       var fbSel = document.getElementById('fb-factor-selector');
       if(fbSel){ fbSel.innerHTML=''; fbSel.style.display='none'; }
+      // 還原 _fbData 為預設值，避免因子卡片名稱空白
+      if(window.FB_DEFAULT_DATA) window._fbData = JSON.parse(JSON.stringify(window.FB_DEFAULT_DATA));
     }
   }
 
