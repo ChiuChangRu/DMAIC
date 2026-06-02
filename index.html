@@ -5220,56 +5220,45 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   }
 
   function homeGoTool(toolId) {
+    // 魚骨圖：帶入問題 + 生成 6M
     if(toolId === 'fishbone') {
+      var firstUser = '';
+      for(var i=0;i<homeHistory.length;i++){
+        if(homeHistory[i].role==='user'){ firstUser=homeHistory[i].content; break; }
+      }
       if(typeof goTool==='function') goTool('fishbone');
       setTimeout(function(){
-        // 魚頭：取用戶第一則問題
-        var firstUser = '';
-        for(var i=0;i<homeHistory.length;i++){
-          if(homeHistory[i].role==='user'){ firstUser=homeHistory[i].content; break; }
-        }
         var fbProbEl = document.getElementById('fb-problem');
         if(fbProbEl && firstUser) fbProbEl.value = firstUser;
-
-        if(!firstUser || homeHistory.length < 2) return;
-
-        // 顯示生成中提示
         var hint = document.createElement('div');
         hint.className = 'fb-import-hint';
         hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
-        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在生成 6M 根本原因建議...';
+        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在為您生成 6M 根本原因建議...';
         var fbHintWrap = document.getElementById('fb-hint-wrap');
         if(fbHintWrap){ fbHintWrap.innerHTML=''; fbHintWrap.appendChild(hint); }
-
+        if(!firstUser){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
         window._homeHistory = homeHistory.slice();
-
-        // 只傳用戶回答 + AI最後摘要，單則訊息避免超長
-        var userAnswers = homeHistory.filter(function(m){return m.role==='user';})
-          .map(function(m){return m.content;}).join('；');
-        var aiLast = '';
-        for(var si=homeHistory.length-1;si>=0;si--){
-          if(homeHistory[si].role==='assistant'){aiLast=homeHistory[si].content.slice(0,150);break;}
-        }
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate', fbModel:'opus',
-            messages:[{role:'user',content:'問題背景：'+userAnswers+'\n分析方向：'+aiLast+'\n請生成魚骨圖6M根本原因，已排除類別回傳[]'}]
+            messages: homeHistory.concat([{role:'user',content:'請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。'}])
           })
         }).then(function(r){return r.json();}).then(function(data){
           console.log('[fb_gen]',JSON.stringify(data).slice(0,150));
           if(data.result){
             if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
-            hint.innerHTML='✅ AI 已帶入根本原因建議，可修改後產生魚骨圖';
-            hint.style.cssText='background:#F0FDF4;border:1px solid #86EFAC;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#166534;margin-bottom:.5rem';
+            hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
+            hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
           } else {
-            hint.innerHTML='⚠️ 生成失敗（'+(data.error||'未知')+'），請手動填寫';
-            hint.style.cssText='background:#FFFBEB;border:1px solid #FDE68A;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#92400E;margin-bottom:.5rem';
+            var errMsg = data.error || 'result 為空';
+            hint.innerHTML='⚠️ AI 建議生成失敗（'+errMsg+'），請手動填寫各欄位';
+            hint.style.background='#FFFBEB'; hint.style.borderColor='#FDE68A'; hint.style.color='#92400E';
           }
         }).catch(function(err){
-          hint.innerHTML='⚠️ 連線失敗，請手動填寫';
-          hint.style.cssText='background:#FEF2F2;border:1px solid #FECACA;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#991B1B;margin-bottom:.5rem';
+          hint.innerHTML='⚠️ 連線失敗，請手動填寫各欄位';
+          hint.style.background='#FEF2F2'; hint.style.borderColor='#FECACA'; hint.style.color='#991B1B';
         });
-      }, 900);
+      }, 500);
     } else {
       if(typeof goTool==='function') goTool(toolId);
     }
