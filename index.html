@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.32 · AI 輔助統計分析平台</title>
+<title>MedQA v3.30 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -579,11 +579,6 @@ tr:hover td{background:#F9FAFB}
   body { font-size:11px; }
   .tp-title { font-size:16px; }
 }
-
-.doe-dcard:has(input:checked){border-color:var(--navy2)!important;background:#EFF6FF!important}
-.doe-dcard:has(input:checked) div:first-of-type{color:var(--navy2)!important}
-.doe-dcard:has(input:not(:checked)) div:first-of-type{color:#6B7280}
-.doe-dcard{transition:border-color .15s,background .15s}
 </style>
 </head>
 <body>
@@ -598,7 +593,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.32 · 2026-06-02 21:21</span>
+    <span class="tb-status" id="dmaic-save-status">v3.31 · 2026-06-02 21:01</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -991,42 +986,9 @@ tr:hover td{background:#F9FAFB}
 <div class="tool-page">
   <div class="tp-header">
     <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・AI 輔助腦力激盪</div></div>
+    <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
   </div>
-
-  <!-- ① 魚骨圖 SVG（置頂，產生後顯示） -->
-  <div id="fb-out" style="display:none">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-        <div class="card-title" style="margin:0"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block;margin-right:6px"></span>魚骨圖</div>
-        <button onclick="fbToggleInput()" style="font-size:11px;color:#6B7280;background:none;border:1px solid #DDE2EC;border-radius:5px;padding:3px 10px;cursor:pointer" id="fb-toggle-btn">✏️ 編輯原因</button>
-      </div>
-      <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
-      <div style="margin-top:.4rem;font-size:11px;color:#9CA3AF;padding:.2rem .5rem">大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（1～5）</div>
-    </div>
-  </div>
-
-  <!-- ② AI 分析報告 -->
-  <div id="claude-container-fishbone" style="padding:0 0 .5rem 0"></div>
-
-  <!-- ③ AI 對話框（人工反饋，可更新魚骨圖） -->
-  <div id="fb-chat-wrap" style="display:none">
-    <div class="card">
-      <div class="card-title"><span style="background:#7C3AED;width:3px;height:13px;border-radius:2px;display:inline-block;margin-right:6px"></span>🤖 AI 分析助理 <span style="font-size:11px;color:#6B7280;font-weight:400">可追問、調整因子、確認風險方向</span></div>
-      <div id="fb-chat-msgs" style="max-height:240px;overflow-y:auto;padding:.5rem 0;display:flex;flex-direction:column;gap:.5rem"></div>
-      <div style="display:flex;gap:8px;margin-top:.5rem">
-        <input type="text" id="fb-chat-input" placeholder="追問或補充說明（例：請重新評估材料類別）" style="flex:1;border:1px solid #DDE2EC;border-radius:7px;padding:.5rem .75rem;font-size:13px;font-family:inherit" onkeydown="if(event.key==='Enter')fbChatSend()">
-        <button onclick="fbChatSend()" style="background:var(--navy2);color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">送出</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ④ 因子列表（勾選帶入DOE） -->
-  <div id="fb-factor-selector" style="display:none"></div>
-
-  <!-- ⑤ 輸入區（可收合，預設展開） -->
-  <div id="fb-input-wrap">
-    <div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>輸入格式說明</div>
 
 <button class="edu-btn" onclick="toggleEdu('fishbone')">
@@ -1076,10 +1038,18 @@ tr:hover td{background:#F9FAFB}
     </div>
     <div class="btn-row"><button class="btn btn-primary" onclick="fishboneDraw()">▶ 產生魚骨圖</button></div>
   </div>
+  <div id="fb-factor-selector" style="display:none"></div>
+<div id="fb-out" style="display:none">
+    <div class="card">
+      <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
+      <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
+        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（1～5）
+      </div>
+    </div>
   </div>
-
 </div>
-
+<div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
+</div>
 
 <!-- ══════════════ 子頁面：Histogram ══════════════ -->
 <div id="page-histogram" class="page">
@@ -1207,27 +1177,13 @@ tr:hover td{background:#F9FAFB}
 
     <div class="g3">
       <div class="g2">
-        <div class="field" style="grid-column:1/-1">
-  <label>選擇實驗設計方法 <span id="doe-nf-hint" style="font-size:11px;color:#6B7280;font-weight:400">（因子數 ≤4 建議全因子）</span></label>
-  <div id="doe-design-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px">
-    <label class="doe-dcard" style="border:2px solid var(--navy2);background:#EFF6FF;border-radius:8px;padding:.7rem .8rem;cursor:pointer;display:block">
-      <input type="radio" name="doe-dtype" value="full" checked onchange="doeUpdateDesignType()" style="display:none">
-      <div style="font-size:12px;font-weight:700;color:var(--navy2);margin-bottom:3px">🔬 全因子 2<sup>k</sup></div>
-      <div style="font-size:11px;color:#374151;line-height:1.5">≤4 個因子，完整估計主效應與交互作用，實驗次數 2ᵏ</div>
-    </label>
-    <label class="doe-dcard" style="border:2px solid #DDE2EC;background:#fff;border-radius:8px;padding:.7rem .8rem;cursor:pointer;display:block">
-      <input type="radio" name="doe-dtype" value="frac" onchange="doeUpdateDesignType()" style="display:none">
-      <div style="font-size:12px;font-weight:700;color:#6B7280;margin-bottom:3px">✂️ 部分因子 2<sup>k-p</sup></div>
-      <div style="font-size:11px;color:#374151;line-height:1.5">4-7 個因子，Resolution III/IV/V，犧牲部分交互作用估計</div>
-    </label>
-    <label class="doe-dcard" style="border:2px solid #DDE2EC;background:#fff;border-radius:8px;padding:.7rem .8rem;cursor:pointer;display:block">
-      <input type="radio" name="doe-dtype" value="pb" onchange="doeUpdateDesignType()" style="display:none">
-      <div style="font-size:12px;font-weight:700;color:#6B7280;margin-bottom:3px">🔍 PB 因子篩選</div>
-      <div style="font-size:11px;color:#374151;line-height:1.5">5-11 個因子，快速篩選主要影響因子，找出關鍵 2-4 個再進全因子 DOE</div>
-    </label>
-  </div>
-  <input type="hidden" id="doe-design-type" value="full">
-</div>
+        <div class="field"><label>設計方法</label>
+          <select id="doe-design-type" onchange="doeUpdateDesignType()">
+            <option value="full">全因子 2ᵏ（≤4因子）</option>
+            <option value="frac">部分因子 2ᵏ⁻ᵖ（4-7因子）</option>
+            <option value="pb">Plackett-Burman（5-11因子篩選）</option>
+          </select>
+        </div>
         <div class="field"><label>因子數量</label>
           <select id="doe-nf" onchange="doeUpdateFactors()">
             <option value="2">2 個因子（4 次實驗）</option>
@@ -2249,17 +2205,6 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
-  document.getElementById('fb-chat-wrap').style.display='block';
-  // 觸發 AI 分析報告
-  var fbStats = '魚骨圖分析\n問題：' + problem + '\n';
-  fbStats += '6M 原因總數：' + fbCauses.length + '\n';
-  [{id:'fb-man',cat:'人員'},{id:'fb-machine',cat:'機器'},{id:'fb-material',cat:'材料'},
-   {id:'fb-method',cat:'方法'},{id:'fb-measure',cat:'量測'},{id:'fb-env',cat:'環境'}]
-  .forEach(function(c){
-    var causes = (document.getElementById(c.id)||{value:''}).value.split('\n').filter(function(l){return l.trim();});
-    if(causes.length) fbStats += c.cat+'：'+causes.map(function(l){return l.split(',')[0].trim();}).join('、')+'\n';
-  });
-  setTimeout(function(){claudeAutoAnalyze('fishbone', fbStats);}, 300);
 
   // 收集所有魚骨圖原因
   var fbCauses = [];
@@ -2299,107 +2244,6 @@ function fishboneDraw(){
     html += '</div></div>';
     selectorDiv.innerHTML = html;
     selectorDiv.style.display = 'block';
-  }
-}
-
-
-// ════════════════════════════════════════════
-// 魚骨圖 AI 對話（fbChatSend）+ 自動更新
-// ════════════════════════════════════════════
-var fbChatHistory = [];
-var fbChatRiskMap = {high:5, medium:3, low:1};
-var fbChatFieldMap = {
-  man:'fb-man', machine:'fb-machine', material:'fb-material',
-  method:'fb-method', measure:'fb-measure', env:'fb-env'
-};
-
-function fbToggleInput(){
-  var wrap = document.getElementById('fb-input-wrap');
-  var btn  = document.getElementById('fb-toggle-btn');
-  if(!wrap) return;
-  var hidden = wrap.style.display === 'none';
-  wrap.style.display = hidden ? '' : 'none';
-  if(btn) btn.textContent = hidden ? '▲ 收合輸入區' : '✏️ 編輯原因';
-}
-
-function fbApplyCauses(result){
-  if(!result) return 0;
-  var total = 0;
-  Object.keys(fbChatFieldMap).forEach(function(cat){
-    var el = document.getElementById(fbChatFieldMap[cat]);
-    if(!el) return;
-    var causes = result[cat] || [];
-    if(causes.length === 0) return;  // 保留空類別不覆寫
-    el.value = causes.map(function(c){ return c.name + ', ' + (fbChatRiskMap[c.risk]||3); }).join(String.fromCharCode(10));
-    total += causes.length;
-  });
-  return total;
-}
-
-async function fbChatSend(){
-  var input = document.getElementById('fb-chat-input');
-  var msgs = document.getElementById('fb-chat-msgs');
-  if(!input || !msgs) return;
-  var text = input.value.trim();
-  if(!text) return;
-  input.value = '';
-
-  // 顯示使用者訊息
-  var uDiv = document.createElement('div');
-  uDiv.style.cssText = 'align-self:flex-end;background:var(--navy2);color:#fff;border-radius:10px 10px 2px 10px;padding:.45rem .8rem;font-size:12px;max-width:80%';
-  uDiv.textContent = text;
-  msgs.appendChild(uDiv);
-
-  // loading
-  var loadDiv = document.createElement('div');
-  loadDiv.style.cssText = 'align-self:flex-start;background:#F3F4F6;color:#6B7280;border-radius:10px;padding:.45rem .8rem;font-size:12px';
-  loadDiv.textContent = 'AI 分析中...';
-  msgs.appendChild(loadDiv);
-  msgs.scrollTop = msgs.scrollHeight;
-
-  // 組裝目前魚骨圖狀態
-  var problem = (document.getElementById('fb-problem')||{value:'問題'}).value;
-  var currentState = {problem: problem, causes: {}};
-  Object.keys(fbChatFieldMap).forEach(function(cat){
-    var el = document.getElementById(fbChatFieldMap[cat]);
-    if(!el || !el.value.trim()) return;
-    currentState.causes[cat] = el.value.trim().split('\n').filter(Boolean).map(function(l){
-      var parts = l.split(','); return {name:parts[0].trim(), strength:parseInt(parts[1])||3};
-    });
-  });
-
-  // 加到對話歷史
-  fbChatHistory.push({role:'user', content: '目前魚骨圖狀態：' + JSON.stringify(currentState) + '\n\n使用者問題：' + text});
-
-  try {
-    var resp = await fetch(window.CLAUDE_WORKER, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({mode:'fishbone_chat', messages: fbChatHistory})
-    });
-    var data = await resp.json();
-    loadDiv.remove();
-
-    var reply = data.reply || data.text || '無回應';
-    var result = data.updated_causes;
-
-    // AI 回覆
-    var aiDiv = document.createElement('div');
-    aiDiv.style.cssText = 'align-self:flex-start;background:#F0F9FF;border-left:3px solid #0891B2;border-radius:0 10px 10px 0;padding:.5rem .8rem;font-size:12px;max-width:90%;line-height:1.7;color:#1a1a2e';
-    aiDiv.innerHTML = reply.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-
-    // 若有更新，加「已同步」提示
-    if(result && typeof result === 'object'){
-      var n = fbApplyCauses(result);
-      if(n > 0){
-        aiDiv.innerHTML += '<div style="margin-top:.4rem;font-size:11px;color:#059669;font-weight:600">✅ 已自動更新 ' + n + ' 個原因到魚骨圖（點「產生魚骨圖」重繪）</div>';
-      }
-    }
-    msgs.appendChild(aiDiv);
-    fbChatHistory.push({role:'assistant', content: reply});
-    msgs.scrollTop = msgs.scrollHeight;
-
-  } catch(e) {
-    loadDiv.textContent = '❌ 連線失敗，請重試';
   }
 }
 
@@ -4997,7 +4841,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.32 · 2026-06-02 21:21enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.31 · 2026-06-02 21:01enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -5091,7 +4935,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.32 · 2026-06-02 21:21enabled');
+  status('v3.31 · 2026-06-02 21:01enabled');
 })();
 
 
@@ -5195,10 +5039,7 @@ function getPBDesign(nf) {
 
 // 設計類型切換
 window.doeUpdateDesignType = function() {
-  // 同步 hidden input（相容舊邏輯）
-  var dtEl=document.querySelector('input[name="doe-dtype"]:checked');
-  if(dtEl){ var hi=document.getElementById('doe-design-type'); if(hi) hi.value=dtEl.value; }
-  var dtEl=document.querySelector('input[name="doe-dtype"]:checked'); var dtype=dtEl?dtEl.value:(document.getElementById('doe-design-type')||{value:'full'}).value;
+  var dtype = document.getElementById('doe-design-type').value;
   var nfSelect = document.getElementById('doe-nf');
   var pbWarn = document.getElementById('pb-warning');
 
@@ -5528,7 +5369,7 @@ function resIcon(res) {
 // 更新設計方法切換
 var _origDoeUpdateDesignType = window.doeUpdateDesignType;
 window.doeUpdateDesignType = function() {
-  var dtEl=document.querySelector('input[name="doe-dtype"]:checked'); var dtype=dtEl?dtEl.value:(document.getElementById('doe-design-type')||{value:'full'}).value;
+  var dtype = document.getElementById('doe-design-type').value;
   var nfSelect = document.getElementById('doe-nf');
   var pbWarn = document.getElementById('pb-warning');
   var fracRow = document.getElementById('frac-design-row');
