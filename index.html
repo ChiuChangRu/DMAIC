@@ -894,7 +894,7 @@ tr:hover td{background:#F9FAFB}
     <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
   </div>
   <div class="card">
-    <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>輸入格式說明</div>
+    <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>根本原因分析</div>
 
 <button class="edu-btn" onclick="toggleEdu('fishbone')">
   <span style="font-size:15px">📖</span> 工具說明 / 教育訓練
@@ -928,10 +928,6 @@ tr:hover td{background:#F9FAFB}
   </div>
 </div>
 
-    <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.85rem 1rem;font-size:13px;margin-bottom:1rem;line-height:2;color:#1E40AF">
-      <strong>每行格式：</strong><code style="background:#DBEAFE;padding:1px 6px;border-radius:4px;font-size:12px">原因名稱, 效應強度</code>　　<strong>效應強度：</strong>1～5（越大越靠近魚頭）<br>
-      <strong>範例：</strong><code style="background:#DBEAFE;padding:1px 6px;border-radius:4px;font-size:12px">操作技能不足, 4</code>　<span style="color:#6B7280;font-size:12px">（省略強度預設 3）</span>
-    </div>
     <div class="field"><label>問題（魚頭）</label><input type="text" id="fb-problem" value="產品不良率偏高"></div>
 
     <!-- AI 模型選擇 -->
@@ -5232,7 +5228,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   }
 
   function homeGoTool(toolId) {
-    // 魚骨圖：帶入問題 + 生成 6M
+    // 魚骨圖：帶入問題 + 生成 6M（僅在有對話歷史時）
     if(toolId === 'fishbone') {
       var firstUser = '';
       for(var i=0;i<homeHistory.length;i++){
@@ -5240,15 +5236,21 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       }
       if(typeof goTool==='function') goTool('fishbone');
       setTimeout(function(){
+        // 帶入問題欄
         var fbProbEl = document.getElementById('fb-problem');
         if(fbProbEl && firstUser) fbProbEl.value = firstUser;
+
+        // 沒有對話歷史：靜默進入，不顯示任何提示
+        if(!firstUser || homeHistory.length < 2) return;
+
+        // 有對話歷史：顯示 AI 生成提示並呼叫
         var hint = document.createElement('div');
         hint.className = 'fb-import-hint';
         hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
-        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在為您生成 6M 根本原因建議...';
+        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在根據您的問題描述生成 6M 根本原因建議...';
         var fbCard = document.querySelector('#page-fishbone .card');
         if(fbCard){ var ex=fbCard.querySelector('.fb-import-hint');if(ex)ex.remove(); fbCard.insertBefore(hint,fbCard.querySelector('.btn-row')); }
-        if(!firstUser){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
+
         // 儲存主頁對話歷史供魚骨圖助理繼承
         window._homeHistory = homeHistory.slice();
         var fbModel = typeof fbGetSelectedModel==='function' ? fbGetSelectedModel() : 'opus';
@@ -5262,8 +5264,14 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
             if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
             hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
             hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
-          } else { hint.innerHTML='⚠️ AI 建議生成失敗，請手動填寫各欄位'; hint.style.background='#FFFBEB'; hint.style.borderColor='#FDE68A'; hint.style.color='#92400E'; }
-        }).catch(function(){ hint.innerHTML='⚠️ 連線失敗，請手動填寫各欄位'; hint.style.background='#FEF2F2'; hint.style.borderColor='#FECACA'; hint.style.color='#991B1B'; });
+          } else {
+            hint.innerHTML='⚠️ AI 建議生成失敗，請手動填寫各欄位';
+            hint.style.background='#FFFBEB'; hint.style.borderColor='#FDE68A'; hint.style.color='#92400E';
+          }
+        }).catch(function(){
+          hint.innerHTML='⚠️ 連線失敗，請手動填寫各欄位';
+          hint.style.background='#FEF2F2'; hint.style.borderColor='#FECACA'; hint.style.color='#991B1B';
+        });
       }, 500);
     } else {
       if(typeof goTool==='function') goTool(toolId);
