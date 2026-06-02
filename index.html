@@ -548,10 +548,9 @@ tr:hover td{background:#F9FAFB}
         </div>
       </div>
 
-      <!-- 工具推薦按鈕區 -->
-      <div id="home-tool-buttons" style="display:none;margin-top:.85rem;padding-top:.75rem;border-top:1px solid rgba(255,255,255,.1)">
-        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:.5rem;letter-spacing:.04em">▸ 推薦分析工具</div>
-        <div id="home-tool-btn-list" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+      <!-- 工具推薦按鈕區（已整合至訊息泡泡，此區保留備用但隱藏） -->
+      <div id="home-tool-buttons" style="display:none">
+        <div id="home-tool-btn-list"></div>
       </div>
     </div>
 
@@ -5218,20 +5217,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       });
       div.appendChild(btnArea);
 
-      // 同步更新固定按鈕區（保留相容性）
-      var tbDiv = document.getElementById('home-tool-btn-list');
-      var tbWrap = document.getElementById('home-tool-buttons');
-      if(tbDiv && tbWrap){
-        tbDiv.innerHTML = '';
-        tbWrap.style.display = 'block';
-        tools.forEach(function(toolId){
-          var btn2 = document.createElement('button');
-          btn2.style.cssText = 'background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit';
-          btn2.textContent = TOOL_NAMES_HOME[toolId] || toolId;
-          btn2.onclick = function(){ homeGoTool(toolId); };
-          tbDiv.appendChild(btn2);
-        });
-      }
+      // 按鈕直接附加在訊息泡泡底部，不另設固定區
     }
     hist.appendChild(div);
     hist.scrollTop = hist.scrollHeight;
@@ -5275,10 +5261,27 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         // 儲存主頁對話歷史供魚骨圖助理繼承
         window._homeHistory = homeHistory.slice();
         var fbModel = typeof fbGetSelectedModel==='function' ? fbGetSelectedModel() : 'opus';
+
+        // 壓縮對話歷史（避免超過 Worker 20000 字元限制）
+        // 只保留用戶的回答，摘要成一則訊息
+        var userAnswers = homeHistory
+          .filter(function(m){ return m.role==='user'; })
+          .map(function(m){ return m.content; })
+          .join('；');
+        var aiSummary = '';
+        for(var si=homeHistory.length-1;si>=0;si--){
+          if(homeHistory[si].role==='assistant'){ aiSummary=homeHistory[si].content.slice(0,300); break; }
+        }
+        var compressedMessages = [
+          { role:'user', content:'問題背景（來自對話摘要）：\n用戶回答：'+userAnswers+'\nAI最後分析：'+aiSummary },
+          { role:'assistant', content:'我了解這個問題的背景，請問需要哪些 6M 根本原因建議？' },
+          { role:'user', content:'請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。' }
+        ];
+
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate', fbModel: fbModel,
-            messages: homeHistory.concat([{role:'user',content:'請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。'}])
+            messages: compressedMessages
           })
         }).then(function(r){return r.json();}).then(function(data){
           if(data.result){
