@@ -5691,7 +5691,21 @@ document.addEventListener('click', function(e) {
 
   // auto-save, restore on navigation
   var oldGoTool=window.goTool, oldGoHome=window.goHome;
-  if(typeof oldGoTool==='function') window.goTool=function(id){ oldGoTool(id); window.dmaicEnhanceRecords(); window.dmaicRestoreCurrent(); };
+  if(typeof oldGoTool==='function') window.goTool=function(id){
+    // 魚骨圖：進入前先清除殘留 hint（在 dmaicRestoreCurrent 之前）
+    if(id==='fishbone'){
+      var hw=document.getElementById('fb-hint-wrap');
+      if(hw) hw.innerHTML='';
+    }
+    oldGoTool(id);
+    window.dmaicEnhanceRecords();
+    window.dmaicRestoreCurrent();
+    // 魚骨圖：restore 之後再清除一次確保乾淨
+    if(id==='fishbone'){
+      var hw2=document.getElementById('fb-hint-wrap');
+      if(hw2) hw2.innerHTML='';
+    }
+  };
   if(typeof oldGoHome==='function') window.goHome=function(){ oldGoHome(); window.dmaicRestoreCurrent(); };
   document.addEventListener('input',function(e){if(e.target && e.target.id){if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(false);clearTimeout(window.__dmaicSaveTimer);window.__dmaicSaveTimer=setTimeout(window.dmaicSaveCurrent,700);}},true);
   document.addEventListener('change',function(e){if(e.target && e.target.id) window.dmaicSaveCurrent();},true);
