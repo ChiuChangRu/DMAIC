@@ -960,6 +960,10 @@ tr:hover td{background:#F9FAFB}
 
     <div class="btn-row"><button class="btn btn-primary" onclick="fbSyncAndDraw()">▶ 產生魚骨圖</button></div>
   </div>
+
+  <!-- AI 帶入提示：固定容器，不受 DMAIC card 影響 -->
+  <div id="fb-hint-wrap"></div>
+
 <div id="fb-out" style="display:none">
     <div class="card">
       <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
@@ -5248,8 +5252,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         hint.className = 'fb-import-hint';
         hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
         hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在根據您的問題描述生成 6M 根本原因建議...';
-        var fbCard = document.querySelector('#page-fishbone .card');
-        if(fbCard){ var ex=fbCard.querySelector('.fb-import-hint');if(ex)ex.remove(); fbCard.insertBefore(hint,fbCard.querySelector('.btn-row')); }
+        var fbHintWrap = document.getElementById('fb-hint-wrap');
+        if(fbHintWrap){ fbHintWrap.innerHTML=''; fbHintWrap.appendChild(hint); }
 
         // 儲存主頁對話歷史供魚骨圖助理繼承
         window._homeHistory = homeHistory.slice();
@@ -6744,8 +6748,8 @@ window.doeUpdateFactors = function() {
     if(window.claudeHistory) delete window.claudeHistory[toolId];
     // 魚骨圖專用：清除 AI 帶入提示和問答助理
     if(toolId === 'fishbone'){
-      var hint = document.querySelector('.fb-import-hint');
-      if(hint) hint.remove();
+      var hintWrap = document.getElementById('fb-hint-wrap');
+      if(hintWrap) hintWrap.innerHTML = '';
       var chatWrap = document.getElementById('fb-chat-wrap');
       if(chatWrap) chatWrap.style.display = 'none';
       var fbSel = document.getElementById('fb-factor-selector');
