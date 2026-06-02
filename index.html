@@ -524,7 +524,7 @@ tr:hover td{background:#F9FAFB}
       </div>
 
       <!-- 對話區（展開後顯示） -->
-      <div id="home-chat-history" style="display:none;max-height:200px;overflow-y:auto;display:none;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
+      <div id="home-chat-history" style="display:none;max-height:380px;overflow-y:auto;display:none;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
 
       <!-- 輸入區 -->
       <div style="display:flex;gap:8px;align-items:flex-end">
@@ -5198,20 +5198,38 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     var div = document.createElement('div');
     div.style.cssText = 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;white-space:pre-wrap';
     div.textContent = text;
+
     if(tools && tools.length > 0) {
+      // 按鈕直接附加在訊息泡泡底部
+      var btnArea = document.createElement('div');
+      btnArea.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
+      var label = document.createElement('div');
+      label.style.cssText = 'width:100%;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:2px;letter-spacing:.04em';
+      label.textContent = '▸ 推薦分析工具';
+      btnArea.appendChild(label);
+      tools.forEach(function(toolId) {
+        var btn = document.createElement('button');
+        btn.style.cssText = 'background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s';
+        btn.textContent = TOOL_NAMES_HOME[toolId] || toolId;
+        btn.onmouseover = function(){ this.style.background='rgba(255,255,255,.25)'; };
+        btn.onmouseout  = function(){ this.style.background='rgba(255,255,255,.15)'; };
+        btn.onclick = function() { homeGoTool(toolId); };
+        btnArea.appendChild(btn);
+      });
+      div.appendChild(btnArea);
+
+      // 同步更新固定按鈕區（保留相容性）
       var tbDiv = document.getElementById('home-tool-btn-list');
       var tbWrap = document.getElementById('home-tool-buttons');
-      if(tbDiv && tbWrap) {
+      if(tbDiv && tbWrap){
         tbDiv.innerHTML = '';
         tbWrap.style.display = 'block';
-        tools.forEach(function(toolId) {
-          var btn = document.createElement('button');
-          btn.style.cssText = 'background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s';
-          btn.textContent = TOOL_NAMES_HOME[toolId] || toolId;
-          btn.onmouseover = function(){ this.style.background='rgba(255,255,255,.22)'; };
-          btn.onmouseout  = function(){ this.style.background='rgba(255,255,255,.12)'; };
-          btn.onclick = function() { homeGoTool(toolId); };
-          tbDiv.appendChild(btn);
+        tools.forEach(function(toolId){
+          var btn2 = document.createElement('button');
+          btn2.style.cssText = 'background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit';
+          btn2.textContent = TOOL_NAMES_HOME[toolId] || toolId;
+          btn2.onclick = function(){ homeGoTool(toolId); };
+          tbDiv.appendChild(btn2);
         });
       }
     }
