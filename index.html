@@ -5498,10 +5498,10 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           surveyCtx = '\n\n【問卷資料（供 6M 分類參考）】\n' + surveyParts.join('\n')
             + '\n\n問卷推論規則：'
             + '\n- 「特定機台才有」→ Machine 有依據，Man/Method 可審慎納入'
-            + '\n- 「無任何近期變更」→ Material/Method 原因應保守，不可大量列入'
-            + '\n- 「偶爾出現，不規則」→ Man/Env 較可能，Machine 需對話中有具體線索才列入'
+            + '\n- 「無任何近期變更」→ Material、Method 原因應保守，不可大量列入'
+            + '\n- 「偶爾出現，不規則」→ Man、Env 較可能；Machine 需有對話線索才列'
             + '\n- 「出廠前 QC 發現」→ Measure 有依據'
-            + '\n- 「材料或供應商變更」→ Material 高度有依據';
+            + '\n- 「材料或供應商變更」→ Material 高度有依據（high）';
         }
         var fbFinalMsg = '請嚴格根據以上對話內容與問卷資料中實際存在的線索，為魚骨圖 6M 各類別提供根本原因建議。'
           + surveyCtx
@@ -5518,9 +5518,9 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
             if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
             hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，正在繪製魚骨圖...';
             hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
-            // 自動產生魚骨圖
+            // 自動產生魚骨圖：必須用 fbSyncAndDraw 先把 _fbData 同步回 textarea 再畫圖
             setTimeout(function(){
-              if(typeof fishboneDraw==='function') fishboneDraw();
+              if(typeof fbSyncAndDraw==='function') fbSyncAndDraw();
               hint.innerHTML='✅ 魚骨圖已產生！可在上方查看，原因可直接編輯後重新繪製。';
             }, 600);
           } else {
