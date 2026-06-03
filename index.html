@@ -888,9 +888,12 @@ tr:hover td{background:#F9FAFB}
 <!-- ══════════════ 子頁面：Fishbone ══════════════ -->
 <div id="page-fishbone" class="page">
 <div class="tool-page">
-  <div class="tp-header">
-    <div class="tp-phase-dot" style="background:var(--D)"></div>
-    <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
+  <div class="tp-header" style="display:flex;align-items:center;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="tp-phase-dot" style="background:var(--D)"></div>
+      <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
+    </div>
+    <button onclick="fbSyncAndDraw()" style="background:var(--navy2);color:#fff;border:none;border-radius:8px;padding:.55rem 1.25rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">▶ 產生魚骨圖</button>
   </div>
   
   <!-- ① SVG 魚骨圖（置頂，畫完後顯示）-->
@@ -898,7 +901,6 @@ tr:hover td{background:#F9FAFB}
 <div id="fb-placeholder" style="background:#F8FAFF;border:2px dashed #C7D9F5;border-radius:12px;padding:2rem;text-align:center;margin-bottom:.75rem">
   <div style="font-size:36px;margin-bottom:.5rem">🐟</div>
   <div style="font-size:14px;color:#6B7280;margin-bottom:1rem">尚未產生魚骨圖<br><span style="font-size:12px">填入下方 6M 原因後按產生</span></div>
-  <button onclick="fbSyncAndDraw()" style="background:var(--navy2);color:#fff;border:none;border-radius:8px;padding:.65rem 1.5rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">▶ 產生魚骨圖</button>
 </div>
 
 <div id="fb-out" style="display:none">
