@@ -2339,7 +2339,6 @@ function fishboneDraw(){
     html += '<span style="font-size:12px;color:#6B7280;flex:1">勾選 DOE 因子後按帶入（已預選 <strong>製程/配方</strong> 類）</span>';
     html += '<button onclick="fbFilterDOE()" style="font-size:11px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">🧪 只看 DOE 因子</button>';
     html += '<button onclick="fbFilterAll()" style="font-size:11px;background:#F9FAFB;color:#6B7280;border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">全部顯示</button>';
-    html += '</div>';
 
     // ── 三個分組渲染 ──
     function renderGroup(factors, groupType){
@@ -2391,8 +2390,6 @@ function fishboneDraw(){
     html += '<span style="font-size:11px;color:#9CA3AF;align-self:center">🔴=高風險 · hover 看建議</span>';
     html += '</div>';
     html += '<div style="font-size:11px;color:#9CA3AF;margin-top:.4rem">DOE 帶入：🧪類勾選因子 ｜ MSA 帶入：📐類勾選因子（量測數據仍需手動填入）</div>';
-    html += '</div>';
-    html += '</div>';
     html += '</div>';
     selectorDiv.innerHTML = html;
     selectorDiv.style.display = 'block';
