@@ -5280,11 +5280,11 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         var cell = document.createElement('div');
         var lbl = document.createElement('div');
         lbl.textContent = q.label;
-        lbl.style.cssText = 'color:rgba(255,255,255,.7);font-size:11px;margin-bottom:3px';
+        lbl.style.cssText = 'color:rgba(255,255,255,.85);font-size:11px;margin-bottom:3px;font-weight:500';
         cell.appendChild(lbl);
         var sel = document.createElement('select');
         sel.id = q.id;
-        sel.style.cssText = 'width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:6px;color:#fff;padding:4px 8px;font-size:12px;font-family:inherit';
+        sel.style.cssText = 'width:100%;background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.4);border-radius:6px;color:#1a1a2e;padding:5px 8px;font-size:12px;font-family:inherit';
         q.opts.forEach(function(o){
           var opt = document.createElement('option');
           opt.value = o[0]; opt.textContent = o[1];
