@@ -2277,125 +2277,115 @@ function fishboneDraw(){
   // 渲染因子選擇面板（魚骨圖下方）
   var selectorDiv = document.getElementById('fb-factor-selector');
   if(selectorDiv && fbCauses.length > 0){
-    var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
-    html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">🧪 選擇實驗因子 → 帶入實驗設計</div>';
 
-    // 設計方法選擇（依因子數動態推薦）
-    var factorCount = fbCauses.length;
-    var suggestPB = factorCount > 4;
-    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.75rem 1rem;margin-bottom:.85rem">';
-    // DOE 製程/配方參數類關鍵字
-    var DOE_KW  = ['溫度','速度','時間','濃度','比例','壓力','轉速','厚度','電壓','流量','配方',
-                   '含量','劑量','頻率','功率','pH','黏度','分子量','批次比例','固化','塗布量'];
+    // === 三大類分類關鍵字 ===
+    var ISO_KW = ['老化','磨損','堵塞','故障','腐蝕','破損','損耗','洩漏','崩解','阻塞','老舊','變形','霧化不良','異常','污染','劣化','龜裂','氧化','銹蝕','卡死','滑牙','失靈'];
+    var MSA_KW = ['量測','校正','量化','檢測','精度','誤差','判讀','記錄','人員','訓練','技能','作業'];
+    var DOE_KW = ['溫度','速度','時間','濃度','比例','壓力','轉速','厚度','電壓','流量','配方','含量','劑量','頻率','功率','黏度','分子量','固化','塗布量'];
+    var MAT_KW = ['供應商','種類','型號','牌','批次','廠牌'];
 
-    function classifyFactor(f) {
-      var name = f.name || '';
-      var cid  = f.catKey || '';
-      // 人員類直接 → MSA
-      if(cid === 'man') return 'msa';
-      // 量測類 → MSA
-      if(cid === 'measure') return 'msa';
-      // 環境類 → ISO
-      if(cid === 'env') return 'iso';
-      // 關鍵字掃描（優先於 6M 類別）
-      for(var i=0;i<ISO_KW.length;i++)  if(name.indexOf(ISO_KW[i])>=0)  return 'iso';
-      for(var i=0;i<MSA_KW.length;i++)  if(name.indexOf(MSA_KW[i])>=0)  return 'msa';
-      for(var i=0;i<DOE_KW.length;i++)  if(name.indexOf(DOE_KW[i])>=0)  return 'doe';
-      // 6M 預設
-      if(cid==='machine')  return 'iso';   // 機器→若非參數則 ISO
-      if(cid==='material') return 'doe';
-      if(cid==='method')   return 'doe';
-      return 'doe'; // 預設
+    function classifyFactor(f){
+      var name=f.name||'', cid=f.catKey||'';
+      if(cid==='man'||cid==='measure') return 'msa';
+      if(cid==='env') return 'iso';
+      for(var i=0;i<ISO_KW.length;i++) if(name.indexOf(ISO_KW[i])>=0) return 'iso';
+      for(var i=0;i<MSA_KW.length;i++) if(name.indexOf(MSA_KW[i])>=0) return 'msa';
+      for(var i=0;i<DOE_KW.length;i++) if(name.indexOf(DOE_KW[i])>=0) return 'doe';
+      if(cid==='machine') return 'iso';
+      return 'doe';
     }
-
-    // 分類因子
-    var catDOE=[], catMSA=[], catISO=[];
-    fbCauses.forEach(function(f,i){
-      f._idx  = i;
-      f._type = classifyFactor(f);
-      if(f._type==='doe')      catDOE.push(f);
-      else if(f._type==='msa') catMSA.push(f);
-      else                     catISO.push(f);
-    });
-
-    // 判斷材料是否為類別型（供應商、種類、型號等）
-    var CAT_KW_MAT = ['供應商','種類','型號','牌','批次','廠牌'];
     function matType(f){
-      for(var i=0;i<CAT_KW_MAT.length;i++) if(f.name.indexOf(CAT_KW_MAT[i])>=0) return '類別型';
+      for(var i=0;i<MAT_KW.length;i++) if(f.name.indexOf(MAT_KW[i])>=0) return '類別型';
       return '連續型';
     }
 
-    // ── 說明卡 ──
-    html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:.75rem 1rem;margin-bottom:.85rem">';
-    html += '<div style="font-weight:700;color:#92400E;margin-bottom:.4rem">📌 因子三大類分析建議</div>';
-    html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;font-size:11px">';
-    html += '<div style="background:#EFF6FF;border-radius:6px;padding:.5rem .7rem"><div style="font-weight:700;color:#1D4ED8;margin-bottom:3px">🧪 製程／配方技術</div><div style="color:#374151">可量化的設定參數，建議以 <strong>DOE 或田口法</strong> 驗證最佳組合</div></div>';
-    html += '<div style="background:#F0FDF4;border-radius:6px;padding:.5rem .7rem"><div style="font-weight:700;color:#15803D;margin-bottom:3px">📐 人員／量測系統</div><div style="color:#374151">量測一致性先做 <strong>MSA/GRR</strong>；人員問題以 <strong>SOP 或訓練</strong> 改善</div></div>';
-    html += '<div style="background:#FEF2F2;border-radius:6px;padding:.5rem .7rem"><div style="font-weight:700;color:#B91C1C;margin-bottom:3px">🔧 設備／環境</div><div style="color:#374151">屬 <strong>ISO 14971 風險管理</strong> 或 PM 維護計畫；納入環境管制規範</div></div>';
-    html += '</div></div>';
+    var catDOE=[],catMSA=[],catISO=[];
+    fbCauses.forEach(function(f,i){
+      f._idx=i; f._type=classifyFactor(f);
+      if(f._type==='doe') catDOE.push(f);
+      else if(f._type==='msa') catMSA.push(f);
+      else catISO.push(f);
+    });
 
-    // 篩選按鈕
-    html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:.6rem;flex-wrap:wrap">';
-    html += '<span style="font-size:12px;color:#6B7280;flex:1">勾選 DOE 因子後按帶入（已預選 <strong>製程/配方</strong> 類）</span>';
-    html += '<button onclick="fbFilterDOE()" style="font-size:11px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">🧪 只看 DOE 因子</button>';
-    html += '<button onclick="fbFilterAll()" style="font-size:11px;background:#F9FAFB;color:#6B7280;border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">全部顯示</button>';
-
-    // ── 三個分組渲染 ──
-    function renderGroup(factors, groupType){
-      var cfgs = {
-        doe:{ title:'🧪 製程／配方技術（適合 DOE）',
-              bg:'#EFF6FF', border:'#BFDBFE', titleColor:'#1D4ED8', checked:true,  disabled:false },
-        msa:{ title:'📐 人員／量測系統（建議 MSA 或 SOP）',
-              bg:'#F0FDF4', border:'#6EE7B7', titleColor:'#15803D', checked:false, disabled:false },
-        iso:{ title:'🔧 設備／環境（ISO/PM 維護議題）',
-              bg:'#FEF2F2', border:'#FECACA', titleColor:'#B91C1C', checked:false, disabled:true }
-      };
-      var c = cfgs[groupType];
+    function renderGroup(factors,groupType){
       if(!factors.length) return '';
-      var h = '<div class="fb-group" data-group="'+groupType+'" style="margin-bottom:.85rem">';
-      h += '<div style="font-size:12px;font-weight:700;color:'+c.titleColor+';margin-bottom:.35rem;display:flex;align-items:center;gap:6px">';
-      h += '<span>'+c.title+'</span>';
-      if(groupType==='iso') h += '<span style="font-size:10px;font-weight:400;color:#9CA3AF">（可勾選但通常不作為 DOE 因子）</span>';
-      h += '</div>';
-      h += '<div style="display:flex;flex-wrap:wrap;gap:.35rem">';
-      factors.forEach(function(f){
-        var isHigh = f.risk==='high';
-        var type   = groupType==='doe' ? (f.catKey==='material' ? matType(f) : '連續型') : '';
-        var disAttr= c.disabled ? 'disabled' : '';
-        var chkAttr= (!c.disabled && c.checked && !isHigh) || (c.checked && isHigh) ? 'checked' : '';
-        if(groupType==='doe' && isHigh) chkAttr='checked'; // 高風險 DOE 因子預選
-        h += '<label data-suit="'+groupType+'" title="'+(groupType==='iso'?'建議加入 PM 計畫或 ISO 風險管理，不建議作為 DOE 因子':'')+(groupType==='msa'?'建議先用 MSA 確認量測系統，再考慮是否需要 DOE':'')+'" ';
-        h += 'style="display:inline-flex;align-items:center;gap:5px;border:1.5px solid '+c.border+';background:'+c.bg+';border-radius:6px;padding:5px 10px;cursor:'+(c.disabled?'default':'pointer')+';font-size:12px;'+(c.disabled?'opacity:.65':'')+(isHigh?';box-shadow:0 0 0 2px #FCA5A566':'')+'">';
-        h += '<input type="checkbox" value="'+f._idx+'" '+disAttr+' '+chkAttr+' onchange="fbUpdateCount()" style="cursor:'+(c.disabled?'not-allowed':'pointer')+'">';
-        h += '<span style="color:'+(isHigh?'#DC2626':c.disabled?'#9CA3AF':'#374151')+';'+(isHigh?'font-weight:700':'')+'">' + f.name + '</span>';
-        if(type) h += '<span style="font-size:9px;background:#fff;color:'+c.titleColor+';border:1px solid '+c.border+';border-radius:3px;padding:0 4px">'+type+'</span>';
-        if(isHigh) h += '<span style="font-size:10px;color:#DC2626">●</span>';
-        h += '</label>';
-      });
-      h += '</div></div>';
+      var cfgs={
+        doe:{title:'🧪 製程／配方技術（適合 DOE）',bg:'#EFF6FF',border:'#BFDBFE',color:'#1D4ED8',checked:true,disabled:false},
+        msa:{title:'📐 人員／量測系統（建議 MSA 或 SOP）',bg:'#F0FDF4',border:'#6EE7B7',color:'#15803D',checked:false,disabled:false},
+        iso:{title:'🔧 設備／環境（ISO/PM 維護議題）',bg:'#FEF2F2',border:'#FECACA',color:'#B91C1C',checked:false,disabled:true}
+      };
+      var c=cfgs[groupType];
+      var h='<div class="fb-group" data-group="'+groupType+'" style="margin-bottom:.75rem">';
+        h+='<div style="font-size:12px;font-weight:700;color:'+c.color+';margin-bottom:.35rem">'+c.title;
+        if(groupType==='iso') h+=' <span style="font-size:10px;font-weight:400;color:#9CA3AF">（通常不作為 DOE 因子）</span>';
+        h+='</div>';
+        h+='<div style="display:flex;flex-wrap:wrap;gap:.35rem">';
+          factors.forEach(function(f){
+            var isHigh=f.risk==='high';
+            var type=groupType==='doe'?(f.catKey==='material'?matType(f):'連續型'):'';
+            var dis=c.disabled?'disabled':'';
+            var chk=(c.checked||isHigh)&&!c.disabled?'checked':'';
+            h+='<label data-suit="'+groupType+'" style="display:inline-flex;align-items:center;gap:5px;border:1.5px solid '+c.border+';background:'+c.bg+';border-radius:6px;padding:5px 10px;cursor:'+(c.disabled?'default':'pointer')+';font-size:12px;'+(c.disabled?'opacity:.6':'')+(isHigh?';box-shadow:0 0 0 2px #FCA5A566':'')+'">';
+              h+='<input type="checkbox" value="'+f._idx+'" '+dis+' '+chk+' onchange="fbUpdateCount()">';
+              h+='<span style="color:'+(isHigh?'#DC2626':c.disabled?'#9CA3AF':'#374151')+';'+(isHigh?'font-weight:700':'')+'">'+f.name+'</span>';
+              if(type) h+='<span style="font-size:9px;background:#fff;color:'+c.color+';border:1px solid '+c.border+';border-radius:3px;padding:0 4px">'+type+'</span>';
+              if(isHigh) h+='<span style="font-size:10px;color:#DC2626">●</span>';
+            h+='</label>';
+          });
+        h+='</div>';
+      h+='</div>';
       return h;
     }
 
-    html += '<div id="fb-factor-list">';
-    html += renderGroup(catDOE,'doe');
-    html += renderGroup(catMSA,'msa');
-    html += renderGroup(catISO,'iso');
-    html += '</div>';
+    // 組裝完整 HTML
+    var html = '';
+    html += '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
 
-    html += '<div style="background:#F8FAFF;border-radius:8px;padding:.75rem 1rem;margin-top:.5rem">';
-    html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">已選 <span id="fb-count" style="font-weight:700;color:#1B3A5C">0</span> 個因子 &nbsp;|&nbsp; 依分類選擇帶入工具：</div>';
-    html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
-    html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🧪 帶入 DOE 實驗設計</button>';
-    html += '<button onclick="fbToMSA()" style="background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border:none;border-radius:7px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">📐 帶入 MSA 量測研究</button>';
-    html += '<span style="font-size:11px;color:#9CA3AF;align-self:center">🔴=高風險 · hover 看建議</span>';
-    html += '</div>';
-    html += '<div style="font-size:11px;color:#9CA3AF;margin-top:.4rem">DOE 帶入：🧪類勾選因子 ｜ MSA 帶入：📐類勾選因子（量測數據仍需手動填入）</div>';
-    html += '</div>';
+      // 標題
+      html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.75rem">🧪 選擇實驗因子 → 帶入分析工具</div>';
+
+      // 說明卡（三大類）
+      html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:.7rem 1rem;margin-bottom:.75rem">';
+        html += '<div style="font-weight:700;color:#92400E;margin-bottom:.35rem">📌 因子三大類分析建議</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;font-size:11px">';
+          html += '<div style="background:#EFF6FF;border-radius:6px;padding:.45rem .7rem"><div style="font-weight:700;color:#1D4ED8;margin-bottom:2px">🧪 製程／配方技術</div><div style="color:#374151">可量化的設定參數，建議以 <strong>DOE</strong> 驗證最佳組合</div></div>';
+          html += '<div style="background:#F0FDF4;border-radius:6px;padding:.45rem .7rem"><div style="font-weight:700;color:#15803D;margin-bottom:2px">📐 人員／量測系統</div><div style="color:#374151">先做 <strong>MSA/GRR</strong>；人員問題以 <strong>SOP</strong> 改善</div></div>';
+          html += '<div style="background:#FEF2F2;border-radius:6px;padding:.45rem .7rem"><div style="font-weight:700;color:#B91C1C;margin-bottom:2px">🔧 設備／環境</div><div style="color:#374151"><strong>ISO 14971</strong> 風險管理或 PM 維護計畫</div></div>';
+        html += '</div>';
+      html += '</div>';
+
+      // 篩選按鈕
+      html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:.6rem;flex-wrap:wrap">';
+        html += '<span style="font-size:12px;color:#6B7280;flex:1">已預選🧪類因子，勾選完成後按下方按鈕帶入工具</span>';
+        html += '<button onclick="fbFilterDOE()" style="font-size:11px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">🧪 只看 DOE 因子</button>';
+        html += '<button onclick="fbFilterAll()" style="font-size:11px;background:#F9FAFB;color:#6B7280;border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">全部顯示</button>';
+      html += '</div>';
+
+      // 三大類因子列表
+      html += '<div id="fb-factor-list">';
+        html += renderGroup(catDOE,'doe');
+        html += renderGroup(catMSA,'msa');
+        html += renderGroup(catISO,'iso');
+      html += '</div>';
+
+      // 帶入按鈕列
+      html += '<div style="background:#F0F4FF;border-radius:8px;padding:.75rem 1rem;margin-top:.75rem">';
+        html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">已選 <span id="fb-count" style="font-weight:700;color:#1B3A5C">0</span> 個因子 &nbsp;|&nbsp; 依分類選擇帶入工具：</div>';
+        html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
+          html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🧪 帶入 DOE 實驗設計</button>';
+          html += '<button onclick="fbToMSA()" style="background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📐 帶入 MSA 量測研究</button>';
+          html += '<span style="font-size:11px;color:#9CA3AF;align-self:center">🔴=高風險 hover看建議</span>';
+        html += '</div>';
+        html += '<div style="font-size:11px;color:#9CA3AF;margin-top:.35rem">DOE 帶入：勾選🧪類 ｜ MSA 帶入：勾選📐類（量測數據仍需手動填入）</div>';
+      html += '</div>';
+
+    html += '</div>'; // end card
+
     selectorDiv.innerHTML = html;
     selectorDiv.style.display = 'block';
-    // 初始化方法 UI
-    if(typeof fbUpdateMethodUI === 'function') setTimeout(fbUpdateMethodUI, 50);
+    setTimeout(function(){ fbUpdateCount(); }, 50);
   }
+
 }
 
 // ════════════════════════════════════════════
