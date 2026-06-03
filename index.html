@@ -2284,49 +2284,6 @@ function fishboneDraw(){
     var factorCount = fbCauses.length;
     var suggestPB = factorCount > 4;
     html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.75rem 1rem;margin-bottom:.85rem">';
-    html += '<div style="font-size:12px;font-weight:600;color:#1E40AF;margin-bottom:.5rem">選擇實驗設計方法';
-    html += '<span style="font-size:11px;font-weight:400;color:#6B7280;margin-left:8px">'+
-      (suggestPB ? '（因子數 > 4，建議先用 PB 篩選）' : '（因子數 ≤ 4，可直接用全因子 DOE）')+
-      '</span></div>';
-    html += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
-
-    if(suggestPB) {
-      // 因子 > 4：顯示 PB（預設）+ 田口
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #2563EB;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-pb-label">';
-      html += '<input type="radio" name="fb-doe-method" value="pb" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
-      html += '<div><div style="font-size:13px;font-weight:600;color:#1D4ED8">🔎 PB 因子篩選 <span style="font-size:10px;background:#DBEAFE;color:#1D4ED8;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
-      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子快速篩選主要影響因子，找出關鍵 2-4 個後再進全因子 DOE</div></div>';
-      html += '</label>';
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
-      html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
-      html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
-      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
-      html += '</label>';
-    } else {
-      // 因子 ≤ 4：顯示 DOE 全因子（預設）+ 田口
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #D97706;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-doe-label">';
-      html += '<input type="radio" name="fb-doe-method" value="doe" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
-      html += '<div><div style="font-size:13px;font-weight:600;color:#D97706">🧪 DOE 全因子／部分因子 <span style="font-size:10px;background:#FEF3C7;color:#D97706;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
-      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">≤ 4 個關鍵因子，完整估計主效應與所有交互作用，結果最可靠</div></div>';
-      html += '</label>';
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
-      html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
-      html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
-      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
-      html += '</label>';
-    }
-    html += '</div></div>';
-
-    // 因子上限提示（依方法動態更新）
-    html += '<div id="fb-factor-limit-hint" style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 <strong id="fb-max-count">11</strong> 個因子，選完後按帶入按鈕</div>';
-
-    // DOE 因子適合度分類
-    // === 三大類分類：關鍵字偵測 ===
-    // 設備狀態/維護類關鍵字 → ISO/PM 問題
-    var ISO_KW = ['老化','磨損','堵塞','故障','腐蝕','破損','損耗','洩漏','崩解','阻塞','老舊','變形',
-                  '霧化不良','異常','污染','劣化','龜裂','氧化','銹蝕','卡死','滑牙','失靈'];
-    // 量測/人員類關鍵字 → MSA/SOP
-    var MSA_KW  = ['量測','校正','量化','檢測','精度','誤差','判讀','記錄','人員','訓練','技能','作業'];
     // DOE 製程/配方參數類關鍵字
     var DOE_KW  = ['溫度','速度','時間','濃度','比例','壓力','轉速','厚度','電壓','流量','配方',
                    '含量','劑量','頻率','功率','pH','黏度','分子量','批次比例','固化','塗布量'];
@@ -5919,8 +5876,8 @@ document.addEventListener('click', function(e) {
 
 // ════ F01: 魚骨圖 → DOE 因子傳遞 ════
 window.fbUpdateMethodUI = function() {
-  var method = document.querySelector('input[name="fb-doe-method"]:checked');
-  var val = method ? method.value : 'pb';
+  // 因子數 > 4 直接用 PB，≤ 4 用全因子 DOE
+  var val = selected.length > 4 ? 'pb' : 'doe';
   var maxCount = val === 'doe' ? 4 : 11;
   var maxEl = document.getElementById('fb-max-count');
   if(maxEl) maxEl.textContent = maxCount;
