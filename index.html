@@ -898,8 +898,7 @@ tr:hover td{background:#F9FAFB}
   
   <!-- ① SVG 魚骨圖（置頂，畫完後顯示）-->
 <!-- 未產生時的佔位區 + 快速產生按鈕 -->
-<div id="fb-placeholder" style="background:#F8FAFF;border:2px dashed #C7D9F5;border-radius:12px;padding:2rem;text-align:center;margin-bottom:.75rem">
-  <div style="font-size:36px;margin-bottom:.5rem">🐟</div>
+<div 
   <div style="font-size:14px;color:#6B7280;margin-bottom:1rem">尚未產生魚骨圖<br><span style="font-size:12px">填入下方 6M 原因後按產生</span></div>
 </div>
 
@@ -945,12 +944,9 @@ tr:hover td{background:#F9FAFB}
 
   <!-- ⑤ 輸入欄（可收合） -->
   <div id="fb-input-wrap">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:6px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
       <div style="font-size:12px;color:#6B7280">📝 編輯 6M 原因輸入欄</div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button onclick="fbSyncAndDraw()" style="background:var(--navy2);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">▶ 產生魚骨圖</button>
-        <button onclick="document.getElementById('fb-input-inner').style.display=document.getElementById('fb-input-inner').style.display==='none'?'':'none';this.textContent=document.getElementById('fb-input-inner').style.display==='none'?'▼ 展開輸入欄':'▲ 收合輸入欄'" style="font-size:11px;color:#6B7280;background:none;border:1px solid #DDE2EC;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit" id="fb-toggle-btn">▲ 收合輸入欄</button>
-      </div>
+      <button onclick="document.getElementById('fb-input-inner').style.display=document.getElementById('fb-input-inner').style.display==='none'?'':'none';this.textContent=document.getElementById('fb-input-inner').style.display==='none'?'▼ 展開':'▲ 收合'" style="font-size:11px;color:#6B7280;background:none;border:1px solid #DDE2EC;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit" id="fb-toggle-btn">▲ 收合</button>
     </div>
     <div id="fb-input-inner">
 <div class="card">
@@ -2247,8 +2243,7 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
-  var fbph = document.getElementById('fb-placeholder');
-  if(fbph) fbph.style.display='none';
+  // fb-placeholder 已移除
   document.getElementById('fb-chat-wrap').style.display='block';
 
   // 組裝 AI 分析摘要（含實際原因數量）
@@ -6033,26 +6028,43 @@ fbToExperiment = function() {
 
   } else {
     // 帶入 DOE 全因子
+    var nLimit = Math.min(selected.length, 4);
     goTool('doe');
     setTimeout(function(){
+      // step1: 設定 radio 和 hidden input 為 full
+      var radio = document.querySelector('input[name="doe-dtype"][value="full"]');
+      if(radio){ radio.checked = true; }
       var dtype = document.getElementById('doe-design-type');
-      if(dtype){ dtype.value = 'full'; if(typeof doeUpdateDesignType==='function') doeUpdateDesignType(); }
+      if(dtype) dtype.value = 'full';
+      // step2: 設定因子數
       var nfEl = document.getElementById('doe-nf');
-      if(nfEl){ nfEl.value = Math.min(selected.length, 4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
+      if(nfEl){
+        nfEl.value = nLimit;
+        // 觸發更新讓因子輸入欄 DOM 建立
+        if(typeof doeUpdateDesignType==='function') doeUpdateDesignType();
+        else if(typeof doeUpdateFactors==='function') doeUpdateFactors();
+      }
+      // step3: 等 DOM 建立後填入因子名稱（800ms 確保足夠）
       setTimeout(function(){
-        selected.forEach(function(f, i){
+        selected.slice(0, nLimit).forEach(function(f, i){
           var el = document.getElementById('doe-f'+(i+1));
           if(el) el.value = f.name;
         });
-        if(typeof doeGenMatrix==='function') doeGenMatrix();
+        // step4: 顯示提示訊息
         var msg = document.createElement('div');
-        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
-        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
+        msg.id = 'fb-import-msg-doe';
+        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.85rem 1rem;margin-bottom:.85rem;font-size:13px;color:#166534';
+        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+nLimit+'</strong> 個因子：' +
+          selected.slice(0,nLimit).map(function(f){return f.name;}).join('、') +
+          (selected.length > 4 ? '<br><span style="font-size:11px;color:#D97706">⚠️ 全因子最多 4 因子，其餘 '+(selected.length-4)+' 個因子請改用 PB 篩選設計帶入。</span>' : '') +
           '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
-        msg.className = 'fb-import-msg';
-        var doeCard = document.querySelector('#page-doe .card');
-        if(doeCard){ var ex=doeCard.querySelector('.fb-import-msg');if(ex)ex.remove(); doeCard.insertBefore(msg,doeCard.firstChild); }
-      }, 400);
+        var tp = document.querySelector('#page-doe .tp-header') || document.querySelector('#page-doe .card');
+        if(tp){
+          var old = document.getElementById('fb-import-msg-doe');
+          if(old) old.remove();
+          tp.parentNode.insertBefore(msg, tp.nextSibling);
+        }
+      }, 800);
     }, 300);
   }
 };
