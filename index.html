@@ -5480,10 +5480,37 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         if(fbHintWrap){ fbHintWrap.innerHTML=''; fbHintWrap.appendChild(hint); }
         if(!firstUser){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
         window._homeHistory = homeHistory.slice();
+
+        // 組建問卷結構化 context，輔助 AI 正確對應 6M 類別
+        var surveyMap = [
+          ['hq-type',  '問題類型'],
+          ['hq-freq',  '發生頻率'],
+          ['hq-where', '發現位置'],
+          ['hq-scope', '影響範圍'],
+          ['hq-data',  '是否有數據'],
+          ['hq-change','近期是否有變更']
+        ];
+        var surveyParts = surveyMap
+          .map(function(item){ var el=document.getElementById(item[0]); return el&&el.value ? item[1]+'：'+el.value : null; })
+          .filter(Boolean);
+        var surveyCtx = '';
+        if(surveyParts.length){
+          surveyCtx = '\n\n【問卷資料（供 6M 分類參考）】\n' + surveyParts.join('\n')
+            + '\n\n問卷推論規則：'
+            + '\n- 「特定機台才有」→ Machine 有依據，Man/Method 可審慎納入'
+            + '\n- 「無任何近期變更」→ Material/Method 原因應保守，不可大量列入'
+            + '\n- 「偶爾出現，不規則」→ Man/Env 較可能，Machine 需對話中有具體線索才列入'
+            + '\n- 「出廠前 QC 發現」→ Measure 有依據'
+            + '\n- 「材料或供應商變更」→ Material 高度有依據';
+        }
+        var fbFinalMsg = '請嚴格根據以上對話內容與問卷資料中實際存在的線索，為魚骨圖 6M 各類別提供根本原因建議。'
+          + surveyCtx
+          + '\n\n【重要限制】對話或問卷中沒有明確線索支持的類別，必須回傳空陣列 []，不可依背景知識自行補充。';
+
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate', fbModel:'opus',
-            messages: homeHistory.concat([{role:'user',content:'請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。'}])
+            messages: homeHistory.concat([{role:'user', content: fbFinalMsg}])
           })
         }).then(function(r){return r.json();}).then(function(data){
           console.log('[fb_gen]',JSON.stringify(data).slice(0,150));
