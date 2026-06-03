@@ -1114,11 +1114,25 @@ tr:hover td{background:#F9FAFB}
 
     <div class="g3">
       <div class="g2">
-        <div class="field"><label>設計方法</label>
-          <select id="doe-design-type" onchange="doeUpdateDesignType()">
-            <option value="full">全因子 2ᵏ（≤4因子）</option>
-            <option value="frac">部分因子 2ᵏ⁻ᵖ（4-7因子）</option>
-          </select>
+        <div class="field" style="grid-column:1/-1"><label>選擇實驗設計方法</label>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px">
+    <label id="dcard-full" style="border:2px solid var(--navy2);background:#EFF6FF;border-radius:8px;padding:.65rem .8rem;cursor:pointer;display:block">
+      <input type="radio" name="doe-dtype" value="full" checked onchange="doeUpdateDesignType()" style="display:none">
+      <div style="font-size:12px;font-weight:700;color:var(--navy2);margin-bottom:3px">🔬 全因子 2ᵏ</div>
+      <div style="font-size:11px;color:#374151;line-height:1.5">≤4 因子，完整估計主效應與交互作用</div>
+    </label>
+    <label id="dcard-frac" style="border:2px solid #DDE2EC;background:#fff;border-radius:8px;padding:.65rem .8rem;cursor:pointer;display:block">
+      <input type="radio" name="doe-dtype" value="frac" onchange="doeUpdateDesignType()" style="display:none">
+      <div style="font-size:12px;font-weight:700;color:#6B7280;margin-bottom:3px">✂️ 部分因子 2ᵏ⁻ᵖ</div>
+      <div style="font-size:11px;color:#374151;line-height:1.5">4-7 因子，Resolution III/IV/V 設計</div>
+    </label>
+    <label id="dcard-pb" style="border:2px solid #DDE2EC;background:#fff;border-radius:8px;padding:.65rem .8rem;cursor:pointer;display:block">
+      <input type="radio" name="doe-dtype" value="pb" onchange="doeUpdateDesignType()" style="display:none">
+      <div style="font-size:12px;font-weight:700;color:#6B7280;margin-bottom:3px">🔍 PB 因子篩選</div>
+      <div style="font-size:11px;color:#374151;line-height:1.5">5-11 因子，快速篩出關鍵 2-4 個</div>
+    </label>
+  </div>
+  <input type="hidden" id="doe-design-type" value="full">
         </div>
         <div class="field"><label>因子數量</label>
           <select id="doe-nf" onchange="doeUpdateFactors()">
@@ -2564,9 +2578,28 @@ window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,
   var topEffects=sortedEff.slice(0,5).map(function(e){return e[0]+'='+parseFloat(e[1].toFixed(4));}).join(', ');
   var dtype=document.getElementById('doe-design-type')?document.getElementById('doe-design-type').value:'full';
   var designLabel=dtype==='full'?'全因子':dtype==='frac'?'部分因子(Fractional)':'Plackett-Burman';
-  var doeStats='DOE '+designLabel+'設計\n因子數：'+factors.length+'  重複次數：'+rep+'\n'+
-    '主要效應（前5）：'+topEffects+'\n'+
-    '反應變數：'+yname;
+  // 組裝完整 ANOVA 數值供 AI 引用（含效應值、F 統計量、p 值、Grand Mean）
+  var allEffsDetail=sortedEff.map(function(e){
+    var ss=e[1]*e[1]*runs*rep/4;
+    return e[0]+'：效應='+parseFloat(e[1].toFixed(4))+'  SS='+parseFloat(ss.toFixed(4));
+  }).join('\n  ');
+  var doeSsTotal=yMeans.reduce(function(s,v){return s+(v-grandMean)*(v-grandMean);},0)*rep;
+  var doeSsModel=sortedEff.reduce(function(s,e){return s+e[1]*e[1]*runs*rep/4;},0);
+  var doeSsErr=doeSsTotal-doeSsModel; var doeDfModel=sortedEff.length; var doeDfErr=Math.max(1,runs*(rep-1)-doeDfModel);
+  var doeMsErr=doeDfErr>0?doeSsErr/doeDfErr:0;
+  var sigEffs=sortedEff.filter(function(e){
+    var F=(e[1]*e[1]*runs*rep/4)/(doeMsErr||1); return F>4;
+  }).map(function(e){return e[0]+'(效應='+parseFloat(e[1].toFixed(3))+')';}).join(', ')||'無顯著因子';
+  var doeStats='DOE '+designLabel+'設計 — 反應變數：'+yname+'\n'+
+    '因子數：'+factors.length+'  重複次數：'+rep+'  實驗次數：'+runs+'\n'+
+    'Grand Mean：'+parseFloat(grandMean.toFixed(4))+'\n'+
+    '== 各因子效應值（完整）==\n  '+allEffsDetail+'\n'+
+    '== ANOVA 摘要 ==\n'+
+    'SS_model='+parseFloat(doeSsModel.toFixed(4))+'  df_model='+doeDfModel+'\n'+
+    'SS_error='+parseFloat(doeSsErr.toFixed(4))+'  df_error='+doeDfErr+'  MS_error='+parseFloat(doeMsErr.toFixed(4))+'\n'+
+    'SS_total='+parseFloat(doeSsTotal.toFixed(4))+'\n'+
+    '== 判斷 ==\n'+
+    '顯著因子（F>4）：'+sigEffs;
   setTimeout(function(){claudeAutoAnalyze('doe',doeStats);},300);
 }
 // Minitab 風格交互作用矩陣圖（所有因子兩兩配對）
@@ -3084,13 +3117,18 @@ function hyAnalyze(){
     const mu0=parseFloat(document.getElementById('hy-mu0')?.value)||0;const tail=document.getElementById('hy-tail')?.value||'two';
     const n=d1.length,m=mean(d1),s=stdS(d1),se=s/Math.sqrt(n),t=(m-mu0)/se,df=n-1;
     let p=tDist(Math.abs(t),df);if(tail==='two')p=Math.min(1,2*p);else if((tail==='right'&&t<0)||(tail==='left'&&t>0))p=1-p;
-    const sig=p<alpha;result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">樣本均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${df}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>單樣本 t 檢定結果</strong><br>H₀: μ = ${mu0}，H₁: μ ${tail==='two'?'≠':tail==='right'?'>':'<'} ${mu0}<br>t = ${r4(t)}，df = ${df}，p = ${p.toFixed(4)}（α = ${alpha}）<br><strong>${sig?`✅ 拒絕 H₀：均值與 ${mu0} 有顯著差異`:`⚠️ 無法拒絕 H₀：均值與 ${mu0} 無顯著差異`}</strong></div>`;
+    const sig=p<alpha;
+    if(!window._hyStats) window._hyStats={};
+    window._hyStats['1t']='單樣本 t 檢定\nn='+n+'  均值='+parseFloat(m.toFixed(4))+'  標準差='+parseFloat(s.toFixed(4))+'\nt 統計量='+parseFloat(t.toFixed(4))+'  df='+df+'  p 值='+parseFloat(p.toFixed(6))+'\n目標均值 μ₀='+mu0+'  差異='+parseFloat((m-mu0).toFixed(4))+'\n結論：'+(sig?'顯著（p<'+alpha+'，拒絕 H₀，均值與目標有顯著差異）':'不顯著（p≥'+alpha+'，無法拒絕 H₀，均值與目標無顯著差異）');
+    result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">樣本均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${df}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>單樣本 t 檢定結果</strong><br>H₀: μ = ${mu0}，H₁: μ ${tail==='two'?'≠':tail==='right'?'>':'<'} ${mu0}<br>t = ${r4(t)}，df = ${df}，p = ${p.toFixed(4)}（α = ${alpha}）<br><strong>${sig?`✅ 拒絕 H₀：均值與 ${mu0} 有顯著差異`:`⚠️ 無法拒絕 H₀：均值與 ${mu0} 無顯著差異`}</strong></div>`;
   }else if(type==='2t'){
     const n1=d1.length,n2=d2.length,m1=mean(d1),m2=mean(d2),s1=stdS(d1),s2=stdS(d2);
     const se=Math.sqrt(s1**2/n1+s2**2/n2),t=(m1-m2)/se;
     const df=Math.floor((s1**2/n1+s2**2/n2)**2/((s1**2/n1)**2/(n1-1)+(s2**2/n2)**2/(n2-1)));
     const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
     const es2=cohensD(d1,d2);
+    if(!window._hyStats) window._hyStats={};
+    window._hyStats['2t']='獨立雙樣本 t 檢定\nn1='+n1+'  n2='+n2+'\n均值1='+parseFloat(m1.toFixed(4))+'  均值2='+parseFloat(m2.toFixed(4))+'  差異='+parseFloat((m1-m2).toFixed(4))+'\nstd1='+parseFloat(s1.toFixed(4))+'  std2='+parseFloat(s2.toFixed(4))+'\nt 統計量='+parseFloat(t.toFixed(4))+'  df='+df+'  p 值='+parseFloat(p.toFixed(6))+'\nCohen\'s d='+parseFloat((es2.d||0).toFixed(4))+'\n結論：'+(sig?'顯著（p<'+alpha+'，兩組均值有顯著差異）':'不顯著（p≥'+alpha+'，兩組均值無顯著差異）');
     result='<div class="stat-grid" style="margin-bottom:.75rem">'+
       '<div class="sc"><div class="v">'+r4(m1)+'</div><div class="l">樣本1均值</div></div>'+
       '<div class="sc"><div class="v">'+r4(m2)+'</div><div class="l">樣本2均值</div></div>'+
@@ -3110,18 +3148,22 @@ function hyAnalyze(){
     if(d1.length!==d2.length)return alert('配對樣本筆數需相同');
     const diff=d1.map((v,i)=>v-d2[i]),n=diff.length,m=mean(diff),s=stdS(diff),se=s/Math.sqrt(n),t=m/se,df=n-1;
     const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
+    if(!window._hyStats) window._hyStats={};
+    window._hyStats['pair']='配對樣本 t 檢定\n配對數 n='+n+'\n差值均值='+parseFloat(m.toFixed(4))+'  差值標準差='+parseFloat(s.toFixed(4))+'\nt 統計量='+parseFloat(t.toFixed(4))+'  df='+df+'  p 值='+parseFloat(p.toFixed(6))+'\n結論：'+(sig?'顯著（p<'+alpha+'，配對前後有顯著差異）':'不顯著（p≥'+alpha+'，配對前後無顯著差異）');
     result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">配對數 n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">差值均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">差值標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>配對樣本 t 檢定</strong><br>差值均值 = ${r4(m)}，t = ${r4(t)}，p = ${p.toFixed(4)}<br><strong>${sig?`✅ 拒絕 H₀：改善前後有顯著差異`:`⚠️ 無法拒絕 H₀：改善前後無顯著差異`}</strong></div>`;
   }else if(type==='f'){
     const n1=d1.length,n2=d2.length,s1=stdS(d1),s2=stdS(d2);
     const F=s1**2/s2**2,df1=n1-1,df2=n2-1,p=Math.min(1,2*Math.min(fDist(F,df1,df2),1-fDist(F,df1,df2)));const sig=p<alpha;
+    if(!window._hyStats) window._hyStats={};
+    window._hyStats['f']='F 檢定（變異數比較）\nn1='+n1+'  n2='+n2+'\ns1='+parseFloat(s1.toFixed(4))+'  s2='+parseFloat(s2.toFixed(4))+'\nF 統計量='+parseFloat(F.toFixed(4))+'  df1='+df1+'  df2='+df2+'  p 值='+parseFloat(p.toFixed(6))+'\n結論：'+(sig?'顯著（p<'+alpha+'，兩組變異數有顯著差異）':'不顯著（p≥'+alpha+'，兩組變異數無顯著差異）');
     result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${r4(s1)}</div><div class="l">s₁</div></div><div class="sc"><div class="v">${r4(s2)}</div><div class="l">s₂</div></div><div class="sc"><div class="v">${r4(s1**2/s2**2)}</div><div class="l">變異數比 F</div></div><div class="sc"><div class="v">${df1},${df2}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>F 檢定（變異數齊一性）</strong><br>F = ${r4(F)}，df=(${df1},${df2})，p = ${p.toFixed(4)}<br><strong>${sig?`✅ 拒絕 H₀：兩組變異數有顯著差異`:`⚠️ 無法拒絕 H₀：兩組變異數無顯著差異`}</strong></div>`;
   }
   document.getElementById('hy-result').innerHTML=result;
   document.getElementById('hy-out').style.display='block';
   var hypPanel=document.getElementById('claude-container-hypothesis');
   if(hypPanel){hypPanel.innerHTML=claudePanelHTML('hypothesis');}
-  var cleanResult=result.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').substring(0,500);
-  setTimeout(function(){claudeAutoAnalyze('hypothesis','假設檢定結果：\n'+cleanResult);},300);
+  var hyStatText = (window._hyStats && window._hyStats[type]) ? window._hyStats[type] : '假設檢定結果：\n' + result.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').substring(0,400);
+  setTimeout(function(){claudeAutoAnalyze('hypothesis', hyStatText);},300);
 }
 
 // ════════════════════════════════════════════
@@ -5866,7 +5908,20 @@ function getPBDesign(nf) {
 
 // 設計類型切換
 window.doeUpdateDesignType = function() {
-  var dtype = document.getElementById('doe-design-type').value;
+  // 同步 radio → hidden input + 卡片高亮
+  var dtEl=document.querySelector('input[name="doe-dtype"]:checked');
+  if(dtEl){
+    var hi=document.getElementById('doe-design-type'); if(hi) hi.value=dtEl.value;
+    ['full','frac','pb'].forEach(function(v){
+      var c=document.getElementById('dcard-'+v);
+      if(!c) return;
+      var sel=dtEl.value===v;
+      c.style.borderColor=sel?'var(--navy2)':'#DDE2EC';
+      c.style.background=sel?'#EFF6FF':'#fff';
+      var lbl=c.querySelector('div:first-of-type'); if(lbl) lbl.style.color=sel?'var(--navy2)':'#6B7280';
+    });
+  }
+  var dtEl2=document.querySelector('input[name="doe-dtype"]:checked'); var dtype=dtEl2?dtEl2.value:(document.getElementById('doe-design-type')||{value:'full'}).value;
   var nfSelect = document.getElementById('doe-nf');
   var pbWarn = document.getElementById('pb-warning');
 
@@ -6200,7 +6255,7 @@ function resIcon(res) {
 // 更新設計方法切換
 var _origDoeUpdateDesignType = window.doeUpdateDesignType;
 window.doeUpdateDesignType = function() {
-  var dtype = document.getElementById('doe-design-type').value;
+  var dtEl2=document.querySelector('input[name="doe-dtype"]:checked'); var dtype=dtEl2?dtEl2.value:(document.getElementById('doe-design-type')||{value:'full'}).value;
   var nfSelect = document.getElementById('doe-nf');
   var pbWarn = document.getElementById('pb-warning');
   var fracRow = document.getElementById('frac-design-row');
