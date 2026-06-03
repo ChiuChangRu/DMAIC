@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.60 · AI 輔助統計分析平台</title>
+<title>MedQA v3.50 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.60 · 2026-06-03</span>
+    <span class="tb-status" id="dmaic-save-status">v3.50 · 2026-06-02</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -522,6 +522,9 @@ tr:hover td{background:#F9FAFB}
         您好！請描述您遇到的品質問題或失效情形，例如：<span style="color:#7EC8E3">「塗層耐磨不足，每批都發生」</span>、<span style="color:#7EC8E3">「檢體針取樣長度不足，良率下降」</span>。<br>
         <span style="font-size:11px;color:rgba(255,255,255,.4)">AI 將透過 2-3 輪對話引導您找出根本原因，並推薦適合的分析工具。</span>
       </div>
+
+      <!-- 快速問卷 slot -->
+      <div id="home-quick-form-slot"></div>
 
       <!-- 對話區（展開後顯示） -->
       <div id="home-chat-history" style="display:none;max-height:380px;overflow-y:auto;display:none;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
@@ -888,68 +891,11 @@ tr:hover td{background:#F9FAFB}
 <!-- ══════════════ 子頁面：Fishbone ══════════════ -->
 <div id="page-fishbone" class="page">
 <div class="tool-page">
-  <div class="tp-header" style="display:flex;align-items:center;justify-content:space-between">
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="tp-phase-dot" style="background:var(--D)"></div>
-      <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
-    </div>
-    <button onclick="fbSyncAndDraw()" style="background:var(--navy2);color:#fff;border:none;border-radius:8px;padding:.55rem 1.25rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">▶ 產生魚骨圖</button>
+  <div class="tp-header">
+    <div class="tp-phase-dot" style="background:var(--D)"></div>
+    <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
   </div>
-  
-  <!-- ① SVG 魚骨圖（置頂，畫完後顯示）-->
-<!-- 未產生時的佔位區 + 快速產生按鈕 -->
-<div 
-  <div style="font-size:14px;color:#6B7280;margin-bottom:1rem">尚未產生魚骨圖<br><span style="font-size:12px">填入下方 6M 原因後按產生</span></div>
-</div>
-
-<div id="fb-out" style="display:none">
-    <div class="card">
-      <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
-      <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
-        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（高風險=5 / 中風險=3 / 低風險=1）
-      </div>
-    </div>
-  </div>
-
-  <!-- ② AI 分析報告 -->
-  <div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
-
-  <!-- ③ AI 對話框（追問／修正原因） -->
-  <div id="fb-chat-wrap" style="display:none;margin-top:.75rem">
-    <div class="card" style="background:#F8FAFF;border:1.5px solid #C7D9F5">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">🤖</span>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#1B3A5C">魚骨圖分析助理</div>
-            <div style="font-size:11px;color:#6B7280">可追問、調整因子、確認根因方向</div>
-          </div>
-        </div>
-        <button onclick="fbChatReset()" style="font-size:11px;color:#6B7280;background:none;border:1px solid #D1D5DB;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">🔄 重設對話</button>
-      </div>
-      <div id="fb-chat-history" style="display:flex;flex-direction:column;gap:.5rem;max-height:280px;overflow-y:auto;margin-bottom:.75rem"></div>
-      <div style="display:flex;gap:8px;align-items:flex-end">
-        <textarea id="fb-chat-input" rows="2" placeholder="例：為什麼人員類別的原因還是要保留？/ 針頭內徑偏小應該算設計還是機器？"
-          onkeydown="fbChatKeydown(event)"
-          style="flex:1;border:1.5px solid #C7D9F5;border-radius:8px;padding:.55rem .8rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.5;transition:border-color .2s"
-          onfocus="this.style.borderColor='#3B7DD8'" onblur="this.style.borderColor='#C7D9F5'"
-        ></textarea>
-        <button onclick="fbChatSend()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:8px;padding:.6rem 1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">送出</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ④ 因子列表（勾選帶入DOE） -->
-  <div id="fb-factor-selector" style="display:none"></div>
-
-  <!-- ⑤ 輸入欄（可收合） -->
-  <div id="fb-input-wrap">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-      <div style="font-size:12px;color:#6B7280">📝 編輯 6M 原因輸入欄</div>
-      <button onclick="document.getElementById('fb-input-inner').style.display=document.getElementById('fb-input-inner').style.display==='none'?'':'none';this.textContent=document.getElementById('fb-input-inner').style.display==='none'?'▼ 展開':'▲ 收合'" style="font-size:11px;color:#6B7280;background:none;border:1px solid #DDE2EC;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit" id="fb-toggle-btn">▲ 收合</button>
-    </div>
-    <div id="fb-input-inner">
-<div class="card">
+  <div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>根本原因分析</div>
 
 <button class="edu-btn" onclick="toggleEdu('fishbone')">
@@ -1003,9 +949,46 @@ tr:hover td{background:#F9FAFB}
 
     <div class="btn-row"><button class="btn btn-primary" onclick="fbSyncAndDraw()">▶ 產生魚骨圖</button></div>
   </div>
+
+  <!-- AI 帶入提示：固定容器，不受 DMAIC card 影響 -->
+  <div id="fb-hint-wrap"></div>
+
+<div id="fb-out" style="display:none">
+    <div class="card">
+      <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
+      <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
+        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（高風險=5 / 中風險=3 / 低風險=1）
+      </div>
     </div>
   </div>
+  <div id="fb-factor-selector" style="display:none"></div>
 
+  <!-- 魚骨圖嵌入式問答助理 -->
+  <div id="fb-chat-wrap" style="display:none;margin-top:.75rem">
+    <div class="card" style="background:#F8FAFF;border:1.5px solid #C7D9F5">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">🤖</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1B3A5C">魚骨圖分析助理</div>
+            <div style="font-size:11px;color:#6B7280">可追問、調整因子、確認根因方向</div>
+          </div>
+        </div>
+        <button onclick="fbChatReset()" style="font-size:11px;color:#6B7280;background:none;border:1px solid #D1D5DB;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">🔄 重設對話</button>
+      </div>
+      <div id="fb-chat-history" style="display:flex;flex-direction:column;gap:.5rem;max-height:280px;overflow-y:auto;margin-bottom:.75rem"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <textarea id="fb-chat-input" rows="2" placeholder="例：為什麼人員類別的原因還是要保留？/ 針頭內徑偏小應該算設計還是機器？"
+          onkeydown="fbChatKeydown(event)"
+          style="flex:1;border:1.5px solid #C7D9F5;border-radius:8px;padding:.55rem .8rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.5;transition:border-color .2s"
+          onfocus="this.style.borderColor='#3B7DD8'" onblur="this.style.borderColor='#C7D9F5'"
+        ></textarea>
+        <button onclick="fbChatSend()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:8px;padding:.6rem 1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">送出</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Histogram ══════════════ -->
@@ -1153,7 +1136,7 @@ tr:hover td{background:#F9FAFB}
     </label>
   </div>
   <input type="hidden" id="doe-design-type" value="full">
-        </div>
+</div>
         <div class="field"><label>因子數量</label>
           <select id="doe-nf" onchange="doeUpdateFactors()">
             <option value="2">2 個因子（4 次實驗）</option>
@@ -2243,23 +2226,6 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
-  // fb-placeholder 已移除
-  document.getElementById('fb-chat-wrap').style.display='block';
-
-  // 組裝 AI 分析摘要（含實際原因數量）
-  var fbAIStat = '魚骨圖分析\n問題：' + problem + '\n';
-  var FB_CATS_FOR_AI = [
-    {id:'fb-man',label:'人員'},{id:'fb-machine',label:'機器'},
-    {id:'fb-material',label:'材料'},{id:'fb-method',label:'方法'},
-    {id:'fb-measure',label:'量測'},{id:'fb-env',label:'環境'}
-  ];
-  FB_CATS_FOR_AI.forEach(function(c){
-    var el = document.getElementById(c.id);
-    if(!el||!el.value.trim()) return;
-    var causes = el.value.trim().split('\n').filter(Boolean).map(function(l){return l.split(',')[0].trim();});
-    if(causes.length) fbAIStat += c.label+'：'+causes.join('、')+'\n';
-  });
-  setTimeout(function(){ claudeAutoAnalyze('fishbone', fbAIStat); }, 300);
 
   // 從卡片資料收集所有因子（含風險等級）
   var fbCauses = [];
@@ -2269,7 +2235,7 @@ function fishboneDraw(){
     var factors = window._fbData && window._fbData[cid];
     if(!factors||!factors.length) return;
     factors.forEach(function(f){
-      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', catKey:cid, risk:f.risk||'medium'});
+      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', risk:f.risk||'medium'});
     });
   });
   window._fbCauses = fbCauses;
@@ -2277,115 +2243,75 @@ function fishboneDraw(){
   // 渲染因子選擇面板（魚骨圖下方）
   var selectorDiv = document.getElementById('fb-factor-selector');
   if(selectorDiv && fbCauses.length > 0){
+    var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
+    html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.75rem;display:flex;align-items:center;gap:8px">🧪 選擇實驗因子 → 帶入實驗設計</div>';
 
-    // === 三大類分類關鍵字 ===
-    var ISO_KW = ['老化','磨損','堵塞','故障','腐蝕','破損','損耗','洩漏','崩解','阻塞','老舊','變形','霧化不良','異常','污染','劣化','龜裂','氧化','銹蝕','卡死','滑牙','失靈'];
-    var MSA_KW = ['量測','校正','量化','檢測','精度','誤差','判讀','記錄','人員','訓練','技能','作業'];
-    var DOE_KW = ['溫度','速度','時間','濃度','比例','壓力','轉速','厚度','電壓','流量','配方','含量','劑量','頻率','功率','黏度','分子量','固化','塗布量'];
-    var MAT_KW = ['供應商','種類','型號','牌','批次','廠牌'];
+    // 設計方法選擇（依因子數動態推薦）
+    var factorCount = fbCauses.length;
+    var suggestPB = factorCount > 4;
+    html += '<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:.75rem 1rem;margin-bottom:.85rem">';
+    html += '<div style="font-size:12px;font-weight:600;color:#1E40AF;margin-bottom:.5rem">選擇實驗設計方法';
+    html += '<span style="font-size:11px;font-weight:400;color:#6B7280;margin-left:8px">'+
+      (suggestPB ? '（因子數 > 4，建議先用 PB 篩選）' : '（因子數 ≤ 4，可直接用全因子 DOE）')+
+      '</span></div>';
+    html += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
 
-    function classifyFactor(f){
-      var name=f.name||'', cid=f.catKey||'';
-      if(cid==='man'||cid==='measure') return 'msa';
-      if(cid==='env') return 'iso';
-      for(var i=0;i<ISO_KW.length;i++) if(name.indexOf(ISO_KW[i])>=0) return 'iso';
-      for(var i=0;i<MSA_KW.length;i++) if(name.indexOf(MSA_KW[i])>=0) return 'msa';
-      for(var i=0;i<DOE_KW.length;i++) if(name.indexOf(DOE_KW[i])>=0) return 'doe';
-      if(cid==='machine') return 'iso';
-      return 'doe';
+    if(suggestPB) {
+      // 因子 > 4：顯示 PB（預設）+ 田口
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #2563EB;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-pb-label">';
+      html += '<input type="radio" name="fb-doe-method" value="pb" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#1D4ED8">🔎 PB 因子篩選 <span style="font-size:10px;background:#DBEAFE;color:#1D4ED8;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子快速篩選主要影響因子，找出關鍵 2-4 個後再進全因子 DOE</div></div>';
+      html += '</label>';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
+      html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
+      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
+      html += '</label>';
+    } else {
+      // 因子 ≤ 4：顯示 DOE 全因子（預設）+ 田口
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #D97706;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-doe-label">';
+      html += '<input type="radio" name="fb-doe-method" value="doe" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#D97706">🧪 DOE 全因子／部分因子 <span style="font-size:10px;background:#FEF3C7;color:#D97706;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">≤ 4 個關鍵因子，完整估計主效應與所有交互作用，結果最可靠</div></div>';
+      html += '</label>';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
+      html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
+      html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
+      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
+      html += '</label>';
     }
-    function matType(f){
-      for(var i=0;i<MAT_KW.length;i++) if(f.name.indexOf(MAT_KW[i])>=0) return '類別型';
-      return '連續型';
-    }
+    html += '</div></div>';
 
-    var catDOE=[],catMSA=[],catISO=[];
-    fbCauses.forEach(function(f,i){
-      f._idx=i; f._type=classifyFactor(f);
-      if(f._type==='doe') catDOE.push(f);
-      else if(f._type==='msa') catMSA.push(f);
-      else catISO.push(f);
+    // 因子上限提示（依方法動態更新）
+    html += '<div id="fb-factor-limit-hint" style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 <strong id="fb-max-count">11</strong> 個因子，選完後按帶入按鈕</div>';
+
+    // 因子列表（高風險紅字粗體）
+    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem">';
+    fbCauses.forEach(function(f, i){
+      var isHigh = f.risk === 'high';
+      var nameStyle = isHigh ? 'color:#DC2626;font-weight:700' : 'color:#374151';
+      var borderStyle = isHigh ? 'border:1.5px solid #FECACA;background:#FEF2F2' : 'border:1px solid #DDE2EC;background:#fff';
+      html += '<label style="display:inline-flex;align-items:center;gap:5px;'+borderStyle+';border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">';
+      html += '<input type="checkbox" value="'+i+'" onchange="fbUpdateCount()" style="cursor:pointer">';
+      html += '<span style="'+nameStyle+'">'+f.name+'</span>';
+      html += '<span style="font-size:10px;color:#9CA3AF">'+f.cat+'</span>';
+      if(isHigh) html += '<span style="font-size:10px;color:#DC2626">●</span>';
+      html += '</label>';
     });
+    html += '</div>';
 
-    function renderGroup(factors,groupType){
-      if(!factors.length) return '';
-      var cfgs={
-        doe:{title:'🧪 製程／配方技術（適合 DOE）',bg:'#EFF6FF',border:'#BFDBFE',color:'#1D4ED8',checked:true,disabled:false},
-        msa:{title:'📐 人員／量測系統（建議 MSA 或 SOP）',bg:'#F0FDF4',border:'#6EE7B7',color:'#15803D',checked:false,disabled:false},
-        iso:{title:'🔧 設備／環境（ISO/PM 維護議題）',bg:'#FEF2F2',border:'#FECACA',color:'#B91C1C',checked:false,disabled:true}
-      };
-      var c=cfgs[groupType];
-      var h='<div class="fb-group" data-group="'+groupType+'" style="margin-bottom:.75rem">';
-        h+='<div style="font-size:12px;font-weight:700;color:'+c.color+';margin-bottom:.35rem">'+c.title;
-        if(groupType==='iso') h+=' <span style="font-size:10px;font-weight:400;color:#9CA3AF">（通常不作為 DOE 因子）</span>';
-        h+='</div>';
-        h+='<div style="display:flex;flex-wrap:wrap;gap:.35rem">';
-          factors.forEach(function(f){
-            var isHigh=f.risk==='high';
-            var type=groupType==='doe'?(f.catKey==='material'?matType(f):'連續型'):'';
-            var dis=c.disabled?'disabled':'';
-            var chk=(c.checked||isHigh)&&!c.disabled?'checked':'';
-            h+='<label data-suit="'+groupType+'" style="display:inline-flex;align-items:center;gap:5px;border:1.5px solid '+c.border+';background:'+c.bg+';border-radius:6px;padding:5px 10px;cursor:'+(c.disabled?'default':'pointer')+';font-size:12px;'+(c.disabled?'opacity:.6':'')+(isHigh?';box-shadow:0 0 0 2px #FCA5A566':'')+'">';
-              h+='<input type="checkbox" value="'+f._idx+'" '+dis+' '+chk+' onchange="fbUpdateCount()">';
-              h+='<span style="color:'+(isHigh?'#DC2626':c.disabled?'#9CA3AF':'#374151')+';'+(isHigh?'font-weight:700':'')+'">'+f.name+'</span>';
-              if(type) h+='<span style="font-size:9px;background:#fff;color:'+c.color+';border:1px solid '+c.border+';border-radius:3px;padding:0 4px">'+type+'</span>';
-              if(isHigh) h+='<span style="font-size:10px;color:#DC2626">●</span>';
-            h+='</label>';
-          });
-        h+='</div>';
-      h+='</div>';
-      return h;
-    }
-
-    // 組裝完整 HTML
-    var html = '';
-    html += '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
-
-      // 標題
-      html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.75rem">🧪 選擇實驗因子 → 帶入分析工具</div>';
-
-      // 說明卡（三大類）
-      html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:.7rem 1rem;margin-bottom:.75rem">';
-        html += '<div style="font-weight:700;color:#92400E;margin-bottom:.35rem">📌 因子三大類分析建議</div>';
-        html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;font-size:11px">';
-          html += '<div style="background:#EFF6FF;border-radius:6px;padding:.45rem .7rem"><div style="font-weight:700;color:#1D4ED8;margin-bottom:2px">🧪 製程／配方技術</div><div style="color:#374151">可量化的設定參數，建議以 <strong>DOE</strong> 驗證最佳組合</div></div>';
-          html += '<div style="background:#F0FDF4;border-radius:6px;padding:.45rem .7rem"><div style="font-weight:700;color:#15803D;margin-bottom:2px">📐 人員／量測系統</div><div style="color:#374151">先做 <strong>MSA/GRR</strong>；人員問題以 <strong>SOP</strong> 改善</div></div>';
-          html += '<div style="background:#FEF2F2;border-radius:6px;padding:.45rem .7rem"><div style="font-weight:700;color:#B91C1C;margin-bottom:2px">🔧 設備／環境</div><div style="color:#374151"><strong>ISO 14971</strong> 風險管理或 PM 維護計畫</div></div>';
-        html += '</div>';
-      html += '</div>';
-
-      // 篩選按鈕
-      html += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:.6rem;flex-wrap:wrap">';
-        html += '<span style="font-size:12px;color:#6B7280;flex:1">已預選🧪類因子，勾選完成後按下方按鈕帶入工具</span>';
-        html += '<button onclick="fbFilterDOE()" style="font-size:11px;background:#EFF6FF;color:#1D4ED8;border:1px solid #93C5FD;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">🧪 只看 DOE 因子</button>';
-        html += '<button onclick="fbFilterAll()" style="font-size:11px;background:#F9FAFB;color:#6B7280;border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">全部顯示</button>';
-      html += '</div>';
-
-      // 三大類因子列表
-      html += '<div id="fb-factor-list">';
-        html += renderGroup(catDOE,'doe');
-        html += renderGroup(catMSA,'msa');
-        html += renderGroup(catISO,'iso');
-      html += '</div>';
-
-      // 帶入按鈕列
-      html += '<div style="background:#F0F4FF;border-radius:8px;padding:.75rem 1rem;margin-top:.75rem">';
-        html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">已選 <span id="fb-count" style="font-weight:700;color:#1B3A5C">0</span> 個因子 &nbsp;|&nbsp; 依分類選擇帶入工具：</div>';
-        html += '<div style="display:flex;gap:8px;flex-wrap:wrap">';
-          html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">🧪 帶入 DOE 實驗設計</button>';
-          html += '<button onclick="fbToMSA()" style="background:linear-gradient(135deg,#059669,#0d9488);color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📐 帶入 MSA 量測研究</button>';
-          html += '<span style="font-size:11px;color:#9CA3AF;align-self:center">🔴=高風險 hover看建議</span>';
-        html += '</div>';
-        html += '<div style="font-size:11px;color:#9CA3AF;margin-top:.35rem">DOE 帶入：勾選🧪類 ｜ MSA 帶入：勾選📐類（量測數據仍需手動填入）</div>';
-      html += '</div>';
-
-    html += '</div>'; // end card
-
+    html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+    html += '<span id="fb-count" style="font-size:12px;color:#6B7280">已選 0 個</span>';
+    html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(27,58,92,.3)">→ 帶入實驗設計</button>';
+    html += '<span style="font-size:11px;color:#DC2626">🔴 = 高風險因子（建議優先選取）</span>';
+    html += '</div>';
+    html += '</div>';
     selectorDiv.innerHTML = html;
     selectorDiv.style.display = 'block';
-    setTimeout(function(){ fbUpdateCount(); }, 50);
+    // 初始化方法 UI
+    if(typeof fbUpdateMethodUI === 'function') setTimeout(fbUpdateMethodUI, 50);
   }
-
 }
 
 // ════════════════════════════════════════════
@@ -2655,28 +2581,9 @@ window._doeLastResult={fitted:fittedVals,residuals:residualVals,factors:factors,
   var topEffects=sortedEff.slice(0,5).map(function(e){return e[0]+'='+parseFloat(e[1].toFixed(4));}).join(', ');
   var dtype=document.getElementById('doe-design-type')?document.getElementById('doe-design-type').value:'full';
   var designLabel=dtype==='full'?'全因子':dtype==='frac'?'部分因子(Fractional)':'Plackett-Burman';
-  // 組裝完整 ANOVA 數值供 AI 引用（含效應值、F 統計量、p 值、Grand Mean）
-  var allEffsDetail=sortedEff.map(function(e){
-    var ss=e[1]*e[1]*runs*rep/4;
-    return e[0]+'：效應='+parseFloat(e[1].toFixed(4))+'  SS='+parseFloat(ss.toFixed(4));
-  }).join('\n  ');
-  var doeSsTotal=yMeans.reduce(function(s,v){return s+(v-grandMean)*(v-grandMean);},0)*rep;
-  var doeSsModel=sortedEff.reduce(function(s,e){return s+e[1]*e[1]*runs*rep/4;},0);
-  var doeSsErr=doeSsTotal-doeSsModel; var doeDfModel=sortedEff.length; var doeDfErr=Math.max(1,runs*(rep-1)-doeDfModel);
-  var doeMsErr=doeDfErr>0?doeSsErr/doeDfErr:0;
-  var sigEffs=sortedEff.filter(function(e){
-    var F=(e[1]*e[1]*runs*rep/4)/(doeMsErr||1); return F>4;
-  }).map(function(e){return e[0]+'(效應='+parseFloat(e[1].toFixed(3))+')';}).join(', ')||'無顯著因子';
-  var doeStats='DOE '+designLabel+'設計 — 反應變數：'+yname+'\n'+
-    '因子數：'+factors.length+'  重複次數：'+rep+'  實驗次數：'+runs+'\n'+
-    'Grand Mean：'+parseFloat(grandMean.toFixed(4))+'\n'+
-    '== 各因子效應值（完整）==\n  '+allEffsDetail+'\n'+
-    '== ANOVA 摘要 ==\n'+
-    'SS_model='+parseFloat(doeSsModel.toFixed(4))+'  df_model='+doeDfModel+'\n'+
-    'SS_error='+parseFloat(doeSsErr.toFixed(4))+'  df_error='+doeDfErr+'  MS_error='+parseFloat(doeMsErr.toFixed(4))+'\n'+
-    'SS_total='+parseFloat(doeSsTotal.toFixed(4))+'\n'+
-    '== 判斷 ==\n'+
-    '顯著因子（F>4）：'+sigEffs;
+  var doeStats='DOE '+designLabel+'設計\n因子數：'+factors.length+'  重複次數：'+rep+'\n'+
+    '主要效應（前5）：'+topEffects+'\n'+
+    '反應變數：'+yname;
   setTimeout(function(){claudeAutoAnalyze('doe',doeStats);},300);
 }
 // Minitab 風格交互作用矩陣圖（所有因子兩兩配對）
@@ -3194,18 +3101,13 @@ function hyAnalyze(){
     const mu0=parseFloat(document.getElementById('hy-mu0')?.value)||0;const tail=document.getElementById('hy-tail')?.value||'two';
     const n=d1.length,m=mean(d1),s=stdS(d1),se=s/Math.sqrt(n),t=(m-mu0)/se,df=n-1;
     let p=tDist(Math.abs(t),df);if(tail==='two')p=Math.min(1,2*p);else if((tail==='right'&&t<0)||(tail==='left'&&t>0))p=1-p;
-    const sig=p<alpha;
-    if(!window._hyStats) window._hyStats={};
-    window._hyStats['1t']='單樣本 t 檢定\nn='+n+'  均值='+parseFloat(m.toFixed(4))+'  標準差='+parseFloat(s.toFixed(4))+'\nt 統計量='+parseFloat(t.toFixed(4))+'  df='+df+'  p 值='+parseFloat(p.toFixed(6))+'\n目標均值 μ₀='+mu0+'  差異='+parseFloat((m-mu0).toFixed(4))+'\n結論：'+(sig?'顯著（p<'+alpha+'，拒絕 H₀，均值與目標有顯著差異）':'不顯著（p≥'+alpha+'，無法拒絕 H₀，均值與目標無顯著差異）');
-    result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">樣本均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${df}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>單樣本 t 檢定結果</strong><br>H₀: μ = ${mu0}，H₁: μ ${tail==='two'?'≠':tail==='right'?'>':'<'} ${mu0}<br>t = ${r4(t)}，df = ${df}，p = ${p.toFixed(4)}（α = ${alpha}）<br><strong>${sig?`✅ 拒絕 H₀：均值與 ${mu0} 有顯著差異`:`⚠️ 無法拒絕 H₀：均值與 ${mu0} 無顯著差異`}</strong></div>`;
+    const sig=p<alpha;result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">樣本均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${df}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>單樣本 t 檢定結果</strong><br>H₀: μ = ${mu0}，H₁: μ ${tail==='two'?'≠':tail==='right'?'>':'<'} ${mu0}<br>t = ${r4(t)}，df = ${df}，p = ${p.toFixed(4)}（α = ${alpha}）<br><strong>${sig?`✅ 拒絕 H₀：均值與 ${mu0} 有顯著差異`:`⚠️ 無法拒絕 H₀：均值與 ${mu0} 無顯著差異`}</strong></div>`;
   }else if(type==='2t'){
     const n1=d1.length,n2=d2.length,m1=mean(d1),m2=mean(d2),s1=stdS(d1),s2=stdS(d2);
     const se=Math.sqrt(s1**2/n1+s2**2/n2),t=(m1-m2)/se;
     const df=Math.floor((s1**2/n1+s2**2/n2)**2/((s1**2/n1)**2/(n1-1)+(s2**2/n2)**2/(n2-1)));
     const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
     const es2=cohensD(d1,d2);
-    if(!window._hyStats) window._hyStats={};
-    window._hyStats['2t']='獨立雙樣本 t 檢定\nn1='+n1+'  n2='+n2+'\n均值1='+parseFloat(m1.toFixed(4))+'  均值2='+parseFloat(m2.toFixed(4))+'  差異='+parseFloat((m1-m2).toFixed(4))+'\nstd1='+parseFloat(s1.toFixed(4))+'  std2='+parseFloat(s2.toFixed(4))+'\nt 統計量='+parseFloat(t.toFixed(4))+'  df='+df+'  p 值='+parseFloat(p.toFixed(6))+'\nCohen\'s d='+parseFloat((es2.d||0).toFixed(4))+'\n結論：'+(sig?'顯著（p<'+alpha+'，兩組均值有顯著差異）':'不顯著（p≥'+alpha+'，兩組均值無顯著差異）');
     result='<div class="stat-grid" style="margin-bottom:.75rem">'+
       '<div class="sc"><div class="v">'+r4(m1)+'</div><div class="l">樣本1均值</div></div>'+
       '<div class="sc"><div class="v">'+r4(m2)+'</div><div class="l">樣本2均值</div></div>'+
@@ -3225,22 +3127,18 @@ function hyAnalyze(){
     if(d1.length!==d2.length)return alert('配對樣本筆數需相同');
     const diff=d1.map((v,i)=>v-d2[i]),n=diff.length,m=mean(diff),s=stdS(diff),se=s/Math.sqrt(n),t=m/se,df=n-1;
     const p=Math.min(1,2*tDist(Math.abs(t),df));const sig=p<alpha;
-    if(!window._hyStats) window._hyStats={};
-    window._hyStats['pair']='配對樣本 t 檢定\n配對數 n='+n+'\n差值均值='+parseFloat(m.toFixed(4))+'  差值標準差='+parseFloat(s.toFixed(4))+'\nt 統計量='+parseFloat(t.toFixed(4))+'  df='+df+'  p 值='+parseFloat(p.toFixed(6))+'\n結論：'+(sig?'顯著（p<'+alpha+'，配對前後有顯著差異）':'不顯著（p≥'+alpha+'，配對前後無顯著差異）');
     result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${n}</div><div class="l">配對數 n</div></div><div class="sc"><div class="v">${r4(m)}</div><div class="l">差值均值</div></div><div class="sc"><div class="v">${r4(s)}</div><div class="l">差值標準差</div></div><div class="sc"><div class="v">${r4(t)}</div><div class="l">t 統計量</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>配對樣本 t 檢定</strong><br>差值均值 = ${r4(m)}，t = ${r4(t)}，p = ${p.toFixed(4)}<br><strong>${sig?`✅ 拒絕 H₀：改善前後有顯著差異`:`⚠️ 無法拒絕 H₀：改善前後無顯著差異`}</strong></div>`;
   }else if(type==='f'){
     const n1=d1.length,n2=d2.length,s1=stdS(d1),s2=stdS(d2);
     const F=s1**2/s2**2,df1=n1-1,df2=n2-1,p=Math.min(1,2*Math.min(fDist(F,df1,df2),1-fDist(F,df1,df2)));const sig=p<alpha;
-    if(!window._hyStats) window._hyStats={};
-    window._hyStats['f']='F 檢定（變異數比較）\nn1='+n1+'  n2='+n2+'\ns1='+parseFloat(s1.toFixed(4))+'  s2='+parseFloat(s2.toFixed(4))+'\nF 統計量='+parseFloat(F.toFixed(4))+'  df1='+df1+'  df2='+df2+'  p 值='+parseFloat(p.toFixed(6))+'\n結論：'+(sig?'顯著（p<'+alpha+'，兩組變異數有顯著差異）':'不顯著（p≥'+alpha+'，兩組變異數無顯著差異）');
     result=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${r4(s1)}</div><div class="l">s₁</div></div><div class="sc"><div class="v">${r4(s2)}</div><div class="l">s₂</div></div><div class="sc"><div class="v">${r4(s1**2/s2**2)}</div><div class="l">變異數比 F</div></div><div class="sc"><div class="v">${df1},${df2}</div><div class="l">自由度</div></div><div class="sc"><div class="v">${p.toFixed(4)}</div><div class="l">p-value</div></div></div><div class="alert ${sig?'danger':'success'}"><strong>F 檢定（變異數齊一性）</strong><br>F = ${r4(F)}，df=(${df1},${df2})，p = ${p.toFixed(4)}<br><strong>${sig?`✅ 拒絕 H₀：兩組變異數有顯著差異`:`⚠️ 無法拒絕 H₀：兩組變異數無顯著差異`}</strong></div>`;
   }
   document.getElementById('hy-result').innerHTML=result;
   document.getElementById('hy-out').style.display='block';
   var hypPanel=document.getElementById('claude-container-hypothesis');
   if(hypPanel){hypPanel.innerHTML=claudePanelHTML('hypothesis');}
-  var hyStatText = (window._hyStats && window._hyStats[type]) ? window._hyStats[type] : '假設檢定結果：\n' + result.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').substring(0,400);
-  setTimeout(function(){claudeAutoAnalyze('hypothesis', hyStatText);},300);
+  var cleanResult=result.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').substring(0,500);
+  setTimeout(function(){claudeAutoAnalyze('hypothesis','假設檢定結果：\n'+cleanResult);},300);
 }
 
 // ════════════════════════════════════════════
@@ -5301,6 +5199,217 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 // ════════════════════════════════════════════════════════
 (function(){
   var homeHistory = [];
+  // ══ 快速問卷 + 信心度 ══
+  (function(){
+    // 問卷題目定義
+    var QS = [
+      {id:'hq-type',  label:'問題類型', opts:[
+        ['','— 請選擇 —'],
+        ['製程問題','製程問題（參數、良率）'],
+        ['材料問題','材料問題（原料、配方）'],
+        ['設備問題','設備問題（機台、夾具）'],
+        ['設計問題','設計問題（尺寸、公差）'],
+        ['量測問題','量測問題（量具、方法）'],
+        ['人員問題','人員問題（操作、SOP）']
+      ]},
+      {id:'hq-freq',  label:'發生頻率', opts:[
+        ['','— 請選擇 —'],
+        ['每批都有，穩定發生','每批都有，穩定發生'],
+        ['偶爾出現，不規則','偶爾出現，不規則'],
+        ['特定條件才有','特定條件才有'],
+        ['近期才開始','近期才開始（以前沒有）']
+      ]},
+      {id:'hq-where', label:'發現位置', opts:[
+        ['','— 請選擇 —'],
+        ['工廠內部製程中發現','工廠內部製程中發現'],
+        ['出廠前 QC 發現','出廠前 QC 發現'],
+        ['客戶端才發現','客戶端或市場才發現'],
+        ['兩者都有','兩者都有']
+      ]},
+      {id:'hq-scope', label:'影響範圍', opts:[
+        ['','— 請選擇 —'],
+        ['所有機台班別都有','所有機台班別都有'],
+        ['特定機台','特定機台才有'],
+        ['特定班別','特定班別才有'],
+        ['隨機無規律','隨機無規律']
+      ]},
+      {id:'hq-data',  label:'是否有數據', opts:[
+        ['','— 請選擇 —'],
+        ['有完整量測數據','有完整量測數據'],
+        ['只有良率或不良數','只有良率或不良數'],
+        ['沒有數據只有觀察','沒有數據，只有觀察']
+      ]},
+      {id:'hq-change',label:'近期是否有變更', opts:[
+        ['','— 請選擇 —'],
+        ['材料或供應商變更','材料或供應商變更'],
+        ['製程參數或設備調整','製程參數或設備調整'],
+        ['設計或規格變更','設計或規格變更'],
+        ['人員或班別變動','人員或班別變動'],
+        ['無任何近期變更','無任何近期變更'],
+        ['不確定有無變更','不確定有無變更']
+      ]}
+    ];
+
+    // 動態建立問卷 DOM
+    function buildQuickForm(){
+      var wrap = document.getElementById('home-quick-form-slot');
+      if(!wrap) return;
+
+      var toggle = document.createElement('button');
+      toggle.id = 'hq-toggle';
+      toggle.textContent = '📋 展開快速問卷（讓 AI 更精準）▼';
+      toggle.style.cssText = 'font-size:11px;color:rgba(255,255,255,.65);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;margin-bottom:.5rem;display:block';
+      toggle.onclick = function(){
+        var b = document.getElementById('hq-body');
+        var open = b.style.display === 'none';
+        b.style.display = open ? 'block' : 'none';
+        toggle.textContent = open ? '📋 收合問卷 ▲' : '📋 展開快速問卷（讓 AI 更精準）▼';
+      };
+      wrap.appendChild(toggle);
+
+      var body = document.createElement('div');
+      body.id = 'hq-body';
+      body.style.cssText = 'display:none;background:rgba(255,255,255,.07);border-radius:10px;padding:.75rem;margin-bottom:.5rem';
+      wrap.appendChild(body);
+
+      var grid = document.createElement('div');
+      grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.5rem .75rem';
+      body.appendChild(grid);
+
+      QS.forEach(function(q){
+        var cell = document.createElement('div');
+        var lbl = document.createElement('div');
+        lbl.textContent = q.label;
+        lbl.style.cssText = 'color:rgba(255,255,255,.7);font-size:11px;margin-bottom:3px';
+        cell.appendChild(lbl);
+        var sel = document.createElement('select');
+        sel.id = q.id;
+        sel.style.cssText = 'width:100%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:6px;color:#fff;padding:4px 8px;font-size:12px;font-family:inherit';
+        q.opts.forEach(function(o){
+          var opt = document.createElement('option');
+          opt.value = o[0]; opt.textContent = o[1];
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', updateFormProgress);
+        cell.appendChild(sel);
+        grid.appendChild(cell);
+      });
+
+      // 進度條
+      var pbar = document.createElement('div');
+      pbar.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:.6rem';
+      pbar.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,.5)">問卷完整度</span><div style="flex:1;height:5px;background:rgba(255,255,255,.15);border-radius:3px"><div id="hq-bar" style="height:100%;width:0;background:linear-gradient(90deg,#10B981,#34D399);border-radius:3px;transition:.3s"></div></div><span id="hq-pct" style="font-size:11px;color:#34D399;font-weight:600;min-width:28px">0%</span>';
+      body.appendChild(pbar);
+    }
+
+    function updateFormProgress(){
+      var filled = QS.filter(function(q){ var el=document.getElementById(q.id); return el&&el.value; }).length;
+      var pct = Math.round(filled/QS.length*100);
+      var bar=document.getElementById('hq-bar'); if(bar) bar.style.width=pct+'%';
+      var pctEl=document.getElementById('hq-pct'); if(pctEl) pctEl.textContent=pct+'%';
+    }
+
+    function getFormAnswers(){
+      return QS.filter(function(q){ var el=document.getElementById(q.id); return el&&el.value; })
+               .map(function(q){ var el=document.getElementById(q.id); return q.label+'\uff1a'+el.value; });
+    }
+
+    // 信心度計算
+    function calcConfidence(history, tools, formCount){
+      var conf = 15;
+      conf += Math.min(formCount * 8, 48);
+      var aiTurns = history.filter(function(m){ return m.role==='assistant'; }).length;
+      conf += Math.min(aiTurns * 6, 30);
+      var allText = history.map(function(m){ return m.content||''; }).join(' ');
+      ['彈簧','擊發','壓力','模具','夾具','機構','導引','機制','驅動','閥門','活塞'].forEach(function(k){
+        if(allText.indexOf(k)>=0) conf+=4;
+      });
+      if(tools && tools.length>0) conf = Math.max(conf, 70);
+      return Math.min(conf, 92);
+    }
+
+    // 覆寫 homeCapaSend
+    var _origSend = window.homeCapaSend;
+    window.homeCapaSend = async function(){
+      var input = document.getElementById('home-problem-input');
+      var sendBtn = document.getElementById('home-send-btn');
+      if(!input) return;
+      var q = input.value.trim();
+      if(!q){ input.focus(); return; }
+
+      var formParts = getFormAnswers();
+      var fullMsg = q;
+      if(formParts.length > 0) fullMsg = q + '\n【快速問卷】' + formParts.join('｜');
+
+      // 顯示使用者訊息
+      appendHomeUser(q + (formParts.length ? ' 📋' + formParts.length+'項問卷' : ''));
+      input.value = '';
+      if(sendBtn) sendBtn.disabled = true;
+      homeHistory.push({role:'user', content: fullMsg});
+
+      // 收合問卷
+      var hqb = document.getElementById('hq-body');
+      if(hqb) hqb.style.display = 'none';
+      var hqt = document.getElementById('hq-toggle');
+      if(hqt) hqt.textContent = '📋 展開快速問卷（讓 AI 更精準）▼';
+
+      // loading
+      var loadDiv = document.createElement('div');
+      loadDiv.style.cssText = 'color:rgba(255,255,255,.4);font-size:12px;font-style:italic;padding:.4rem .5rem';
+      loadDiv.textContent = '思考中...';
+      loadDiv.id = 'home-loading';
+      var hist = document.getElementById('home-chat-history');
+      if(hist){ hist.style.display='flex'; hist.appendChild(loadDiv); hist.scrollTop=hist.scrollHeight; }
+
+      try {
+        var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ mode:'navigate', messages: homeHistory })
+        });
+        var data = await resp.json();
+        var el = document.getElementById('home-loading'); if(el) el.remove();
+        var text = data.text || '';
+        var tools = data.tools || [];
+        homeHistory.push({role:'assistant', content: text});
+        window._homeHistory = homeHistory.slice();
+
+        var conf = calcConfidence(homeHistory, tools, formParts.length);
+        appendHomeAI_withConf(text, tools, conf);
+      } catch(err) {
+        var el2 = document.getElementById('home-loading'); if(el2) el2.remove();
+        appendHomeAI(err.message ? '⚠️ 連線失敗：'+err.message : '⚠️ 連線失敗', []);
+      }
+      if(sendBtn) sendBtn.disabled = false;
+    };
+
+    // 新版 appendHomeAI（含信心度）
+    function appendHomeAI_withConf(text, tools, conf){
+      appendHomeAI(text, tools);
+      if(conf === undefined) return;
+      var hist = document.getElementById('home-chat-history');
+      if(!hist) return;
+      var confColor = conf>=75?'#10B981':conf>=50?'#F59E0B':'#EF4444';
+      var confLabel = conf>=90?'高信心，建議立即行動':conf>=75?'建議足夠，可進行分析':conf>=50?'需再補充 1-2 個資訊':'資訊不足，請填問卷或繼續對話';
+      var bar = document.createElement('div');
+      bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:.35rem .5rem;margin-top:2px';
+      bar.innerHTML = '<span style="font-size:10px;color:rgba(255,255,255,.45)">AI 信心度</span>'+
+        '<div style="width:90px;height:5px;background:rgba(255,255,255,.15);border-radius:3px">'+
+          '<div style="height:100%;width:'+conf+'%;background:'+confColor+';border-radius:3px;transition:.5s"></div>'+
+        '</div>'+
+        '<span style="font-size:11px;color:'+confColor+';font-weight:700">'+conf+'%</span>'+
+        '<span style="font-size:10px;color:rgba(255,255,255,.4)">'+confLabel+'</span>';
+      hist.appendChild(bar);
+      hist.scrollTop = hist.scrollHeight;
+    }
+
+    // DOM 就緒後建立問卷
+    function init(){
+      buildQuickForm();
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+
   var TOOL_NAMES_HOME = {
     fishbone:'🐟 魚骨圖', spc:'📈 SPC 管制圖', msa:'📐 MSA 量測分析',
     histogram:'📉 直方圖', hypothesis:'🔬 假設檢定', scatter:'🔗 相關性分析',
@@ -5749,7 +5858,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.60 · 2026-06-03 enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.50 · 2026-06-02 enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -5857,14 +5966,14 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.60 · 2026-06-03 enabled');
+  status('v3.50 · 2026-06-02 enabled');
 })();
 
 
 // ════ F01: 魚骨圖 → DOE 因子傳遞 ════
 window.fbUpdateMethodUI = function() {
-  // 因子數 > 4 直接用 PB，≤ 4 用全因子 DOE
-  var val = selected.length > 4 ? 'pb' : 'doe';
+  var method = document.querySelector('input[name="fb-doe-method"]:checked');
+  var val = method ? method.value : 'pb';
   var maxCount = val === 'doe' ? 4 : 11;
   var maxEl = document.getElementById('fb-max-count');
   if(maxEl) maxEl.textContent = maxCount;
@@ -5887,54 +5996,7 @@ window.fbUpdateCount = function() {
   all.forEach(function(cb){ if(!cb.checked) cb.disabled = count >= maxCount; });
 };
 
-window.
-window.fbToMSA = function() {
-  var causes = window._fbCauses || [];
-  var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
-  // 取 MSA 類因子（data-suit=msa 的 label 下的 checkbox）
-  var msaSelected = [];
-  checked.forEach(function(cb){
-    var lbl = cb.closest('label');
-    if(lbl && lbl.dataset.suit === 'msa') msaSelected.push(causes[parseInt(cb.value)]);
-  });
-  // 若沒勾 MSA 類，也把 DOE 類一起送（讓使用者評估）
-  if(msaSelected.length === 0){
-    checked.forEach(function(cb){ msaSelected.push(causes[parseInt(cb.value)]); });
-  }
-  if(msaSelected.length === 0){ alert('請先勾選量測系統相關因子'); return; }
-
-  goTool('msa');
-  setTimeout(function(){
-    // 在 MSA 頁頂部顯示背景說明
-    var banner = document.createElement('div');
-    banner.id = 'msa-from-fb-banner';
-    banner.style.cssText = 'background:#F0FDF4;border:1px solid #6EE7B7;border-radius:8px;padding:.85rem 1rem;margin-bottom:.85rem;font-size:13px;color:#065F46';
-    var names = msaSelected.map(function(f){ return '• '+f.name+(f.risk==='high'?' 🔴':''); }).join('<br>');
-    banner.innerHTML =
-      '<div style="font-weight:700;font-size:14px;margin-bottom:.4rem">📐 來自魚骨圖的量測問題（MSA 研究背景）</div>' +
-      '<div style="margin-bottom:.5rem">' + names + '</div>' +
-      '<div style="font-size:12px;color:#047857;border-top:1px solid #A7F3D0;padding-top:.4rem;margin-top:.3rem">' +
-      '<strong>建議步驟：</strong>①確認量測系統類型（計量/計數） ②設計 Gage R&R 研究（≥2 操作員 × ≥10 零件 × 2-3 次重複）' +
-      ' ③執行分析得 %GRR → 若 &gt;30% 需改善量具或方法後再做 DOE</div>';
-    var msaPage = document.querySelector('#page-msa');
-    if(msaPage){
-      var old = document.getElementById('msa-from-fb-banner');
-      if(old) old.remove();
-      msaPage.insertBefore(banner, msaPage.firstChild);
-    }
-
-    // 若有 GRR 操作員數欄位，建議填入 3（標準）
-    var opEl = document.querySelector('#grr-operators, #grr-nop, select[id*="op"]');
-    if(opEl && opEl.tagName==='SELECT'){
-      // 選 3 operators
-      for(var i=0;i<opEl.options.length;i++){
-        if(opEl.options[i].value==='3'){ opEl.selectedIndex=i; break; }
-      }
-    }
-  }, 300);
-};
-
-fbToExperiment = function() {
+window.fbToExperiment = function() {
   var causes = window._fbCauses || [];
   var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
   if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
@@ -5972,43 +6034,26 @@ fbToExperiment = function() {
 
   } else {
     // 帶入 DOE 全因子
-    var nLimit = Math.min(selected.length, 4);
     goTool('doe');
     setTimeout(function(){
-      // step1: 設定 radio 和 hidden input 為 full
-      var radio = document.querySelector('input[name="doe-dtype"][value="full"]');
-      if(radio){ radio.checked = true; }
       var dtype = document.getElementById('doe-design-type');
-      if(dtype) dtype.value = 'full';
-      // step2: 設定因子數
+      if(dtype){ dtype.value = 'full'; if(typeof doeUpdateDesignType==='function') doeUpdateDesignType(); }
       var nfEl = document.getElementById('doe-nf');
-      if(nfEl){
-        nfEl.value = nLimit;
-        // 觸發更新讓因子輸入欄 DOM 建立
-        if(typeof doeUpdateDesignType==='function') doeUpdateDesignType();
-        else if(typeof doeUpdateFactors==='function') doeUpdateFactors();
-      }
-      // step3: 等 DOM 建立後填入因子名稱（800ms 確保足夠）
+      if(nfEl){ nfEl.value = Math.min(selected.length, 4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
       setTimeout(function(){
-        selected.slice(0, nLimit).forEach(function(f, i){
+        selected.forEach(function(f, i){
           var el = document.getElementById('doe-f'+(i+1));
           if(el) el.value = f.name;
         });
-        // step4: 顯示提示訊息
+        if(typeof doeGenMatrix==='function') doeGenMatrix();
         var msg = document.createElement('div');
-        msg.id = 'fb-import-msg-doe';
-        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.85rem 1rem;margin-bottom:.85rem;font-size:13px;color:#166534';
-        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+nLimit+'</strong> 個因子：' +
-          selected.slice(0,nLimit).map(function(f){return f.name;}).join('、') +
-          (selected.length > 4 ? '<br><span style="font-size:11px;color:#D97706">⚠️ 全因子最多 4 因子，其餘 '+(selected.length-4)+' 個因子請改用 PB 篩選設計帶入。</span>' : '') +
+        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
           '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
-        var tp = document.querySelector('#page-doe .tp-header') || document.querySelector('#page-doe .card');
-        if(tp){
-          var old = document.getElementById('fb-import-msg-doe');
-          if(old) old.remove();
-          tp.parentNode.insertBefore(msg, tp.nextSibling);
-        }
-      }, 800);
+        msg.className = 'fb-import-msg';
+        var doeCard = document.querySelector('#page-doe .card');
+        if(doeCard){ var ex=doeCard.querySelector('.fb-import-msg');if(ex)ex.remove(); doeCard.insertBefore(msg,doeCard.firstChild); }
+      }, 400);
     }, 300);
   }
 };
@@ -6049,17 +6094,15 @@ function getPBDesign(nf) {
 
 // 設計類型切換
 window.doeUpdateDesignType = function() {
-  // 同步 radio → hidden input + 卡片高亮
   var dtEl=document.querySelector('input[name="doe-dtype"]:checked');
   if(dtEl){
     var hi=document.getElementById('doe-design-type'); if(hi) hi.value=dtEl.value;
     ['full','frac','pb'].forEach(function(v){
-      var c=document.getElementById('dcard-'+v);
-      if(!c) return;
+      var c=document.getElementById('dcard-'+v); if(!c) return;
       var sel=dtEl.value===v;
       c.style.borderColor=sel?'var(--navy2)':'#DDE2EC';
       c.style.background=sel?'#EFF6FF':'#fff';
-      var lbl=c.querySelector('div:first-of-type'); if(lbl) lbl.style.color=sel?'var(--navy2)':'#6B7280';
+      var lbl=c.querySelector('div'); if(lbl) lbl.style.color=sel?'var(--navy2)':'#6B7280';
     });
   }
   var dtEl2=document.querySelector('input[name="doe-dtype"]:checked'); var dtype=dtEl2?dtEl2.value:(document.getElementById('doe-design-type')||{value:'full'}).value;
