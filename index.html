@@ -1,3 +1,14 @@
+
+function fbFilterGood(){
+  document.querySelectorAll('#fb-factor-list label').forEach(function(lbl){
+    lbl.style.display = lbl.dataset.suit==='good' ? '' : 'none';
+  });
+}
+function fbFilterAll(){
+  document.querySelectorAll('#fb-factor-list label').forEach(function(lbl){
+    lbl.style.display = '';
+  });
+}
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -2274,7 +2285,7 @@ function fishboneDraw(){
     var factors = window._fbData && window._fbData[cid];
     if(!factors||!factors.length) return;
     factors.forEach(function(f){
-      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', risk:f.risk||'medium'});
+      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', catKey:cid, risk:f.risk||'medium'});
     });
   });
   window._fbCauses = fbCauses;
@@ -2325,17 +2336,57 @@ function fishboneDraw(){
     // 因子上限提示（依方法動態更新）
     html += '<div id="fb-factor-limit-hint" style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 <strong id="fb-max-count">11</strong> 個因子，選完後按帶入按鈕</div>';
 
-    // 因子列表（高風險紅字粗體）
+    // DOE 因子適合度分類
+    var DOE_SUITABILITY = {
+      man:     { level:'no',      label:'不建議 DOE', icon:'🚫', color:'#9CA3AF', bg:'#F9FAFB', border:'#E5E7EB',
+                 tip:'人員因子難以量化與控制，建議改用標準作業程序（SOP）或訓練來解決', type:'' },
+      machine: { level:'good',    label:'適合 DOE',   icon:'✅', color:'#059669', bg:'#F0FDF4', border:'#6EE7B7',
+                 tip:'設備設定值（轉速、溫度、壓力等）可量化，為最理想的 DOE 因子', type:'連續型' },
+      material:{ level:'good',    label:'適合 DOE',   icon:'✅', color:'#2563EB', bg:'#EFF6FF', border:'#93C5FD',
+                 tip:'配方比例/濃度可設為連續型；不同供應商/材料種類設為類別型（不連續）', type:'連續 or 類別' },
+      method:  { level:'good',    label:'適合 DOE',   icon:'✅', color:'#7C3AED', bg:'#F5F3FF', border:'#C4B5FD',
+                 tip:'製程參數（時間、速度、步驟）可量化，適合設為連續型因子', type:'連續型' },
+      measure: { level:'caution', label:'謹慎評估',   icon:'⚠️', color:'#D97706', bg:'#FFFBEB', border:'#FCD34D',
+                 tip:'量測系統問題通常用 MSA/Gage R&R 解決，而非 DOE；但量測方法參數例外', type:'' },
+      env:     { level:'caution', label:'謹慎評估',   icon:'⚠️', color:'#D97706', bg:'#FFFBEB', border:'#FCD34D',
+                 tip:'環境因子（溫濕度）難以控制，多為雜訊因子；若可嚴格控制才適合做 DOE', type:'' }
+    };
+
+    // 說明卡片
+    html += '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:.65rem 1rem;margin-bottom:.75rem;font-size:12px;line-height:1.7">';
+    html += '<div style="font-weight:700;color:#92400E;margin-bottom:.3rem">📌 DOE 因子選擇建議</div>';
+    html += '<div style="color:#78350F">✅ <strong>適合</strong>：機器設定值（連續）、配方/濃度（連續）、材料種類（類別）、製程參數（連續）</div>';
+    html += '<div style="color:#92400E">⚠️ <strong>謹慎</strong>：環境因子（難控制，多為雜訊）、量測方法（優先用 MSA）</div>';
+    html += '<div style="color:#6B7280">🚫 <strong>不建議</strong>：人員因子（難量化，建議改用 SOP/訓練）</div>';
+    html += '</div>';
+
+    // 篩選按鈕
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">';
+    html += '<div id="fb-factor-limit-hint2" style="font-size:12px;color:#6B7280;flex:1">勾選適合的 DOE 因子（已預選適合項）</div>';
+    html += '<button onclick="fbFilterGood()" style="font-size:11px;background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">只顯示推薦因子</button>';
+    html += '<button onclick="fbFilterAll()" style="font-size:11px;background:#F9FAFB;color:#6B7280;border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit">全部顯示</button>';
+    html += '</div>';
+
+    // 因子列表（含適合度標示）
     html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem">';
     fbCauses.forEach(function(f, i){
-      var isHigh = f.risk === 'high';
-      var nameStyle = isHigh ? 'color:#DC2626;font-weight:700' : 'color:#374151';
-      var borderStyle = isHigh ? 'border:1.5px solid #FECACA;background:#FEF2F2' : 'border:1px solid #DDE2EC;background:#fff';
-      html += '<label style="display:inline-flex;align-items:center;gap:5px;'+borderStyle+';border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">';
-      html += '<input type="checkbox" value="'+i+'" onchange="fbUpdateCount()" style="cursor:pointer">';
-      html += '<span style="'+nameStyle+'">'+f.name+'</span>';
-      html += '<span style="font-size:10px;color:#9CA3AF">'+f.cat+'</span>';
-      if(isHigh) html += '<span style="font-size:10px;color:#DC2626">●</span>';
+      var catKey = (f.catKey || f.cat || '').toLowerCase();
+      var suit = DOE_SUITABILITY[catKey] || DOE_SUITABILITY.method;
+      var isGood = suit.level === 'good';
+      var isNo = suit.level === 'no';
+      var borderStyle = isNo ? 'border:1px solid #E5E7EB;background:#F9FAFB;opacity:.65'
+                       : (suit.level==='caution' ? 'border:1px dashed '+suit.border+';background:'+suit.bg
+                       : 'border:1.5px solid '+suit.border+';background:'+suit.bg);
+      var nameColor = isNo ? '#9CA3AF' : (f.risk==='high' ? '#DC2626' : '#374151');
+      var nameFw = f.risk==='high' ? 'font-weight:700' : '';
+      var checkedAttr = isGood ? 'checked' : '';  // 預設只勾選適合因子
+      html += '<label title="'+suit.tip+(suit.type?' ｜ 建議：'+suit.type:'')+'" ';
+      html += 'data-suit="'+suit.level+'" ';
+      html += 'style="display:inline-flex;align-items:center;gap:5px;'+borderStyle+';border-radius:6px;padding:5px 10px;cursor:'+(isNo?'default':'pointer')+';font-size:12px">';
+      html += '<input type="checkbox" value="'+i+'" '+(isNo?'disabled':'')+' '+checkedAttr+' onchange="fbUpdateCount()" style="cursor:'+(isNo?'not-allowed':'pointer')+'">';
+      html += '<span style="color:'+nameColor+';'+nameFw+'">'+f.name+'</span>';
+      html += '<span style="font-size:10px;color:'+suit.color+'">'+suit.icon+'</span>';
+      if(suit.type) html += '<span style="font-size:9px;background:'+suit.bg+';color:'+suit.color+';border-radius:3px;padding:0 4px;border:1px solid '+suit.border+'">'+suit.type+'</span>';
       html += '</label>';
     });
     html += '</div>';
@@ -2343,7 +2394,7 @@ function fishboneDraw(){
     html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     html += '<span id="fb-count" style="font-size:12px;color:#6B7280">已選 0 個</span>';
     html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(27,58,92,.3)">→ 帶入實驗設計</button>';
-    html += '<span style="font-size:11px;color:#DC2626">🔴 = 高風險因子（建議優先選取）</span>';
+    html += '<span style="font-size:11px;color:#6B7280">（滑鼠移到因子上可看適合度說明）</span>';
     html += '</div>';
     html += '</div>';
     selectorDiv.innerHTML = html;
