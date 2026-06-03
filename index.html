@@ -894,6 +894,13 @@ tr:hover td{background:#F9FAFB}
   </div>
   
   <!-- ① SVG 魚骨圖（置頂，畫完後顯示）-->
+<!-- 未產生時的佔位區 + 快速產生按鈕 -->
+<div id="fb-placeholder" style="background:#F8FAFF;border:2px dashed #C7D9F5;border-radius:12px;padding:2rem;text-align:center;margin-bottom:.75rem">
+  <div style="font-size:36px;margin-bottom:.5rem">🐟</div>
+  <div style="font-size:14px;color:#6B7280;margin-bottom:1rem">尚未產生魚骨圖<br><span style="font-size:12px">填入下方 6M 原因後按產生</span></div>
+  <button onclick="fbSyncAndDraw()" style="background:var(--navy2);color:#fff;border:none;border-radius:8px;padding:.65rem 1.5rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">▶ 產生魚骨圖</button>
+</div>
+
 <div id="fb-out" style="display:none">
     <div class="card">
       <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
@@ -936,9 +943,12 @@ tr:hover td{background:#F9FAFB}
 
   <!-- ⑤ 輸入欄（可收合） -->
   <div id="fb-input-wrap">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:6px">
       <div style="font-size:12px;color:#6B7280">📝 編輯 6M 原因輸入欄</div>
-      <button onclick="document.getElementById('fb-input-inner').style.display=document.getElementById('fb-input-inner').style.display==='none'?'':'none';this.textContent=document.getElementById('fb-input-inner').style.display==='none'?'▼ 展開輸入欄':'▲ 收合輸入欄'" style="font-size:11px;color:#6B7280;background:none;border:1px solid #DDE2EC;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit" id="fb-toggle-btn">▲ 收合輸入欄</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="fbSyncAndDraw()" style="background:var(--navy2);color:#fff;border:none;border-radius:6px;padding:4px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">▶ 產生魚骨圖</button>
+        <button onclick="document.getElementById('fb-input-inner').style.display=document.getElementById('fb-input-inner').style.display==='none'?'':'none';this.textContent=document.getElementById('fb-input-inner').style.display==='none'?'▼ 展開輸入欄':'▲ 收合輸入欄'" style="font-size:11px;color:#6B7280;background:none;border:1px solid #DDE2EC;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit" id="fb-toggle-btn">▲ 收合輸入欄</button>
+      </div>
     </div>
     <div id="fb-input-inner">
 <div class="card">
@@ -2235,6 +2245,8 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
+  var fbph = document.getElementById('fb-placeholder');
+  if(fbph) fbph.style.display='none';
   document.getElementById('fb-chat-wrap').style.display='block';
 
   // 組裝 AI 分析摘要（含實際原因數量）
