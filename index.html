@@ -892,7 +892,56 @@ tr:hover td{background:#F9FAFB}
     <div class="tp-phase-dot" style="background:var(--D)"></div>
     <div><div class="tp-title">魚骨圖（石川圖）</div><div class="tp-subtitle">6M 根本原因分析・SVG 向量繪圖・等長大骨・效應強度排列</div></div>
   </div>
-  <div class="card">
+  
+  <!-- ① SVG 魚骨圖（置頂，畫完後顯示）-->
+<div id="fb-out" style="display:none">
+    <div class="card">
+      <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
+      <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
+        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（高風險=5 / 中風險=3 / 低風險=1）
+      </div>
+    </div>
+  </div>
+
+  <!-- ② AI 分析報告 -->
+  <div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
+
+  <!-- ③ AI 對話框（追問／修正原因） -->
+  <div id="fb-chat-wrap" style="display:none;margin-top:.75rem">
+    <div class="card" style="background:#F8FAFF;border:1.5px solid #C7D9F5">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">🤖</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1B3A5C">魚骨圖分析助理</div>
+            <div style="font-size:11px;color:#6B7280">可追問、調整因子、確認根因方向</div>
+          </div>
+        </div>
+        <button onclick="fbChatReset()" style="font-size:11px;color:#6B7280;background:none;border:1px solid #D1D5DB;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">🔄 重設對話</button>
+      </div>
+      <div id="fb-chat-history" style="display:flex;flex-direction:column;gap:.5rem;max-height:280px;overflow-y:auto;margin-bottom:.75rem"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <textarea id="fb-chat-input" rows="2" placeholder="例：為什麼人員類別的原因還是要保留？/ 針頭內徑偏小應該算設計還是機器？"
+          onkeydown="fbChatKeydown(event)"
+          style="flex:1;border:1.5px solid #C7D9F5;border-radius:8px;padding:.55rem .8rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.5;transition:border-color .2s"
+          onfocus="this.style.borderColor='#3B7DD8'" onblur="this.style.borderColor='#C7D9F5'"
+        ></textarea>
+        <button onclick="fbChatSend()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:8px;padding:.6rem 1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">送出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ 因子列表（勾選帶入DOE） -->
+  <div id="fb-factor-selector" style="display:none"></div>
+
+  <!-- ⑤ 輸入欄（可收合） -->
+  <div id="fb-input-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <div style="font-size:12px;color:#6B7280">📝 編輯 6M 原因輸入欄</div>
+      <button onclick="document.getElementById('fb-input-inner').style.display=document.getElementById('fb-input-inner').style.display==='none'?'':'none';this.textContent=document.getElementById('fb-input-inner').style.display==='none'?'▼ 展開輸入欄':'▲ 收合輸入欄'" style="font-size:11px;color:#6B7280;background:none;border:1px solid #DDE2EC;border-radius:5px;padding:3px 10px;cursor:pointer;font-family:inherit" id="fb-toggle-btn">▲ 收合輸入欄</button>
+    </div>
+    <div id="fb-input-inner">
+<div class="card">
     <div class="card-title"><span style="background:var(--D);width:3px;height:13px;border-radius:2px;display:inline-block"></span>根本原因分析</div>
 
 <button class="edu-btn" onclick="toggleEdu('fishbone')">
@@ -946,46 +995,9 @@ tr:hover td{background:#F9FAFB}
 
     <div class="btn-row"><button class="btn btn-primary" onclick="fbSyncAndDraw()">▶ 產生魚骨圖</button></div>
   </div>
-
-  <!-- AI 帶入提示：固定容器，不受 DMAIC card 影響 -->
-  <div id="fb-hint-wrap"></div>
-
-<div id="fb-out" style="display:none">
-    <div class="card">
-      <div id="fb-svg-wrap" style="overflow-x:auto;background:#FAFAFA;border-radius:8px;padding:.5rem"></div>
-      <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
-        大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（高風險=5 / 中風險=3 / 低風險=1）
-      </div>
     </div>
   </div>
-  <div id="fb-factor-selector" style="display:none"></div>
 
-  <!-- 魚骨圖嵌入式問答助理 -->
-  <div id="fb-chat-wrap" style="display:none;margin-top:.75rem">
-    <div class="card" style="background:#F8FAFF;border:1.5px solid #C7D9F5">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">🤖</span>
-          <div>
-            <div style="font-size:13px;font-weight:700;color:#1B3A5C">魚骨圖分析助理</div>
-            <div style="font-size:11px;color:#6B7280">可追問、調整因子、確認根因方向</div>
-          </div>
-        </div>
-        <button onclick="fbChatReset()" style="font-size:11px;color:#6B7280;background:none;border:1px solid #D1D5DB;border-radius:6px;padding:3px 10px;cursor:pointer;font-family:inherit">🔄 重設對話</button>
-      </div>
-      <div id="fb-chat-history" style="display:flex;flex-direction:column;gap:.5rem;max-height:280px;overflow-y:auto;margin-bottom:.75rem"></div>
-      <div style="display:flex;gap:8px;align-items:flex-end">
-        <textarea id="fb-chat-input" rows="2" placeholder="例：為什麼人員類別的原因還是要保留？/ 針頭內徑偏小應該算設計還是機器？"
-          onkeydown="fbChatKeydown(event)"
-          style="flex:1;border:1.5px solid #C7D9F5;border-radius:8px;padding:.55rem .8rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.5;transition:border-color .2s"
-          onfocus="this.style.borderColor='#3B7DD8'" onblur="this.style.borderColor='#C7D9F5'"
-        ></textarea>
-        <button onclick="fbChatSend()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:8px;padding:.6rem 1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">送出</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div id="claude-container-fishbone" style="padding:0 0 1rem 0"></div>
 </div>
 
 <!-- ══════════════ 子頁面：Histogram ══════════════ -->
@@ -2223,6 +2235,22 @@ function fishboneDraw(){
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
   document.getElementById('fb-out').style.display='block';
+  document.getElementById('fb-chat-wrap').style.display='block';
+
+  // 組裝 AI 分析摘要（含實際原因數量）
+  var fbAIStat = '魚骨圖分析\n問題：' + problem + '\n';
+  var FB_CATS_FOR_AI = [
+    {id:'fb-man',label:'人員'},{id:'fb-machine',label:'機器'},
+    {id:'fb-material',label:'材料'},{id:'fb-method',label:'方法'},
+    {id:'fb-measure',label:'量測'},{id:'fb-env',label:'環境'}
+  ];
+  FB_CATS_FOR_AI.forEach(function(c){
+    var el = document.getElementById(c.id);
+    if(!el||!el.value.trim()) return;
+    var causes = el.value.trim().split('\n').filter(Boolean).map(function(l){return l.split(',')[0].trim();});
+    if(causes.length) fbAIStat += c.label+'：'+causes.join('、')+'\n';
+  });
+  setTimeout(function(){ claudeAutoAnalyze('fishbone', fbAIStat); }, 300);
 
   // 從卡片資料收集所有因子（含風險等級）
   var fbCauses = [];
