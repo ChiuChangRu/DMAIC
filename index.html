@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.50 · AI 輔助統計分析平台</title>
+<title>MedQA v3.51 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.50 · 2026-06-02</span>
+    <span class="tb-status" id="dmaic-save-status">v3.51 · 2026-06-03 03:42</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -5201,10 +5201,9 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   var homeHistory = [];
   // ══ 快速問卷 + 信心度 ══
   (function(){
-    // 問卷題目定義
+    // 問卷題目定義（multi:true 表示可複選，用 checkbox 群組顯示）
     var QS = [
-      {id:'hq-type',  label:'問題類型', opts:[
-        ['','— 請選擇 —'],
+      {id:'hq-type',  label:'問題類型', multi:true, opts:[
         ['製程問題','製程問題（參數、良率）'],
         ['材料問題','材料問題（原料、配方）'],
         ['設備問題','設備問題（機台、夾具）'],
@@ -5212,35 +5211,33 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         ['量測問題','量測問題（量具、方法）'],
         ['人員問題','人員問題（操作、SOP）']
       ]},
-      {id:'hq-freq',  label:'發生頻率', opts:[
+      {id:'hq-freq',  label:'發生頻率', multi:false, opts:[
         ['','— 請選擇 —'],
         ['每批都有，穩定發生','每批都有，穩定發生'],
         ['偶爾出現，不規則','偶爾出現，不規則'],
         ['特定條件才有','特定條件才有'],
         ['近期才開始','近期才開始（以前沒有）']
       ]},
-      {id:'hq-where', label:'發現位置', opts:[
+      {id:'hq-where', label:'發現位置', multi:false, opts:[
         ['','— 請選擇 —'],
         ['工廠內部製程中發現','工廠內部製程中發現'],
         ['出廠前 QC 發現','出廠前 QC 發現'],
         ['客戶端才發現','客戶端或市場才發現'],
         ['兩者都有','兩者都有']
       ]},
-      {id:'hq-scope', label:'影響範圍', opts:[
-        ['','— 請選擇 —'],
+      {id:'hq-scope', label:'影響範圍', multi:true, opts:[
         ['所有機台班別都有','所有機台班別都有'],
-        ['特定機台','特定機台才有'],
-        ['特定班別','特定班別才有'],
+        ['特定機台才有','特定機台才有'],
+        ['特定班別才有','特定班別才有'],
         ['隨機無規律','隨機無規律']
       ]},
-      {id:'hq-data',  label:'是否有數據', opts:[
+      {id:'hq-data',  label:'是否有數據', multi:false, opts:[
         ['','— 請選擇 —'],
         ['有完整量測數據','有完整量測數據'],
         ['只有良率或不良數','只有良率或不良數'],
         ['沒有數據只有觀察','沒有數據，只有觀察']
       ]},
-      {id:'hq-change',label:'近期是否有變更', opts:[
-        ['','— 請選擇 —'],
+      {id:'hq-change',label:'近期是否有變更', multi:true, opts:[
         ['材料或供應商變更','材料或供應商變更'],
         ['製程參數或設備調整','製程參數或設備調整'],
         ['設計或規格變更','設計或規格變更'],
@@ -5249,6 +5246,17 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         ['不確定有無變更','不確定有無變更']
       ]}
     ];
+
+    // 讀取某題目的答案（相容單選/複選）
+    function getQValue(q){
+      if(q.multi){
+        var checks = document.querySelectorAll('input[name="'+q.id+'_cb"]:checked');
+        return checks.length ? Array.from(checks).map(function(c){return c.value;}).join('、') : '';
+      } else {
+        var el = document.getElementById(q.id);
+        return el ? el.value : '';
+      }
+    }
 
     // 動態建立問卷 DOM
     function buildQuickForm(){
@@ -5278,20 +5286,49 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
       QS.forEach(function(q){
         var cell = document.createElement('div');
+        // 複選題目佔滿整行
+        if(q.multi) cell.style.cssText = 'grid-column:1/-1';
+
         var lbl = document.createElement('div');
-        lbl.textContent = q.label;
-        lbl.style.cssText = 'color:rgba(255,255,255,.85);font-size:11px;margin-bottom:3px;font-weight:500';
+        lbl.textContent = q.label + (q.multi ? ' （可複選）' : '');
+        lbl.style.cssText = 'color:rgba(255,255,255,.85);font-size:11px;margin-bottom:4px;font-weight:500';
         cell.appendChild(lbl);
-        var sel = document.createElement('select');
-        sel.id = q.id;
-        sel.style.cssText = 'width:100%;background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.4);border-radius:6px;color:#1a1a2e;padding:5px 8px;font-size:12px;font-family:inherit';
-        q.opts.forEach(function(o){
-          var opt = document.createElement('option');
-          opt.value = o[0]; opt.textContent = o[1];
-          sel.appendChild(opt);
-        });
-        sel.addEventListener('change', updateFormProgress);
-        cell.appendChild(sel);
+
+        if(q.multi){
+          // checkbox 群組
+          var cbWrap = document.createElement('div');
+          cbWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:5px 10px';
+          q.opts.forEach(function(o){
+            var cbLabel = document.createElement('label');
+            cbLabel.style.cssText = 'display:flex;align-items:center;gap:4px;cursor:pointer;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:5px;padding:3px 8px;font-size:11px;color:rgba(255,255,255,.9);transition:background .15s';
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.name = q.id + '_cb';
+            cb.value = o[0];
+            cb.style.cssText = 'accent-color:#34D399;cursor:pointer';
+            cb.addEventListener('change', function(){
+              cbLabel.style.background = cb.checked ? 'rgba(52,211,153,.25)' : 'rgba(255,255,255,.12)';
+              cbLabel.style.borderColor = cb.checked ? 'rgba(52,211,153,.6)' : 'rgba(255,255,255,.25)';
+              updateFormProgress();
+            });
+            cbLabel.appendChild(cb);
+            cbLabel.appendChild(document.createTextNode(o[1]));
+            cbWrap.appendChild(cbLabel);
+          });
+          cell.appendChild(cbWrap);
+        } else {
+          // 單選 select
+          var sel = document.createElement('select');
+          sel.id = q.id;
+          sel.style.cssText = 'width:100%;background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.4);border-radius:6px;color:#1a1a2e;padding:5px 8px;font-size:12px;font-family:inherit';
+          q.opts.forEach(function(o){
+            var opt = document.createElement('option');
+            opt.value = o[0]; opt.textContent = o[1];
+            sel.appendChild(opt);
+          });
+          sel.addEventListener('change', updateFormProgress);
+          cell.appendChild(sel);
+        }
         grid.appendChild(cell);
       });
 
@@ -5303,15 +5340,17 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     }
 
     function updateFormProgress(){
-      var filled = QS.filter(function(q){ var el=document.getElementById(q.id); return el&&el.value; }).length;
+      var filled = QS.filter(function(q){ return getQValue(q) !== ''; }).length;
       var pct = Math.round(filled/QS.length*100);
       var bar=document.getElementById('hq-bar'); if(bar) bar.style.width=pct+'%';
       var pctEl=document.getElementById('hq-pct'); if(pctEl) pctEl.textContent=pct+'%';
     }
 
     function getFormAnswers(){
-      return QS.filter(function(q){ var el=document.getElementById(q.id); return el&&el.value; })
-               .map(function(q){ var el=document.getElementById(q.id); return q.label+'\uff1a'+el.value; });
+      return QS.map(function(q){
+        var val = getQValue(q);
+        return val ? q.label+'\uff1a'+val : null;
+      }).filter(Boolean);
     }
 
     // 信心度計算
@@ -5482,7 +5521,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         window._homeHistory = homeHistory.slice();
 
         // 組建問卷結構化 context，輔助 AI 正確對應 6M 類別
-        var surveyMap = [
+        var _surveyMap = [
           ['hq-type',  '問題類型'],
           ['hq-freq',  '發生頻率'],
           ['hq-where', '發現位置'],
@@ -5490,12 +5529,18 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           ['hq-data',  '是否有數據'],
           ['hq-change','近期是否有變更']
         ];
-        var surveyParts = surveyMap
-          .map(function(item){ var el=document.getElementById(item[0]); return el&&el.value ? item[1]+'：'+el.value : null; })
-          .filter(Boolean);
-        var surveyCtx = '';
-        if(surveyParts.length){
-          surveyCtx = '\n\n【問卷資料（供 6M 分類參考）】\n' + surveyParts.join('\n')
+        var _surveyParts = _surveyMap.map(function(item){
+          // 支援複選 checkbox 群組
+          var checks = document.querySelectorAll('input[name="'+item[0]+'_cb"]:checked');
+          if(checks.length){
+            return item[1]+'：'+Array.from(checks).map(function(c){return c.value;}).join('、');
+          }
+          var el = document.getElementById(item[0]);
+          return (el&&el.value) ? item[1]+'：'+el.value : null;
+        }).filter(Boolean);
+        var _surveyCtx = '';
+        if(_surveyParts.length){
+          _surveyCtx = '\n\n【問卷資料（供 6M 分類參考）】\n' + _surveyParts.join('\n')
             + '\n\n問卷推論規則：'
             + '\n- 「特定機台才有」→ Machine 有依據，Man/Method 可審慎納入'
             + '\n- 「無任何近期變更」→ Material、Method 原因應保守，不可大量列入'
@@ -5503,14 +5548,14 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
             + '\n- 「出廠前 QC 發現」→ Measure 有依據'
             + '\n- 「材料或供應商變更」→ Material 高度有依據（high）';
         }
-        var fbFinalMsg = '請嚴格根據以上對話內容與問卷資料中實際存在的線索，為魚骨圖 6M 各類別提供根本原因建議。'
-          + surveyCtx
+        var _fbFinalMsg = '請嚴格根據以上對話內容與問卷資料中實際存在的線索，為魚骨圖 6M 各類別提供根本原因建議。'
+          + _surveyCtx
           + '\n\n【重要限制】對話或問卷中沒有明確線索支持的類別，必須回傳空陣列 []，不可依背景知識自行補充。';
 
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate', fbModel:'opus',
-            messages: homeHistory.concat([{role:'user', content: fbFinalMsg}])
+            messages: homeHistory.concat([{role:'user', content: _fbFinalMsg}])
           })
         }).then(function(r){return r.json();}).then(function(data){
           console.log('[fb_gen]',JSON.stringify(data).slice(0,150));
@@ -5890,7 +5935,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.50 · 2026-06-02 enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.51 · 2026-06-03 03:42';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -5998,7 +6043,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.50 · 2026-06-02 enabled');
+  status('v3.51 · 2026-06-03 03:42');
 })();
 
 
@@ -6044,8 +6089,7 @@ window.fbToExperiment = async function() {
   if(btn){ btn.disabled = true; btn.textContent = '⏳ AI 轉譯參數中...'; }
 
   var problem = (document.getElementById('fb-problem')||{}).value || '未知問題';
-  var causeList = selected.map(function(f,i){ return (i+1)+'. ['+f.cat+'] '+f.name+' (風險:'+f.risk+')'; }).join('
-');
+  var causeList = selected.map(function(f,i){ return (i+1)+'. ['+f.cat+'] '+f.name+' (風險:'+f.risk+')'; }).join('\n');
   var designType = val === 'pb' ? 'Plackett-Burman 篩選設計（需篩選多因子）' : '全因子 DOE（精確量化 2-4 個關鍵因子）';
 
   var translatedFactors = null;
@@ -6057,13 +6101,9 @@ window.fbToExperiment = async function() {
         problem: problem,
         designType: designType,
         messages: [{role:'user', content:
-          '問題：' + problem + '
-' +
-          '實驗設計類型：' + designType + '
-
-' +
-          '以下是從魚骨圖選出的根本原因，請將每個原因轉譯為可操作的實驗參數：
-' + causeList
+          '問題：' + problem + '\n' +
+          '實驗設計類型：' + designType + '\n\n' +
+          '以下是從魚骨圖選出的根本原因，請將每個原因轉譯為可操作的實驗參數：\n' + causeList
         }]
       })
     });
@@ -6082,7 +6122,6 @@ window.fbToExperiment = async function() {
   function buildTranslationTable(factors) {
     var rows = factors.map(function(f){
       var orig = f.original || f.factor;
-      var changed = orig !== f.factor;
       return '<tr>' +
         '<td style="padding:5px 8px;color:#6B7280;font-size:12px">' + orig + '</td>' +
         '<td style="padding:5px 8px;font-weight:600;color:#1B3A5C;font-size:12px">' + f.factor + (f.unit?' ('+f.unit+')':'') + '</td>' +
