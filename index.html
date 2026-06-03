@@ -6028,7 +6028,8 @@ window.fbUpdateCount = function() {
   all.forEach(function(cb){ if(!cb.checked) cb.disabled = count >= maxCount; });
 };
 
-window.fbToExperiment = function() {
+// ── AI 轉譯魚骨圖原因 → 可操作實驗參數，再帶入 DOE/PB ──
+window.fbToExperiment = async function() {
   var causes = window._fbCauses || [];
   var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
   if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
@@ -6037,27 +6038,92 @@ window.fbToExperiment = function() {
   var selected = [];
   checked.forEach(function(cb){ selected.push(causes[parseInt(cb.value)]); });
 
+  // 顯示 AI 轉譯中的提示
+  var btn = document.querySelector('[onclick="fbToExperiment()"]');
+  var origText = btn ? btn.textContent : '';
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ AI 轉譯參數中...'; }
+
+  var problem = (document.getElementById('fb-problem')||{}).value || '未知問題';
+  var causeList = selected.map(function(f,i){ return (i+1)+'. ['+f.cat+'] '+f.name+' (風險:'+f.risk+')'; }).join('
+');
+  var designType = val === 'pb' ? 'Plackett-Burman 篩選設計（需篩選多因子）' : '全因子 DOE（精確量化 2-4 個關鍵因子）';
+
+  var translatedFactors = null;
+  try {
+    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode: 'fishbone_to_doe',
+        problem: problem,
+        designType: designType,
+        messages: [{role:'user', content:
+          '問題：' + problem + '
+' +
+          '實驗設計類型：' + designType + '
+
+' +
+          '以下是從魚骨圖選出的根本原因，請將每個原因轉譯為可操作的實驗參數：
+' + causeList
+        }]
+      })
+    });
+    var data = await resp.json();
+    if(data.factors && data.factors.length) translatedFactors = data.factors;
+  } catch(e) { /* 轉譯失敗則 fallback 用原始名稱 */ }
+
+  if(btn){ btn.disabled = false; btn.textContent = origText; }
+
+  // 用轉譯結果（或 fallback 原始名稱）填入實驗設計
+  var fillFactors = translatedFactors || selected.map(function(f){
+    return { factor: f.name, unit: '', low: '低', high: '高', original: f.name };
+  });
+
+  // 產生轉譯對照表 HTML
+  function buildTranslationTable(factors) {
+    var rows = factors.map(function(f){
+      var orig = f.original || f.factor;
+      var changed = orig !== f.factor;
+      return '<tr>' +
+        '<td style="padding:5px 8px;color:#6B7280;font-size:12px">' + orig + '</td>' +
+        '<td style="padding:5px 8px;font-weight:600;color:#1B3A5C;font-size:12px">' + f.factor + (f.unit?' ('+f.unit+')':'') + '</td>' +
+        '<td style="padding:5px 8px;text-align:center;font-size:12px">' + f.low + '</td>' +
+        '<td style="padding:5px 8px;text-align:center;font-size:12px">' + f.high + '</td>' +
+      '</tr>';
+    }).join('');
+    return '<table style="width:100%;border-collapse:collapse;margin-top:.5rem">' +
+      '<thead><tr style="background:#F3F4F6">' +
+      '<th style="padding:5px 8px;font-size:11px;text-align:left;color:#6B7280">魚骨圖原因</th>' +
+      '<th style="padding:5px 8px;font-size:11px;text-align:left;color:#1B3A5C">轉譯實驗參數</th>' +
+      '<th style="padding:5px 8px;font-size:11px;text-align:center;color:#374151">低水準</th>' +
+      '<th style="padding:5px 8px;font-size:11px;text-align:center;color:#374151">高水準</th>' +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<div style="font-size:11px;color:#92400E;margin-top:.4rem">⚠️ 請確認水準值是否符合您的實際製程範圍，必要時手動調整。</div>';
+  }
+
   if(val === 'pb') {
-    // 帶入 PB 頁面
     goTool('pb');
     setTimeout(function(){
       var nfEl = document.getElementById('pb-nf');
       if(nfEl){
-        // 找最接近的合法因子數（5-11）
-        var nf = Math.max(5, Math.min(11, selected.length));
+        var nf = Math.max(5, Math.min(11, fillFactors.length));
         nfEl.value = nf;
         if(typeof pbPageUpdateFactors==='function') pbPageUpdateFactors();
       }
       setTimeout(function(){
-        selected.forEach(function(f, i){
-          var el = document.getElementById('pbp-f'+(i+1));
-          if(el) el.value = f.name;
+        fillFactors.forEach(function(f, i){
+          var nameEl = document.getElementById('pbp-f'+(i+1));
+          var lowEl  = document.getElementById('pbp-l'+(i+1));
+          var highEl = document.getElementById('pbp-h'+(i+1));
+          if(nameEl) nameEl.value = f.factor + (f.unit?' ('+f.unit+')':'');
+          if(lowEl)  lowEl.value  = f.low || '低';
+          if(highEl) highEl.value = f.high || '高';
         });
         if(typeof pbPageGenMatrix==='function') pbPageGenMatrix(parseInt(document.getElementById('pb-nf').value)||5);
         var msg = document.createElement('div');
         msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
-        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
-          '<br><span style="font-size:11px;color:#4B7A5E">請填入高低水準值，再輸入實驗結果執行篩選分析。</span>';
+        var tableHTML = translatedFactors ? buildTranslationTable(fillFactors) : '';
+        msg.innerHTML = '✅ AI 已將魚骨圖原因轉譯為 <strong>'+fillFactors.length+'</strong> 個實驗參數並帶入' +
+          (translatedFactors ? '，高低水準為建議值：' : '（轉譯失敗，使用原始名稱）：') + tableHTML;
         msg.className = 'fb-import-msg';
         var pbCard = document.querySelector('#page-pb .card');
         if(pbCard){ var ex=pbCard.querySelector('.fb-import-msg');if(ex)ex.remove(); pbCard.insertBefore(msg,pbCard.firstChild); }
@@ -6065,23 +6131,27 @@ window.fbToExperiment = function() {
     }, 300);
 
   } else {
-    // 帶入 DOE 全因子
     goTool('doe');
     setTimeout(function(){
       var dtype = document.getElementById('doe-design-type');
       if(dtype){ dtype.value = 'full'; if(typeof doeUpdateDesignType==='function') doeUpdateDesignType(); }
       var nfEl = document.getElementById('doe-nf');
-      if(nfEl){ nfEl.value = Math.min(selected.length, 4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
+      if(nfEl){ nfEl.value = Math.min(fillFactors.length, 4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
       setTimeout(function(){
-        selected.forEach(function(f, i){
-          var el = document.getElementById('doe-f'+(i+1));
-          if(el) el.value = f.name;
+        fillFactors.forEach(function(f, i){
+          var nameEl = document.getElementById('doe-f'+(i+1));
+          var lowEl  = document.getElementById('doe-l'+(i+1));
+          var highEl = document.getElementById('doe-h'+(i+1));
+          if(nameEl) nameEl.value = f.factor + (f.unit?' ('+f.unit+')':'');
+          if(lowEl)  lowEl.value  = f.low || '低';
+          if(highEl) highEl.value = f.high || '高';
         });
         if(typeof doeGenMatrix==='function') doeGenMatrix();
         var msg = document.createElement('div');
         msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
-        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
-          '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
+        var tableHTML = translatedFactors ? buildTranslationTable(fillFactors) : '';
+        msg.innerHTML = '✅ AI 已將魚骨圖原因轉譯為 <strong>'+fillFactors.length+'</strong> 個實驗參數並帶入' +
+          (translatedFactors ? '，高低水準為建議值：' : '（轉譯失敗，使用原始名稱）：') + tableHTML;
         msg.className = 'fb-import-msg';
         var doeCard = document.querySelector('#page-doe .card');
         if(doeCard){ var ex=doeCard.querySelector('.fb-import-msg');if(ex)ex.remove(); doeCard.insertBefore(msg,doeCard.firstChild); }
