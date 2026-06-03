@@ -5489,8 +5489,13 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           console.log('[fb_gen]',JSON.stringify(data).slice(0,150));
           if(data.result){
             if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
-            hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
+            hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，正在繪製魚骨圖...';
             hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
+            // 自動產生魚骨圖
+            setTimeout(function(){
+              if(typeof fishboneDraw==='function') fishboneDraw();
+              hint.innerHTML='✅ 魚骨圖已產生！可在上方查看，原因可直接編輯後重新繪製。';
+            }, 600);
           } else {
             var errMsg = data.error || 'result 為空';
             hint.innerHTML='⚠️ AI 建議生成失敗（'+errMsg+'），請手動填寫各欄位';
