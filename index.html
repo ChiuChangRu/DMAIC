@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 15:45</span>
+    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 16:30</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -5389,7 +5389,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       if(formParts.length > 0) fullMsg = q + '\n【快速問卷】' + formParts.join('｜');
 
       // 顯示使用者訊息
-      appendHomeUser(q + (formParts.length ? ' 📋' + formParts.length+'項問卷' : ''));
+      var isFirstSend = homeHistory.length === 0;
+      appendHomeUser(q + (isFirstSend && formParts.length ? ' 📋' + formParts.length+'項問卷' : ''));
       input.value = '';
       if(sendBtn) sendBtn.disabled = true;
       homeHistory.push({role:'user', content: fullMsg});
@@ -5897,7 +5898,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 15:45';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 16:30';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6005,7 +6006,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.52 · 2026-06-03 15:45');
+  status('v3.52 · 2026-06-03 16:30');
 })();
 
 
@@ -6042,7 +6043,7 @@ window.fbToExperiment = async function() {
   var method = document.querySelector('input[name="fb-doe-method"]:checked');
   var val = method ? method.value : 'pb';
 
-  // 優先從 _fbCauses 讀，fallback 從 DOM label 讀
+  // 優先從 _fbCauses 讀，fallback 從 label data 屬性讀
   var causes = window._fbCauses || [];
   var selected = [];
   checked.forEach(function(cb){
@@ -6051,14 +6052,12 @@ window.fbToExperiment = async function() {
     if(c){
       selected.push(c);
     } else {
-      // fallback: 從 label 的 span 讀取名稱和類別
-      var label = cb.closest('label') || cb.parentElement;
-      if(label){
-        var spans = label.querySelectorAll('span');
-        var name = spans[0] ? spans[0].textContent.trim() : '因子'+(idx+1);
-        var cat  = spans[1] ? spans[1].textContent.trim() : '';
-        selected.push({name:name, cat:cat, risk:'medium'});
-      }
+      var label = cb.closest ? cb.closest('label') : cb.parentElement;
+      if(!label) label = cb.parentElement;
+      var name = (label && label.getAttribute('data-name')) || ('因子'+(idx+1));
+      var cat  = (label && label.getAttribute('data-cat'))  || '';
+      var risk = (label && label.getAttribute('data-risk')) || 'medium';
+      selected.push({name:name, cat:cat, risk:risk});
     }
   });
   if(selected.length === 0){
