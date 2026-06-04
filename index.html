@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 10:30</span>
+    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 10:58</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -5274,19 +5274,19 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
       var toggle = document.createElement('button');
       toggle.id = 'hq-toggle';
-      toggle.textContent = '📋 展開問卷 ▼';
+      toggle.textContent = '📋 收合問卷 ▲';
       toggle.style.cssText = 'font-size:11px;color:rgba(255,255,255,.65);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;margin-bottom:.5rem;display:block';
       toggle.onclick = function(){
         var b = document.getElementById('hq-body');
-        var open = b.style.display === 'none';
-        b.style.display = open ? 'block' : 'none';
-        toggle.textContent = open ? '📋 收合問卷 ▲' : '📋 展開問卷 ▼';
+        var open = b.style.display !== 'none';
+        b.style.display = open ? 'none' : 'block';
+        toggle.textContent = open ? '📋 展開問卷 ▼' : '📋 收合問卷 ▲';
       };
       wrap.appendChild(toggle);
 
       var body = document.createElement('div');
       body.id = 'hq-body';
-      body.style.cssText = 'display:none;background:rgba(255,255,255,.07);border-radius:10px;padding:.75rem;margin-bottom:.5rem';
+      body.style.cssText = 'display:block;background:rgba(255,255,255,.07);border-radius:10px;padding:.75rem;margin-bottom:.5rem';
       wrap.appendChild(body);
 
       var grid = document.createElement('div');
@@ -5396,7 +5396,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       var hqb = document.getElementById('hq-body');
       if(hqb) hqb.style.display = 'none';
       var hqt = document.getElementById('hq-toggle');
-      if(hqt) hqt.textContent = '📋 展開快速問卷（讓 AI 更精準）▼';
+      if(hqt) hqt.textContent = '📋 展開問卷 ▼';
       var step2 = document.getElementById('hq-step2-label');
       if(step2) step2.style.display = 'flex';
 
@@ -5941,7 +5941,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 10:30';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 10:58';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6049,7 +6049,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.52 · 2026-06-03 10:30');
+  status('v3.52 · 2026-06-03 10:58');
 })();
 
 
