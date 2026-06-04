@@ -5539,24 +5539,12 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           return (el&&el.value) ? item[1]+'：'+el.value : null;
         }).filter(Boolean);
         var _surveyCtx2 = _surveyParts2.length
-          ? '
-
-【問卷資料】
-'+_surveyParts2.join('
-')
-            +'
-
-問卷推論規則：
-- 「特定機台才有」→ Machine 有依據
-- 「無任何近期變更」→ Material/Method 保守
-- 「出廠前 QC 發現」→ Measure 有依據
-- 「材料或供應商變更」→ Material 高度有依據'
+          ? '\n\n【問卷資料】\n'+_surveyParts2.join('\n')
+            +'\n\n問卷推論規則：\n- 「特定機台才有」→ Machine 有依據\n- 「無任何近期變更」→ Material/Method 保守\n- 「出廠前 QC 發現」→ Measure 有依據\n- 「材料或供應商變更」→ Material 高度有依據'
           : '';
         var _fbFinalMsg2 = '請嚴格根據以上對話內容與問卷資料中實際存在的線索，為魚骨圖 6M 各類別提供根本原因建議。'
           + _surveyCtx2
-          + '
-
-【重要限制】沒有線索支持的類別必須回傳空陣列 []，不可依背景知識補充。';
+          + '\n\n【重要限制】沒有線索支持的類別必須回傳空陣列 []，不可依背景知識補充。';
 
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
