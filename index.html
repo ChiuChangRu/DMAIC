@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 13:00</span>
+    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 14:15</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -5307,12 +5307,12 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           cbWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px';
           q.opts.forEach(function(o){
             var cbLabel = document.createElement('label');
-            cbLabel.style.cssText = 'display:inline-flex;align-items:center;gap:5px;cursor:pointer;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,.9);transition:all .15s;white-space:nowrap;flex-shrink:0';
+            cbLabel.style.cssText = 'display:inline-flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,.92);transition:all .15s;white-space:nowrap;flex-shrink:0;user-select:none';
             var cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.name = q.id+'_cb';
             cb.value = o[0];
-            cb.style.cssText = 'accent-color:#34D399;cursor:pointer;flex-shrink:0';
+            cb.style.cssText = 'accent-color:#34D399;cursor:pointer;flex-shrink:0;width:14px;height:14px;min-width:14px';
             cb.addEventListener('change', function(){
               cbLabel.style.background = cb.checked ? 'rgba(52,211,153,.2)' : 'rgba(255,255,255,.1)';
               cbLabel.style.borderColor = cb.checked ? 'rgba(52,211,153,.5)' : 'rgba(255,255,255,.2)';
@@ -5931,7 +5931,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 13:00';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 14:15';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6039,7 +6039,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.52 · 2026-06-03 13:00');
+  status('v3.52 · 2026-06-03 14:15');
 })();
 
 
@@ -6077,7 +6077,15 @@ window.fbToExperiment = async function() {
   var method = document.querySelector('input[name="fb-doe-method"]:checked');
   var val = method ? method.value : 'pb';
   var selected = [];
-  checked.forEach(function(cb){ selected.push(causes[parseInt(cb.value)]); });
+  checked.forEach(function(cb){
+    var idx = parseInt(cb.value);
+    var c = causes[idx];
+    if(c) selected.push(c);
+  });
+  if(selected.length === 0){
+    alert('因子資料讀取失敗，請重新產生魚骨圖後再試');
+    return;
+  }
 
   var btn = document.querySelector('[onclick="fbToExperiment()"]');
   var origText = btn ? btn.textContent : '';
