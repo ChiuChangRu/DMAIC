@@ -2317,12 +2317,32 @@ function fishboneDraw(){
 
     html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     html += '<span id="fb-count" style="font-size:12px;color:#6B7280">已選 0 個</span>';
-    html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(27,58,92,.3)">→ 帶入實驗設計</button>';
+    html += '<button id="fb-to-exp-btn" onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(27,58,92,.3)">→ 帶入實驗設計</button>';
     html += '<span style="font-size:11px;color:#DC2626">🔴 = 高風險因子（建議優先選取）</span>';
     html += '</div>';
     html += '</div>';
     selectorDiv.innerHTML = html;
     selectorDiv.style.display = 'block';
+
+    // 用 JS 直接綁定事件，不依賴 onchange attribute
+    var cbList = selectorDiv.querySelectorAll('#fb-factor-list input[type=checkbox]');
+    cbList.forEach(function(cb){
+      cb.addEventListener('change', function(){
+        // 更新計數
+        var allCb = selectorDiv.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
+        var count = allCb.length;
+        var countEl = document.getElementById('fb-count');
+        if(countEl){
+          countEl.textContent = '已選 '+count+' 個';
+          countEl.style.color = count > 0 ? '#059669' : '#6B7280';
+        }
+        // 超過上限時停用其他
+        var method = document.querySelector('input[name="fb-doe-method"]:checked');
+        var maxCount = (method && method.value === 'doe') ? 4 : 11;
+        var all = selectorDiv.querySelectorAll('#fb-factor-list input[type=checkbox]');
+        all.forEach(function(c){ if(!c.checked) c.disabled = count >= maxCount; });
+      });
+    });
     // 初始化方法 UI
     if(typeof fbUpdateMethodUI === 'function') setTimeout(fbUpdateMethodUI, 50);
   }
@@ -6038,6 +6058,7 @@ window.fbUpdateCount = function() {
 
 // ── AI 轉譯魚骨圖原因 → 可操作實驗參數 ──
 window.fbToExperiment = async function() {
+  try {
   var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
   if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
   var method = document.querySelector('input[name="fb-doe-method"]:checked');
@@ -6065,7 +6086,7 @@ window.fbToExperiment = async function() {
     return;
   }
 
-  var btn = document.querySelector('[onclick="fbToExperiment()"]');
+  var btn = document.getElementById('fb-to-exp-btn') || document.querySelector('[onclick="fbToExperiment()"]');
   var origText = btn ? btn.textContent : '';
   if(btn){ btn.disabled = true; btn.textContent = '⏳ AI 轉譯參數中...'; }
 
@@ -6147,6 +6168,12 @@ window.fbToExperiment = async function() {
         var c=document.querySelector('#page-doe .card'); if(c){var e=c.querySelector('.fb-import-msg');if(e)e.remove();c.insertBefore(msg,c.firstChild);}
       },400);
     },300);
+  }
+  } catch(fbErr) {
+    console.error('[fbToExperiment]', fbErr);
+    alert('帶入失敗：' + fbErr.message);
+    var errBtn = document.getElementById('fb-to-exp-btn');
+    if(errBtn){ errBtn.disabled = false; errBtn.textContent = '→ 帶入實驗設計'; }
   }
 };
 
