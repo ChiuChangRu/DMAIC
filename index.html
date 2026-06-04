@@ -5409,12 +5409,21 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
     // 新版 appendHomeAI（含信心度）
     function appendHomeAI_withConf(text, tools, conf){
-      appendHomeAI(text, tools);
+      // 用 window.appendHomeAI 確保能找到外層定義的函式
+      if(typeof window.appendHomeAI === 'function'){
+        window.appendHomeAI(text, tools);
+      }
       if(conf === undefined) return;
       var hist = document.getElementById('home-chat-history');
       if(!hist) return;
       var confColor = conf>=75?'#10B981':conf>=50?'#F59E0B':'#EF4444';
-      var confLabel = conf>=90?'高信心，建議立即行動':conf>=75?'建議足夠，可進行分析':conf>=50?'需再補充 1-2 個資訊':'資訊不足，請填問卷或繼續對話';
+      // 有推薦工具時，顯示「可開始分析」
+      var confLabel = tools && tools.length > 0
+        ? '✅ 可開始分析'
+        : conf>=90?'高信心，建議立即行動'
+          :conf>=75?'建議足夠，可進行分析'
+          :conf>=50?'需再補充 1-2 個資訊'
+          :'資訊不足，請填問卷或繼續對話';
       var bar = document.createElement('div');
       bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:.35rem .5rem;margin-top:2px';
       bar.innerHTML = '<span style="font-size:10px;color:rgba(255,255,255,.45)">AI 信心度</span>'+
@@ -5450,7 +5459,6 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     div.textContent = text;
 
     if(tools && tools.length > 0) {
-      // 按鈕直接附加在訊息泡泡底部
       var btnArea = document.createElement('div');
       btnArea.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
       var label = document.createElement('div');
@@ -5467,12 +5475,11 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         btnArea.appendChild(btn);
       });
       div.appendChild(btnArea);
-
-      // 按鈕直接附加在訊息泡泡底部，不另設固定區
     }
     hist.appendChild(div);
     hist.scrollTop = hist.scrollHeight;
   }
+  window.appendHomeAI = appendHomeAI;
 
   function appendHomeUser(text) {
     var hist = document.getElementById('home-chat-history');
