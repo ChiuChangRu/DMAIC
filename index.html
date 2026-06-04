@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.52 · AI 輔助統計分析平台</title>
+<title>MedQA v3.50 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -279,7 +279,104 @@ tr:hover td{background:#F9FAFB}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
-/* ════ 魚骨圖因子卡片 ════ */
+/* ════ 分割視窗 ════ */
+#split-container {
+  display: flex;
+  height: calc(100vh - 56px - 40px);
+  overflow: hidden;
+}
+#split-left {
+  flex: 0 0 60%;
+  overflow-y: auto;
+  border-right: 3px solid #C7D9F5;
+  position: relative;
+}
+#split-right {
+  flex: 0 0 40%;
+  overflow-y: auto;
+  background: #F8FAFF;
+  position: relative;
+}
+#split-right-header {
+  background: #1B3A5C;
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+#split-right-content { padding: 0; }
+.split-tool-select {
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+}
+#split-toggle-btn {
+  position: fixed;
+  bottom: 80px;
+  right: 12px;
+  background: #1B3A5C;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  z-index: 200;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+/* 非分割模式下的正常頁面 */
+body.normal-mode #split-container { display: none; }
+body.normal-mode .page { display: none; }
+body.normal-mode .page.active { display: block; }
+/* 分割模式 */
+body.split-mode .page { display: none !important; }
+body.split-mode #split-container { display: flex !important; }
+
+/* ════ 案件管理列 ════ */
+#case-bar {
+  background: #0F2044;
+  color: #fff;
+  padding: 6px 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+#case-bar input {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.2);
+  color: #fff;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 12px;
+  font-family: inherit;
+  width: 120px;
+}
+#case-bar input::placeholder { color: rgba(255,255,255,.4); }
+.case-btn {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.case-btn:hover { background: rgba(255,255,255,.22); }
 .fb-cat-section { margin-bottom: 1.1rem; }
 .fb-cat-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -464,18 +561,6 @@ tr:hover td{background:#F9FAFB}
   .tp-title { font-size:16px; }
 }
 </style>
-<script>
-(function(){
-  var now = new Date();
-  var pad = function(n){ return n < 10 ? '0'+n : n; };
-  var ts = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes());
-  window._buildTime = ts;
-  document.addEventListener('DOMContentLoaded', function(){
-    var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.52 · ' + ts;
-  });
-})();
-</script>
 </head>
 <body>
 
@@ -489,9 +574,25 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.52</span>
+    <span class="tb-status" id="dmaic-save-status">v3.50 · 2026-06-02</span>
   </div>
 </div>
+<!-- ── 案件管理列 ── -->
+<div id="case-bar">
+  <span style="color:rgba(255,255,255,.5);white-space:nowrap">📁 案件：</span>
+  <input type="text" id="case-code" placeholder="案件代碼" style="width:100px">
+  <input type="text" id="case-name" placeholder="專案名稱" style="width:150px">
+  <button class="case-btn" onclick="caseSave()">💾 存檔</button>
+  <button class="case-btn" onclick="caseLoad()">📂 載入</button>
+  <button class="case-btn" onclick="caseExport()">⬇ JSON</button>
+  <label class="case-btn" style="cursor:pointer">
+    📥 匯入
+    <input type="file" accept=".json" onchange="caseImport(event)" style="display:none">
+  </label>
+  <span id="case-status" style="color:rgba(255,255,255,.5);font-size:11px;margin-left:4px"></span>
+  <button id="split-toggle-btn2" onclick="toggleSplitMode()" style="margin-left:auto;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">⬜ 分割視窗</button>
+</div>
+
 <!-- 子頁面工具列 -->
 <div id="tool-bar" style="display:none;background:#1B3A5C;padding:7px 1.5rem;align-items:center;gap:10px;border-bottom:2px solid #7EC8E3">
   <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1B3A5C;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
@@ -501,6 +602,48 @@ tr:hover td{background:#F9FAFB}
   <button onclick="dmaicSaveCurrent()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">💾 儲存</button>
   <button onclick="dmaicExportJSON()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">⬇ JSON</button>
   <button onclick="dmaicPrintCurrentTool()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">🖨 列印</button>
+</div>
+
+<!-- ══ 分割視窗容器 ══ -->
+<div id="split-container" style="display:none">
+  <div id="split-left">
+    <!-- 左側工具選擇列 -->
+    <div style="background:#1B3A5C;color:#fff;padding:6px 12px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10">
+      <span style="font-size:11px;color:rgba(255,255,255,.6)">左側工具：</span>
+      <select id="split-left-sel" onchange="splitLoadTool('left')" class="split-tool-select">
+        <option value="">— 選擇工具 —</option>
+        <option value="fishbone">🐟 魚骨圖</option>
+        <option value="spc">📈 SPC</option>
+        <option value="msa">📐 MSA</option>
+        <option value="histogram">📉 直方圖</option>
+        <option value="hypothesis">🔬 假設檢定</option>
+        <option value="scatter">🔗 相關性</option>
+        <option value="boxplot">📦 箱型圖</option>
+        <option value="pb">🔎 PB 篩選</option>
+        <option value="doe">🧪 DOE</option>
+      </select>
+      <button onclick="exitSplitMode()" style="margin-left:auto;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">✕ 結束分割</button>
+    </div>
+    <div id="split-left-content"></div>
+  </div>
+  <div id="split-right">
+    <div id="split-right-header">
+      <span style="font-size:11px;color:rgba(255,255,255,.6)">右側工具：</span>
+      <select id="split-right-sel" onchange="splitLoadTool('right')" class="split-tool-select">
+        <option value="">— 選擇工具 —</option>
+        <option value="fishbone">🐟 魚骨圖</option>
+        <option value="spc">📈 SPC</option>
+        <option value="msa">📐 MSA</option>
+        <option value="histogram">📉 直方圖</option>
+        <option value="hypothesis">🔬 假設檢定</option>
+        <option value="scatter">🔗 相關性</option>
+        <option value="boxplot">📦 箱型圖</option>
+        <option value="pb">🔎 PB 篩選</option>
+        <option value="doe">🧪 DOE</option>
+      </select>
+    </div>
+    <div id="split-right-content"></div>
+  </div>
 </div>
 
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
@@ -535,25 +678,8 @@ tr:hover td{background:#F9FAFB}
         <span style="font-size:11px;color:rgba(255,255,255,.4)">AI 將透過 2-3 輪對話引導您找出根本原因，並推薦適合的分析工具。</span>
       </div>
 
-      <!-- 步驟一標題 -->
-      <div id="hq-step1-label" style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
-        <div style="background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;white-space:nowrap">步驟一</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">CAPA 問卷（直接選工具）</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4)">— 填越多 AI 越精準</div>
-      </div>
-
-      <!-- 快速問卷 slot -->
-      <div id="home-quick-form-slot"></div>
-
-      <!-- 步驟二標題（送出前隱藏，送出後顯示） -->
-      <div id="hq-step2-label" style="display:none;align-items:center;gap:8px;margin:.75rem 0 .4rem">
-        <div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;white-space:nowrap">步驟二</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">AI 輔助問答</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4)">— AI 將針對問卷未涵蓋的深入問題追問</div>
-      </div>
-
       <!-- 對話區（展開後顯示） -->
-      <div id="home-chat-history" style="display:none;max-height:380px;overflow-y:auto;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
+      <div id="home-chat-history" style="display:none;max-height:380px;overflow-y:auto;display:none;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
 
       <!-- 輸入區 -->
       <div style="display:flex;gap:8px;align-items:flex-end">
@@ -1143,26 +1269,12 @@ tr:hover td{background:#F9FAFB}
 
     <div class="g3">
       <div class="g2">
-        <div class="field" style="grid-column:1/-1"><label>選擇實驗設計方法</label>
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px">
-    <label id="dcard-full" style="border:2px solid var(--navy2);background:#EFF6FF;border-radius:8px;padding:.65rem .8rem;cursor:pointer;display:block">
-      <input type="radio" name="doe-dtype" value="full" checked onchange="doeUpdateDesignType()" style="display:none">
-      <div style="font-size:12px;font-weight:700;color:var(--navy2);margin-bottom:3px">🔬 全因子 2ᵏ</div>
-      <div style="font-size:11px;color:#374151;line-height:1.5">≤4 因子，完整估計主效應與交互作用</div>
-    </label>
-    <label id="dcard-frac" style="border:2px solid #DDE2EC;background:#fff;border-radius:8px;padding:.65rem .8rem;cursor:pointer;display:block">
-      <input type="radio" name="doe-dtype" value="frac" onchange="doeUpdateDesignType()" style="display:none">
-      <div style="font-size:12px;font-weight:700;color:#6B7280;margin-bottom:3px">✂️ 部分因子 2ᵏ⁻ᵖ</div>
-      <div style="font-size:11px;color:#374151;line-height:1.5">4-7 因子，Resolution III/IV/V 設計</div>
-    </label>
-    <label id="dcard-pb" style="border:2px solid #DDE2EC;background:#fff;border-radius:8px;padding:.65rem .8rem;cursor:pointer;display:block">
-      <input type="radio" name="doe-dtype" value="pb" onchange="doeUpdateDesignType()" style="display:none">
-      <div style="font-size:12px;font-weight:700;color:#6B7280;margin-bottom:3px">🔍 PB 因子篩選</div>
-      <div style="font-size:11px;color:#374151;line-height:1.5">5-11 因子，快速篩出關鍵 2-4 個</div>
-    </label>
-  </div>
-  <input type="hidden" id="doe-design-type" value="full">
-</div>
+        <div class="field"><label>設計方法</label>
+          <select id="doe-design-type" onchange="doeUpdateDesignType()">
+            <option value="full">全因子 2ᵏ（≤4因子）</option>
+            <option value="frac">部分因子 2ᵏ⁻ᵖ（4-7因子）</option>
+          </select>
+        </div>
         <div class="field"><label>因子數量</label>
           <select id="doe-nf" onchange="doeUpdateFactors()">
             <option value="2">2 個因子（4 次實驗）</option>
@@ -2284,24 +2396,24 @@ function fishboneDraw(){
 
     if(suggestPB) {
       // 因子 > 4：顯示 PB（預設）+ 田口
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #2563EB;border-radius:8px;padding:.5rem .75rem;cursor:pointer;flex:1;min-width:140px;max-width:280px" id="fb-method-pb-label">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #2563EB;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-pb-label">';
       html += '<input type="radio" name="fb-doe-method" value="pb" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#1D4ED8">🔎 PB 因子篩選 <span style="font-size:10px;background:#DBEAFE;color:#1D4ED8;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
-      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子篩選，找出關鍵 2-4 個</div></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子快速篩選主要影響因子，找出關鍵 2-4 個後再進全因子 DOE</div></div>';
       html += '</label>';
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.5rem .75rem;cursor:not-allowed;flex:1;min-width:140px;max-width:280px;opacity:.55">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
       html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
-      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">製程穩健設計，開發中</div></div>';
+      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
       html += '</label>';
     } else {
       // 因子 ≤ 4：顯示 DOE 全因子（預設）+ 田口
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #D97706;border-radius:8px;padding:.5rem .75rem;cursor:pointer;flex:1;min-width:140px;max-width:280px" id="fb-method-doe-label">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #D97706;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-doe-label">';
       html += '<input type="radio" name="fb-doe-method" value="doe" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#D97706">🧪 DOE 全因子／部分因子 <span style="font-size:10px;background:#FEF3C7;color:#D97706;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
-      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">≤ 4 個因子，完整估計主效應與交互作用</div></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">≤ 4 個關鍵因子，完整估計主效應與所有交互作用，結果最可靠</div></div>';
       html += '</label>';
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.5rem .75rem;cursor:not-allowed;flex:1;min-width:140px;max-width:280px;opacity:.55">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
       html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
       html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
@@ -2313,12 +2425,12 @@ function fishboneDraw(){
     html += '<div id="fb-factor-limit-hint" style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 <strong id="fb-max-count">11</strong> 個因子，選完後按帶入按鈕</div>';
 
     // 因子列表（高風險紅字粗體）
-    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.85rem">';
+    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem">';
     fbCauses.forEach(function(f, i){
       var isHigh = f.risk === 'high';
       var nameStyle = isHigh ? 'color:#DC2626;font-weight:700' : 'color:#374151';
       var borderStyle = isHigh ? 'border:1.5px solid #FECACA;background:#FEF2F2' : 'border:1px solid #DDE2EC;background:#fff';
-      html += '<label style="display:inline-flex;align-items:center;gap:6px;'+borderStyle+';border-radius:7px;padding:6px 12px;cursor:pointer;font-size:13px;white-space:nowrap;flex-shrink:0">';
+      html += '<label style="display:inline-flex;align-items:center;gap:5px;'+borderStyle+';border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">';
       html += '<input type="checkbox" value="'+i+'" onchange="fbUpdateCount()" style="cursor:pointer">';
       html += '<span style="'+nameStyle+'">'+f.name+'</span>';
       html += '<span style="font-size:10px;color:#9CA3AF">'+f.cat+'</span>';
@@ -2329,32 +2441,12 @@ function fishboneDraw(){
 
     html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
     html += '<span id="fb-count" style="font-size:12px;color:#6B7280">已選 0 個</span>';
-    html += '<button id="fb-to-exp-btn" onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(27,58,92,.3)">→ 帶入實驗設計</button>';
+    html += '<button onclick="fbToExperiment()" style="background:linear-gradient(135deg,#1B3A5C,#2A5278);color:#fff;border:none;border-radius:7px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(27,58,92,.3)">→ 帶入實驗設計</button>';
     html += '<span style="font-size:11px;color:#DC2626">🔴 = 高風險因子（建議優先選取）</span>';
     html += '</div>';
     html += '</div>';
     selectorDiv.innerHTML = html;
     selectorDiv.style.display = 'block';
-
-    // 用 JS 直接綁定事件，不依賴 onchange attribute
-    var cbList = selectorDiv.querySelectorAll('#fb-factor-list input[type=checkbox]');
-    cbList.forEach(function(cb){
-      cb.addEventListener('change', function(){
-        // 更新計數
-        var allCb = selectorDiv.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
-        var count = allCb.length;
-        var countEl = document.getElementById('fb-count');
-        if(countEl){
-          countEl.textContent = '已選 '+count+' 個';
-          countEl.style.color = count > 0 ? '#059669' : '#6B7280';
-        }
-        // 超過上限時停用其他
-        var method = document.querySelector('input[name="fb-doe-method"]:checked');
-        var maxCount = (method && method.value === 'doe') ? 4 : 11;
-        var all = selectorDiv.querySelectorAll('#fb-factor-list input[type=checkbox]');
-        all.forEach(function(c){ if(!c.checked) c.disabled = count >= maxCount; });
-      });
-    });
     // 初始化方法 UI
     if(typeof fbUpdateMethodUI === 'function') setTimeout(fbUpdateMethodUI, 50);
   }
@@ -5137,7 +5229,164 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 })();
 
 // ════════════════════════════════════════════════════════
-// 魚骨圖嵌入式問答助理
+// 案件管理系統
+// ════════════════════════════════════════════════════════
+(function(){
+  var CASE_KEY = 'medqa-case';
+
+  function getCaseData() {
+    var code = (document.getElementById('case-code')||{}).value||'CASE001';
+    var name = (document.getElementById('case-name')||{}).value||'未命名專案';
+    // 收集所有頁面的輸入數據
+    var toolData = {};
+    ['spc','msa','fishbone','histogram','hypothesis','scatter','boxplot','pb','doe','pareto','sipoc'].forEach(function(toolId){
+      var page = document.getElementById('page-'+toolId);
+      if(!page) return;
+      var fields = {};
+      page.querySelectorAll('input[id],select[id],textarea[id]').forEach(function(el){
+        fields[el.id] = el.value;
+      });
+      // 魚骨圖特殊：存 _fbData
+      if(toolId==='fishbone' && window._fbData) fields['__fbData'] = JSON.stringify(window._fbData);
+      if(Object.keys(fields).length) toolData[toolId] = fields;
+    });
+    // CAPA 對話
+    var capaHistory = window._homeHistory || [];
+    return { code:code, name:name, savedAt:new Date().toISOString(), toolData:toolData, capaHistory:capaHistory };
+  }
+
+  function applyCase(data) {
+    if(!data) return;
+    var codeEl = document.getElementById('case-code');
+    var nameEl = document.getElementById('case-name');
+    if(codeEl) codeEl.value = data.code||'';
+    if(nameEl) nameEl.value = data.name||'';
+    // 還原各工具數據
+    if(data.toolData) {
+      Object.keys(data.toolData).forEach(function(toolId){
+        var fields = data.toolData[toolId];
+        Object.keys(fields).forEach(function(id){
+          if(id==='__fbData') {
+            try{ window._fbData=JSON.parse(fields[id]); if(typeof renderAll==='function') setTimeout(renderAll,100); }catch(e){}
+            return;
+          }
+          var el=document.getElementById(id);
+          if(el){ el.value=fields[id]; el.dispatchEvent(new Event('change')); }
+        });
+      });
+    }
+    caseStatus('✅ 載入：'+data.code+' '+data.name+' ('+data.savedAt.slice(0,10)+')');
+  }
+
+  function caseStatus(msg) {
+    var el = document.getElementById('case-status');
+    if(el){ el.textContent=msg; setTimeout(function(){el.textContent='';},3000); }
+  }
+
+  window.caseSave = function() {
+    var data = getCaseData();
+    try{
+      localStorage.setItem(CASE_KEY+'::'+data.code, JSON.stringify(data));
+      caseStatus('✅ 已儲存：'+data.code);
+    }catch(e){ alert('儲存失敗：'+e.message); }
+  };
+
+  window.caseLoad = function() {
+    var code = (document.getElementById('case-code')||{}).value;
+    if(!code){ alert('請先輸入案件代碼'); return; }
+    var raw = localStorage.getItem(CASE_KEY+'::'+code);
+    if(!raw){ alert('找不到案件：'+code); return; }
+    try{ applyCase(JSON.parse(raw)); }catch(e){ alert('載入失敗：'+e.message); }
+  };
+
+  window.caseExport = function() {
+    var data = getCaseData();
+    var blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (data.code||'case')+'_'+(data.name||'project').replace(/\s+/g,'_')+'.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    caseStatus('✅ 已匯出 JSON');
+  };
+
+  window.caseImport = function(event) {
+    var file = event.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      try{
+        var data = JSON.parse(e.target.result);
+        applyCase(data);
+        // 自動填入代碼和名稱
+        var codeEl=document.getElementById('case-code');
+        var nameEl=document.getElementById('case-name');
+        if(codeEl&&data.code) codeEl.value=data.code;
+        if(nameEl&&data.name) nameEl.value=data.name;
+      }catch(err){ alert('匯入失敗：'+err.message); }
+    };
+    reader.readAsText(file);
+    event.target.value='';
+  };
+})();
+
+// ════════════════════════════════════════════════════════
+// 分割視窗系統
+// ════════════════════════════════════════════════════════
+(function(){
+  var splitMode = false;
+
+  window.toggleSplitMode = function() {
+    splitMode = !splitMode;
+    var container = document.getElementById('split-container');
+    var btn = document.getElementById('split-toggle-btn2');
+    if(splitMode){
+      // 進入分割模式：把 active page 的內容複製到左側
+      var activePage = document.querySelector('.page.active');
+      var leftContent = document.getElementById('split-left-content');
+      if(activePage && leftContent){
+        leftContent.innerHTML = activePage.innerHTML;
+        // 設定對應的選項
+        var pageId = activePage.id.replace('page-','');
+        var leftSel = document.getElementById('split-left-sel');
+        if(leftSel) leftSel.value = pageId;
+      }
+      container.style.display = 'flex';
+      document.querySelectorAll('.page').forEach(function(p){ p.style.display='none'; });
+      document.getElementById('tool-bar').style.display = 'none';
+      if(btn) btn.textContent = '⬛ 結束分割';
+    } else {
+      exitSplitMode();
+    }
+  };
+
+  window.exitSplitMode = function() {
+    splitMode = false;
+    var container = document.getElementById('split-container');
+    container.style.display = 'none';
+    // 還原 active page
+    var activePage = document.querySelector('.page');
+    if(activePage) activePage.classList.add('active');
+    document.querySelectorAll('.page.active').forEach(function(p){ p.style.display='block'; });
+    var btn = document.getElementById('split-toggle-btn2');
+    if(btn) btn.textContent = '⬜ 分割視窗';
+  };
+
+  window.splitLoadTool = function(side) {
+    var sel = document.getElementById('split-'+side+'-sel');
+    var content = document.getElementById('split-'+side+'-content');
+    if(!sel || !content) return;
+    var toolId = sel.value;
+    if(!toolId){ content.innerHTML = '<div style="padding:2rem;color:#9CA3AF;text-align:center">請選擇工具</div>'; return; }
+    var page = document.getElementById('page-'+toolId);
+    if(page){
+      content.innerHTML = page.querySelector('.tool-page') ? page.querySelector('.tool-page').outerHTML : page.innerHTML;
+      // 重新執行初始化（如 PB 頁面）
+      if(toolId==='pb' && typeof pbPageUpdateFactors==='function') setTimeout(pbPageUpdateFactors,100);
+      if(toolId==='fishbone' && typeof renderAll==='function') setTimeout(renderAll,100);
+    }
+  };
+})();
 // ════════════════════════════════════════════════════════
 (function(){
   // 共用主頁對話歷史（由 homeCapaSend 寫入 window._homeHistory）
@@ -5245,253 +5494,6 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 // ════════════════════════════════════════════════════════
 (function(){
   var homeHistory = [];
-  // ══ 快速問卷 + 信心度 ══
-  (function(){
-    // 問卷題目定義（multi:true 表示複選 checkbox；multi:false 為單選 select）
-    var QS = [
-      {id:'hq-type',  label:'問題類型', multi:true, opts:[
-        ['製程問題','製程問題'],['材料問題','材料問題'],['設備問題','設備問題'],
-        ['設計問題','設計問題'],['量測問題','量測問題'],['人員問題','人員問題']
-      ]},
-      {id:'hq-freq',  label:'發生頻率', multi:false, opts:[
-        ['','— 請選擇 —'],
-        ['每批都有，穩定發生','每批都有，穩定發生'],
-        ['偶爾出現，不規則','偶爾出現，不規則'],
-        ['特定條件才有','特定條件才有'],
-        ['近期才開始','近期才開始（以前沒有）']
-      ]},
-      {id:'hq-where', label:'發現位置', multi:false, opts:[
-        ['','— 請選擇 —'],
-        ['工廠內部製程中發現','工廠內部製程中發現'],
-        ['出廠前 QC 發現','出廠前 QC 發現'],
-        ['客戶端才發現','客戶端或市場才發現'],
-        ['兩者都有','兩者都有']
-      ]},
-      {id:'hq-scope', label:'影響範圍', multi:true, opts:[
-        ['所有機台班別都有','所有機台班別都有'],
-        ['特定機台才有','特定機台才有'],
-        ['特定班別才有','特定班別才有'],
-        ['隨機無規律','隨機無規律']
-      ]},
-      {id:'hq-data',  label:'是否有數據', multi:false, opts:[
-        ['','— 請選擇 —'],
-        ['有完整量測數據','有完整量測數據'],
-        ['只有良率或不良數','只有良率或不良數'],
-        ['沒有數據只有觀察','沒有數據，只有觀察']
-      ]},
-      {id:'hq-change',label:'近期是否有變更', multi:true, opts:[
-        ['材料或供應商變更','材料或供應商變更'],
-        ['製程參數或設備調整','製程參數或設備調整'],
-        ['設計或規格變更','設計或規格變更'],
-        ['人員或班別變動','人員或班別變動'],
-        ['無任何近期變更','無任何近期變更'],
-        ['不確定有無變更','不確定有無變更']
-      ]}
-    ];
-
-    // 讀取某題的答案（相容單選/複選）
-    function getQValue(q){
-      if(q.multi){
-        var checks = document.querySelectorAll('input[name="'+q.id+'_cb"]:checked');
-        return checks.length ? Array.from(checks).map(function(c){return c.value;}).join('、') : '';
-      }
-      var el = document.getElementById(q.id);
-      return el ? el.value : '';
-    }
-
-    // 動態建立問卷 DOM
-    function buildQuickForm(){
-      var wrap = document.getElementById('home-quick-form-slot');
-      if(!wrap) return;
-
-      var toggle = document.createElement('button');
-      toggle.id = 'hq-toggle';
-      toggle.textContent = '📋 收合問卷 ▲';
-      toggle.style.cssText = 'font-size:11px;color:rgba(255,255,255,.65);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:6px;padding:4px 12px;cursor:pointer;font-family:inherit;margin-bottom:.5rem;display:block';
-      toggle.onclick = function(){
-        var b = document.getElementById('hq-body');
-        var open = b.style.display !== 'none';
-        b.style.display = open ? 'none' : 'block';
-        toggle.textContent = open ? '📋 展開問卷 ▼' : '📋 收合問卷 ▲';
-      };
-      wrap.appendChild(toggle);
-
-      var body = document.createElement('div');
-      body.id = 'hq-body';
-      body.style.cssText = 'display:block;background:rgba(255,255,255,.07);border-radius:10px;padding:.75rem;margin-bottom:.5rem';
-      wrap.appendChild(body);
-
-      var grid = document.createElement('div');
-      grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:.75rem';
-      body.appendChild(grid);
-
-      QS.forEach(function(q){
-        var cell = document.createElement('div');
-        if(q.multi) cell.style.cssText = 'grid-column:1/-1;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.08)';
-
-        var lbl = document.createElement('div');
-        lbl.textContent = q.label + (q.multi ? '（可複選）' : '');
-        lbl.style.cssText = 'color:rgba(255,255,255,.75);font-size:11px;margin-bottom:4px;font-weight:500';
-        cell.appendChild(lbl);
-
-        if(q.multi){
-          var cbWrap = document.createElement('div');
-          cbWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px';
-          q.opts.forEach(function(o){
-            var cbLabel = document.createElement('label');
-            cbLabel.style.cssText = 'display:inline-flex;align-items:center;gap:6px;cursor:pointer;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:6px 14px;font-size:12px;color:rgba(255,255,255,.92);transition:all .15s;white-space:nowrap;flex-shrink:0;user-select:none';
-            var cb = document.createElement('input');
-            cb.type = 'checkbox';
-            cb.name = q.id+'_cb';
-            cb.value = o[0];
-            cb.style.cssText = 'accent-color:#34D399;cursor:pointer;flex-shrink:0;width:14px;height:14px;min-width:14px';
-            cb.addEventListener('change', function(){
-              cbLabel.style.background = cb.checked ? 'rgba(52,211,153,.2)' : 'rgba(255,255,255,.1)';
-              cbLabel.style.borderColor = cb.checked ? 'rgba(52,211,153,.5)' : 'rgba(255,255,255,.2)';
-              updateFormProgress();
-            });
-            cbLabel.appendChild(cb);
-            var txt = document.createElement('span');
-            txt.textContent = o[1];
-            txt.style.cssText = 'white-space:nowrap;pointer-events:none';
-            cbLabel.appendChild(txt);
-            cbWrap.appendChild(cbLabel);
-          });
-          cell.appendChild(cbWrap);
-        } else {
-          var sel = document.createElement('select');
-          sel.id = q.id;
-          sel.style.cssText = 'width:100%;background:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.4);border-radius:6px;color:#1a1a2e;padding:5px 8px;font-size:12px;font-family:inherit';
-          q.opts.forEach(function(o){
-            var opt = document.createElement('option');
-            opt.value = o[0]; opt.textContent = o[1];
-            sel.appendChild(opt);
-          });
-          sel.addEventListener('change', updateFormProgress);
-          cell.appendChild(sel);
-        }
-        grid.appendChild(cell);
-      });
-
-      var pbar = document.createElement('div');
-      pbar.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:.6rem';
-      pbar.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,.5)">問卷完整度</span><div style="flex:1;height:5px;background:rgba(255,255,255,.15);border-radius:3px"><div id="hq-bar" style="height:100%;width:0;background:linear-gradient(90deg,#10B981,#34D399);border-radius:3px;transition:.3s"></div></div><span id="hq-pct" style="font-size:11px;color:#34D399;font-weight:600;min-width:28px">0%</span>';
-      body.appendChild(pbar);
-    }
-
-    function updateFormProgress(){
-      var filled = QS.filter(function(q){ return getQValue(q) !== ''; }).length;
-      var pct = Math.round(filled/QS.length*100);
-      var bar=document.getElementById('hq-bar'); if(bar) bar.style.width=pct+'%';
-      var pctEl=document.getElementById('hq-pct'); if(pctEl) pctEl.textContent=pct+'%';
-    }
-
-    function getFormAnswers(){
-      return QS.map(function(q){
-        var val = getQValue(q);
-        return val ? q.label+'\uff1a'+val : null;
-      }).filter(Boolean);
-    }
-
-    // 信心度計算
-    function calcConfidence(history, tools, formCount){
-      var conf = 15;
-      conf += Math.min(formCount * 8, 48);
-      var aiTurns = history.filter(function(m){ return m.role==='assistant'; }).length;
-      conf += Math.min(aiTurns * 6, 30);
-      var allText = history.map(function(m){ return m.content||''; }).join(' ');
-      ['彈簧','擊發','壓力','模具','夾具','機構','導引','機制','驅動','閥門','活塞'].forEach(function(k){
-        if(allText.indexOf(k)>=0) conf+=4;
-      });
-      if(tools && tools.length>0) conf = Math.max(conf, 70);
-      return Math.min(conf, 92);
-    }
-
-    // 覆寫 homeCapaSend
-    var _origSend = window.homeCapaSend;
-    window.homeCapaSend = async function(){
-      var input = document.getElementById('home-problem-input');
-      var sendBtn = document.getElementById('home-send-btn');
-      if(!input) return;
-      var q = input.value.trim();
-      if(!q){ input.focus(); return; }
-
-      var formParts = getFormAnswers();
-      var fullMsg = q;
-      if(formParts.length > 0) fullMsg = q + '\n【快速問卷】' + formParts.join('｜');
-
-      // 顯示使用者訊息
-      var isFirstSend = homeHistory.length === 0;
-      appendHomeUser(q + (isFirstSend && formParts.length ? ' 📋' + formParts.length+'項問卷' : ''));
-      input.value = '';
-      if(sendBtn) sendBtn.disabled = true;
-      homeHistory.push({role:'user', content: fullMsg});
-
-      // 收合問卷，顯示步驟二標題
-      var hqb = document.getElementById('hq-body');
-      if(hqb) hqb.style.display = 'none';
-      var hqt = document.getElementById('hq-toggle');
-      if(hqt) hqt.textContent = '📋 展開問卷 ▼';
-      var step2 = document.getElementById('hq-step2-label');
-      if(step2) step2.style.display = 'flex';
-
-      // loading
-      var loadDiv = document.createElement('div');
-      loadDiv.style.cssText = 'color:rgba(255,255,255,.4);font-size:12px;font-style:italic;padding:.4rem .5rem';
-      loadDiv.textContent = '思考中...';
-      loadDiv.id = 'home-loading';
-      var hist = document.getElementById('home-chat-history');
-      if(hist){ hist.style.display='flex'; hist.appendChild(loadDiv); hist.scrollTop=hist.scrollHeight; }
-
-      try {
-        var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ mode:'navigate', messages: homeHistory })
-        });
-        var data = await resp.json();
-        var el = document.getElementById('home-loading'); if(el) el.remove();
-        var text = data.text || '';
-        var tools = data.tools || [];
-        homeHistory.push({role:'assistant', content: text});
-        window._homeHistory = homeHistory.slice();
-
-        var conf = calcConfidence(homeHistory, tools, formParts.length);
-        appendHomeAI_withConf(text, tools, conf);
-      } catch(err) {
-        var el2 = document.getElementById('home-loading'); if(el2) el2.remove();
-        appendHomeAI(err.message ? '⚠️ 連線失敗：'+err.message : '⚠️ 連線失敗', []);
-      }
-      if(sendBtn) sendBtn.disabled = false;
-    };
-
-    // 新版 appendHomeAI（含信心度）
-    function appendHomeAI_withConf(text, tools, conf){
-      appendHomeAI(text, tools);
-      if(conf === undefined) return;
-      var hist = document.getElementById('home-chat-history');
-      if(!hist) return;
-      var confColor = conf>=75?'#10B981':conf>=50?'#F59E0B':'#EF4444';
-      var confLabel = conf>=90?'高信心，建議立即行動':conf>=75?'建議足夠，可進行分析':conf>=50?'需再補充 1-2 個資訊':'資訊不足，請填問卷或繼續對話';
-      var bar = document.createElement('div');
-      bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:.35rem .5rem;margin-top:2px';
-      bar.innerHTML = '<span style="font-size:10px;color:rgba(255,255,255,.45)">AI 信心度</span>'+
-        '<div style="width:90px;height:5px;background:rgba(255,255,255,.15);border-radius:3px">'+
-          '<div style="height:100%;width:'+conf+'%;background:'+confColor+';border-radius:3px;transition:.5s"></div>'+
-        '</div>'+
-        '<span style="font-size:11px;color:'+confColor+';font-weight:700">'+conf+'%</span>'+
-        '<span style="font-size:10px;color:rgba(255,255,255,.4)">'+confLabel+'</span>';
-      hist.appendChild(bar);
-      hist.scrollTop = hist.scrollHeight;
-    }
-
-    // DOM 就緒後建立問卷
-    function init(){
-      buildQuickForm();
-    }
-    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
-    else init();
-  })();
-
   var TOOL_NAMES_HOME = {
     fishbone:'🐟 魚骨圖', spc:'📈 SPC 管制圖', msa:'📐 MSA 量測分析',
     histogram:'📉 直方圖', hypothesis:'🔬 假設檢定', scatter:'🔗 相關性分析',
@@ -5562,41 +5564,17 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         if(fbHintWrap){ fbHintWrap.innerHTML=''; fbHintWrap.appendChild(hint); }
         if(!firstUser){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
         window._homeHistory = homeHistory.slice();
-
-        var _surveyMap2 = [
-          ['hq-type',  '問題類型'],['hq-freq','發生頻率'],['hq-where','發現位置'],
-          ['hq-scope', '影響範圍'],['hq-data','是否有數據'],['hq-change','近期是否有變更']
-        ];
-        var _surveyParts2 = _surveyMap2.map(function(item){
-          var checks = document.querySelectorAll('input[name="'+item[0]+'_cb"]:checked');
-          if(checks.length) return item[1]+'：'+Array.from(checks).map(function(c){return c.value;}).join('、');
-          var el = document.getElementById(item[0]);
-          return (el&&el.value) ? item[1]+'：'+el.value : null;
-        }).filter(Boolean);
-        var _surveyCtx2 = _surveyParts2.length
-          ? '\n\n【問卷資料】\n'+_surveyParts2.join('\n')
-            +'\n\n問卷推論規則：\n- 「特定機台才有」→ Machine 有依據\n- 「無任何近期變更」→ Material/Method 保守\n- 「出廠前 QC 發現」→ Measure 有依據\n- 「材料或供應商變更」→ Material 高度有依據'
-          : '';
-        var _fbFinalMsg2 = '請嚴格根據以上對話內容與問卷資料中實際存在的線索，為魚骨圖 6M 各類別提供根本原因建議。'
-          + _surveyCtx2
-          + '\n\n【重要限制】沒有線索支持的類別必須回傳空陣列 []，不可依背景知識補充。';
-
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate', fbModel:'opus',
-            messages: homeHistory.concat([{role:'user', content: _fbFinalMsg2}])
+            messages: homeHistory.concat([{role:'user',content:'請根據以上對話，為魚骨圖 6M 各類別提供根本原因建議。已排除的類別請回傳空陣列。'}])
           })
         }).then(function(r){return r.json();}).then(function(data){
           console.log('[fb_gen]',JSON.stringify(data).slice(0,150));
           if(data.result){
             if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
-            hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，正在繪製魚骨圖...';
+            hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，可點擊風險等級切換、🗑 刪除或＋新增，確認後產生魚骨圖';
             hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
-            // 自動產生魚骨圖：必須用 fbSyncAndDraw 先把 _fbData 同步回 textarea 再畫圖
-            setTimeout(function(){
-              if(typeof fbSyncAndDraw==='function') fbSyncAndDraw();
-              hint.innerHTML='✅ 魚骨圖已產生！可在上方查看，原因可直接編輯後重新繪製。';
-            }, 600);
           } else {
             var errMsg = data.error || 'result 為空';
             hint.innerHTML='⚠️ AI 建議生成失敗（'+errMsg+'），請手動填寫各欄位';
@@ -5612,7 +5590,41 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     }
   }
 
-  // homeCapaSend 已由內層 IIFE 定義（含問卷整合），此處移除重複定義
+  window.homeCapaSend = async function() {
+    var input = document.getElementById('home-problem-input');
+    var sendBtn = document.getElementById('home-send-btn');
+    if(!input) return;
+    var q = input.value.trim();
+    if(!q) return;
+    appendHomeUser(q);
+    input.value = '';
+    if(sendBtn) sendBtn.disabled = true;
+    homeHistory.push({role:'user', content:q});
+    // 顯示 loading
+    var loadDiv = document.createElement('div');
+    loadDiv.style.cssText = 'color:rgba(255,255,255,.4);font-size:12px;font-style:italic;padding:.4rem .5rem';
+    loadDiv.textContent = '思考中...';
+    loadDiv.id = 'home-loading';
+    var hist = document.getElementById('home-chat-history');
+    if(hist){ hist.style.display='flex'; hist.appendChild(loadDiv); hist.scrollTop=hist.scrollHeight; }
+    try {
+      var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'navigate', messages: homeHistory })
+      });
+      var data = await resp.json();
+      var el = document.getElementById('home-loading'); if(el) el.remove();
+      var text = data.text || '';
+      var tools = data.tools || [];
+      homeHistory.push({role:'assistant', content: text});
+      window._homeHistory = homeHistory.slice();
+      appendHomeAI(text, tools);
+    } catch(err) {
+      var el2 = document.getElementById('home-loading'); if(el2) el2.remove();
+      appendHomeAI('⚠️ 連線失敗：' + err.message);
+    }
+    if(sendBtn) sendBtn.disabled = false;
+  };
 
   window.homeCapaKeydown = function(e) {
     if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); homeCapaSend(); }
@@ -5910,127 +5922,6 @@ window.pbPageLoadExample = function() {
 };
 window.hyUpdateUI=hyUpdateUI;window.hyAnalyze=hyAnalyze;window.hyLoadEx=hyLoadEx;
 window.boxplotAnalyze=boxplotAnalyze;
-
-// ── AI 轉譯魚骨圖原因 → 可操作實驗參數 ──
-window.fbToExperiment = async function() {
-  try {
-  var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
-  if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
-  var method = document.querySelector('input[name="fb-doe-method"]:checked');
-  var val = method ? method.value : 'pb';
-
-  // 優先從 _fbCauses 讀，fallback 從 label data 屬性讀
-  var causes = window._fbCauses || [];
-  var selected = [];
-  checked.forEach(function(cb){
-    var idx = parseInt(cb.value);
-    var c = causes[idx];
-    if(c){
-      selected.push(c);
-    } else {
-      var label = cb.closest ? cb.closest('label') : cb.parentElement;
-      if(!label) label = cb.parentElement;
-      var name = (label && label.getAttribute('data-name')) || ('因子'+(idx+1));
-      var cat  = (label && label.getAttribute('data-cat'))  || '';
-      var risk = (label && label.getAttribute('data-risk')) || 'medium';
-      selected.push({name:name, cat:cat, risk:risk});
-    }
-  });
-  if(selected.length === 0){
-    alert('因子資料讀取失敗，請重新產生魚骨圖後再試');
-    return;
-  }
-
-  var btn = document.getElementById('fb-to-exp-btn') || document.querySelector('[onclick="fbToExperiment()"]');
-  var origText = btn ? btn.textContent : '';
-  if(btn){ btn.disabled = true; btn.textContent = '⏳ AI 轉譯參數中...'; }
-
-  var problem = (document.getElementById('fb-problem')||{}).value || '未知問題';
-  var causeList = selected.map(function(f,i){ return (i+1)+'. ['+f.cat+'] '+f.name+' (風險:'+f.risk+')'; }).join('\n');
-  var designType = val === 'pb' ? 'Plackett-Burman 篩選設計' : '全因子 DOE';
-
-  var translatedFactors = null;
-  try {
-    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        mode:'fishbone_to_doe', problem:problem, designType:designType,
-        messages:[{role:'user', content:'問題：'+problem+'\n設計類型：'+designType+'\n\n魚骨圖選出的原因：\n'+causeList}]
-      })
-    });
-    var data = await resp.json();
-    if(data.factors && data.factors.length) translatedFactors = data.factors;
-  } catch(e) {}
-  if(btn){ btn.disabled = false; btn.textContent = origText; }
-
-  var fillFactors = translatedFactors || selected.map(function(f){
-    return { factor:f.name, unit:'', low:'低', high:'高', original:f.name };
-  });
-
-  function buildTable(factors){
-    var rows = factors.map(function(f){
-      return '<tr><td style="padding:4px 8px;color:#6B7280;font-size:11px">'+(f.original||f.factor)+'</td>'+
-        '<td style="padding:4px 8px;font-weight:600;color:#1B3A5C;font-size:11px">'+f.factor+(f.unit?' ('+f.unit+')':'')+'</td>'+
-        '<td style="padding:4px 8px;text-align:center;font-size:11px">'+f.low+'</td>'+
-        '<td style="padding:4px 8px;text-align:center;font-size:11px">'+f.high+'</td></tr>';
-    }).join('');
-    return '<table style="width:100%;border-collapse:collapse;margin-top:.4rem">'+
-      '<thead><tr style="background:#F3F4F6"><th style="padding:4px 8px;font-size:10px;text-align:left;color:#6B7280">魚骨圖原因</th>'+
-      '<th style="padding:4px 8px;font-size:10px;text-align:left;color:#1B3A5C">實驗參數</th>'+
-      '<th style="padding:4px 8px;font-size:10px;text-align:center">低水準</th>'+
-      '<th style="padding:4px 8px;font-size:10px;text-align:center">高水準</th></tr></thead>'+
-      '<tbody>'+rows+'</tbody></table>'+
-      '<div style="font-size:10px;color:#92400E;margin-top:.3rem">⚠️ 請確認水準值是否符合實際製程範圍</div>';
-  }
-
-  if(val === 'pb'){
-    goTool('pb');
-    setTimeout(function(){
-      var nfEl = document.getElementById('pb-nf');
-      if(nfEl){ nfEl.value = Math.max(5,Math.min(11,fillFactors.length)); if(typeof pbPageUpdateFactors==='function') pbPageUpdateFactors(); }
-      setTimeout(function(){
-        fillFactors.forEach(function(f,i){
-          var n=document.getElementById('pbp-f'+(i+1)); var l=document.getElementById('pbp-l'+(i+1)); var h=document.getElementById('pbp-h'+(i+1));
-          if(n) n.value=f.factor+(f.unit?' ('+f.unit+')':''); if(l) l.value=f.low||'低'; if(h) h.value=f.high||'高';
-        });
-        if(typeof pbPageGenMatrix==='function') pbPageGenMatrix(parseInt(document.getElementById('pb-nf').value)||5);
-        var msg=document.createElement('div');
-        msg.style.cssText='background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
-        msg.innerHTML='✅ AI 已將魚骨圖原因轉譯為 <strong>'+fillFactors.length+'</strong> 個實驗參數'+(translatedFactors?'，高低水準為建議值：':'（轉譯失敗，使用原始名稱）：')+buildTable(fillFactors);
-        msg.className='fb-import-msg';
-        var c=document.querySelector('#page-pb .card'); if(c){var e=c.querySelector('.fb-import-msg');if(e)e.remove();c.insertBefore(msg,c.firstChild);}
-      },350);
-    },300);
-  } else {
-    goTool('doe');
-    setTimeout(function(){
-      var dtype=document.getElementById('doe-design-type'); if(dtype){dtype.value='full';if(typeof doeUpdateDesignType==='function')doeUpdateDesignType();}
-      var nfEl=document.getElementById('doe-nf'); if(nfEl){nfEl.value=Math.min(fillFactors.length,4);if(typeof doeUpdateFactors==='function')doeUpdateFactors();}
-      setTimeout(function(){
-        fillFactors.forEach(function(f,i){
-          var n=document.getElementById('doe-f'+(i+1)); var l=document.getElementById('doe-l'+(i+1)); var h=document.getElementById('doe-h'+(i+1));
-          if(n) n.value=f.factor+(f.unit?' ('+f.unit+')':''); if(l) l.value=f.low||'低'; if(h) h.value=f.high||'高';
-        });
-        if(typeof doeGenMatrix==='function') doeGenMatrix();
-        var msg=document.createElement('div');
-        msg.style.cssText='background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
-        msg.innerHTML='✅ AI 已將魚骨圖原因轉譯為 <strong>'+fillFactors.length+'</strong> 個實驗參數'+(translatedFactors?'，高低水準為建議值：':'（轉譯失敗，使用原始名稱）：')+buildTable(fillFactors);
-        msg.className='fb-import-msg';
-        var c=document.querySelector('#page-doe .card'); if(c){var e=c.querySelector('.fb-import-msg');if(e)e.remove();c.insertBefore(msg,c.firstChild);}
-      },400);
-    },300);
-  }
-  } catch(fbErr) {
-    console.error('[fbToExperiment]', fbErr);
-    alert('帶入失敗：' + fbErr.message);
-    var errBtn = document.getElementById('fb-to-exp-btn');
-    if(errBtn){ errBtn.disabled = false; errBtn.textContent = '→ 帶入實驗設計'; }
-  }
-};
-
-// 保留舊的 fbToDOE 作為相容
-window.fbToDOE = window.fbToExperiment;
-
 </script>
 
 <script>
@@ -6051,7 +5942,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.50 · 2026-06-02 enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6066,25 +5957,14 @@ document.addEventListener('click', function(e) {
       card.setAttribute('data-quality-record','1');
       card.innerHTML=''+
         '<div class="card-title" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between" onclick="dmaicToggleRecord(this)">'+ 
-          '<span style="display:flex;align-items:center;gap:6px"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>📋 分析紀錄 / 報告輸出</span>'+
-          '<span class="record-toggle-icon" style="font-size:12px;color:#6B7280">▼ 展開填寫</span>'+
+          '<span style="display:flex;align-items:center;gap:6px"><span style="background:var(--gold);width:3px;height:13px;border-radius:2px;display:inline-block"></span>📋 分析紀錄</span>'+
+          '<span class="record-toggle-icon" style="font-size:12px;color:#6B7280">▼ 展開</span>'+
         '</div>'+
         '<div class="record-body" style="display:none">'+
-          '<div class="print-only">MedQA 分析報告 - '+(document.title||'')+'</div>'+ 
-          '<div class="record-grid">'+
-            '<div class="field"><label>專案 / 產品</label><input id="'+pid+'-record-project" type="text" placeholder="例：檢體針組 / 親水塗層 / 包裝確效"></div>'+ 
-            '<div class="field"><label>批號 / Lot / 樣品</label><input id="'+pid+'-record-lot" type="text" placeholder="例：P3-001 / Lot A"></div>'+ 
-            '<div class="field"><label>分析日期</label><input id="'+pid+'-record-date" type="date" value="'+today()+'"></div>'+ 
-          '</div>'+ 
-          '<div class="record-grid-2">'+
-            '<div class="field"><label>分析者</label><input id="'+pid+'-record-owner" type="text" placeholder="分析者 / 部門"></div>'+ 
-            '<div class="field"><label>結論</label><select id="'+pid+'-record-result"><option value="未判定">未判定</option><option value="PASS">PASS</option><option value="FAIL">FAIL</option><option value="需調查">需調查</option><option value="僅供參考">僅供參考</option></select></div>'+ 
-          '</div>'+ 
           '<div class="field"><label>分析目的</label><textarea class="record-note" id="'+pid+'-record-purpose" rows="2" placeholder="本次分析要回答的問題"></textarea></div>'+ 
           '<div class="field"><label>判讀 / Note / 後續處置</label><textarea class="record-note" id="'+pid+'-record-note" rows="3" placeholder="記錄異常點、改善措施、CAPA編號"></textarea></div>'+ 
           '<div class="record-actions">'+
             '<button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存</button>'+
-            '<button class="btn btn-sec" onclick="dmaicExportJSON()">⬇ 匯出 JSON</button>'+
           '</div>'+
           '<div id="'+pid+'-save-indicator" style="margin-top:6px;font-size:12px;color:#6B7280">尚未儲存</div>'+
         '</div>';
@@ -6159,7 +6039,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.52 · '+window._buildTime);
+  status('v3.50 · 2026-06-02 enabled');
 })();
 
 
@@ -6189,6 +6069,70 @@ window.fbUpdateCount = function() {
   all.forEach(function(cb){ if(!cb.checked) cb.disabled = count >= maxCount; });
 };
 
+window.fbToExperiment = function() {
+  var causes = window._fbCauses || [];
+  var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
+  if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
+  var method = document.querySelector('input[name="fb-doe-method"]:checked');
+  var val = method ? method.value : 'pb';
+  var selected = [];
+  checked.forEach(function(cb){ selected.push(causes[parseInt(cb.value)]); });
+
+  if(val === 'pb') {
+    // 帶入 PB 頁面
+    goTool('pb');
+    setTimeout(function(){
+      var nfEl = document.getElementById('pb-nf');
+      if(nfEl){
+        // 找最接近的合法因子數（5-11）
+        var nf = Math.max(5, Math.min(11, selected.length));
+        nfEl.value = nf;
+        if(typeof pbPageUpdateFactors==='function') pbPageUpdateFactors();
+      }
+      setTimeout(function(){
+        selected.forEach(function(f, i){
+          var el = document.getElementById('pbp-f'+(i+1));
+          if(el) el.value = f.name;
+        });
+        if(typeof pbPageGenMatrix==='function') pbPageGenMatrix(parseInt(document.getElementById('pb-nf').value)||5);
+        var msg = document.createElement('div');
+        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
+          '<br><span style="font-size:11px;color:#4B7A5E">請填入高低水準值，再輸入實驗結果執行篩選分析。</span>';
+        msg.className = 'fb-import-msg';
+        var pbCard = document.querySelector('#page-pb .card');
+        if(pbCard){ var ex=pbCard.querySelector('.fb-import-msg');if(ex)ex.remove(); pbCard.insertBefore(msg,pbCard.firstChild); }
+      }, 350);
+    }, 300);
+
+  } else {
+    // 帶入 DOE 全因子
+    goTool('doe');
+    setTimeout(function(){
+      var dtype = document.getElementById('doe-design-type');
+      if(dtype){ dtype.value = 'full'; if(typeof doeUpdateDesignType==='function') doeUpdateDesignType(); }
+      var nfEl = document.getElementById('doe-nf');
+      if(nfEl){ nfEl.value = Math.min(selected.length, 4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
+      setTimeout(function(){
+        selected.forEach(function(f, i){
+          var el = document.getElementById('doe-f'+(i+1));
+          if(el) el.value = f.name;
+        });
+        if(typeof doeGenMatrix==='function') doeGenMatrix();
+        var msg = document.createElement('div');
+        msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+        msg.innerHTML = '✅ 已從魚骨圖帶入 <strong>'+selected.length+'</strong> 個因子：'+selected.map(function(f){return f.name;}).join('、')+
+          '<br><span style="font-size:11px;color:#4B7A5E">請填入各因子的高低水準值，再輸入實驗結果執行分析。</span>';
+        msg.className = 'fb-import-msg';
+        var doeCard = document.querySelector('#page-doe .card');
+        if(doeCard){ var ex=doeCard.querySelector('.fb-import-msg');if(ex)ex.remove(); doeCard.insertBefore(msg,doeCard.firstChild); }
+      }, 400);
+    }, 300);
+  }
+};
+
+// 保留舊的 fbToDOE 作為相容
+window.fbToDOE = window.fbToExperiment;
 
 
 // ════════════════════════════════════════════════════════
@@ -6223,18 +6167,7 @@ function getPBDesign(nf) {
 
 // 設計類型切換
 window.doeUpdateDesignType = function() {
-  var dtEl=document.querySelector('input[name="doe-dtype"]:checked');
-  if(dtEl){
-    var hi=document.getElementById('doe-design-type'); if(hi) hi.value=dtEl.value;
-    ['full','frac','pb'].forEach(function(v){
-      var c=document.getElementById('dcard-'+v); if(!c) return;
-      var sel=dtEl.value===v;
-      c.style.borderColor=sel?'var(--navy2)':'#DDE2EC';
-      c.style.background=sel?'#EFF6FF':'#fff';
-      var lbl=c.querySelector('div'); if(lbl) lbl.style.color=sel?'var(--navy2)':'#6B7280';
-    });
-  }
-  var dtEl2=document.querySelector('input[name="doe-dtype"]:checked'); var dtype=dtEl2?dtEl2.value:(document.getElementById('doe-design-type')||{value:'full'}).value;
+  var dtype = document.getElementById('doe-design-type').value;
   var nfSelect = document.getElementById('doe-nf');
   var pbWarn = document.getElementById('pb-warning');
 
@@ -6568,7 +6501,7 @@ function resIcon(res) {
 // 更新設計方法切換
 var _origDoeUpdateDesignType = window.doeUpdateDesignType;
 window.doeUpdateDesignType = function() {
-  var dtEl2=document.querySelector('input[name="doe-dtype"]:checked'); var dtype=dtEl2?dtEl2.value:(document.getElementById('doe-design-type')||{value:'full'}).value;
+  var dtype = document.getElementById('doe-design-type').value;
   var nfSelect = document.getElementById('doe-nf');
   var pbWarn = document.getElementById('pb-warning');
   var fracRow = document.getElementById('frac-design-row');
