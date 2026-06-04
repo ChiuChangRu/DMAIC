@@ -522,7 +522,7 @@ tr:hover td{background:#F9FAFB}
 <div id="page-home" class="page active">
 
 <!-- ══ Hero + 問題輸入對話框 ══ -->
-<div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:hidden">
+<div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:visible">
   <!-- 裝飾背景圓 -->
   <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
   <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
@@ -536,7 +536,7 @@ tr:hover td{background:#F9FAFB}
     </div>
 
     <!-- 問題輸入框 -->
-    <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:1.25rem 1.5rem;backdrop-filter:blur(8px)">
+    <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:1.25rem 1.5rem">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
         <span style="font-size:18px">🤖</span>
         <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,.9)">CAPA 分析助理</span>
@@ -5176,6 +5176,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   (function(){
     // 問卷題目定義（multi:true 表示複選 checkbox；multi:false 為單選 select）
     var QS = [
+      {id:'hq-problem', label:'問題主題', multi:false, isText:true,
+       placeholder:'例：親水塗層潤滑度不足、檢體針取樣量不足、封口強度不夠...'},
       {id:'hq-timing', label:'這個問題什麼時候出現？', multi:false, opts:[
         ['','— 請選擇 —'],
         ['new','新產品／新設計一開始就有這個問題'],
@@ -5262,14 +5264,32 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
       QS.forEach(function(q){
         var cell = document.createElement('div');
-        if(q.multi) cell.style.cssText = 'grid-column:1/-1;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.08)';
+        // 文字輸入 或 複選 佔整行
+        if(q.multi || q.isText) cell.style.cssText = 'grid-column:1/-1;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.08)';
 
         var lbl = document.createElement('div');
         lbl.textContent = q.label + (q.multi ? '（可複選）' : '');
         lbl.style.cssText = 'color:rgba(255,255,255,.75);font-size:11px;margin-bottom:4px;font-weight:500';
         cell.appendChild(lbl);
 
-        if(q.multi){
+        if(q.isText){
+          // 文字輸入框
+          var inp = document.createElement('input');
+          inp.type = 'text';
+          inp.id = q.id;
+          inp.placeholder = q.placeholder || '請輸入...';
+          inp.style.cssText = 'width:100%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.25);border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;transition:border-color .2s';
+          inp.onfocus = function(){ this.style.borderColor='rgba(126,200,227,.7)'; };
+          inp.onblur  = function(){ this.style.borderColor='rgba(255,255,255,.25)'; };
+          inp.addEventListener('input', function(){
+            // 同步到主輸入框
+            var mainInput = document.getElementById('home-problem-input');
+            if(mainInput && !mainInput.value.trim()) mainInput.value = inp.value;
+            else if(mainInput && mainInput.value === inp.value) mainInput.value = inp.value;
+            updateFormProgress();
+          });
+          cell.appendChild(inp);
+        } else if(q.multi){
           var cbWrap = document.createElement('div');
           cbWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px';
           q.opts.forEach(function(o){
@@ -5348,6 +5368,13 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       var input = document.getElementById('home-problem-input');
       var sendBtn = document.getElementById('home-send-btn');
       if(!input) return;
+
+      // 若主輸入框空白但問題主題有填，自動帶入
+      var hqProblem = document.getElementById('hq-problem');
+      if(hqProblem && hqProblem.value.trim() && !input.value.trim()){
+        input.value = hqProblem.value.trim();
+      }
+
       var q = input.value.trim();
       if(!q){
         // 顯示提示並讓輸入框閃紅
