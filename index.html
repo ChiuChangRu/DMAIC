@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 10:58</span>
+    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 11:30</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -5304,11 +5304,10 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
         if(q.multi){
           var cbWrap = document.createElement('div');
-          var cols = q.opts.length <= 4 ? q.opts.length : 3;
-          cbWrap.style.cssText = 'display:grid;grid-template-columns:repeat('+cols+',1fr);gap:5px';
+          cbWrap.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px';
           q.opts.forEach(function(o){
             var cbLabel = document.createElement('label');
-            cbLabel.style.cssText = 'display:flex;align-items:center;gap:4px;cursor:pointer;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 8px;font-size:11px;color:rgba(255,255,255,.85);transition:all .15s';
+            cbLabel.style.cssText = 'display:flex;align-items:center;gap:4px;cursor:pointer;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:5px 10px;font-size:12px;color:rgba(255,255,255,.85);transition:all .15s;white-space:nowrap;min-width:0';
             var cb = document.createElement('input');
             cb.type = 'checkbox';
             cb.name = q.id+'_cb';
@@ -5929,7 +5928,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 10:58';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 11:30';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6037,7 +6036,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.52 · 2026-06-03 10:58');
+  status('v3.52 · 2026-06-03 11:30');
 })();
 
 
