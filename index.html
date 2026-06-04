@@ -2280,8 +2280,8 @@ function fishboneDraw(){
   });
   window._fbCauses = fbCauses;
 
-  // 渲染因子選擇面板（魚骨圖下方）
   // 渲染 6M 自動分類面板
+  var selectorDiv = document.getElementById('fb-factor-selector');
   if(typeof fbRenderClassifiedSelector === 'function') {
     fbRenderClassifiedSelector(fbCauses, selectorDiv);
   }
