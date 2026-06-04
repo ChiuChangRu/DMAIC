@@ -553,8 +553,8 @@ tr:hover td{background:#F9FAFB}
       <!-- 步驟一標題 -->
       <div id="hq-step1-label" style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
         <div style="background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;white-space:nowrap">步驟一</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">CAPA 問卷（直接選工具）</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4)">— 填越多 AI 越精準</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">先描述問題</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4)">— 在下方輸入框描述問題，再填問卷</div>
       </div>
 
       <!-- 快速問卷 slot -->
@@ -563,8 +563,8 @@ tr:hover td{background:#F9FAFB}
       <!-- 步驟二標題（送出前隱藏，送出後顯示） -->
       <div id="hq-step2-label" style="display:none;align-items:center;gap:8px;margin:.75rem 0 .4rem">
         <div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;white-space:nowrap">步驟二</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">AI 輔助問答</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4)">— AI 將針對問卷未涵蓋的深入問題追問</div>
+        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">AI 追問</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4)">— 針對問卷未涵蓋的部分深入確認</div>
       </div>
 
       <!-- 對話區（展開後顯示） -->
@@ -5349,7 +5349,17 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       var sendBtn = document.getElementById('home-send-btn');
       if(!input) return;
       var q = input.value.trim();
-      if(!q){ input.focus(); return; }
+      if(!q){
+        // 顯示提示並讓輸入框閃紅
+        input.style.borderColor = 'rgba(239,68,68,.8)';
+        input.placeholder = '⚠️ 請先描述您的問題，例如：檢體針取樣量不足、塗層耐磨性不佳...';
+        input.focus();
+        setTimeout(function(){
+          input.style.borderColor = 'rgba(255,255,255,.2)';
+          input.placeholder = '例：檢體針取樣長度不足，良率從 95% 下降至 88%，問題約兩週前開始...';
+        }, 2500);
+        return;
+      }
 
       var formParts = getFormAnswers();
       var fullMsg = q;
