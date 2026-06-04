@@ -6218,8 +6218,30 @@ document.addEventListener('click', function(e) {
   };
 
   function fieldsIn(page){return Array.prototype.slice.call(page.querySelectorAll('input[id],select[id],textarea[id]'));}
-  function collectPage(){var p=activePage();var data={app:APP_VER,page:pageKey(),savedAt:new Date().toISOString(),fields:{}};fieldsIn(p).forEach(function(el){data.fields[el.id]=el.value;});return data;}
-  function applyData(data){if(!data||!data.fields)return;Object.keys(data.fields).forEach(function(id){var el=document.getElementById(id);if(el){el.value=data.fields[id];el.dispatchEvent(new Event('change'));}});}
+  function collectPage(){
+    var p=activePage();
+    var data={app:APP_VER,page:pageKey(),savedAt:new Date().toISOString(),fields:{}};
+    fieldsIn(p).forEach(function(el){data.fields[el.id]=el.value;});
+    // 魚骨圖特殊：存 _fbData
+    if(pageKey()==='page-fishbone' && window._fbData){
+      data.fields['__fbData']=JSON.stringify(window._fbData);
+    }
+    return data;
+  }
+  function applyData(data){
+    if(!data||!data.fields)return;
+    Object.keys(data.fields).forEach(function(id){
+      if(id==='__fbData'){
+        try{
+          window._fbData=JSON.parse(data.fields[id]);
+          if(typeof renderAll==='function') setTimeout(renderAll,100);
+        }catch(e){}
+        return;
+      }
+      var el=document.getElementById(id);
+      if(el){el.value=data.fields[id];el.dispatchEvent(new Event('change'));}
+    });
+  }
   window.dmaicSaveCurrent=function(){try{localStorage.setItem(APP_VER+'::'+pageKey(),JSON.stringify(collectPage()));status('已儲存本頁：'+new Date().toLocaleTimeString());if(typeof dmaicSetSaveStatus==='function')dmaicSetSaveStatus(true);}catch(e){alert('儲存失敗：'+e.message);}};
   window.dmaicRestoreCurrent=function(){try{var raw=localStorage.getItem(APP_VER+'::'+pageKey());if(raw)applyData(JSON.parse(raw));}catch(e){console.warn(e);}};
   window.dmaicClearCurrent=function(){if(!confirm('確定清除本頁已儲存資料？'))return;try{localStorage.removeItem(APP_VER+'::'+pageKey());status('已清除本頁儲存資料');}catch(e){} };
@@ -6242,10 +6264,13 @@ document.addEventListener('click', function(e) {
     oldGoTool(id);
     window.dmaicEnhanceRecords();
     window.dmaicRestoreCurrent();
-    // 魚骨圖：restore 之後再清除一次確保乾淨
+    // 魚骨圖：restore 之後重新渲染卡片 + 清除殘留 hint
     if(id==='fishbone'){
       var hw2=document.getElementById('fb-hint-wrap');
       if(hw2) hw2.innerHTML='';
+      setTimeout(function(){
+        if(typeof renderAll==='function') renderAll();
+      }, 150);
     }
   };
   if(typeof oldGoHome==='function') window.goHome=function(){ oldGoHome(); window.dmaicRestoreCurrent(); };
@@ -7257,8 +7282,15 @@ window.doeUpdateFactors = function() {
       if(chatWrap) chatWrap.style.display = 'none';
       var fbSel = document.getElementById('fb-factor-selector');
       if(fbSel){ fbSel.innerHTML=''; fbSel.style.display='none'; }
-      // 還原 _fbData 為預設值，避免因子卡片名稱空白
-      if(window.FB_DEFAULT_DATA) window._fbData = JSON.parse(JSON.stringify(window.FB_DEFAULT_DATA));
+      // 只在沒有 localStorage 儲存資料時，才還原 _fbData 為預設值
+      var hasSaved = false;
+      try{
+        var raw = localStorage.getItem('dmaic-v2-records::page-fishbone');
+        if(raw){ var parsed = JSON.parse(raw); hasSaved = !!(parsed.fields && parsed.fields['__fbData']); }
+      }catch(e){}
+      if(!hasSaved && window.FB_DEFAULT_DATA){
+        window._fbData = JSON.parse(JSON.stringify(window.FB_DEFAULT_DATA));
+      }
     }
   }
 
