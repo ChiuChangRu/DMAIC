@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 14:15</span>
+    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 15:00</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2301,12 +2301,12 @@ function fishboneDraw(){
     html += '<div id="fb-factor-limit-hint" style="font-size:12px;color:#6B7280;margin-bottom:.6rem">勾選最多 <strong id="fb-max-count">11</strong> 個因子，選完後按帶入按鈕</div>';
 
     // 因子列表（高風險紅字粗體）
-    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem">';
+    html += '<div id="fb-factor-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.85rem">';
     fbCauses.forEach(function(f, i){
       var isHigh = f.risk === 'high';
       var nameStyle = isHigh ? 'color:#DC2626;font-weight:700' : 'color:#374151';
       var borderStyle = isHigh ? 'border:1.5px solid #FECACA;background:#FEF2F2' : 'border:1px solid #DDE2EC;background:#fff';
-      html += '<label style="display:inline-flex;align-items:center;gap:5px;'+borderStyle+';border-radius:6px;padding:5px 10px;cursor:pointer;font-size:12px">';
+      html += '<label style="display:inline-flex;align-items:center;gap:6px;'+borderStyle+';border-radius:7px;padding:6px 12px;cursor:pointer;font-size:13px;white-space:nowrap;flex-shrink:0">';
       html += '<input type="checkbox" value="'+i+'" onchange="fbUpdateCount()" style="cursor:pointer">';
       html += '<span style="'+nameStyle+'">'+f.name+'</span>';
       html += '<span style="font-size:10px;color:#9CA3AF">'+f.cat+'</span>';
@@ -5579,41 +5579,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     }
   }
 
-  window.homeCapaSend = async function() {
-    var input = document.getElementById('home-problem-input');
-    var sendBtn = document.getElementById('home-send-btn');
-    if(!input) return;
-    var q = input.value.trim();
-    if(!q) return;
-    appendHomeUser(q);
-    input.value = '';
-    if(sendBtn) sendBtn.disabled = true;
-    homeHistory.push({role:'user', content:q});
-    // 顯示 loading
-    var loadDiv = document.createElement('div');
-    loadDiv.style.cssText = 'color:rgba(255,255,255,.4);font-size:12px;font-style:italic;padding:.4rem .5rem';
-    loadDiv.textContent = '思考中...';
-    loadDiv.id = 'home-loading';
-    var hist = document.getElementById('home-chat-history');
-    if(hist){ hist.style.display='flex'; hist.appendChild(loadDiv); hist.scrollTop=hist.scrollHeight; }
-    try {
-      var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ mode:'navigate', messages: homeHistory })
-      });
-      var data = await resp.json();
-      var el = document.getElementById('home-loading'); if(el) el.remove();
-      var text = data.text || '';
-      var tools = data.tools || [];
-      homeHistory.push({role:'assistant', content: text});
-      window._homeHistory = homeHistory.slice();
-      appendHomeAI(text, tools);
-    } catch(err) {
-      var el2 = document.getElementById('home-loading'); if(el2) el2.remove();
-      appendHomeAI('⚠️ 連線失敗：' + err.message);
-    }
-    if(sendBtn) sendBtn.disabled = false;
-  };
+  // homeCapaSend 已由內層 IIFE 定義（含問卷整合），此處移除重複定義
 
   window.homeCapaKeydown = function(e) {
     if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); homeCapaSend(); }
@@ -5931,7 +5897,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 14:15';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 15:00';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6039,7 +6005,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.52 · 2026-06-03 14:15');
+  status('v3.52 · 2026-06-03 15:00');
 })();
 
 
