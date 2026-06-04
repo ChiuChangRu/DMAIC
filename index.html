@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.50 · AI 輔助統計分析平台</title>
+<title>MedQA v3.51 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -311,7 +311,7 @@ tr:hover td{background:#F9FAFB}
 }
 #split-right-content { padding: 0; }
 .split-tool-select {
-  background: rgba(255,255,255,.15);
+  background: #1B3A5C;
   color: #fff;
   border: 1px solid rgba(255,255,255,.3);
   border-radius: 5px;
@@ -319,6 +319,10 @@ tr:hover td{background:#F9FAFB}
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+}
+.split-tool-select option {
+  background: #fff;
+  color: #1a1a2e;
 }
 #split-toggle-btn {
   position: fixed;
@@ -574,7 +578,7 @@ body.split-mode #split-container { display: flex !important; }
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.50 · 2026-06-02</span>
+    <span class="tb-status" id="dmaic-save-status">v3.51 · 2026-06-04</span>
   </div>
 </div>
 <!-- ── 案件管理列 ── -->
@@ -5341,19 +5345,15 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     var container = document.getElementById('split-container');
     var btn = document.getElementById('split-toggle-btn2');
     if(splitMode){
-      // 進入分割模式：把 active page 的內容複製到左側
-      var activePage = document.querySelector('.page.active');
-      var leftContent = document.getElementById('split-left-content');
-      if(activePage && leftContent){
-        leftContent.innerHTML = activePage.innerHTML;
-        // 設定對應的選項
-        var pageId = activePage.id.replace('page-','');
-        var leftSel = document.getElementById('split-left-sel');
-        if(leftSel) leftSel.value = pageId;
-      }
       container.style.display = 'flex';
+      // 隱藏一般頁面
       document.querySelectorAll('.page').forEach(function(p){ p.style.display='none'; });
       document.getElementById('tool-bar').style.display = 'none';
+      // 預設：左側空白提示，右側空白提示
+      var leftContent = document.getElementById('split-left-content');
+      var rightContent = document.getElementById('split-right-content');
+      if(leftContent) leftContent.innerHTML = '<div style="padding:2rem;color:#9CA3AF;text-align:center;font-size:13px">← 請從上方選擇左側工具</div>';
+      if(rightContent) rightContent.innerHTML = '<div style="padding:2rem;color:#9CA3AF;text-align:center;font-size:13px">← 請從上方選擇右側工具</div>';
       if(btn) btn.textContent = '⬛ 結束分割';
     } else {
       exitSplitMode();
@@ -5364,10 +5364,14 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     splitMode = false;
     var container = document.getElementById('split-container');
     container.style.display = 'none';
-    // 還原 active page
-    var activePage = document.querySelector('.page');
-    if(activePage) activePage.classList.add('active');
-    document.querySelectorAll('.page.active').forEach(function(p){ p.style.display='block'; });
+    // 還原：清除 inline style 讓 CSS class 控制顯示
+    document.querySelectorAll('.page').forEach(function(p){ p.style.display=''; });
+    // 確保 active page 顯示
+    var active = document.querySelector('.page.active');
+    if(!active){
+      var home = document.getElementById('page-home');
+      if(home) home.classList.add('active');
+    }
     var btn = document.getElementById('split-toggle-btn2');
     if(btn) btn.textContent = '⬜ 分割視窗';
   };
@@ -5942,7 +5946,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.50 · 2026-06-02 enabled';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.51 · 2026-06-04 enabled';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6039,7 +6043,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.50 · 2026-06-02 enabled');
+  status('v3.51 · 2026-06-04 enabled');
 })();
 
 
