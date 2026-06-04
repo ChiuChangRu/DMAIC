@@ -279,73 +279,7 @@ tr:hover td{background:#F9FAFB}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
-/* ════ 分割視窗 ════ */
-#split-container {
-  display: flex;
-  height: calc(100vh - 56px - 40px);
-  overflow: hidden;
-}
-#split-left {
-  flex: 0 0 60%;
-  overflow-y: auto;
-  border-right: 3px solid #C7D9F5;
-  position: relative;
-}
-#split-right {
-  flex: 0 0 40%;
-  overflow-y: auto;
-  background: #F8FAFF;
-  position: relative;
-}
-#split-right-header {
-  background: #1B3A5C;
-  color: #fff;
-  padding: 8px 12px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-#split-right-content { padding: 0; }
-.split-tool-select {
-  background: #1B3A5C;
-  color: #fff;
-  border: 1px solid rgba(255,255,255,.3);
-  border-radius: 5px;
-  padding: 3px 8px;
-  font-size: 11px;
-  font-family: inherit;
-  cursor: pointer;
-}
-.split-tool-select option {
-  background: #fff;
-  color: #1a1a2e;
-}
-#split-toggle-btn {
-  position: fixed;
-  bottom: 80px;
-  right: 12px;
-  background: #1B3A5C;
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 12px;
-  cursor: pointer;
-  font-family: inherit;
-  z-index: 200;
-  box-shadow: 0 2px 8px rgba(0,0,0,.2);
-}
-/* 非分割模式下的正常頁面 */
-body.normal-mode #split-container { display: none; }
-body.normal-mode .page { display: none; }
-body.normal-mode .page.active { display: block; }
-/* 分割模式 */
-body.split-mode .page { display: none !important; }
-body.split-mode #split-container { display: flex !important; }
+
 
 /* ════ 案件管理列 ════ */
 #case-bar {
@@ -594,7 +528,6 @@ body.split-mode #split-container { display: flex !important; }
     <input type="file" accept=".json" onchange="caseImport(event)" style="display:none">
   </label>
   <span id="case-status" style="color:rgba(255,255,255,.5);font-size:11px;margin-left:4px"></span>
-  <button id="split-toggle-btn2" onclick="toggleSplitMode()" style="margin-left:auto;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">⬜ 分割視窗</button>
 </div>
 
 <!-- 子頁面工具列 -->
@@ -608,53 +541,12 @@ body.split-mode #split-container { display: flex !important; }
   <button onclick="dmaicPrintCurrentTool()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">🖨 列印</button>
 </div>
 
-<!-- ══ 分割視窗容器 ══ -->
-<div id="split-container" style="display:none">
-  <div id="split-left">
-    <!-- 左側工具選擇列 -->
-    <div style="background:#1B3A5C;color:#fff;padding:6px 12px;display:flex;align-items:center;gap:8px;position:sticky;top:0;z-index:10">
-      <span style="font-size:11px;color:rgba(255,255,255,.6)">左側工具：</span>
-      <select id="split-left-sel" onchange="splitLoadTool('left')" class="split-tool-select">
-        <option value="">— 選擇工具 —</option>
-        <option value="fishbone">🐟 魚骨圖</option>
-        <option value="spc">📈 SPC</option>
-        <option value="msa">📐 MSA</option>
-        <option value="histogram">📉 直方圖</option>
-        <option value="hypothesis">🔬 假設檢定</option>
-        <option value="scatter">🔗 相關性</option>
-        <option value="boxplot">📦 箱型圖</option>
-        <option value="pb">🔎 PB 篩選</option>
-        <option value="doe">🧪 DOE</option>
-      </select>
-      <button onclick="exitSplitMode()" style="margin-left:auto;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">✕ 結束分割</button>
-    </div>
-    <div id="split-left-content"></div>
-  </div>
-  <div id="split-right">
-    <div id="split-right-header">
-      <span style="font-size:11px;color:rgba(255,255,255,.6)">右側工具：</span>
-      <select id="split-right-sel" onchange="splitLoadTool('right')" class="split-tool-select">
-        <option value="">— 選擇工具 —</option>
-        <option value="fishbone">🐟 魚骨圖</option>
-        <option value="spc">📈 SPC</option>
-        <option value="msa">📐 MSA</option>
-        <option value="histogram">📉 直方圖</option>
-        <option value="hypothesis">🔬 假設檢定</option>
-        <option value="scatter">🔗 相關性</option>
-        <option value="boxplot">📦 箱型圖</option>
-        <option value="pb">🔎 PB 篩選</option>
-        <option value="doe">🧪 DOE</option>
-      </select>
-    </div>
-    <div id="split-right-content"></div>
-  </div>
-</div>
 
 <!-- ══════════════ 母頁面 HOME ══════════════ -->
 <div id="page-home" class="page active">
 
 <!-- ══ Hero + 問題輸入對話框 ══ -->
-<div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:2.5rem 2rem 0;min-height:320px;position:relative;overflow:hidden">
+<div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:hidden">
   <!-- 裝飾背景圓 -->
   <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
   <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
@@ -662,7 +554,7 @@ body.split-mode #split-container { display: flex !important; }
   <div style="max-width:720px;margin:0 auto;position:relative;z-index:1">
     <!-- 標題 -->
     <div style="text-align:center;margin-bottom:2rem">
-      <h2 style="font-size:32px;font-weight:700;line-height:1.3;letter-spacing:-.01em">
+      <h2 style="font-size:24px;font-weight:700;line-height:1.3;letter-spacing:-.01em">
         AI 輔助品質分析平台
       </h2>
     </div>
@@ -5332,63 +5224,6 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   };
 })();
 
-// ════════════════════════════════════════════════════════
-// 分割視窗系統
-// ════════════════════════════════════════════════════════
-(function(){
-  var splitMode = false;
-
-  window.toggleSplitMode = function() {
-    splitMode = !splitMode;
-    var container = document.getElementById('split-container');
-    var btn = document.getElementById('split-toggle-btn2');
-    if(splitMode){
-      container.style.display = 'flex';
-      // 隱藏一般頁面
-      document.querySelectorAll('.page').forEach(function(p){ p.style.display='none'; });
-      document.getElementById('tool-bar').style.display = 'none';
-      // 預設：左側空白提示，右側空白提示
-      var leftContent = document.getElementById('split-left-content');
-      var rightContent = document.getElementById('split-right-content');
-      if(leftContent) leftContent.innerHTML = '<div style="padding:2rem;color:#9CA3AF;text-align:center;font-size:13px">← 請從上方選擇左側工具</div>';
-      if(rightContent) rightContent.innerHTML = '<div style="padding:2rem;color:#9CA3AF;text-align:center;font-size:13px">← 請從上方選擇右側工具</div>';
-      if(btn) btn.textContent = '⬛ 結束分割';
-    } else {
-      exitSplitMode();
-    }
-  };
-
-  window.exitSplitMode = function() {
-    splitMode = false;
-    var container = document.getElementById('split-container');
-    container.style.display = 'none';
-    // 還原：清除 inline style 讓 CSS class 控制顯示
-    document.querySelectorAll('.page').forEach(function(p){ p.style.display=''; });
-    // 確保 active page 顯示
-    var active = document.querySelector('.page.active');
-    if(!active){
-      var home = document.getElementById('page-home');
-      if(home) home.classList.add('active');
-    }
-    var btn = document.getElementById('split-toggle-btn2');
-    if(btn) btn.textContent = '⬜ 分割視窗';
-  };
-
-  window.splitLoadTool = function(side) {
-    var sel = document.getElementById('split-'+side+'-sel');
-    var content = document.getElementById('split-'+side+'-content');
-    if(!sel || !content) return;
-    var toolId = sel.value;
-    if(!toolId){ content.innerHTML = '<div style="padding:2rem;color:#9CA3AF;text-align:center">請選擇工具</div>'; return; }
-    var page = document.getElementById('page-'+toolId);
-    if(page){
-      content.innerHTML = page.querySelector('.tool-page') ? page.querySelector('.tool-page').outerHTML : page.innerHTML;
-      // 重新執行初始化（如 PB 頁面）
-      if(toolId==='pb' && typeof pbPageUpdateFactors==='function') setTimeout(pbPageUpdateFactors,100);
-      if(toolId==='fishbone' && typeof renderAll==='function') setTimeout(renderAll,100);
-    }
-  };
-})();
 // ════════════════════════════════════════════════════════
 (function(){
   // 共用主頁對話歷史（由 homeCapaSend 寫入 window._homeHistory）
