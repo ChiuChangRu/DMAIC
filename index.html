@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.53 · AI 輔助統計分析平台</title>
+<title>MedQA v3.54 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -472,7 +472,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.53 · ' + ts;
+    if(el) el.textContent = 'v3.54 · ' + ts;
   });
 })();
 </script>
@@ -489,7 +489,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.53</span>
+    <span class="tb-status" id="dmaic-save-status">v3.54</span>
   </div>
 </div>
 
@@ -5176,45 +5176,47 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   (function(){
     // 問卷題目定義（multi:true 表示複選 checkbox；multi:false 為單選 select）
     var QS = [
-      {id:'hq-type',  label:'問題類型', multi:true, opts:[
-        ['製程問題','製程問題'],['材料問題','材料問題'],['設備問題','設備問題'],
-        ['設計問題','設計問題'],['量測問題','量測問題'],['人員問題','人員問題']
-      ]},
-      {id:'hq-freq',  label:'發生頻率', multi:false, opts:[
+      {id:'hq-timing', label:'這個問題什麼時候出現？', multi:false, opts:[
         ['','— 請選擇 —'],
-        ['每批都有，穩定發生','每批都有，穩定發生'],
-        ['偶爾出現，不規則','偶爾出現，不規則'],
-        ['特定條件才有','特定條件才有'],
-        ['近期才開始','近期才開始（以前沒有）']
+        ['new','新產品／新設計一開始就有這個問題'],
+        ['regression','以前沒問題，最近才出現'],
+        ['always','一直都有，現在想改善'],
+        ['unknown','不確定']
       ]},
-      {id:'hq-where', label:'發現位置', multi:false, opts:[
+      {id:'hq-stage', label:'在哪個階段發現的？', multi:false, opts:[
         ['','— 請選擇 —'],
-        ['工廠內部製程中發現','工廠內部製程中發現'],
-        ['出廠前 QC 發現','出廠前 QC 發現'],
-        ['客戶端才發現','客戶端或市場才發現'],
-        ['兩者都有','兩者都有']
+        ['design','設計驗證或樣品階段'],
+        ['production','量產生產過程中'],
+        ['qc','出廠前 QC 或最終檢驗'],
+        ['customer','客戶端使用後回報']
       ]},
-      {id:'hq-scope', label:'影響範圍', multi:true, opts:[
-        ['所有機台班別都有','所有機台班別都有'],
-        ['特定機台才有','特定機台才有'],
-        ['特定班別才有','特定班別才有'],
-        ['隨機無規律','隨機無規律']
-      ]},
-      {id:'hq-data',  label:'是否有數據', multi:false, opts:[
+      {id:'hq-pattern', label:'問題發生的規律是？', multi:false, opts:[
         ['','— 請選擇 —'],
-        ['有完整量測數據','有完整量測數據'],
-        ['只有良率或不良數','只有良率或不良數'],
-        ['沒有數據只有觀察','沒有數據，只有觀察']
+        ['every','每次／每批都有，很穩定'],
+        ['random','隨機出現，沒有規律'],
+        ['specific_machine','只有特定機台或產線才有'],
+        ['specific_person','只有特定人員操作才有'],
+        ['specific_lot','只有特定批次材料才有']
       ]},
-      {id:'hq-change',label:'近期是否有變更', multi:true, opts:[
-        ['材料或供應商變更','材料或供應商變更'],
-        ['製程參數或設備調整','製程參數或設備調整'],
-        ['設計或規格變更','設計或規格變更'],
-        ['人員或班別變動','人員或班別變動'],
-        ['無任何近期變更','無任何近期變更'],
-        ['不確定有無變更','不確定有無變更']
+      {id:'hq-data', label:'目前有沒有可量化的數據？', multi:false, opts:[
+        ['','— 請選擇 —'],
+        ['measure','有量測數據（尺寸、重量、強度等）'],
+        ['yield','有良率或不良數量的紀錄'],
+        ['observation','只有目視觀察，沒有數字'],
+        ['none','完全沒有任何數據']
+      ]},
+      {id:'hq-change', label:'問題出現前有沒有任何改變？', multi:true, opts:[
+        ['material','材料或供應商有變更'],
+        ['process','製程參數或設備有調整'],
+        ['design','設計或規格有變更'],
+        ['people','人員有變動或新人上線'],
+        ['none','完全沒有任何改變'],
+        ['unknown','不確定有沒有改變']
       ]}
     ];
+
+    // 問卷標題說明
+    var QS_HEADER = '請回答以下 5 個問題，幫助 AI 更精準地找出分析方向。\n不需要知道原因，只要描述您觀察到的現象即可。';
 
     // 讀取某題的答案（相容單選/複選）
     function getQValue(q){
@@ -5246,6 +5248,12 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       var body = document.createElement('div');
       body.id = 'hq-body';
       body.style.cssText = 'display:block;background:rgba(255,255,255,.07);border-radius:10px;padding:.75rem;margin-bottom:.5rem';
+
+      // 說明文字
+      var desc = document.createElement('div');
+      desc.style.cssText = 'font-size:11px;color:rgba(255,255,255,.55);margin-bottom:.75rem;line-height:1.6;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:.5rem';
+      desc.textContent = '請描述您觀察到的現象（不需要知道原因），AI 會根據答案追問並給出最精準的分析方向。';
+      body.appendChild(desc);
       wrap.appendChild(body);
 
       var grid = document.createElement('div');
@@ -5371,9 +5379,17 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       if(hist){ hist.style.display='flex'; hist.appendChild(loadDiv); hist.scrollTop=hist.scrollHeight; }
 
       try {
+        // 收集結構化問卷答案傳給 Worker
+        var surveyData = {
+          timing:  getQValue({id:'hq-timing',  multi:false}),
+          stage:   getQValue({id:'hq-stage',   multi:false}),
+          pattern: getQValue({id:'hq-pattern', multi:false}),
+          data:    getQValue({id:'hq-data',    multi:false}),
+          change:  getQValue({id:'hq-change',  multi:true})
+        };
         var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ mode:'navigate', messages: homeHistory })
+          body: JSON.stringify({ mode:'navigate', messages: homeHistory, surveyData: surveyData })
         });
         var data = await resp.json();
         var el = document.getElementById('home-loading'); if(el) el.remove();
@@ -6176,7 +6192,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.53 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.54 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6309,7 +6325,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.53 · '+window._buildTime);
+  status('v3.54 · '+window._buildTime);
 })();
 
 
