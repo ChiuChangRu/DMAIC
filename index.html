@@ -477,7 +477,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 15:00</span>
+    <span class="tb-status" id="dmaic-save-status">v3.52 · 2026-06-03 15:45</span>
   </div>
 </div>
 <!-- 子頁面工具列 -->
@@ -2272,24 +2272,24 @@ function fishboneDraw(){
 
     if(suggestPB) {
       // 因子 > 4：顯示 PB（預設）+ 田口
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #2563EB;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-pb-label">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #2563EB;border-radius:8px;padding:.5rem .75rem;cursor:pointer;flex:1;min-width:140px;max-width:280px" id="fb-method-pb-label">';
       html += '<input type="radio" name="fb-doe-method" value="pb" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#1D4ED8">🔎 PB 因子篩選 <span style="font-size:10px;background:#DBEAFE;color:#1D4ED8;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
-      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子快速篩選主要影響因子，找出關鍵 2-4 個後再進全因子 DOE</div></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">5–11 個因子篩選，找出關鍵 2-4 個</div></div>';
       html += '</label>';
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.5rem .75rem;cursor:not-allowed;flex:1;min-width:140px;max-width:280px;opacity:.55">';
       html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
-      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
+      html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">製程穩健設計，開發中</div></div>';
       html += '</label>';
     } else {
       // 因子 ≤ 4：顯示 DOE 全因子（預設）+ 田口
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #D97706;border-radius:8px;padding:.6rem .85rem;cursor:pointer;flex:1;min-width:200px" id="fb-method-doe-label">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#fff;border:1.5px solid #D97706;border-radius:8px;padding:.5rem .75rem;cursor:pointer;flex:1;min-width:140px;max-width:280px" id="fb-method-doe-label">';
       html += '<input type="radio" name="fb-doe-method" value="doe" checked onchange="fbUpdateMethodUI()" style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#D97706">🧪 DOE 全因子／部分因子 <span style="font-size:10px;background:#FEF3C7;color:#D97706;padding:1px 7px;border-radius:10px;font-weight:700">建議</span></div>';
-      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">≤ 4 個關鍵因子，完整估計主效應與所有交互作用，結果最可靠</div></div>';
+      html += '<div style="font-size:11px;color:#6B7280;margin-top:2px">≤ 4 個因子，完整估計主效應與交互作用</div></div>';
       html += '</label>';
-      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.6rem .85rem;cursor:not-allowed;flex:1;min-width:200px;opacity:.55">';
+      html += '<label style="display:flex;align-items:flex-start;gap:8px;background:#F9FAFB;border:1.5px dashed #D1D5DB;border-radius:8px;padding:.5rem .75rem;cursor:not-allowed;flex:1;min-width:140px;max-width:280px;opacity:.55">';
       html += '<input type="radio" name="fb-doe-method" value="taguchi" disabled style="margin-top:2px">';
       html += '<div><div style="font-size:13px;font-weight:600;color:#6B7280">📐 田口方法 Taguchi <span style="font-size:10px;background:#F3F4F6;color:#6B7280;padding:1px 7px;border-radius:10px">開發中</span></div>';
       html += '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">適用於製程穩健設計，透過直交表最小化雜訊因子（溫度、濕度、批次差異）對品質特性的影響，常用於設計驗證階段</div></div>';
@@ -5897,7 +5897,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 15:00';},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.52 · 2026-06-03 15:45';},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6005,7 +6005,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.52 · 2026-06-03 15:00');
+  status('v3.52 · 2026-06-03 15:45');
 })();
 
 
@@ -6037,16 +6037,29 @@ window.fbUpdateCount = function() {
 
 // ── AI 轉譯魚骨圖原因 → 可操作實驗參數 ──
 window.fbToExperiment = async function() {
-  var causes = window._fbCauses || [];
   var checked = document.querySelectorAll('#fb-factor-list input[type=checkbox]:checked');
   if(checked.length === 0){ alert('請至少勾選 1 個因子'); return; }
   var method = document.querySelector('input[name="fb-doe-method"]:checked');
   var val = method ? method.value : 'pb';
+
+  // 優先從 _fbCauses 讀，fallback 從 DOM label 讀
+  var causes = window._fbCauses || [];
   var selected = [];
   checked.forEach(function(cb){
     var idx = parseInt(cb.value);
     var c = causes[idx];
-    if(c) selected.push(c);
+    if(c){
+      selected.push(c);
+    } else {
+      // fallback: 從 label 的 span 讀取名稱和類別
+      var label = cb.closest('label') || cb.parentElement;
+      if(label){
+        var spans = label.querySelectorAll('span');
+        var name = spans[0] ? spans[0].textContent.trim() : '因子'+(idx+1);
+        var cat  = spans[1] ? spans[1].textContent.trim() : '';
+        selected.push({name:name, cat:cat, risk:'medium'});
+      }
+    }
   });
   if(selected.length === 0){
     alert('因子資料讀取失敗，請重新產生魚骨圖後再試');
