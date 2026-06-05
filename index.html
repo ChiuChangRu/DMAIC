@@ -5350,6 +5350,26 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 window._confirmedFactors = null;
 window._pendingTools = [];
 
+// 繼續追問：恢復輸入框
+window.homeResumeChat = function() {
+  var confirmAsk = document.getElementById('home-factor-confirm-ask');
+  if(confirmAsk) confirmAsk.remove();
+  var inputWrap = document.getElementById('home-chat-input-wrap');
+  if(inputWrap) inputWrap.style.display = 'flex';
+  window._homeStep = 4;
+  var chatInput = document.getElementById('home-chat-input');
+  if(chatInput) chatInput.focus();
+};
+
+// 確認完整，整理因子
+window.homeProceedFactors = function() {
+  var confirmAsk = document.getElementById('home-factor-confirm-ask');
+  if(confirmAsk) confirmAsk.remove();
+  var stepLabel = document.querySelector('#home-step4 div:first-child');
+  if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 整理分析因子';
+  homeSummarizeFactors(window._pendingTools || []);
+};
+
 window.homeSummarizeFactors = async function(tools) {
   window._pendingTools = tools || [];
   var hist = document.getElementById('home-chat-history');
@@ -5839,16 +5859,31 @@ window.homeConfirmFactors = function() {
         var conf = calcConfidence(homeHistory, tools, formParts.length);
         appendHomeAI_withConf(text, tools, conf);
 
-        // 有推薦工具時：呼叫 summarize_factors 整理因子
+        // 有推薦工具時：先詢問使用者是否完成對話
         if(tools && tools.length > 0) {
           window._homeStep = 5;
+          window._pendingTools = tools;
+
+          // 顯示確認框：繼續追問 or 整理因子
+          var confirmDiv = document.createElement('div');
+          confirmDiv.id = 'home-factor-confirm-ask';
+          confirmDiv.style.cssText = 'background:rgba(126,200,227,.08);border:1.5px solid rgba(126,200,227,.25);border-radius:10px;padding:.85rem 1rem;margin-top:.5rem';
+          confirmDiv.innerHTML =
+            '<div style="font-size:13px;color:#7EC8E3;font-weight:600;margin-bottom:.5rem">🎯 AI 已推薦分析工具</div>'+
+            '<div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:.75rem;line-height:1.6">'+
+              '您還有想補充的資訊嗎？可以繼續追問，讓 AI 整理出更準確的因子。'+
+            '</div>'+
+            '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+              '<button onclick="homeResumeChat()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 16px;font-size:12px;cursor:pointer;font-family:inherit">💬 還有資訊要補充</button>'+
+              '<button onclick="homeProceedFactors()" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:7px 18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">✅ 資訊已完整，整理因子</button>'+
+            '</div>';
+
+          var hist4 = document.getElementById('home-chat-history');
+          if(hist4){ hist4.appendChild(confirmDiv); hist4.scrollTop=hist4.scrollHeight; }
+
+          // 輸入框先隱藏
           var inputWrap = document.getElementById('home-chat-input-wrap');
           if(inputWrap) inputWrap.style.display = 'none';
-          var stepLabel = document.querySelector('#home-step4 div:first-child');
-          if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 整理分析因子';
-
-          // 呼叫 summarize_factors
-          homeSummarizeFactors(tools);
         }
       } catch(err) {
         var el3 = document.getElementById('home-loading'); if(el3) el3.remove();
