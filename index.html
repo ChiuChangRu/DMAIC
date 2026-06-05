@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.54 · AI 輔助統計分析平台</title>
+<title>MedQA v3.56 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -472,7 +472,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.54 · ' + ts;
+    if(el) el.textContent = 'v3.56 · ' + ts;
   });
 })();
 </script>
@@ -489,7 +489,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.54</span>
+    <span class="tb-status" id="dmaic-save-status">v3.56</span>
   </div>
 </div>
 
@@ -992,6 +992,18 @@ tr:hover td{background:#F9FAFB}
 
   <!-- AI 帶入提示：固定容器，不受 DMAIC card 影響 -->
   <div id="fb-hint-wrap"></div>
+
+  <!-- FDA MAUDE 查詢區 -->
+  <div id="fb-fda-wrap" style="margin-bottom:.75rem">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:12px;color:#6B7280">🔍 FDA 客訴資料庫（MAUDE）：</span>
+      <input type="text" id="fb-fda-keyword" placeholder="英文關鍵字，例：biopsy needle、catheter coating" 
+        style="flex:1;min-width:200px;border:1.5px solid #C7D9F5;border-radius:7px;padding:5px 10px;font-size:12px;font-family:inherit;outline:none"
+        onfocus="this.style.borderColor='#3B7DD8'" onblur="this.style.borderColor='#C7D9F5'">
+      <button onclick="fbSearchFDA()" style="background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">查詢</button>
+    </div>
+    <div id="fb-fda-result" style="margin-top:.5rem"></div>
+  </div>
 
 <div id="fb-out" style="display:none">
     <div class="card">
@@ -5531,47 +5543,82 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   }
 
   function homeGoTool(toolId) {
-    // 魚骨圖：帶入問題 + 生成 6M
     if(toolId === 'fishbone') {
-      var firstUser = '';
-      for(var i=0;i<homeHistory.length;i++){
-        if(homeHistory[i].role==='user'){ firstUser=homeHistory[i].content; break; }
-      }
       if(typeof goTool==='function') goTool('fishbone');
       setTimeout(function(){
+
+        // 1. 魚頭：優先用 hq-problem，其次用第一則用戶輸入
+        var problemTitle = '';
+        var hqProbEl = document.getElementById('hq-problem');
+        if(hqProbEl && hqProbEl.value.trim()) {
+          problemTitle = hqProbEl.value.trim();
+        } else {
+          for(var i=0;i<homeHistory.length;i++){
+            if(homeHistory[i].role==='user'){
+              // 去除問卷標記
+              problemTitle = homeHistory[i].content.replace(/\n【快速問卷】.*/,'').trim();
+              break;
+            }
+          }
+        }
         var fbProbEl = document.getElementById('fb-problem');
-        if(fbProbEl && firstUser) fbProbEl.value = firstUser;
+        if(fbProbEl && problemTitle) fbProbEl.value = problemTitle;
+
         var hint = document.createElement('div');
         hint.className = 'fb-import-hint';
         hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
-        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在為您生成 6M 根本原因建議...';
+        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在根據您的問題描述生成 6M 根本原因建議...';
         var fbHintWrap = document.getElementById('fb-hint-wrap');
         if(fbHintWrap){ fbHintWrap.innerHTML=''; fbHintWrap.appendChild(hint); }
-        if(!firstUser){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
+
+        if(!problemTitle){ hint.innerHTML='⚠️ 未偵測到問題描述，請手動填寫各欄位'; return; }
         window._homeHistory = homeHistory.slice();
 
-        var _surveyMap2 = [
-          ['hq-type',  '問題類型'],['hq-freq','發生頻率'],['hq-where','發現位置'],
-          ['hq-scope', '影響範圍'],['hq-data','是否有數據'],['hq-change','近期是否有變更']
+        // 2. 收集新問卷答案（hq-timing/stage/pattern/data/change）
+        var surveyItems = [
+          {id:'hq-timing',  label:'出現時機'},
+          {id:'hq-stage',   label:'發現階段'},
+          {id:'hq-pattern', label:'發生規律'},
+          {id:'hq-data',    label:'可量化數據'},
+          {id:'hq-change',  label:'近期變更', multi:true}
         ];
-        var _surveyParts2 = _surveyMap2.map(function(item){
-          var checks = document.querySelectorAll('input[name="'+item[0]+'_cb"]:checked');
-          if(checks.length) return item[1]+'：'+Array.from(checks).map(function(c){return c.value;}).join('、');
-          var el = document.getElementById(item[0]);
-          return (el&&el.value) ? item[1]+'：'+el.value : null;
+        var surveyLines = surveyItems.map(function(item){
+          if(item.multi){
+            var checks = document.querySelectorAll('input[name="'+item.id+'_cb"]:checked');
+            if(checks.length) return item.label+'：'+Array.from(checks).map(function(c){return c.value;}).join('、');
+          }
+          var el = document.getElementById(item.id);
+          return (el && el.value) ? item.label+'：'+el.value : null;
         }).filter(Boolean);
-        var _surveyCtx2 = _surveyParts2.length
-          ? '\n\n【問卷資料】\n'+_surveyParts2.join('\n')
-            +'\n\n問卷推論規則：\n- 「特定機台才有」→ Machine 有依據\n- 「無任何近期變更」→ Material/Method 保守\n- 「出廠前 QC 發現」→ Measure 有依據\n- 「材料或供應商變更」→ Material 高度有依據'
+
+        // 3. 組合傳給 fishbone_generate 的訊息
+        var surveyCtx = surveyLines.length
+          ? '【問卷資料】\n'+surveyLines.join('\n')+'\n\n'
           : '';
-        var _fbFinalMsg2 = '請嚴格根據以上對話內容與問卷資料中實際存在的線索，為魚骨圖 6M 各類別提供根本原因建議。'
-          + _surveyCtx2
-          + '\n\n【重要限制】沒有線索支持的類別必須回傳空陣列 []，不可依背景知識補充。';
+
+        // 對話摘要（用戶回答部分）
+        var userAnswers = homeHistory
+          .filter(function(m){ return m.role==='user'; })
+          .map(function(m){ return m.content.replace(/\n【快速問卷】.*/,'').trim(); })
+          .filter(function(s){ return s.length > 2; })
+          .join('；');
+        var aiLast = '';
+        for(var si=homeHistory.length-1;si>=0;si--){
+          if(homeHistory[si].role==='assistant'){ aiLast=homeHistory[si].content.slice(0,200); break; }
+        }
+
+        var finalMsg = surveyCtx
+          + '問題主題：' + problemTitle + '\n'
+          + '對話摘要：' + userAnswers + '\n'
+          + 'AI 分析：' + aiLast + '\n\n'
+          + '請根據以上資訊，為魚骨圖 6M 各類別提供根本原因建議。\n'
+          + '重要：只列出有對話或問卷依據的原因，不要根據通用知識補充不合邏輯的因子。\n'
+          + '已排除的類別（如問卷顯示「所有人員機台都有」）回傳空陣列 []。';
 
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate', fbModel:'opus',
-            messages: homeHistory.concat([{role:'user', content: _fbFinalMsg2}])
+            messages:[{role:'user', content: finalMsg}]
           })
         }).then(function(r){return r.json();}).then(function(data){
           console.log('[fb_gen]',JSON.stringify(data).slice(0,150));
@@ -5579,10 +5626,9 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
             if(typeof fbFillFromAI==='function') fbFillFromAI(data.result);
             hint.innerHTML='✅ AI 已帶入 6M 根本原因建議，正在繪製魚骨圖...';
             hint.style.background='#F0FDF4'; hint.style.borderColor='#86EFAC'; hint.style.color='#166534';
-            // 自動產生魚骨圖：必須用 fbSyncAndDraw 先把 _fbData 同步回 textarea 再畫圖
             setTimeout(function(){
               if(typeof fbSyncAndDraw==='function') fbSyncAndDraw();
-              hint.innerHTML='✅ 魚骨圖已產生！可在上方查看，原因可直接編輯後重新繪製。';
+              hint.innerHTML='✅ 魚骨圖已產生！原因可直接編輯後重新繪製。';
             }, 600);
           } else {
             var errMsg = data.error || 'result 為空';
@@ -6129,7 +6175,214 @@ window.fbGoTool = function(cat) {
 };
 
 // ════════════════════════════════════════════════════════
-// 案件管理系統
+// FDA MAUDE 客訴資料庫查詢
+// ════════════════════════════════════════════════════════
+
+// Google Translate 免費 API（前端直接呼叫）
+async function gtTranslate(text) {
+  if(!text || !text.trim()) return text;
+  try {
+    var url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh-TW&dt=t&q=' + encodeURIComponent(text);
+    var resp = await fetch(url);
+    var data = await resp.json();
+    // 回傳格式：[[["翻譯結果","原文"...],...],...]
+    return data[0].map(function(s){ return s[0]; }).join('');
+  } catch(e) {
+    return text; // 翻譯失敗回傳原文
+  }
+}
+
+window.fbSearchFDA = async function() {
+  var kw = (document.getElementById('fb-fda-keyword')||{}).value;
+  if(!kw || !kw.trim()){ alert('請輸入英文關鍵字，例：biopsy needle'); return; }
+  kw = kw.trim();
+
+  var resultDiv = document.getElementById('fb-fda-result');
+  if(!resultDiv) return;
+  resultDiv.innerHTML = '<div style="font-size:12px;color:#6B7280;padding:.4rem">🔄 查詢中...</div>';
+
+  try {
+    var url = 'https://api.fda.gov/device/event.json?search=device.generic_name:"'
+      + encodeURIComponent(kw) + '"&limit=5&sort=date_received:desc';
+    var resp = await fetch(url);
+    var data = await resp.json();
+
+    if(!data.results || data.results.length === 0) {
+      url = 'https://api.fda.gov/device/event.json?search=device.generic_name:'
+        + encodeURIComponent(kw.split(' ')[0]) + '&limit=5&sort=date_received:desc';
+      resp = await fetch(url);
+      data = await resp.json();
+    }
+
+    if(!data.results || data.results.length === 0) {
+      resultDiv.innerHTML = '<div style="font-size:12px;color:#92400E;background:#FFFBEB;border:1px solid #FDE68A;border-radius:6px;padding:.5rem .75rem">找不到相關記錄，請嘗試其他關鍵字（如：needle、catheter、syringe）</div>';
+      return;
+    }
+
+    // 抽取關鍵欄位
+    var reports = data.results.map(function(r) {
+      var devName = (r.device&&r.device[0]) ? (r.device[0].generic_name||r.device[0].brand_name||'') : '';
+      var mdrText = (r.mdr_text&&r.mdr_text[0]) ? r.mdr_text[0].text||'' : '';
+      return {
+        date: r.date_received || '',
+        event: r.event_type || '',
+        device: devName,
+        text: mdrText.slice(0, 200)
+      };
+    });
+
+    // 儲存原始報告
+    window._fdaReports = reports;
+
+    // 顯示確認對話框（翻譯前確認）
+    var confirmHtml = '<div style="background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:8px;padding:.75rem">';
+    confirmHtml += '<div style="font-size:12px;font-weight:700;color:#1B3A5C;margin-bottom:.5rem">📋 找到 '+reports.length+' 筆 FDA MAUDE 客訴記錄</div>';
+    confirmHtml += '<div style="font-size:11px;color:#6B7280;margin-bottom:.75rem">以下為英文原文摘要，請確認是否要翻譯成中文？</div>';
+
+    reports.forEach(function(r, i){
+      confirmHtml += '<div style="border-top:1px solid #E2ECF8;padding:.4rem 0;font-size:11px">';
+      confirmHtml += '<span style="color:#6B7280">'+r.date+'</span> ';
+      confirmHtml += '<span style="background:#FEF2F2;color:#991B1B;border-radius:4px;padding:1px 6px;font-weight:600">'+r.event+'</span> ';
+      confirmHtml += '<span style="color:#1B3A5C;font-weight:600">'+r.device+'</span><br>';
+      confirmHtml += '<span style="color:#374151">'+r.text.slice(0,100)+'...</span>';
+      confirmHtml += '</div>';
+    });
+
+    confirmHtml += '<div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap">';
+    confirmHtml += '<button onclick="fbFDATranslate()" style="background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🌐 翻譯成中文</button>';
+    confirmHtml += '<button onclick="fbFDAShow(false)" style="background:#fff;color:#374151;border:1.5px solid #D1D5DB;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">顯示英文原文</button>';
+    confirmHtml += '<button onclick="fbFDAtoAI()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🤖 直接讓 AI 分析→補充魚骨圖</button>';
+    confirmHtml += '</div>';
+    confirmHtml += '</div>';
+    resultDiv.innerHTML = confirmHtml;
+
+  } catch(err) {
+    resultDiv.innerHTML = '<div style="font-size:12px;color:#991B1B;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;padding:.5rem .75rem">⚠️ 查詢失敗：'+err.message+'</div>';
+  }
+};
+
+// 翻譯並顯示
+window.fbFDATranslate = async function() {
+  var reports = window._fdaReports;
+  if(!reports) return;
+  var resultDiv = document.getElementById('fb-fda-result');
+  var btn = resultDiv.querySelector('button');
+  if(btn){ btn.textContent='🔄 翻譯中...'; btn.disabled=true; }
+
+  // 批次翻譯（每筆翻譯事件類型 + 描述）
+  var translated = await Promise.all(reports.map(async function(r){
+    var tEvent = await gtTranslate(r.event);
+    var tText  = await gtTranslate(r.text);
+    var tDevice = await gtTranslate(r.device);
+    return { date:r.date, event:tEvent, device:tDevice, text:tText, orig:r };
+  }));
+
+  window._fdaReports = reports; // 保留原始供 AI 分析
+  fbFDAShow(true, translated);
+};
+
+// 顯示結果（translated=true 顯示中文，false 顯示原文）
+window.fbFDAShow = function(translated, data) {
+  var reports = data || window._fdaReports;
+  var resultDiv = document.getElementById('fb-fda-result');
+
+  var html = '<div style="background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:8px;padding:.75rem">';
+  html += '<div style="font-size:12px;font-weight:700;color:#1B3A5C;margin-bottom:.5rem">';
+  html += '📋 FDA MAUDE 查詢結果（'+reports.length+' 筆）';
+  html += translated ? ' <span style="background:#DBEAFE;color:#1D4ED8;font-size:10px;padding:1px 6px;border-radius:4px">中文翻譯</span>' : ' <span style="background:#F3F4F6;color:#6B7280;font-size:10px;padding:1px 6px;border-radius:4px">英文原文</span>';
+  html += '</div>';
+
+  reports.forEach(function(r){
+    html += '<div style="border-top:1px solid #E2ECF8;padding:.5rem 0;font-size:11px">';
+    html += '<span style="color:#6B7280">'+r.date+'</span> ';
+    html += '<span style="background:#FEF2F2;color:#991B1B;border-radius:4px;padding:1px 6px;font-weight:600">'+r.event+'</span> ';
+    html += '<span style="color:#1B3A5C;font-weight:600">'+r.device+'</span><br>';
+    html += '<span style="color:#374151;line-height:1.6">'+r.text+'</span>';
+    html += '</div>';
+  });
+
+  html += '<div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap">';
+  html += '<button onclick="fbFDAtoAI()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🤖 AI 分析→補充魚骨圖因子</button>';
+  if(translated){
+    html += '<button onclick="fbFDAShow(false)" style="background:#fff;color:#374151;border:1.5px solid #D1D5DB;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">顯示英文原文</button>';
+  } else {
+    html += '<button onclick="fbFDATranslate()" style="background:#fff;color:#1D4ED8;border:1.5px solid #BFDBFE;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">🌐 翻譯成中文</button>';
+  }
+  html += '</div></div>';
+  resultDiv.innerHTML = html;
+};
+
+// FDA 報告 → AI 分析 → 補充魚骨圖因子
+window.fbFDAtoAI = async function() {
+  var reports = window._fdaReports;
+  if(!reports || reports.length === 0) return;
+  var resultDiv = document.getElementById('fb-fda-result');
+
+  var fdaSummary = reports.map(function(r,i){
+    return (i+1)+'. ['+r.event+'] '+r.device+' ('+r.date+'): '+r.text;
+  }).join('\n');
+
+  var problem = (document.getElementById('fb-problem')||{}).value || '醫療器材品質問題';
+
+  // 顯示 loading
+  var loadDiv = document.createElement('div');
+  loadDiv.style.cssText = 'font-size:12px;color:#7C3AED;padding:.4rem;display:flex;align-items:center;gap:6px';
+  loadDiv.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid #DDD6FE;border-top-color:#7C3AED;border-radius:50%;animation:spin .8s linear infinite"></span>AI 正在分析 FDA 客訴並推論根本原因...';
+  resultDiv.appendChild(loadDiv);
+
+  try {
+    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode: 'fishbone_generate', fbModel: 'opus',
+        messages: [{
+          role: 'user',
+          content: '問題主題：' + problem + '\n\n'
+            + '以下是 FDA MAUDE 資料庫中的類似產品客訴記錄，請根據這些真實案例推論根本原因，補充魚骨圖 6M 因子。\n\n'
+            + '【FDA MAUDE 客訴記錄】\n' + fdaSummary + '\n\n'
+            + '請根據以上客訴記錄，推論出與本問題相關的根本原因，填入 6M 各類別。'
+            + '只列出有客訴記錄依據的原因，沒有依據的類別回傳空陣列。'
+        }]
+      })
+    });
+    var data = await resp.json();
+    loadDiv.remove();
+
+    if(data.result) {
+      // 合併現有因子和 FDA 推論的新因子
+      var existing = window._fbData || {};
+      var newData = data.result;
+      ['man','machine','material','method','measure','env'].forEach(function(cat){
+        if(newData[cat] && newData[cat].length > 0) {
+          if(!existing[cat]) existing[cat] = [];
+          newData[cat].forEach(function(f){
+            // 避免重複
+            var isDup = existing[cat].some(function(e){ return e.name === f.name; });
+            if(!isDup) existing[cat].push({name:f.name+'（FDA）', risk:f.risk});
+          });
+        }
+      });
+      window._fbData = existing;
+      if(typeof renderAll === 'function') renderAll();
+
+      var ok = document.createElement('div');
+      ok.style.cssText = 'font-size:12px;color:#166534;background:#F0FDF4;border:1px solid #86EFAC;border-radius:6px;padding:.5rem .75rem;margin-top:.4rem';
+      ok.textContent = '✅ AI 已根據 '+reports.length+' 筆 FDA 客訴記錄補充因子（標記 FDA），請確認後產生魚骨圖';
+      resultDiv.appendChild(ok);
+    } else {
+      var err2 = document.createElement('div');
+      err2.style.cssText = 'font-size:12px;color:#92400E;padding:.4rem';
+      err2.textContent = '⚠️ AI 分析失敗：'+(data.error||'未知錯誤');
+      resultDiv.appendChild(err2);
+    }
+  } catch(e) {
+    loadDiv.remove();
+    var errDiv = document.createElement('div');
+    errDiv.style.cssText = 'font-size:12px;color:#991B1B;padding:.4rem';
+    errDiv.textContent = '⚠️ 連線失敗：'+e.message;
+    resultDiv.appendChild(errDiv);
+  }
+};
 // ════════════════════════════════════════════════════════
 (function(){
   var CASE_KEY = 'medqa-case';
@@ -6236,7 +6489,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.54 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.56 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6369,7 +6622,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.54 · '+window._buildTime);
+  status('v3.56 · '+window._buildTime);
 })();
 
 
