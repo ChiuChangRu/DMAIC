@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.63 · AI 輔助統計分析平台</title>
+<title>MedQA v3.66 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.63 · ' + ts;
+    if(el) el.textContent = 'v3.66 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.63</span>
+    <span class="tb-status" id="dmaic-save-status">v3.66</span>
   </div>
 </div>
 
@@ -564,7 +564,7 @@ tr:hover td{background:#F9FAFB}
             識別 →
           </button>
         </div>
-        <div id="home-step1-loading" style="display:none;font-size:12px;color:rgba(255,255,255,.5);padding:.5rem 0;display:flex;align-items:center;gap:6px">
+        <div id="home-step1-loading" style="display:none;font-size:12px;color:rgba(255,255,255,.5);padding:.5rem 0;align-items:center;gap:6px">
           <span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite"></span>
           查詢 FDA 資料庫並識別器材...
         </div>
@@ -5281,7 +5281,9 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     if(!name){ input.style.borderColor='rgba(239,68,68,.8)'; input.focus(); setTimeout(function(){input.style.borderColor='rgba(255,255,255,.2)';},1500); return; }
 
     var loading = document.getElementById('home-step1-loading');
+    var identifyBtn = document.querySelector('#home-step1 button');
     if(loading) loading.style.display='flex';
+    if(identifyBtn){ identifyBtn.disabled=true; identifyBtn.style.opacity='.6'; }
 
     try {
       // 前端查 FDA 510k
@@ -5305,6 +5307,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       });
       var data = await resp.json();
       if(loading) loading.style.display='none';
+      if(identifyBtn){ identifyBtn.disabled=false; identifyBtn.style.opacity='1'; }
 
       if(data.result) {
         window._deviceInfo = data.result;
@@ -5315,6 +5318,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       }
     } catch(err) {
       if(loading) loading.style.display='none';
+      if(identifyBtn){ identifyBtn.disabled=false; identifyBtn.style.opacity='1'; }
       alert('連線失敗：'+err.message);
     }
   };
@@ -5490,6 +5494,13 @@ window.homeSummarizeFactors = async function(tools) {
   } catch(e) {
     panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5">⚠️ 連線失敗</div>';
   }
+};
+
+window.homeRemoveFactor = function(btn, cat, idx) {
+  if(!window._confirmedFactors || !window._confirmedFactors[cat]) return;
+  window._confirmedFactors[cat].splice(idx, 1);
+  // 重新渲染面板
+  renderFactorPanel(window._confirmedFactors);
 };
 
 window.homeAddFactor = function() {
@@ -6026,8 +6037,7 @@ window.homeConfirmFactors = function() {
       if(typeof goTool==='function') goTool(toolId);
     }
   }
-
-  // homeCapaSend 已由內層 IIFE 定義（含問卷整合），此處移除重複定義
+  window.homeGoTool = homeGoTool; // 暴露到 window 供外部呼叫
 
   window.homeCapaKeydown = function(e) {
     if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); homeCapaSend(); }
@@ -6883,7 +6893,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.63 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.66 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7016,7 +7026,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.63 · '+window._buildTime);
+  status('v3.66 · '+window._buildTime);
 })();
 
 
