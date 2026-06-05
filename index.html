@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.56 · AI 輔助統計分析平台</title>
+<title>MedQA v3.60 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -472,7 +472,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.56 · ' + ts;
+    if(el) el.textContent = 'v3.60 · ' + ts;
   });
 })();
 </script>
@@ -489,7 +489,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.56</span>
+    <span class="tb-status" id="dmaic-save-status">v3.60</span>
   </div>
 </div>
 
@@ -523,76 +523,130 @@ tr:hover td{background:#F9FAFB}
 
 <!-- ══ Hero + 問題輸入對話框 ══ -->
 <div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:visible">
-  <!-- 裝飾背景圓 -->
   <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
   <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
 
   <div style="max-width:720px;margin:0 auto;position:relative;z-index:1">
-    <!-- 標題 -->
-    <div style="text-align:center;margin-bottom:2rem">
-      <h2 style="font-size:32px;font-weight:700;line-height:1.3;letter-spacing:-.01em">
-        AI 輔助品質分析平台
-      </h2>
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <h2 style="font-size:28px;font-weight:700;line-height:1.3;letter-spacing:-.01em">AI 輔助品質分析平台</h2>
     </div>
 
-    <!-- 問題輸入框 -->
     <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:1.25rem 1.5rem">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
         <span style="font-size:18px">🤖</span>
         <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,.9)">CAPA 分析助理</span>
-        <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:4px">· 描述問題，引導分析路徑</span>
+        <span style="font-size:11px;color:rgba(255,255,255,.4)">· 描述問題，引導分析路徑</span>
         <span style="margin-left:auto;width:8px;height:8px;background:#4ADE80;border-radius:50%;animation:fab-pulse 2s ease-in-out infinite;flex-shrink:0"></span>
       </div>
 
-      <!-- AI 歡迎訊息 -->
-      <div id="home-ai-welcome" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px 10px 10px 3px;padding:.75rem 1rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:.85rem">
-        您好！請描述您遇到的品質問題或失效情形，例如：<span style="color:#7EC8E3">「塗層耐磨不足，每批都發生」</span>、<span style="color:#7EC8E3">「檢體針取樣長度不足，良率下降」</span>。<br>
-        <span style="font-size:11px;color:rgba(255,255,255,.4)">AI 將透過 2-3 輪對話引導您找出根本原因，並推薦適合的分析工具。</span>
+      <!-- ══ STEP 1：輸入器材名稱 ══ -->
+      <div id="home-step1" style="display:block">
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+          步驟 1 / 5 &nbsp;·&nbsp; 輸入醫療器材名稱
+        </div>
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:.75rem 1rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:.85rem">
+          請先告訴我您要分析的是哪種醫療器材？<br>
+          <span style="font-size:11px;color:rgba(255,255,255,.4)">AI 會先確認器材的材料、結構、用途，確保後續分析不出現不合理的因子。</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="home-device-input"
+            placeholder="例：檢體針、Pigtail 導管、球囊擴張導管、骨科螺釘..."
+            onkeydown="if(event.key==='Enter') homeDeviceSearch()"
+            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;color:#fff;outline:none;transition:border-color .2s"
+            onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
+            onblur="this.style.borderColor='rgba(255,255,255,.2)'">
+          <button onclick="homeDeviceSearch()"
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.65rem 1.2rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
+            識別 →
+          </button>
+        </div>
+        <div id="home-step1-loading" style="display:none;font-size:12px;color:rgba(255,255,255,.5);padding:.5rem 0;display:flex;align-items:center;gap:6px">
+          <span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite"></span>
+          查詢 FDA 資料庫並識別器材...
+        </div>
       </div>
 
-      <!-- 步驟一標題 -->
-      <div id="hq-step1-label" style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem">
-        <div style="background:linear-gradient(135deg,#3B82F6,#6366F1);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;white-space:nowrap">步驟一</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">先描述問題</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4)">— 在下方輸入框描述問題，再填問卷</div>
+      <!-- ══ STEP 2：確認器材 ══ -->
+      <div id="home-step2" style="display:none">
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+          步驟 2 / 5 &nbsp;·&nbsp; 確認醫療器材
+        </div>
+        <div id="home-device-card" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:.85rem"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="homeDeviceConfirm(true)"
+            style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+            ✅ 是的，就是這個
+          </button>
+          <button onclick="homeDeviceConfirm(false)"
+            style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 20px;font-size:13px;cursor:pointer;font-family:inherit">
+            ❌ 不是，重新輸入
+          </button>
+        </div>
       </div>
 
-      <!-- 快速問卷 slot -->
-      <div id="home-quick-form-slot"></div>
-
-      <!-- 步驟二標題（送出前隱藏，送出後顯示） -->
-      <div id="hq-step2-label" style="display:none;align-items:center;gap:8px;margin:.75rem 0 .4rem">
-        <div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;white-space:nowrap">步驟二</div>
-        <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.85)">AI 追問</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.4)">— 針對問卷未涵蓋的部分深入確認</div>
-      </div>
-
-      <!-- 對話區（展開後顯示） -->
-      <div id="home-chat-history" style="display:none;max-height:380px;overflow-y:auto;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
-
-      <!-- 輸入區 -->
-      <div style="display:flex;gap:8px;align-items:flex-end">
+      <!-- ══ STEP 3：輸入問題 + 問卷 ══ -->
+      <div id="home-step3" style="display:none">
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+          步驟 3 / 5 &nbsp;·&nbsp; 描述問題 + 填問卷
+        </div>
+        <!-- 器材確認標示 -->
+        <div id="home-device-badge" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:11px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
+          <span>✅</span><span id="home-device-badge-text">器材已確認</span>
+        </div>
+        <!-- 問題主題 -->
+        <div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:4px;font-weight:600">問題描述 <span style="color:#F87171">*必填</span></div>
         <textarea id="home-problem-input" rows="2"
-          placeholder="例：檢體針取樣長度不足，良率從 95% 下降至 88%，問題約兩週前開始..."
+          placeholder="例：親水塗層潤滑度不足，每批都發生，客戶投訴..."
           onkeydown="homeCapaKeydown(event)"
-          style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
+          style="width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;box-sizing:border-box;transition:border-color .2s;margin-bottom:.75rem"
           onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
-          onblur="this.style.borderColor='rgba(255,255,255,.2)'"
-        ></textarea>
-        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
+        <!-- 問卷 slot -->
+        <div id="home-quick-form-slot"></div>
+        <div style="display:flex;gap:8px;margin-top:.75rem">
           <button onclick="homeCapaSend()" id="home-send-btn"
-            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4);transition:transform .15s"
-            onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform=''">
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.65rem 1.4rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(190,24,93,.4)">
             送出 →
           </button>
           <button onclick="homeCapaReset()"
-            style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.35rem .7rem;font-size:11px;cursor:pointer;font-family:inherit;text-align:center">
+            style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.65rem .9rem;font-size:12px;cursor:pointer;font-family:inherit">
             🔄 重設
           </button>
         </div>
       </div>
 
-      <!-- 工具推薦按鈕區（已整合至訊息泡泡，此區保留備用但隱藏） -->
+      <!-- ══ STEP 4：AI 追問 ══ -->
+      <div id="home-step4" style="display:none">
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+          步驟 4 / 5 &nbsp;·&nbsp; AI 深入追問
+        </div>
+        <div id="home-device-badge2" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:11px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
+          <span>✅</span><span id="home-device-badge-text2"></span>
+        </div>
+        <div id="home-chat-history" style="max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+          <textarea id="home-chat-input" rows="2"
+            placeholder="回答 AI 的問題..."
+            onkeydown="homeCapaKeydown(event)"
+            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
+            onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
+            onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
+          <button onclick="homeCapaSend()" id="home-send-btn"
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
+            送出 →
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ STEP 5：推薦工具 ══ -->
+      <div id="home-step5" style="display:none">
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+          步驟 5 / 5 &nbsp;·&nbsp; 分析完成，選擇工具
+        </div>
+        <div id="home-step5-content"></div>
+      </div>
+
+      <!-- 工具推薦按鈕區（備用） -->
       <div id="home-tool-buttons" style="display:none">
         <div id="home-tool-btn-list"></div>
       </div>
@@ -5180,6 +5234,117 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 })();
 
 // ════════════════════════════════════════════════════════
+// 5步驟流程控制器
+// ════════════════════════════════════════════════════════
+(function(){
+  window._homeStep = 1;
+  window._deviceInfo = null;
+
+  function showStep(n) {
+    window._homeStep = n;
+    [1,2,3,4,5].forEach(function(i){
+      var el = document.getElementById('home-step'+i);
+      if(el) el.style.display = (i===n) ? 'block' : 'none';
+    });
+  }
+
+  // ── Step 1：查詢 FDA 510k 識別器材 ──
+  window.homeDeviceSearch = async function() {
+    var input = document.getElementById('home-device-input');
+    if(!input) return;
+    var name = input.value.trim();
+    if(!name){ input.style.borderColor='rgba(239,68,68,.8)'; input.focus(); setTimeout(function(){input.style.borderColor='rgba(255,255,255,.2)';},1500); return; }
+
+    var loading = document.getElementById('home-step1-loading');
+    if(loading) loading.style.display='flex';
+
+    try {
+      // 前端查 FDA 510k
+      var fdaUrl = 'https://api.fda.gov/device/510k.json?search=device_name:"'
+        + encodeURIComponent(name) + '"&limit=3&sort=decision_date:desc';
+      var fdaData = '';
+      try {
+        var fdaResp = await fetch(fdaUrl);
+        var fdaJson = await fdaResp.json();
+        if(fdaJson.results && fdaJson.results.length > 0) {
+          fdaData = fdaJson.results.map(function(r){
+            return r.device_name + ' (' + r.applicant + ', ' + r.decision_date + ', Class:' + (r.device_class||'?') + ')';
+          }).join('\n');
+        }
+      } catch(e) { fdaData = '(FDA 查詢失敗，根據器材名稱推斷)'; }
+
+      // 送 Worker identify_device
+      var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ mode:'identify_device', deviceName:name, fdaData:fdaData })
+      });
+      var data = await resp.json();
+      if(loading) loading.style.display='none';
+
+      if(data.result) {
+        window._deviceInfo = data.result;
+        renderDeviceCard(data.result);
+        showStep(2);
+      } else {
+        alert('識別失敗，請試試其他描述方式（如英文名稱）');
+      }
+    } catch(err) {
+      if(loading) loading.style.display='none';
+      alert('連線失敗：'+err.message);
+    }
+  };
+
+  function renderDeviceCard(d) {
+    var card = document.getElementById('home-device-card');
+    if(!card) return;
+    var confColor = d.confidence>=80?'#10B981':d.confidence>=60?'#F59E0B':'#EF4444';
+    card.innerHTML =
+      '<div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:.5rem">'+d.confirmed_name+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .75rem;font-size:12px;margin-bottom:.6rem">'+
+        (d.device_class?'<div><span style="color:rgba(255,255,255,.5)">FDA Class：</span><span style="color:#fff">'+d.device_class+'</span></div>':'')+
+        '<div><span style="color:rgba(255,255,255,.5)">材料：</span><span style="color:#7EC8E3">'+d.material+'</span></div>'+
+        '<div style="grid-column:1/-1"><span style="color:rgba(255,255,255,.5)">結構：</span><span style="color:#fff">'+d.structure+'</span></div>'+
+        '<div style="grid-column:1/-1"><span style="color:rgba(255,255,255,.5)">用途：</span><span style="color:#fff">'+d.indication+'</span></div>'+
+      '</div>'+
+      '<div style="font-size:11px;margin-bottom:.4rem"><span style="color:rgba(255,255,255,.5)">關鍵品質特性：</span>'+
+        (d.key_quality||[]).map(function(q){ return '<span style="background:rgba(126,200,227,.2);color:#7EC8E3;padding:1px 7px;border-radius:10px;margin-right:4px">'+q+'</span>'; }).join('')+
+      '</div>'+
+      '<div style="font-size:11px;color:rgba(255,255,255,.35)">識別信心度：<span style="color:'+confColor+'">'+d.confidence+'%</span></div>';
+  }
+
+  // ── Step 2：確認器材 ──
+  window.homeDeviceConfirm = function(confirmed) {
+    if(confirmed) {
+      // 帶入器材名稱到問卷 hq-problem
+      var hqProb = document.getElementById('hq-problem');
+      if(hqProb && window._deviceInfo) hqProb.value = window._deviceInfo.confirmed_name;
+      // 顯示 badge
+      var badge = document.getElementById('home-device-badge-text');
+      var badge2 = document.getElementById('home-device-badge-text2');
+      var name = window._deviceInfo ? window._deviceInfo.confirmed_name : '已確認';
+      if(badge) badge.textContent = '器材：'+name;
+      if(badge2) badge2.textContent = '器材：'+name;
+      showStep(3);
+    } else {
+      // 回到 Step 1
+      window._deviceInfo = null;
+      var input = document.getElementById('home-device-input');
+      if(input){ input.value=''; input.focus(); }
+      showStep(1);
+    }
+  };
+
+  // DOM 就緒後初始化
+  function init() {
+    showStep(1);
+    // 把問卷放到 step 3 裡
+    if(typeof buildQuickForm === 'function') buildQuickForm();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
+// ════════════════════════════════════════════════════════
 // 主頁嵌入式 CAPA 對話框
 // ════════════════════════════════════════════════════════
 (function(){
@@ -5377,58 +5542,70 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     // 覆寫 homeCapaSend
     var _origSend = window.homeCapaSend;
     window.homeCapaSend = async function(){
-      var input = document.getElementById('home-problem-input');
+      // Step 3：第一次送出（問題描述 + 問卷）
+      // Step 4：後續追問
+      var currentStep = window._homeStep || 1;
+
+      // 抓輸入框（Step 3 用 home-problem-input，Step 4 用 home-chat-input）
+      var inputId = currentStep <= 3 ? 'home-problem-input' : 'home-chat-input';
+      var input = document.getElementById(inputId);
       var sendBtn = document.getElementById('home-send-btn');
       if(!input) return;
 
-      // 若主輸入框空白但問題主題有填，自動帶入
-      var hqProblem = document.getElementById('hq-problem');
-      if(hqProblem && hqProblem.value.trim() && !input.value.trim()){
-        input.value = hqProblem.value.trim();
+      // Step 3 自動帶入 hq-problem
+      if(currentStep <= 3) {
+        var hqProblem = document.getElementById('hq-problem');
+        if(hqProblem && hqProblem.value.trim() && !input.value.trim()){
+          input.value = hqProblem.value.trim();
+        }
       }
 
       var q = input.value.trim();
       if(!q){
-        // 顯示提示並讓輸入框閃紅
         input.style.borderColor = 'rgba(239,68,68,.8)';
-        input.placeholder = '⚠️ 請先描述您的問題，例如：檢體針取樣量不足、塗層耐磨性不佳...';
         input.focus();
-        setTimeout(function(){
-          input.style.borderColor = 'rgba(255,255,255,.2)';
-          input.placeholder = '例：檢體針取樣長度不足，良率從 95% 下降至 88%，問題約兩週前開始...';
-        }, 2500);
+        setTimeout(function(){ input.style.borderColor='rgba(255,255,255,.2)'; }, 1500);
         return;
       }
 
-      var formParts = getFormAnswers();
+      var formParts = currentStep <= 3 ? getFormAnswers() : [];
       var fullMsg = q;
       if(formParts.length > 0) fullMsg = q + '\n【快速問卷】' + formParts.join('｜');
 
       // 顯示使用者訊息
       var isFirstSend = homeHistory.length === 0;
-      appendHomeUser(q + (isFirstSend && formParts.length ? ' 📋' + formParts.length+'項問卷' : ''));
+      appendHomeUser(q + (isFirstSend && formParts.length ? ' 📋'+formParts.length+'項問卷' : ''));
       input.value = '';
       if(sendBtn) sendBtn.disabled = true;
       homeHistory.push({role:'user', content: fullMsg});
+      window._homeHistory = homeHistory.slice();
 
-      // 收合問卷，顯示步驟二標題
-      var hqb = document.getElementById('hq-body');
-      if(hqb) hqb.style.display = 'none';
-      var hqt = document.getElementById('hq-toggle');
-      if(hqt) hqt.textContent = '📋 展開問卷 ▼';
-      var step2 = document.getElementById('hq-step2-label');
-      if(step2) step2.style.display = 'flex';
+      // 第一次送出後切到 Step 4（AI 追問）
+      if(currentStep <= 3) {
+        // 收合問卷
+        var hqb = document.getElementById('hq-body');
+        if(hqb) hqb.style.display = 'none';
+        window._homeStep = 4;
+        [1,2,3,5].forEach(function(i){
+          var el = document.getElementById('home-step'+i);
+          if(el) el.style.display='none';
+        });
+        var step4 = document.getElementById('home-step4');
+        if(step4) step4.style.display='block';
+        // 確保 chat history 顯示
+        var hist = document.getElementById('home-chat-history');
+        if(hist) hist.style.display='flex';
+      }
 
       // loading
       var loadDiv = document.createElement('div');
       loadDiv.style.cssText = 'color:rgba(255,255,255,.4);font-size:12px;font-style:italic;padding:.4rem .5rem';
       loadDiv.textContent = '思考中...';
       loadDiv.id = 'home-loading';
-      var hist = document.getElementById('home-chat-history');
-      if(hist){ hist.style.display='flex'; hist.appendChild(loadDiv); hist.scrollTop=hist.scrollHeight; }
+      var hist2 = document.getElementById('home-chat-history');
+      if(hist2){ hist2.appendChild(loadDiv); hist2.scrollTop=hist2.scrollHeight; }
 
       try {
-        // 收集結構化問卷答案傳給 Worker
         var surveyData = {
           timing:  getQValue({id:'hq-timing',  multi:false}),
           stage:   getQValue({id:'hq-stage',   multi:false}),
@@ -5438,7 +5615,12 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         };
         var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ mode:'navigate', messages: homeHistory, surveyData: surveyData })
+          body: JSON.stringify({
+            mode:'navigate',
+            messages: homeHistory,
+            surveyData: surveyData,
+            deviceInfo: window._deviceInfo  // 傳入器材知識
+          })
         });
         var data = await resp.json();
         var el = document.getElementById('home-loading'); if(el) el.remove();
@@ -5449,8 +5631,23 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
         var conf = calcConfidence(homeHistory, tools, formParts.length);
         appendHomeAI_withConf(text, tools, conf);
+
+        // 有推薦工具時切到 Step 5
+        if(tools && tools.length > 0) {
+          window._homeStep = 5;
+          [1,2,3,4].forEach(function(i){
+            var el2 = document.getElementById('home-step'+i);
+            if(el2) el2.style.display='none';
+          });
+          var step5 = document.getElementById('home-step5');
+          if(step5) step5.style.display='block';
+          var step5content = document.getElementById('home-step5-content');
+          if(step5content) step5content.appendChild(
+            document.getElementById('home-chat-history').parentNode || document.getElementById('home-chat-history')
+          );
+        }
       } catch(err) {
-        var el2 = document.getElementById('home-loading'); if(el2) el2.remove();
+        var el3 = document.getElementById('home-loading'); if(el3) el3.remove();
         appendHomeAI(err.message ? '⚠️ 連線失敗：'+err.message : '⚠️ 連線失敗', []);
       }
       if(sendBtn) sendBtn.disabled = false;
@@ -5618,6 +5815,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
           body:JSON.stringify({ mode:'fishbone_generate', fbModel:'opus',
+            deviceInfo: window._deviceInfo,  // 傳入器材知識
             messages:[{role:'user', content: finalMsg}]
           })
         }).then(function(r){return r.json();}).then(function(data){
@@ -6489,7 +6687,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.56 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.60 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6622,7 +6820,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.56 · '+window._buildTime);
+  status('v3.60 · '+window._buildTime);
 })();
 
 
