@@ -624,7 +624,7 @@ tr:hover td{background:#F9FAFB}
           <span>✅</span><span id="home-device-badge-text2"></span>
         </div>
         <div id="home-chat-history" style="max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
-        <div style="display:flex;gap:8px;align-items:flex-end">
+        <div id="home-chat-input-wrap" style="display:flex;gap:8px;align-items:flex-end">
           <textarea id="home-chat-input" rows="2"
             placeholder="回答 AI 的問題..."
             onkeydown="homeCapaKeydown(event)"
@@ -5632,19 +5632,14 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         var conf = calcConfidence(homeHistory, tools, formParts.length);
         appendHomeAI_withConf(text, tools, conf);
 
-        // 有推薦工具時切到 Step 5
+        // 有推薦工具時：隱藏輸入框，顯示完成提示
         if(tools && tools.length > 0) {
           window._homeStep = 5;
-          [1,2,3,4].forEach(function(i){
-            var el2 = document.getElementById('home-step'+i);
-            if(el2) el2.style.display='none';
-          });
-          var step5 = document.getElementById('home-step5');
-          if(step5) step5.style.display='block';
-          var step5content = document.getElementById('home-step5-content');
-          if(step5content) step5content.appendChild(
-            document.getElementById('home-chat-history').parentNode || document.getElementById('home-chat-history')
-          );
+          var inputWrap = document.getElementById('home-chat-input-wrap');
+          if(inputWrap) inputWrap.style.display = 'none';
+          // 步驟標題更新
+          var stepLabel = document.querySelector('#home-step4 div:first-child');
+          if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 分析完成，點擊工具開始分析';
         }
       } catch(err) {
         var el3 = document.getElementById('home-loading'); if(el3) el3.remove();
