@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.70 · AI 輔助統計分析平台</title>
+<title>MedQA v3.72 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.70 · ' + ts;
+    if(el) el.textContent = 'v3.72 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.70</span>
+    <span class="tb-status" id="dmaic-save-status">v3.72</span>
   </div>
 </div>
 
@@ -5274,9 +5274,23 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     if(identifyBtn){ identifyBtn.disabled=true; identifyBtn.style.opacity='.6'; }
 
     try {
+      // 中文 → 英文（查 FDA 用）
+      var FDA_KEY = 'feGMbWYwCzBlC7Fmbvx4uSyySdcan5QYVhzgOIz2';
+      var searchName = name;
+      try {
+        var hasChinese = /[\u4e00-\u9fff]/.test(name);
+        if(hasChinese) {
+          var transResp = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-TW&tl=en&dt=t&q='+encodeURIComponent(name));
+          var transData = await transResp.json();
+          var translated = transData[0].map(function(s){return s[0];}).join('');
+          if(translated) searchName = translated;
+          console.log('[FDA] 翻譯:', name, '→', searchName);
+        }
+      } catch(e) { /* 翻譯失敗就用原文 */ }
+
       // 前端查 FDA 510k
-      var fdaUrl = 'https://api.fda.gov/device/510k.json?search=device_name:"'
-        + encodeURIComponent(name) + '"&limit=3&sort=decision_date:desc';
+      var fdaUrl = 'https://api.fda.gov/device/510k.json?api_key='+FDA_KEY+'&search=device_name:"'
+        + encodeURIComponent(searchName) + '"&limit=3&sort=decision_date:desc';
       var fdaData = '';
       try {
         var fdaResp = await fetch(fdaUrl);
@@ -5291,7 +5305,12 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       // 送 Worker identify_device
       var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev', {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ mode:'identify_device', deviceName:name, fdaData:fdaData })
+        body: JSON.stringify({
+          mode:'identify_device',
+          deviceName: name,           // 原始名稱（中文）
+          deviceNameEn: searchName,   // 英文名稱（查 FDA 用）
+          fdaData: fdaData
+        })
       });
       var data = await resp.json();
       if(loading) loading.style.display='none';
@@ -5302,7 +5321,6 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         renderDeviceCard(data.result);
         showStep(2);
       } else {
-        // 顯示內嵌錯誤，不用 alert
         var errDiv = document.getElementById('home-step1-error');
         if(!errDiv){
           errDiv = document.createElement('div');
@@ -5311,7 +5329,9 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           var step1 = document.getElementById('home-step1');
           if(step1) step1.appendChild(errDiv);
         }
-        errDiv.innerHTML = '⚠️ 無法識別此器材，請試試：<br>・使用英文名稱（如 syringe、catheter）<br>・更完整的描述（如 pre-filled saline syringe）';
+        var debugInfo = data._debug ? JSON.stringify(data._debug) : '無';
+        errDiv.innerHTML = '⚠️ 無法識別此器材，請試試英文名稱（如 syringe、catheter）<br>'
+          + '<span style="font-size:10px;color:rgba(255,255,255,.3)">debug: '+debugInfo+'</span>';
       }
     } catch(err) {
       if(loading) loading.style.display='none';
@@ -7068,7 +7088,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.70 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.72 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7201,7 +7221,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.70 · '+window._buildTime);
+  status('v3.72 · '+window._buildTime);
 })();
 
 
