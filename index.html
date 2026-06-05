@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.61 · AI 輔助統計分析平台</title>
+<title>MedQA v3.62 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -279,7 +279,11 @@ tr:hover td{background:#F9FAFB}
 .claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
-/* ════ 魚骨圖因子卡片 ════ */
+/* ════ 手機版：左右分欄改為上下 ════ */
+@media(max-width:640px){
+  #home-split-wrap { flex-direction: column !important; }
+  #home-factor-panel { flex: none !important; width: 100% !important; }
+}
 .fb-cat-section { margin-bottom: 1.1rem; }
 .fb-cat-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -472,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.61 · ' + ts;
+    if(el) el.textContent = 'v3.62 · ' + ts;
   });
 })();
 </script>
@@ -489,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.61</span>
+    <span class="tb-status" id="dmaic-save-status">v3.62</span>
   </div>
 </div>
 
@@ -615,34 +619,55 @@ tr:hover td{background:#F9FAFB}
         </div>
       </div>
 
-      <!-- ══ STEP 4：AI 追問 ══ -->
+      <!-- ══ STEP 4 + 5：AI 追問（左）+ 因子面板（右）══ -->
       <div id="home-step4" style="display:none">
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem" id="home-step4-label">
           步驟 4 / 5 &nbsp;·&nbsp; AI 深入追問
         </div>
         <div id="home-device-badge2" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:11px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
           <span>✅</span><span id="home-device-badge-text2"></span>
         </div>
-        <div id="home-chat-history" style="max-height:380px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
-        <div id="home-chat-input-wrap" style="display:flex;gap:8px;align-items:flex-end">
-          <textarea id="home-chat-input" rows="2"
-            placeholder="回答 AI 的問題..."
-            onkeydown="homeCapaKeydown(event)"
-            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
-            onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
-            onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
-          <button onclick="homeCapaSend()" id="home-send-btn"
-            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
-            送出 →
-          </button>
-        </div>
+
+        <!-- 左右分欄容器 -->
+        <div id="home-split-wrap" style="display:flex;gap:12px;align-items:flex-start">
+
+          <!-- 左側：對話區 60% -->
+          <div style="flex:0 0 60%;min-width:0">
+            <div id="home-chat-history" style="max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.65rem"></div>
+            <div id="home-chat-input-wrap" style="display:flex;gap:8px;align-items:flex-end">
+              <textarea id="home-chat-input" rows="2"
+                placeholder="回答 AI 的問題..."
+                onkeydown="homeCapaKeydown(event)"
+                style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:12px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
+                onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
+                onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
+              <button onclick="homeCapaSend()" id="home-send-btn"
+                style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1rem;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
+                送出
+              </button>
+            </div>
+          </div>
+
+          <!-- 右側：因子面板 40% -->
+          <div id="home-factor-panel" style="flex:0 0 38%;min-width:0;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:.75rem;display:flex;flex-direction:column;min-height:200px">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:.5rem;letter-spacing:.04em">📋 AI 整理的因子</div>
+            <div id="home-factor-panel-content" style="flex:1;font-size:11px;color:rgba(255,255,255,.4);font-style:italic">
+              對話結束後，點「整理因子」按鈕更新
+            </div>
+            <!-- 確認鍵（固定在底部） -->
+            <div id="home-factor-panel-btn" style="margin-top:.75rem;display:none">
+              <button onclick="homeConfirmFactors()"
+                style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(5,150,105,.3)">
+                ✅ 確認，進入魚骨圖
+              </button>
+            </div>
+          </div>
+
+        </div><!-- end split -->
       </div>
 
-      <!-- ══ STEP 5：推薦工具 ══ -->
+      <!-- ══ STEP 5（備用，不再使用）══ -->
       <div id="home-step5" style="display:none">
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
-          步驟 5 / 5 &nbsp;·&nbsp; 分析完成，選擇工具
-        </div>
         <div id="home-step5-content"></div>
       </div>
 
@@ -5361,30 +5386,61 @@ window.homeResumeChat = function() {
   if(chatInput) chatInput.focus();
 };
 
-// 確認完整，整理因子
+// 確認完整，整理因子到右側面板
 window.homeProceedFactors = function() {
   var confirmAsk = document.getElementById('home-factor-confirm-ask');
   if(confirmAsk) confirmAsk.remove();
-  var stepLabel = document.querySelector('#home-step4 div:first-child');
-  if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 整理分析因子';
   homeSummarizeFactors(window._pendingTools || []);
 };
 
+// 渲染右側因子面板
+function renderFactorPanel(result) {
+  var panel = document.getElementById('home-factor-panel-content');
+  if(!panel) return;
+
+  var CAT_NAMES = {man:'👤 人員', machine:'⚙️ 機器', material:'🧪 材料',
+                   method:'📋 方法', measure:'📐 量測', env:'🌿 環境'};
+  var CAT_COLORS = {man:'#60A5FA', machine:'#22D3EE', material:'#34D399',
+                    method:'#FBBF24', measure:'#A78BFA', env:'#F472B6'};
+  var RISK_DOT = {high:'🔴', medium:'🟡', low:'🟢'};
+
+  var html = '';
+  if(result.summary){
+    html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:.6rem;line-height:1.5;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:.5rem">'+result.summary+'</div>';
+  }
+
+  Object.keys(CAT_NAMES).forEach(function(cat){
+    var factors = result[cat];
+    if(!factors || factors.length === 0) return;
+    html += '<div style="margin-bottom:.5rem">';
+    html += '<div style="font-size:10px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.25rem">'+CAT_NAMES[cat]+'</div>';
+    factors.forEach(function(f, idx){
+      html += '<div style="display:flex;align-items:center;gap:4px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
+      html += '<span style="font-size:9px;flex-shrink:0">'+RISK_DOT[f.risk||'medium']+'</span>';
+      html += '<span style="flex:1;font-size:11px;color:#fff">'+f.name+'</span>';
+      html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:12px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1">×</button>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<div style="margin-top:.5rem;font-size:10px;color:rgba(255,255,255,.3)">× 可刪除不合理的因子</div>';
+  panel.innerHTML = html;
+
+  // 顯示確認按鈕
+  var btn = document.getElementById('home-factor-panel-btn');
+  if(btn) btn.style.display = 'block';
+}
+
 window.homeSummarizeFactors = async function(tools) {
   window._pendingTools = tools || [];
-  var hist = document.getElementById('home-chat-history');
-  if(!hist) return;
+  var panel = document.getElementById('home-factor-panel-content');
+  if(!panel) return;
 
-  // 顯示整理中提示
-  var loadDiv = document.createElement('div');
-  loadDiv.id = 'home-factor-loading';
-  loadDiv.style.cssText = 'background:rgba(126,200,227,.1);border:1px solid rgba(126,200,227,.3);border-radius:10px;padding:.75rem 1rem;font-size:12px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px;margin-top:.5rem';
-  loadDiv.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#7EC8E3;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在根據對話整理可能的根本原因因子，請稍候...';
-  hist.appendChild(loadDiv);
-  hist.scrollTop = hist.scrollHeight;
+  // 顯示整理中
+  panel.innerHTML = '<div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);font-size:11px"><span style="display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#7EC8E3;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 整理中...</div>';
 
   try {
-    // 組合訊息
     var userAnswers = (window._homeHistory||[])
       .filter(function(m){return m.role==='user';})
       .map(function(m){return m.content.replace(/\n【快速問卷】.*/,'').trim();})
@@ -5406,10 +5462,10 @@ window.homeSummarizeFactors = async function(tools) {
     });
 
     var msg = '【問卷資料】\n'+surveyLines.join('\n')+'\n\n'
-      + '問題主題：'+(document.getElementById('hq-problem')||{}).value+'\n'
+      + '問題主題：'+((document.getElementById('hq-problem')||{}).value||'')+'\n'
       + '對話摘要：'+userAnswers+'\n'
       + 'AI分析：'+aiLast.slice(0,300)+'\n\n'
-      + '請根據以上資訊整理魚骨圖 6M 因子清單，每個因子標注依據。';
+      + '請整理魚骨圖 6M 因子清單，每個因子標注依據。';
 
     var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -5420,125 +5476,18 @@ window.homeSummarizeFactors = async function(tools) {
       })
     });
     var data = await resp.json();
-    var loading = document.getElementById('home-factor-loading');
-    if(loading) loading.remove();
 
     if(data.result) {
       window._confirmedFactors = data.result;
-      renderFactorConfirmUI(data.result);
+      renderFactorPanel(data.result);
     } else {
-      // 失敗就直接顯示工具按鈕
-      var errDiv = document.createElement('div');
-      errDiv.style.cssText = 'font-size:12px;color:rgba(255,255,255,.6);padding:.4rem';
-      errDiv.textContent = '⚠️ 因子整理失敗，請直接點選工具進行分析';
-      hist.appendChild(errDiv);
+      panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5">⚠️ 整理失敗，請手動確認</div>';
     }
   } catch(e) {
-    var loading2 = document.getElementById('home-factor-loading');
-    if(loading2) loading2.remove();
+    panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5">⚠️ 連線失敗</div>';
   }
 };
 
-function renderFactorConfirmUI(result) {
-  var hist = document.getElementById('home-chat-history');
-  if(!hist) return;
-
-  var CAT_NAMES = {man:'人員 Man', machine:'機器 Machine', material:'材料 Material',
-                   method:'方法 Method', measure:'量測 Measurement', env:'環境 Environment'};
-  var CAT_COLORS = {man:'#3B82F6', machine:'#0891B2', material:'#059669',
-                    method:'#D97706', measure:'#7C3AED', env:'#BE185D'};
-  var RISK_LABEL = {high:'🔴 高', medium:'🟡 中', low:'🟢 低'};
-
-  var wrap = document.createElement('div');
-  wrap.style.cssText = 'background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;padding:1rem;margin-top:.5rem';
-
-  // 標題
-  var title = document.createElement('div');
-  title.style.cssText = 'font-size:13px;font-weight:700;color:#fff;margin-bottom:.4rem';
-  title.textContent = '📋 AI 整理的可能根本原因因子';
-  wrap.appendChild(title);
-
-  if(result.summary) {
-    var summary = document.createElement('div');
-    summary.style.cssText = 'font-size:11px;color:rgba(255,255,255,.55);margin-bottom:.85rem;line-height:1.5';
-    summary.textContent = result.summary;
-    wrap.appendChild(summary);
-  }
-
-  var hint = document.createElement('div');
-  hint.style.cssText = 'font-size:11px;color:rgba(255,255,255,.4);margin-bottom:.75rem';
-  hint.textContent = '請確認以下因子是否合適，可刪除不相關的項目，確認後產生魚骨圖。';
-  wrap.appendChild(hint);
-
-  // 6M 因子列表
-  var factorWrap = document.createElement('div');
-  factorWrap.style.cssText = 'display:flex;flex-direction:column;gap:.6rem';
-  factorWrap.id = 'home-factor-list';
-
-  Object.keys(CAT_NAMES).forEach(function(cat) {
-    var factors = result[cat];
-    if(!factors || factors.length === 0) return;
-
-    var catDiv = document.createElement('div');
-    catDiv.setAttribute('data-cat', cat);
-    catDiv.style.cssText = 'background:rgba(255,255,255,.05);border-radius:8px;padding:.6rem .85rem';
-
-    var catTitle = document.createElement('div');
-    catTitle.style.cssText = 'font-size:11px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.4rem';
-    catTitle.textContent = CAT_NAMES[cat];
-    catDiv.appendChild(catTitle);
-
-    factors.forEach(function(f, idx) {
-      var fDiv = document.createElement('div');
-      fDiv.setAttribute('data-idx', idx);
-      fDiv.style.cssText = 'display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)';
-
-      var riskColor = f.risk==='high'?'#FCA5A5':f.risk==='medium'?'#FDE68A':'#86EFAC';
-      fDiv.innerHTML =
-        '<span style="font-size:10px;color:'+riskColor+'">'+RISK_LABEL[f.risk]+'</span>'+
-        '<span style="flex:1;font-size:12px;color:#fff">'+f.name+'</span>'+
-        '<span style="font-size:10px;color:rgba(255,255,255,.3);font-style:italic;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+f.basis+'">'+f.basis+'</span>'+
-        '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" style="background:rgba(239,68,68,.2);border:none;color:#FCA5A5;border-radius:4px;padding:1px 6px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0">✕</button>';
-      catDiv.appendChild(fDiv);
-    });
-
-    factorWrap.appendChild(catDiv);
-  });
-
-  wrap.appendChild(factorWrap);
-
-  // 確認按鈕
-  var btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:8px;margin-top:.85rem;flex-wrap:wrap';
-
-  var confirmBtn = document.createElement('button');
-  confirmBtn.style.cssText = 'background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit';
-  confirmBtn.textContent = '✅ 確認因子，產生魚骨圖';
-  confirmBtn.onclick = homeConfirmFactors;
-  btnRow.appendChild(confirmBtn);
-
-  var addBtn = document.createElement('button');
-  addBtn.style.cssText = 'background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit';
-  addBtn.textContent = '+ 手動新增因子';
-  addBtn.onclick = homeAddFactor;
-  btnRow.appendChild(addBtn);
-
-  wrap.appendChild(btnRow);
-  hist.appendChild(wrap);
-  hist.scrollTop = hist.scrollHeight;
-}
-
-// 刪除因子
-window.homeRemoveFactor = function(btn, cat, idx) {
-  if(!window._confirmedFactors || !window._confirmedFactors[cat]) return;
-  window._confirmedFactors[cat].splice(idx, 1);
-  var row = btn.parentNode;
-  row.style.opacity = '0';
-  row.style.transition = 'opacity .2s';
-  setTimeout(function(){ row.remove(); }, 200);
-};
-
-// 手動新增因子
 window.homeAddFactor = function() {
   var name = prompt('輸入新增因子名稱（10字以內）：');
   if(!name || !name.trim()) return;
@@ -5548,10 +5497,7 @@ window.homeAddFactor = function() {
   if(!window._confirmedFactors) window._confirmedFactors = {};
   if(!window._confirmedFactors[catId]) window._confirmedFactors[catId] = [];
   window._confirmedFactors[catId].push({name:name.trim(), risk:'medium', basis:'手動新增'});
-  // 重新渲染
-  var fl = document.getElementById('home-factor-list');
-  if(fl) fl.parentNode.parentNode.removeChild(fl.parentNode); // 移除舊的確認介面
-  renderFactorConfirmUI(window._confirmedFactors);
+  renderFactorPanel(window._confirmedFactors);
 };
 
 // 確認因子 → 帶入魚骨圖
@@ -6952,7 +6898,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.61 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.62 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7085,7 +7031,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.61 · '+window._buildTime);
+  status('v3.62 · '+window._buildTime);
 })();
 
 
