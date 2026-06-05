@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.68 · AI 輔助統計分析平台</title>
+<title>MedQA v3.69 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.68 · ' + ts;
+    if(el) el.textContent = 'v3.69 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.68</span>
+    <span class="tb-status" id="dmaic-save-status">v3.69</span>
   </div>
 </div>
 
@@ -1071,18 +1071,6 @@ tr:hover td{background:#F9FAFB}
 
   <!-- AI 帶入提示：固定容器，不受 DMAIC card 影響 -->
   <div id="fb-hint-wrap"></div>
-
-  <!-- FDA MAUDE 查詢區 -->
-  <div id="fb-fda-wrap" style="margin-bottom:.75rem">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <span style="font-size:12px;color:#6B7280">🔍 FDA 客訴資料庫（MAUDE）：</span>
-      <input type="text" id="fb-fda-keyword" placeholder="英文關鍵字，例：biopsy needle、catheter coating" 
-        style="flex:1;min-width:200px;border:1.5px solid #C7D9F5;border-radius:7px;padding:5px 10px;font-size:12px;font-family:inherit;outline:none"
-        onfocus="this.style.borderColor='#3B7DD8'" onblur="this.style.borderColor='#C7D9F5'">
-      <button onclick="fbSearchFDA()" style="background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">查詢</button>
-    </div>
-    <div id="fb-fda-result" style="margin-top:.5rem"></div>
-  </div>
 
 <div id="fb-out" style="display:none">
     <div class="card">
@@ -5568,11 +5556,23 @@ window.homeConfirmFactors = async function() {
       window._verificationPlan = data.result;
       renderVerificationPlan(data.result, factors);
     } else {
-      // 失敗就直接跳魚骨圖
-      proceedToFishbone(factors);
+      // 顯示錯誤原因
+      if(panel) panel.innerHTML =
+        '<div style="font-size:11px;color:#FCA5A5;margin-bottom:.5rem">⚠️ 驗證計畫生成失敗：'+(data.error||'Worker 尚未更新，請重新部署 worker.js')+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.4)">可直接進入魚骨圖</div>';
+      if(btn){
+        btn.style.display='block';
+        var b=btn.querySelector('button');
+        if(b){ b.textContent='🐟 直接進入魚骨圖'; b.onclick=function(){proceedToFishbone(factors);}; }
+      }
     }
   } catch(e) {
-    proceedToFishbone(factors);
+    if(panel) panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5">⚠️ 連線失敗：'+e.message+'</div>';
+    if(btn){
+      btn.style.display='block';
+      var b2=btn.querySelector('button');
+      if(b2){ b2.textContent='🐟 直接進入魚骨圖'; b2.onclick=function(){proceedToFishbone(factors);}; }
+    }
   }
 };
 
@@ -7059,7 +7059,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.68 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.69 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7192,7 +7192,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.68 · '+window._buildTime);
+  status('v3.69 · '+window._buildTime);
 })();
 
 
