@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.66 · AI 輔助統計分析平台</title>
+<title>MedQA v3.67 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.66 · ' + ts;
+    if(el) el.textContent = 'v3.67 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.66</span>
+    <span class="tb-status" id="dmaic-save-status">v3.67</span>
   </div>
 </div>
 
@@ -2366,7 +2366,7 @@ function fishboneDraw(){
     var factors = window._fbData && window._fbData[cid];
     if(!factors||!factors.length) return;
     factors.forEach(function(f){
-      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', risk:f.risk||'medium'});
+      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', catId:cid, risk:f.risk||'medium', tool:f.tool||''});
     });
   });
   window._fbCauses = fbCauses;
@@ -5407,6 +5407,15 @@ function renderFactorPanel(result) {
   var CAT_COLORS = {man:'#60A5FA', machine:'#22D3EE', material:'#34D399',
                     method:'#FBBF24', measure:'#A78BFA', env:'#F472B6'};
   var RISK_DOT = {high:'🔴', medium:'🟡', low:'🟢'};
+  var TOOL_BADGE = {
+    doe:        {label:'DOE',      bg:'#FEF3C7',color:'#92400E'},
+    pb:         {label:'PB篩選',   bg:'#DBEAFE',color:'#1E40AF'},
+    taguchi:    {label:'田口',     bg:'#EDE9FE',color:'#5B21B6'},
+    spc:        {label:'SPC',      bg:'#DCFCE7',color:'#166534'},
+    msa:        {label:'MSA',      bg:'#F3E8FF',color:'#6B21A8'},
+    hypothesis: {label:'假設檢定', bg:'#FEE2E2',color:'#991B1B'},
+    none:       {label:'ISO管控',  bg:'#F3F4F6',color:'#6B7280'}
+  };
 
   var html = '';
   if(result.summary){
@@ -5417,25 +5426,25 @@ function renderFactorPanel(result) {
     var factors = result[cat];
     if(!factors || factors.length === 0) return;
     html += '<div style="margin-bottom:.5rem">';
-    html += '<div style="font-size:10px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.25rem">'+CAT_NAMES[cat]+'</div>';
+    html += '<div style="font-size:10px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.3rem">'+CAT_NAMES[cat]+'</div>';
     factors.forEach(function(f, idx){
-      html += '<div style="display:flex;align-items:center;gap:4px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
+      var tb = TOOL_BADGE[f.tool||'none'] || TOOL_BADGE.none;
+      html += '<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
       html += '<span style="font-size:9px;flex-shrink:0">'+RISK_DOT[f.risk||'medium']+'</span>';
       html += '<span style="flex:1;font-size:11px;color:#fff">'+f.name+'</span>';
+      html += '<span style="background:'+tb.bg+';color:'+tb.color+';font-size:9px;padding:1px 4px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-right:2px" title="'+(f.tool_reason||'')+'">'+tb.label+'</span>';
       html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:12px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1">×</button>';
       html += '</div>';
     });
     html += '</div>';
   });
 
-  html += '<div style="margin-top:.5rem;font-size:10px;color:rgba(255,255,255,.3);line-height:1.5">× 刪除不合理因子<br>💬 可繼續左側對話補充</div>';
+  html += '<div style="margin-top:.5rem;font-size:10px;color:rgba(255,255,255,.3);line-height:1.5">× 刪除 ｜ 標籤=建議工具（hover看原因）<br>💬 可繼續左側對話補充</div>';
   panel.innerHTML = html;
 
-  // 更新步驟標題
   var stepLabel = document.getElementById('home-step4-label');
   if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 確認因子後進入魚骨圖';
 
-  // 顯示確認按鈕
   var btn = document.getElementById('home-factor-panel-btn');
   if(btn) btn.style.display = 'block';
 }
@@ -6474,31 +6483,39 @@ window.fbToDOE = window.fbToExperiment;
 window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   if(!fbCauses || fbCauses.length === 0 || !selectorDiv) return;
 
-  // 6M 類別 → 工具對應
-  var CAT_TO_TOOL = {
-    '材料': { tool:'doe',  label:'🧪 DOE / PB 實驗優化', color:'#D97706', desc:'材料規格、製程參數 → 帶入實驗因子欄' },
-    '方法': { tool:'msa',  label:'📐 MSA 量測驗證',      color:'#7C3AED', desc:'操作方法一致性 → 帶入量測項目' },
-    '機器': { tool:'doe',  label:'🧪 田口/DOE 穩健設計', color:'#0891B2', desc:'機器參數雜訊因子 → 帶入實驗因子欄' },
-    '量測': { tool:'msa',  label:'📐 MSA 量測驗證',      color:'#7C3AED', desc:'量具可靠性 → 帶入量測項目' },
-    '人員': { tool:'spc',  label:'📈 SPC 製程管控',       color:'#1A9CB0', desc:'操作穩定性監控 → 帶入量測項目名稱' },
-    '環境': { tool:'iso',  label:'🏭 ISO 環境管控',       color:'#6B7280', desc:'依 ISO 13485/14644 規範監控，超標啟動 CAPA' },
+  // 工具資訊
+  var TOOL_INFO = {
+    doe:        { label:'🧪 DOE / PB 實驗優化',  color:'#D97706', desc:'可調變參數 → 帶入實驗因子欄',        tool:'doe' },
+    pb:         { label:'🔎 PB 因子篩選',         color:'#2563EB', desc:'因子多先篩選 → 帶入 PB 實驗',       tool:'pb'  },
+    taguchi:    { label:'📐 田口 穩健設計',        color:'#7C3AED', desc:'雜訊因子 → 帶入田口實驗',            tool:'doe' },
+    spc:        { label:'📈 SPC 製程管控',         color:'#1A9CB0', desc:'被動監控趨勢 → 帶入量測項目',       tool:'spc' },
+    msa:        { label:'📏 MSA 量測驗證',         color:'#9333EA', desc:'量測/操作一致性 → 帶入量測項目',    tool:'msa' },
+    hypothesis: { label:'🔬 假設檢定',             color:'#DC2626', desc:'批次/群組比較 → 帶入數據',          tool:'hypothesis' },
+    none:       { label:'🏭 ISO 環境管控',         color:'#6B7280', desc:'受 ISO 規範管控，不帶入統計工具',   tool:'iso' }
   };
 
-  // 依類別分組
-  var groups = {};
+  // 依 tool 欄位分組（優先用因子的 tool，沒有才用 6M 預設）
+  var CAT_DEFAULT = {man:'spc', machine:'spc', material:'doe', method:'msa', measure:'msa', env:'none'};
+  var CAT_NAMES = {man:'人員', machine:'機器', material:'材料', method:'方法', measure:'量測', env:'環境'};
+
+  var toolGroups = {};
   fbCauses.forEach(function(f) {
-    var cat = f.cat || '方法';
-    if(!groups[cat]) groups[cat] = [];
-    groups[cat].push(f);
+    var t = f.tool || CAT_DEFAULT[f.catId||''] || 'doe';
+    if(!toolGroups[t]) toolGroups[t] = [];
+    toolGroups[t].push(f);
   });
 
   var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
-  html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:1rem">🔀 魚骨圖因子自動分類 → 帶入對應工具</div>';
+  html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.5rem">🔀 因子分類 → 帶入對應工具</div>';
+  html += '<div style="font-size:11px;color:#6B7280;margin-bottom:1rem">每個因子依 AI 判斷的建議工具分組，可點按鈕帶入</div>';
 
-  Object.keys(groups).forEach(function(cat) {
-    var factors = groups[cat];
-    var info = CAT_TO_TOOL[cat] || { tool:'doe', label:'🧪 實驗分析', color:'#6B7280', desc:'' };
-    var isISO = info.tool === 'iso';
+  // 按工具重要性排序顯示
+  var toolOrder = ['doe','pb','taguchi','spc','msa','hypothesis','none'];
+  toolOrder.forEach(function(toolKey) {
+    var factors = toolGroups[toolKey];
+    if(!factors || factors.length === 0) return;
+    var info = TOOL_INFO[toolKey];
+    var isISO = toolKey === 'none';
 
     html += '<div style="border:1.5px solid '+info.color+'33;border-radius:10px;padding:.75rem 1rem;margin-bottom:.75rem;background:#fff">';
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:6px">';
@@ -6506,22 +6523,23 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
     html += '<span style="font-weight:700;color:'+info.color+';font-size:13px">'+info.label+'</span>';
     html += '<span style="font-size:11px;color:#6B7280;margin-left:8px">'+info.desc+'</span>';
     html += '</div>';
-    if(!isISO) {
-      html += '<button onclick="fbGoTool(\''+cat+'\')" style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入'+info.label.replace(/[🧪📐📈🏭]/g,'').trim()+'</button>';
+    if(!isISO){
+      html += '<button onclick="fbGoToolByList('+JSON.stringify(factors.map(function(f){return f.name;}))+',\''+info.tool+'\')" ';
+      html += 'style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入</button>';
     }
     html += '</div>';
 
     // 因子列表
-    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
-    factors.forEach(function(f) {
+    html += '<div style="display:flex;flex-wrap:wrap;gap:.4rem">';
+    factors.forEach(function(f){
       var isHigh = f.risk === 'high';
       var clr = isHigh ? '#DC2626' : f.risk === 'medium' ? '#92400E' : '#374151';
       var bg  = isHigh ? '#FEF2F2' : '#F9FAFB';
-      html += '<span style="background:'+bg+';border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;font-size:12px;color:'+clr+';font-weight:'+(isHigh?'700':'400')+'">'+f.name+'</span>';
+      html += '<span style="background:'+bg+';border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;font-size:12px;color:'+clr+';font-weight:'+(isHigh?'700':'400')+'" title="6M: '+(CAT_NAMES[f.catId||'']||f.cat||'')+'">'+f.name+'</span>';
     });
     html += '</div>';
 
-    if(isISO) {
+    if(isISO){
       html += '<div style="margin-top:.5rem;font-size:11px;color:#6B7280;background:#F3F4F6;border-radius:5px;padding:6px 10px">⚠️ 環境因子受 ISO 13485 / ISO 14644 規範管控，不建議直接帶入統計工具。若超出規格，應啟動 CAPA 流程。</div>';
     }
     html += '</div>';
@@ -6532,7 +6550,42 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   selectorDiv.style.display = 'block';
 };
 
-// 依類別跳轉並帶入因子到對應工具
+// 依工具帶入因子列表（新版）
+window.fbGoToolByList = function(names, toolId) {
+  if(!names || names.length === 0) return;
+  var targetTool = toolId === 'taguchi' ? 'doe' : toolId;
+  goTool(targetTool);
+  setTimeout(function(){
+    var msg = document.createElement('div');
+    msg.className = 'fb-import-msg';
+    msg.style.cssText = 'background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:.75rem 1rem;margin-bottom:.75rem;font-size:13px;color:#166534';
+    if(targetTool === 'doe'){
+      var nfEl = document.getElementById('doe-nf');
+      if(nfEl){ nfEl.value = Math.min(names.length,4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
+      setTimeout(function(){ names.forEach(function(n,i){ var el=document.getElementById('doe-f'+(i+1)); if(el) el.value=n; }); if(typeof doeGenMatrix==='function') doeGenMatrix(); },350);
+      msg.innerHTML = '✅ 已帶入 <strong>'+names.length+'</strong> 個因子到 DOE：'+names.join('、');
+      var c=document.querySelector('#page-doe .card'); if(c){var e=c.querySelector('.fb-import-msg');if(e)e.remove();c.insertBefore(msg,c.firstChild);}
+    } else if(targetTool === 'pb'){
+      var nf2 = document.getElementById('pb-nf');
+      if(nf2){ nf2.value=Math.min(Math.max(names.length,5),11); if(typeof pbPageUpdateFactors==='function') pbPageUpdateFactors(); }
+      setTimeout(function(){ names.forEach(function(n,i){ var el=document.getElementById('pbp-f'+(i+1)); if(el) el.value=n; }); },300);
+      msg.innerHTML = '✅ 已帶入 <strong>'+names.length+'</strong> 個因子到 PB：'+names.join('、');
+      var c2=document.querySelector('#page-pb .card'); if(c2){var e2=c2.querySelector('.fb-import-msg');if(e2)e2.remove();c2.insertBefore(msg,c2.firstChild);}
+    } else if(targetTool === 'spc'){
+      var sEl=document.getElementById('spc-char')||document.getElementById('spc-name'); if(sEl) sEl.value=names[0]||'';
+      msg.innerHTML = '✅ 帶入 SPC 監控：'+names.join('、');
+      var c3=document.querySelector('#page-spc .card'); if(c3){var e3=c3.querySelector('.fb-import-msg');if(e3)e3.remove();c3.insertBefore(msg,c3.firstChild);}
+    } else if(targetTool === 'msa'){
+      var mEl=document.getElementById('grr-part-name')||document.getElementById('grr-char'); if(mEl) mEl.value=names[0]||'';
+      msg.innerHTML = '✅ 帶入 MSA 量測項目：'+names.join('、');
+      var c4=document.querySelector('#page-msa .card'); if(c4){var e4=c4.querySelector('.fb-import-msg');if(e4)e4.remove();c4.insertBefore(msg,c4.firstChild);}
+    } else if(targetTool === 'hypothesis'){
+      msg.innerHTML = '✅ 進入假設檢定，請輸入數據：'+names.join('、');
+      var c5=document.querySelector('#page-hypothesis .card'); if(c5){var e5=c5.querySelector('.fb-import-msg');if(e5)e5.remove();c5.insertBefore(msg,c5.firstChild);}
+    }
+  }, 400);
+};
+
 window.fbGoTool = function(cat) {
   var CAT_TO_TOOL = {
     '材料': 'doe', '方法': 'msa', '機器': 'doe', '量測': 'msa', '人員': 'spc',
@@ -6893,7 +6946,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.66 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.67 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7026,7 +7079,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.66 · '+window._buildTime);
+  status('v3.67 · '+window._buildTime);
 })();
 
 
