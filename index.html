@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.60 · AI 輔助統計分析平台</title>
+<title>MedQA v3.61 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -472,7 +472,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.60 · ' + ts;
+    if(el) el.textContent = 'v3.61 · ' + ts;
   });
 })();
 </script>
@@ -489,7 +489,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.60</span>
+    <span class="tb-status" id="dmaic-save-status">v3.61</span>
   </div>
 </div>
 
@@ -5345,6 +5345,213 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 })();
 
 // ════════════════════════════════════════════════════════
+// Step 5：因子整理 + 使用者確認
+// ════════════════════════════════════════════════════════
+window._confirmedFactors = null;
+window._pendingTools = [];
+
+window.homeSummarizeFactors = async function(tools) {
+  window._pendingTools = tools || [];
+  var hist = document.getElementById('home-chat-history');
+  if(!hist) return;
+
+  // 顯示整理中提示
+  var loadDiv = document.createElement('div');
+  loadDiv.id = 'home-factor-loading';
+  loadDiv.style.cssText = 'background:rgba(126,200,227,.1);border:1px solid rgba(126,200,227,.3);border-radius:10px;padding:.75rem 1rem;font-size:12px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:8px;margin-top:.5rem';
+  loadDiv.innerHTML = '<span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#7EC8E3;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在根據對話整理可能的根本原因因子，請稍候...';
+  hist.appendChild(loadDiv);
+  hist.scrollTop = hist.scrollHeight;
+
+  try {
+    // 組合訊息
+    var userAnswers = (window._homeHistory||[])
+      .filter(function(m){return m.role==='user';})
+      .map(function(m){return m.content.replace(/\n【快速問卷】.*/,'').trim();})
+      .join('；');
+    var aiLast = '';
+    var h = window._homeHistory||[];
+    for(var i=h.length-1;i>=0;i--){ if(h[i].role==='assistant'){aiLast=h[i].content;break;} }
+
+    var surveyLines = [];
+    [{id:'hq-timing',label:'出現時機'},{id:'hq-stage',label:'發現階段'},
+     {id:'hq-pattern',label:'發生規律'},{id:'hq-data',label:'量化數據'},
+     {id:'hq-change',label:'近期變更',multi:true}].forEach(function(q){
+      var el=document.getElementById(q.id);
+      if(el&&el.value) surveyLines.push(q.label+'：'+el.value);
+      else if(q.multi){
+        var checks=document.querySelectorAll('input[name="'+q.id+'_cb"]:checked');
+        if(checks.length) surveyLines.push(q.label+'：'+Array.from(checks).map(function(c){return c.value;}).join('、'));
+      }
+    });
+
+    var msg = '【問卷資料】\n'+surveyLines.join('\n')+'\n\n'
+      + '問題主題：'+(document.getElementById('hq-problem')||{}).value+'\n'
+      + '對話摘要：'+userAnswers+'\n'
+      + 'AI分析：'+aiLast.slice(0,300)+'\n\n'
+      + '請根據以上資訊整理魚骨圖 6M 因子清單，每個因子標注依據。';
+
+    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode:'summarize_factors',
+        deviceInfo: window._deviceInfo,
+        messages:[{role:'user', content:msg}]
+      })
+    });
+    var data = await resp.json();
+    var loading = document.getElementById('home-factor-loading');
+    if(loading) loading.remove();
+
+    if(data.result) {
+      window._confirmedFactors = data.result;
+      renderFactorConfirmUI(data.result);
+    } else {
+      // 失敗就直接顯示工具按鈕
+      var errDiv = document.createElement('div');
+      errDiv.style.cssText = 'font-size:12px;color:rgba(255,255,255,.6);padding:.4rem';
+      errDiv.textContent = '⚠️ 因子整理失敗，請直接點選工具進行分析';
+      hist.appendChild(errDiv);
+    }
+  } catch(e) {
+    var loading2 = document.getElementById('home-factor-loading');
+    if(loading2) loading2.remove();
+  }
+};
+
+function renderFactorConfirmUI(result) {
+  var hist = document.getElementById('home-chat-history');
+  if(!hist) return;
+
+  var CAT_NAMES = {man:'人員 Man', machine:'機器 Machine', material:'材料 Material',
+                   method:'方法 Method', measure:'量測 Measurement', env:'環境 Environment'};
+  var CAT_COLORS = {man:'#3B82F6', machine:'#0891B2', material:'#059669',
+                    method:'#D97706', measure:'#7C3AED', env:'#BE185D'};
+  var RISK_LABEL = {high:'🔴 高', medium:'🟡 中', low:'🟢 低'};
+
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);border-radius:12px;padding:1rem;margin-top:.5rem';
+
+  // 標題
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:13px;font-weight:700;color:#fff;margin-bottom:.4rem';
+  title.textContent = '📋 AI 整理的可能根本原因因子';
+  wrap.appendChild(title);
+
+  if(result.summary) {
+    var summary = document.createElement('div');
+    summary.style.cssText = 'font-size:11px;color:rgba(255,255,255,.55);margin-bottom:.85rem;line-height:1.5';
+    summary.textContent = result.summary;
+    wrap.appendChild(summary);
+  }
+
+  var hint = document.createElement('div');
+  hint.style.cssText = 'font-size:11px;color:rgba(255,255,255,.4);margin-bottom:.75rem';
+  hint.textContent = '請確認以下因子是否合適，可刪除不相關的項目，確認後產生魚骨圖。';
+  wrap.appendChild(hint);
+
+  // 6M 因子列表
+  var factorWrap = document.createElement('div');
+  factorWrap.style.cssText = 'display:flex;flex-direction:column;gap:.6rem';
+  factorWrap.id = 'home-factor-list';
+
+  Object.keys(CAT_NAMES).forEach(function(cat) {
+    var factors = result[cat];
+    if(!factors || factors.length === 0) return;
+
+    var catDiv = document.createElement('div');
+    catDiv.setAttribute('data-cat', cat);
+    catDiv.style.cssText = 'background:rgba(255,255,255,.05);border-radius:8px;padding:.6rem .85rem';
+
+    var catTitle = document.createElement('div');
+    catTitle.style.cssText = 'font-size:11px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.4rem';
+    catTitle.textContent = CAT_NAMES[cat];
+    catDiv.appendChild(catTitle);
+
+    factors.forEach(function(f, idx) {
+      var fDiv = document.createElement('div');
+      fDiv.setAttribute('data-idx', idx);
+      fDiv.style.cssText = 'display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.05)';
+
+      var riskColor = f.risk==='high'?'#FCA5A5':f.risk==='medium'?'#FDE68A':'#86EFAC';
+      fDiv.innerHTML =
+        '<span style="font-size:10px;color:'+riskColor+'">'+RISK_LABEL[f.risk]+'</span>'+
+        '<span style="flex:1;font-size:12px;color:#fff">'+f.name+'</span>'+
+        '<span style="font-size:10px;color:rgba(255,255,255,.3);font-style:italic;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+f.basis+'">'+f.basis+'</span>'+
+        '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" style="background:rgba(239,68,68,.2);border:none;color:#FCA5A5;border-radius:4px;padding:1px 6px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0">✕</button>';
+      catDiv.appendChild(fDiv);
+    });
+
+    factorWrap.appendChild(catDiv);
+  });
+
+  wrap.appendChild(factorWrap);
+
+  // 確認按鈕
+  var btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;margin-top:.85rem;flex-wrap:wrap';
+
+  var confirmBtn = document.createElement('button');
+  confirmBtn.style.cssText = 'background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit';
+  confirmBtn.textContent = '✅ 確認因子，產生魚骨圖';
+  confirmBtn.onclick = homeConfirmFactors;
+  btnRow.appendChild(confirmBtn);
+
+  var addBtn = document.createElement('button');
+  addBtn.style.cssText = 'background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit';
+  addBtn.textContent = '+ 手動新增因子';
+  addBtn.onclick = homeAddFactor;
+  btnRow.appendChild(addBtn);
+
+  wrap.appendChild(btnRow);
+  hist.appendChild(wrap);
+  hist.scrollTop = hist.scrollHeight;
+}
+
+// 刪除因子
+window.homeRemoveFactor = function(btn, cat, idx) {
+  if(!window._confirmedFactors || !window._confirmedFactors[cat]) return;
+  window._confirmedFactors[cat].splice(idx, 1);
+  var row = btn.parentNode;
+  row.style.opacity = '0';
+  row.style.transition = 'opacity .2s';
+  setTimeout(function(){ row.remove(); }, 200);
+};
+
+// 手動新增因子
+window.homeAddFactor = function() {
+  var name = prompt('輸入新增因子名稱（10字以內）：');
+  if(!name || !name.trim()) return;
+  var cat = prompt('屬於哪個類別？\n1=人員 2=機器 3=材料 4=方法 5=量測 6=環境');
+  var catMap = {'1':'man','2':'machine','3':'material','4':'method','5':'measure','6':'env'};
+  var catId = catMap[cat] || 'method';
+  if(!window._confirmedFactors) window._confirmedFactors = {};
+  if(!window._confirmedFactors[catId]) window._confirmedFactors[catId] = [];
+  window._confirmedFactors[catId].push({name:name.trim(), risk:'medium', basis:'手動新增'});
+  // 重新渲染
+  var fl = document.getElementById('home-factor-list');
+  if(fl) fl.parentNode.parentNode.removeChild(fl.parentNode); // 移除舊的確認介面
+  renderFactorConfirmUI(window._confirmedFactors);
+};
+
+// 確認因子 → 帶入魚骨圖
+window.homeConfirmFactors = function() {
+  var factors = window._confirmedFactors;
+  if(!factors) return;
+  // 帶入 _fbData
+  var clean = {};
+  ['man','machine','material','method','measure','env'].forEach(function(cat){
+    clean[cat] = (factors[cat]||[]).map(function(f){
+      return {name:f.name, risk:f.risk||'medium'};
+    });
+  });
+  window._fbData = clean;
+
+  // 跳到魚骨圖
+  homeGoTool('fishbone');
+};
+
+// ════════════════════════════════════════════════════════
 // 主頁嵌入式 CAPA 對話框
 // ════════════════════════════════════════════════════════
 (function(){
@@ -5632,14 +5839,16 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         var conf = calcConfidence(homeHistory, tools, formParts.length);
         appendHomeAI_withConf(text, tools, conf);
 
-        // 有推薦工具時：隱藏輸入框，顯示完成提示
+        // 有推薦工具時：呼叫 summarize_factors 整理因子
         if(tools && tools.length > 0) {
           window._homeStep = 5;
           var inputWrap = document.getElementById('home-chat-input-wrap');
           if(inputWrap) inputWrap.style.display = 'none';
-          // 步驟標題更新
           var stepLabel = document.querySelector('#home-step4 div:first-child');
-          if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 分析完成，點擊工具開始分析';
+          if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 整理分析因子';
+
+          // 呼叫 summarize_factors
+          homeSummarizeFactors(tools);
         }
       } catch(err) {
         var el3 = document.getElementById('home-loading'); if(el3) el3.remove();
@@ -5740,7 +5949,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       if(typeof goTool==='function') goTool('fishbone');
       setTimeout(function(){
 
-        // 1. 魚頭：優先用 hq-problem，其次用第一則用戶輸入
+        // 魚頭
         var problemTitle = '';
         var hqProbEl = document.getElementById('hq-problem');
         if(hqProbEl && hqProbEl.value.trim()) {
@@ -5748,7 +5957,6 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         } else {
           for(var i=0;i<homeHistory.length;i++){
             if(homeHistory[i].role==='user'){
-              // 去除問卷標記
               problemTitle = homeHistory[i].content.replace(/\n【快速問卷】.*/,'').trim();
               break;
             }
@@ -5756,6 +5964,20 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         }
         var fbProbEl = document.getElementById('fb-problem');
         if(fbProbEl && problemTitle) fbProbEl.value = problemTitle;
+
+        var fbHintWrap = document.getElementById('fb-hint-wrap');
+
+        // 若已有確認的因子，直接帶入，不再呼叫 AI
+        if(window._confirmedFactors) {
+          if(typeof fbFillFromAI==='function') fbFillFromAI(window._confirmedFactors);
+          setTimeout(function(){
+            if(typeof fbSyncAndDraw==='function') fbSyncAndDraw();
+          }, 400);
+          if(fbHintWrap){
+            fbHintWrap.innerHTML='<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#166534;margin-bottom:.5rem">✅ 已帶入您確認的因子，魚骨圖已產生！</div>';
+          }
+          return;
+        }
 
         var hint = document.createElement('div');
         hint.className = 'fb-import-hint';
@@ -6695,7 +6917,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.60 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.61 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -6828,7 +7050,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.60 · '+window._buildTime);
+  status('v3.61 · '+window._buildTime);
 })();
 
 
