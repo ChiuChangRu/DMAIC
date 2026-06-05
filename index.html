@@ -5736,7 +5736,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     div.textContent = text;
     hist.appendChild(div);
     hist.scrollTop = hist.scrollHeight;
-    document.getElementById('home-ai-welcome').style.display = 'none';
+    var welcome = document.getElementById('home-ai-welcome');
+    if(welcome) welcome.style.display = 'none';
   }
 
   function homeGoTool(toolId) {
@@ -5851,6 +5852,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
   window.homeCapaReset = function() {
     homeHistory = [];
+    window._deviceInfo = null;
+    window._homeStep = 1;
     var hist = document.getElementById('home-chat-history');
     if(hist){ hist.innerHTML=''; hist.style.display='none'; }
     var welcome = document.getElementById('home-ai-welcome');
@@ -5859,6 +5862,16 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     if(tbWrap) tbWrap.style.display='none';
     var input = document.getElementById('home-problem-input');
     if(input) input.value='';
+    // 回到 Step 1
+    if(typeof showStep==='function') showStep(1);
+    else {
+      [1,2,3,4,5].forEach(function(i){
+        var el=document.getElementById('home-step'+i);
+        if(el) el.style.display=(i===1?'block':'none');
+      });
+    }
+    var deviceInput = document.getElementById('home-device-input');
+    if(deviceInput) deviceInput.value='';
   };
 })();
 // ════════════════════════════════════════════════════════
