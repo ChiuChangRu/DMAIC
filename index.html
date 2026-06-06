@@ -503,7 +503,7 @@ tr:hover td{background:#F9FAFB}
   <span style="color:rgba(255,255,255,.5);white-space:nowrap">📁</span>
   <input type="text" id="case-code" placeholder="案件代碼" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:3px 8px;font-size:12px;font-family:inherit;width:100px">
   <input type="text" id="case-name" placeholder="專案名稱" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:3px 8px;font-size:12px;font-family:inherit;width:150px">
-  <button onclick="caseSave()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">💾 存檔</button>
+  <button onclick="caseSave()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">💾 案件存檔</button>
   <button onclick="caseLoad()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">📂 載入</button>
   <button onclick="caseExport()" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">⬇ JSON</button>
   <label style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">
@@ -518,7 +518,7 @@ tr:hover td{background:#F9FAFB}
     ← 主目錄
   </button>
   <span id="tool-bar-title" style="font-size:13px;color:#7EC8E3;font-weight:500;flex:1"></span>
-  <button onclick="dmaicSaveCurrent()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">💾 儲存</button>
+  <button onclick="dmaicSaveCurrent()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">💾 儲存本頁</button>
   <button onclick="dmaicExportJSON()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">⬇ JSON</button>
   <button onclick="dmaicPrintCurrentTool()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:inherit">🖨 列印</button>
 </div>
@@ -2428,29 +2428,48 @@ function doeUpdateFactors(){
   const names=['溫度','壓力','時間','濃度'];
   const lows=['180','2.0','30','5%'];
   const highs=['220','3.0','60','15%'];
+  // 保留已輸入/帶入的因子（切換設計類型或因子數時不重設名稱、水準、類型）
+  const pN=[],pL=[],pH=[],pT=[];
+  for(let i=0;i<30;i++){
+    const ne=document.getElementById('doe-f'+(i+1)); if(!ne) break;
+    pN[i]=ne.value;
+    const le=document.getElementById('doe-l'+(i+1)); if(le) pL[i]=le.value;
+    const he=document.getElementById('doe-h'+(i+1)); if(he) pH[i]=he.value;
+    const te=document.getElementById('doe-ftype'+(i+1)); if(te) pT[i]=te.value;
+  }
+  const keep=(v,d)=>(v!==undefined&&v!=='')?v:d;
+  const escAttr=(s)=>String(s).replace(/"/g,'&quot;');
   let fw='';
-  for(let i=0;i<nf;i++)fw+=`<div style="border:1px solid #E8EDF5;border-radius:7px;padding:.6rem .75rem;margin-bottom:8px">
+  for(let i=0;i<nf;i++){
+    const vName=escAttr(keep(pN[i], names[i]||'因子'+(i+1)));
+    const vLow =escAttr(keep(pL[i],  lows[i]||'低'));
+    const vHigh=escAttr(keep(pH[i],  highs[i]||'高'));
+    const vType=pT[i]||'cont';
+    fw+=`<div style="border:1px solid #E8EDF5;border-radius:7px;padding:.6rem .75rem;margin-bottom:8px">
       <div class="g2" style="margin-bottom:5px">
         <div class="field"><label>因子 ${i+1} 名稱</label>
-          <input type="text" id="doe-f${i+1}" value="${names[i]||'因子'+(i+1)}">
+          <input type="text" id="doe-f${i+1}" value="${vName}">
         </div>
         <div class="field"><label>因子類型</label>
           <select id="doe-ftype${i+1}" onchange="doeUpdateFactorType(${i+1})">
-            <option value="cont">連續型（數值）</option>
-            <option value="cat">類別型（名稱）</option>
+            <option value="cont"${vType==='cont'?' selected':''}>連續型（數值）</option>
+            <option value="cat"${vType==='cat'?' selected':''}>類別型（名稱）</option>
           </select>
         </div>
       </div>
       <div class="g2">
         <div class="field"><label id="doe-ll${i+1}">低水準 (−1)</label>
-          <input type="text" id="doe-l${i+1}" value="${lows[i]||'低'}" placeholder="數值或類別名稱">
+          <input type="text" id="doe-l${i+1}" value="${vLow}" placeholder="數值或類別名稱">
         </div>
         <div class="field"><label id="doe-hl${i+1}">高水準 (+1)</label>
-          <input type="text" id="doe-h${i+1}" value="${highs[i]||'高'}" placeholder="數值或類別名稱">
+          <input type="text" id="doe-h${i+1}" value="${vHigh}" placeholder="數值或類別名稱">
         </div>
       </div>
     </div>`
+  }
   document.getElementById('doe-factors-wrap').innerHTML=fw;
+  // 還原類別型因子的水準標籤
+  for(let i=0;i<nf;i++){ if((pT[i]||'cont')==='cat' && typeof doeUpdateFactorType==='function') doeUpdateFactorType(i+1); }
   doeGenMatrix();
 }
 function doeGenMatrix(){
@@ -7348,7 +7367,7 @@ document.addEventListener('click', function(e) {
           '<div class="field"><label>分析目的</label><textarea class="record-note" id="'+pid+'-record-purpose" rows="2" placeholder="本次分析要回答的問題"></textarea></div>'+ 
           '<div class="field"><label>判讀 / Note / 後續處置</label><textarea class="record-note" id="'+pid+'-record-note" rows="3" placeholder="記錄異常點、改善措施、CAPA編號"></textarea></div>'+ 
           '<div class="record-actions">'+
-            '<button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存</button>'+
+            '<button class="btn btn-primary" onclick="dmaicSaveCurrent()">💾 儲存本頁</button>'+
             '<button class="btn btn-sec" onclick="dmaicExportJSON()">⬇ 匯出 JSON</button>'+
           '</div>'+
           '<div id="'+pid+'-save-indicator" style="margin-top:6px;font-size:12px;color:#6B7280">尚未儲存</div>'+
@@ -7875,13 +7894,15 @@ window.doeUpdateDesignType = function() {
   var pbWarn = document.getElementById('pb-warning');
   var fracRow = document.getElementById('frac-design-row');
   var fracInfo = document.getElementById('frac-info');
+  var _curNf = parseInt(nfSelect.value)||0;
+  function _keepNf(dflt){ for(var _o=0;_o<nfSelect.options.length;_o++){ if(parseInt(nfSelect.options[_o].value)===_curNf){ nfSelect.value=String(_curNf); return; } } nfSelect.value=dflt; }
 
   if(dtype === 'full') {
     nfSelect.innerHTML =
       '<option value="2">2 個因子（4次實驗）</option>' +
       '<option value="3" selected>3 個因子（8次實驗）</option>' +
       '<option value="4">4 個因子（16次實驗）</option>';
-    nfSelect.value = '3';
+    _keepNf('3');
     if(pbWarn) pbWarn.style.display = 'none';
     if(fracRow) fracRow.style.display = 'none';
     if(fracInfo) fracInfo.style.display = 'none';
@@ -7893,7 +7914,7 @@ window.doeUpdateDesignType = function() {
       '<option value="5">5 個因子</option>' +
       '<option value="6">6 個因子</option>' +
       '<option value="7">7 個因子</option>';
-    nfSelect.value = '4';
+    _keepNf('4');
     if(pbWarn) pbWarn.style.display = 'none';
     if(fracRow) fracRow.style.display = 'block';
     doeUpdateFracOptions();
@@ -7908,7 +7929,7 @@ window.doeUpdateDesignType = function() {
       '<option value="9">9 個因子（PB12，12次）</option>' +
       '<option value="10">10 個因子（PB12，12次）</option>' +
       '<option value="11">11 個因子（PB12，12次）</option>';
-    nfSelect.value = '5';
+    _keepNf('5');
     if(pbWarn) pbWarn.style.display = 'block';
     if(fracRow) fracRow.style.display = 'none';
     if(fracInfo) fracInfo.style.display = 'none';
