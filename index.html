@@ -5588,15 +5588,15 @@ window.homeConfirmFactors = async function() {
     });
     var data = await resp.json();
 
-    if(data.result && data.result.plans) {
+    if(data.result && data.result.plans && data.result.plans.length > 0) {
       window._verificationPlan = data.result;
       renderVerificationPlan(data.result, factors);
     } else {
-      var errMsg = data.error || JSON.stringify(data).slice(0,100);
+      var errMsg = data._debug ? JSON.stringify(data._debug) : (data.error || '回傳空結果');
       if(panel) panel.innerHTML =
-        '<div style="font-size:11px;color:#FCA5A5;margin-bottom:.5rem">⚠️ 驗證計畫生成失敗：'+errMsg+'</div>'+
-        '<div style="font-size:10px;color:rgba(255,255,255,.3)">debug: '+JSON.stringify(data).slice(0,150)+'</div>'+
-        '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:.4rem">可直接進入魚骨圖</div>';
+        '<div style="font-size:11px;color:#FCA5A5;margin-bottom:.5rem">⚠️ 驗證計畫生成失敗</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:.4rem">'+errMsg+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.4)">可直接進入魚骨圖</div>';
       if(btn){
         btn.style.display='block';
         var b=btn.querySelector('button');
