@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.79 · AI 輔助統計分析平台</title>
+<title>MedQA v5.0 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.79 · ' + ts;
+    if(el) el.textContent = 'v5.0 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.79</span>
+    <span class="tb-status" id="dmaic-save-status">v5.0</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -648,6 +648,7 @@ tr:hover td{background:#F9FAFB}
           <div id="home-factor-panel-content" style="font-size:12px;color:rgba(255,255,255,.4);font-style:italic">
             對話結束後自動整理
           </div>
+          <div id="home-iso-panel" style="margin-top:.6rem"></div>
           <div id="home-factor-panel-btn" style="margin-top:.85rem;display:none">
             <button onclick="homeConfirmFactors()"
               style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(5,150,105,.3)">
@@ -5571,6 +5572,7 @@ window.homeConfirmFactors = async function() {
     '<div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.6);font-size:11px;margin-bottom:.5rem">' +
     '<span style="display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#7EC8E3;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>' +
     'AI 正在為每個因子建議驗證計畫...</div>';
+  var _isoBox = document.getElementById('home-iso-panel'); if(_isoBox) _isoBox.innerHTML='';
 
   var stepLabel = document.getElementById('home-step4-label');
   if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 建立驗證計畫';
@@ -5689,6 +5691,140 @@ function renderVerificationPlan(result, factors) {
       btn.onclick = function(){ proceedToFishbone(factors); };
     }
   }
+
+  // v5.0：驗證計畫畫好後，自動做 ISO 對照（找出 ISO 應驗但計畫沒涵蓋的缺口）
+  runIsoCrosscheck(result.plans);
+}
+
+// ════════════════════════════════════════════════════════
+// v5.0 ISO 對照模組
+//   iso_map.json（靜態檔，RA 維護）→ worker iso_crosscheck → 缺口紅旗
+//   設計：模型只能引用 iso_map 內實際存在的標準（不生成假條號）；
+//        項目為「類別」草稿，一律以正本為準、需 RA 核可。
+// ════════════════════════════════════════════════════════
+window._isoMap = null;
+
+async function loadIsoMap(){
+  if(window._isoMap) return window._isoMap;
+  try{
+    var r = await fetch('iso_map.json', {cache:'no-cache'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    window._isoMap = await r.json();
+    return window._isoMap;
+  }catch(e){
+    window._isoMap = {__error: e.message};
+    return window._isoMap;
+  }
+}
+
+// 把 iso_map 攤平成可引用的標準清單（依編號去重）
+function flattenIsoStandards(map){
+  var out = [], seen = {};
+  function push(s){ if(s && s.no && !seen[s.no]){ seen[s.no]=1; out.push(s); } }
+  if(map && map.ics){ Object.keys(map.ics).forEach(function(k){ (map.ics[k].standards||[]).forEach(push); }); }
+  if(map && map.cross_cutting){ (map.cross_cutting.standards||[]).forEach(push); }
+  return out;
+}
+
+async function runIsoCrosscheck(plans){
+  var box = document.getElementById('home-iso-panel');
+  if(!box) return;
+  if(!plans || !plans.length){ box.innerHTML=''; return; }
+
+  box.innerHTML =
+    '<div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.55);font-size:11px;padding:.5rem .2rem">'+
+    '<span style="display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#DAA520;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>'+
+    '比對 ISO 應驗項目，檢查缺口...</div>';
+
+  var map = await loadIsoMap();
+  if(map && map.__error){
+    box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照未啟用（找不到 iso_map.json：'+map.__error+'）</div>';
+    return;
+  }
+  var standards = flattenIsoStandards(map);
+  if(!standards.length){ box.innerHTML=''; return; }
+
+  try{
+    var problem = (document.getElementById('hq-problem')||{}).value || '';
+    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        mode:'iso_crosscheck',
+        deviceInfo: window._deviceInfo,
+        problem: problem,
+        plans: plans,
+        isoStandards: standards
+      })
+    });
+    var data = await resp.json();
+    if(data.result && data.result.items){
+      renderIsoPanel(data.result);
+    }else{
+      box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.35);padding:.3rem .2rem">📐 ISO 對照：無法判定（'+(data._debug?JSON.stringify(data._debug):(data.error||'空結果'))+'）</div>';
+    }
+  }catch(e){
+    box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.35);padding:.3rem .2rem">📐 ISO 對照連線失敗：'+e.message+'</div>';
+  }
+}
+
+function renderIsoPanel(r){
+  var box = document.getElementById('home-iso-panel');
+  if(!box) return;
+
+  var apps  = r.applicable || [];
+  var items = r.items || [];
+  var gaps  = items.filter(function(i){ return i.status==='gap'; });
+  var parts = items.filter(function(i){ return i.status==='partial'; });
+  var cov   = items.filter(function(i){ return i.status==='covered'; });
+
+  var appLabel = apps.map(function(a){ return a.no; }).join('、') || '—';
+
+  var html = '';
+  html += '<div style="border-top:1px solid rgba(255,255,255,.12);margin-top:.5rem;padding-top:.6rem">';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.75);margin-bottom:.5rem">📐 ISO 對照 <span style="font-weight:400;color:rgba(255,255,255,.4);font-size:10px">'+appLabel+'</span></div>';
+
+  // ── 缺口紅旗（最重要，永遠展開）──
+  if(gaps.length){
+    html += '<div style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35);border-radius:8px;padding:.55rem .65rem;margin-bottom:.45rem">';
+    html += '<div style="font-size:11px;font-weight:700;color:#FCA5A5;margin-bottom:.35rem">⚠️ ISO 應驗、但因子/計畫未涵蓋（'+gaps.length+' 項 — CAPA 風險）</div>';
+    gaps.forEach(function(g){
+      html += '<div style="font-size:10px;color:rgba(255,255,255,.8);margin-bottom:.22rem;line-height:1.45">'+
+        '<span style="color:#FCA5A5">●</span> <b>'+g.item+'</b> '+
+        '<span style="color:rgba(255,255,255,.4)">（'+g.standard+'）</span>'+
+        (g.note?'<span style="color:rgba(255,255,255,.35)"> — '+g.note+'</span>':'')+'</div>';
+    });
+    html += '</div>';
+  }else{
+    html += '<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:.45rem .65rem;margin-bottom:.45rem;font-size:11px;color:#6EE7B7">✅ 適用 ISO 應驗項目皆有對應因子（無明顯缺口）</div>';
+  }
+
+  // ── partial（提醒，預設展開）──
+  if(parts.length){
+    html += '<div style="margin-bottom:.4rem">';
+    parts.forEach(function(p){
+      html += '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:.2rem;line-height:1.45">'+
+        '<span style="color:#FBBF24">◐</span> '+p.item+' <span style="color:rgba(255,255,255,.35)">（'+p.standard+'）部分涵蓋'+(p.covered_by?'：'+p.covered_by:'')+'</span></div>';
+    });
+    html += '</div>';
+  }
+
+  // ── covered（收合）──
+  if(cov.length){
+    html += '<details style="margin-bottom:.3rem"><summary style="font-size:10px;color:rgba(255,255,255,.45);cursor:pointer;list-style:none">▸ 已涵蓋 '+cov.length+' 項</summary><div style="padding-top:.3rem">';
+    cov.forEach(function(c){
+      html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:.18rem;line-height:1.4">'+
+        '<span style="color:#34D399">✓</span> '+c.item+' <span style="color:rgba(255,255,255,.3)">（'+c.standard+(c.covered_by?' ← '+c.covered_by:'')+'）</span></div>';
+    });
+    html += '</div></details>';
+  }
+
+  if(r.summary){
+    html += '<div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:.35rem;line-height:1.5">💡 '+r.summary+'</div>';
+  }
+  html += '<div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:.4rem;line-height:1.4">※ 項目為類別比對草稿，以 ISO 正本最新版次為準，需 RA 核可（見 iso_map.json）。</div>';
+  html += '</div>';
+
+  box.innerHTML = html;
 }
 
 // ════════════════════════════════════════════════════════
@@ -7151,7 +7287,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.79 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v5.0 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7284,7 +7420,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.79 · '+window._buildTime);
+  status('v5.0 · '+window._buildTime);
 
   // 顯示 Worker 版本
   fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
