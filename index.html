@@ -5406,7 +5406,7 @@ window.homeProceedFactors = function() {
 };
 
 // 渲染因子面板（下方分類並排）
-function renderFactorPanel(result) {
+window.renderFactorPanel = function renderFactorPanel(result) {
   var panel = document.getElementById('home-factor-panel-content');
   var panelWrap = document.getElementById('home-factor-panel');
   if(!panel) return;
