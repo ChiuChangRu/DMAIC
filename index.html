@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.73 · AI 輔助統計分析平台</title>
+<title>MedQA v3.75 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.73 · ' + ts;
+    if(el) el.textContent = 'v3.75 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.73</span>
+    <span class="tb-status" id="dmaic-save-status">v3.75</span>
   </div>
 </div>
 
@@ -530,7 +530,7 @@ tr:hover td{background:#F9FAFB}
   <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
   <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
 
-  <div style="max-width:720px;margin:0 auto;position:relative;z-index:1">
+  <div style="max-width:960px;margin:0 auto;position:relative;z-index:1">
     <div style="text-align:center;margin-bottom:1.5rem">
       <h2 style="font-size:28px;font-weight:700;line-height:1.3;letter-spacing:-.01em">AI 輔助品質分析平台</h2>
     </div>
@@ -619,7 +619,7 @@ tr:hover td{background:#F9FAFB}
         </div>
       </div>
 
-      <!-- ══ STEP 4 + 5：AI 追問（左）+ 因子面板（右）══ -->
+      <!-- ══ STEP 4 + 5：AI 追問（上）+ 因子面板（下）══ -->
       <div id="home-step4" style="display:none">
         <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem" id="home-step4-label">
           步驟 4 / 5 &nbsp;·&nbsp; AI 深入追問
@@ -628,50 +628,42 @@ tr:hover td{background:#F9FAFB}
           <span>✅</span><span id="home-device-badge-text2"></span>
         </div>
 
-        <!-- 左右分欄容器 -->
-        <div id="home-split-wrap" style="display:flex;gap:12px;align-items:flex-start">
+        <!-- 對話區（全寬） -->
+        <div id="home-chat-history" style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.65rem"></div>
+        <div id="home-chat-input-wrap" style="display:flex;gap:8px;align-items:flex-end;margin-bottom:1rem">
+          <textarea id="home-chat-input" rows="2"
+            placeholder="回答 AI 的問題..."
+            onkeydown="homeCapaKeydown(event)"
+            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
+            onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
+            onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
+          <button onclick="homeCapaSend()" id="home-send-btn"
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
+            送出
+          </button>
+        </div>
 
-          <!-- 左側：對話區 60% -->
-          <div style="flex:0 0 60%;min-width:0">
-            <div id="home-chat-history" style="max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.65rem"></div>
-            <div id="home-chat-input-wrap" style="display:flex;gap:8px;align-items:flex-end">
-              <textarea id="home-chat-input" rows="2"
-                placeholder="回答 AI 的問題..."
-                onkeydown="homeCapaKeydown(event)"
-                style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:12px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
-                onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
-                onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
-              <button onclick="homeCapaSend()" id="home-send-btn"
-                style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1rem;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
-                送出
-              </button>
-            </div>
+        <!-- 因子面板（下方，分類並排） -->
+        <div id="home-factor-panel" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:.85rem 1rem;display:none">
+          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:.6rem">📋 AI 整理的因子</div>
+          <div id="home-factor-panel-content" style="font-size:11px;color:rgba(255,255,255,.4);font-style:italic">
+            對話結束後自動整理
           </div>
-
-          <!-- 右側：因子面板 40% -->
-          <div id="home-factor-panel" style="flex:0 0 38%;min-width:0;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:.75rem;display:flex;flex-direction:column;min-height:200px">
-            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.5);margin-bottom:.5rem;letter-spacing:.04em">📋 AI 整理的因子</div>
-            <div id="home-factor-panel-content" style="flex:1;font-size:11px;color:rgba(255,255,255,.4);font-style:italic">
-              對話結束後，點「整理因子」按鈕更新
-            </div>
-            <!-- 確認鍵（固定在底部） -->
-            <div id="home-factor-panel-btn" style="margin-top:.75rem;display:none">
-              <button onclick="homeConfirmFactors()"
-                style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(5,150,105,.3)">
-                ✅ 確認，進入魚骨圖
-              </button>
-            </div>
+          <div id="home-factor-panel-btn" style="margin-top:.85rem;display:none">
+            <button onclick="homeConfirmFactors()"
+              style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(5,150,105,.3)">
+              ✅ 確認因子，進入魚骨圖
+            </button>
           </div>
+        </div>
 
-        </div><!-- end split -->
       </div>
 
-      <!-- ══ STEP 5（備用，不再使用）══ -->
+      <!-- ══ STEP 5（備用）══ -->
       <div id="home-step5" style="display:none">
         <div id="home-step5-content"></div>
       </div>
 
-      <!-- 工具推薦按鈕區（備用） -->
       <div id="home-tool-buttons" style="display:none">
         <div id="home-tool-btn-list"></div>
       </div>
@@ -5343,7 +5335,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   function renderDeviceCard(d) {
     var card = document.getElementById('home-device-card');
     if(!card) return;
-    var confColor = d.confidence>=80?'#10B981':d.confidence>=60?'#F59E0B':'#EF4444';
+    var conf = d.confidence || 0;
+    var confColor = conf>=80?'#10B981':conf>=60?'#F59E0B':'#EF4444';
     card.innerHTML =
       '<div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:.5rem">'+d.confirmed_name+'</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .75rem;font-size:12px;margin-bottom:.6rem">'+
@@ -5355,7 +5348,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       '<div style="font-size:11px;margin-bottom:.4rem"><span style="color:rgba(255,255,255,.5)">關鍵品質特性：</span>'+
         (d.key_quality||[]).map(function(q){ return '<span style="background:rgba(126,200,227,.2);color:#7EC8E3;padding:1px 7px;border-radius:10px;margin-right:4px">'+q+'</span>'; }).join('')+
       '</div>'+
-      '<div style="font-size:11px;color:rgba(255,255,255,.35)">識別信心度：<span style="color:'+confColor+'">'+d.confidence+'%</span></div>';
+      '<div style="font-size:11px;color:rgba(255,255,255,.35)">識別信心度：<span style="color:'+confColor+'">'+conf+'%</span></div>';
   }
 
   // ── Step 2：確認器材 ──
@@ -5414,9 +5407,10 @@ window.homeProceedFactors = function() {
   homeSummarizeFactors(window._pendingTools || []);
 };
 
-// 渲染右側因子面板
+// 渲染因子面板（下方分類並排）
 function renderFactorPanel(result) {
   var panel = document.getElementById('home-factor-panel-content');
+  var panelWrap = document.getElementById('home-factor-panel');
   if(!panel) return;
 
   var CAT_NAMES = {man:'👤 人員', machine:'⚙️ 機器', material:'🧪 材料',
@@ -5434,37 +5428,47 @@ function renderFactorPanel(result) {
     none:       {label:'ISO管控',  bg:'#F3F4F6',color:'#6B7280'}
   };
 
+  // 摘要
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:.6rem;line-height:1.5;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:.5rem">'+result.summary+'</div>';
+    html += '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:.75rem;line-height:1.5;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.08)">'+result.summary+'</div>';
   }
+
+  // 分類並排網格
+  html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.6rem">';
 
   Object.keys(CAT_NAMES).forEach(function(cat){
     var factors = result[cat];
     if(!factors || factors.length === 0) return;
-    html += '<div style="margin-bottom:.5rem">';
-    html += '<div style="font-size:10px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.3rem">'+CAT_NAMES[cat]+'</div>';
+
+    html += '<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.6rem .75rem">';
+    html += '<div style="font-size:10px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.4rem">'+CAT_NAMES[cat]+'</div>';
+
     factors.forEach(function(f, idx){
       var tb = TOOL_BADGE[f.tool||'none'] || TOOL_BADGE.none;
-      html += '<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
+      html += '<div style="display:flex;align-items:center;gap:3px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
       html += '<span style="font-size:9px;flex-shrink:0">'+RISK_DOT[f.risk||'medium']+'</span>';
-      html += '<span style="flex:1;font-size:11px;color:#fff">'+f.name+'</span>';
-      html += '<span style="background:'+tb.bg+';color:'+tb.color+';font-size:9px;padding:1px 4px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin-right:2px" title="'+(f.tool_reason||'')+'">'+tb.label+'</span>';
-      html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:12px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1">×</button>';
+      html += '<span style="flex:1;font-size:11px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+f.name+'">'+f.name+'</span>';
+      html += '<span style="background:'+tb.bg+';color:'+tb.color+';font-size:8px;padding:1px 4px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin:0 2px" title="'+(f.tool_reason||'')+'">'+tb.label+'</span>';
+      html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:11px;cursor:pointer;padding:0 1px;flex-shrink:0;line-height:1">×</button>';
       html += '</div>';
     });
     html += '</div>';
   });
 
-  html += '<div style="margin-top:.5rem;font-size:10px;color:rgba(255,255,255,.3);line-height:1.5">× 刪除 ｜ 標籤=建議工具（hover看原因）<br>💬 可繼續左側對話補充</div>';
+  html += '</div>';
+  html += '<div style="margin-top:.6rem;font-size:10px;color:rgba(255,255,255,.3)">× 刪除 ｜ 標籤=建議工具（hover看原因）</div>';
+
   panel.innerHTML = html;
 
+  // 顯示面板和確認按鈕
+  if(panelWrap) panelWrap.style.display = 'block';
   var stepLabel = document.getElementById('home-step4-label');
   if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 確認因子後進入魚骨圖';
-
   var btn = document.getElementById('home-factor-panel-btn');
   if(btn) btn.style.display = 'block';
 }
+
 
 window.homeSummarizeFactors = async function(tools) {
   window._pendingTools = tools || [];
@@ -5952,30 +5956,63 @@ function renderVerificationPlan(result, factors) {
           data:    getQValue({id:'hq-data',    multi:false}),
           change:  getQValue({id:'hq-change',  multi:true})
         };
-        var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+
+        // 建立 AI 訊息泡泡（串流逐字填入）
+        var loadEl = document.getElementById('home-loading'); if(loadEl) loadEl.remove();
+        var aiDiv = document.createElement('div');
+        aiDiv.style.cssText = 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;white-space:pre-wrap';
+        aiDiv.textContent = '▋';
+        var histEl = document.getElementById('home-chat-history');
+        if(histEl){ histEl.appendChild(aiDiv); histEl.scrollTop=histEl.scrollHeight; }
+
+        var streamResp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            mode:'navigate',
-            messages: homeHistory,
-            surveyData: surveyData,
-            deviceInfo: window._deviceInfo  // 傳入器材知識
-          })
+          body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo })
         });
-        var data = await resp.json();
-        var el = document.getElementById('home-loading'); if(el) el.remove();
-        var text = data.text || '';
-        var tools = data.tools || [];
-        homeHistory.push({role:'assistant', content: text});
-        window._homeHistory = homeHistory.slice();
 
-        var conf = calcConfidence(homeHistory, tools, formParts.length);
-        appendHomeAI_withConf(text, tools, conf);
+        var reader = streamResp.body.getReader();
+        var decoder = new TextDecoder();
+        var fullText = ''; var tools = []; var buf = '';
+        while(true){
+          var res = await reader.read();
+          if(res.done) break;
+          buf += decoder.decode(res.value, {stream:true});
+          var lines2 = buf.split('\n'); buf = lines2.pop()||'';
+          for(var li=0;li<lines2.length;li++){
+            var line=lines2[li]; if(!line.startsWith('data: ')) continue;
+            try{
+              var parsed=JSON.parse(line.slice(6));
+              if(parsed.text){ fullText+=parsed.text; aiDiv.textContent=fullText+'▋'; if(histEl) histEl.scrollTop=histEl.scrollHeight; }
+              if(parsed.done){
+                fullText=parsed.fullText||fullText; tools=parsed.tools||[];
+                aiDiv.textContent=fullText;
+                if(tools.length>0){
+                  var btnArea=document.createElement('div');
+                  btnArea.style.cssText='display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
+                  var lbl=document.createElement('div'); lbl.style.cssText='width:100%;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:2px'; lbl.textContent='▸ 推薦分析工具';
+                  btnArea.appendChild(lbl);
+                  tools.forEach(function(tid){
+                    var b=document.createElement('button');
+                    b.style.cssText='background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit';
+                    b.textContent=TOOL_NAMES_HOME[tid]||tid;
+                    b.onclick=(function(t){return function(){window.homeGoTool(t);};})(tid);
+                    btnArea.appendChild(b);
+                  });
+                  aiDiv.appendChild(btnArea);
+                }
+              }
+            }catch(e){}
+          }
+        }
 
-        // 有推薦工具時：立刻整理因子到右側面板，輸入框保持開啟
-        if(tools && tools.length > 0) {
-          window._pendingTools = tools;
-          window._homeStep = 5;
-          // 右側面板顯示整理中，不關閉輸入框
+        homeHistory.push({role:'assistant', content:fullText});
+        window._homeHistory=homeHistory.slice();
+        var conf=calcConfidence(homeHistory,tools,formParts.length);
+        // 顯示信心度條
+        if(typeof appendHomeAI_withConf==='function') appendHomeAI_withConf('',tools,conf);
+
+        if(tools&&tools.length>0){
+          window._pendingTools=tools; window._homeStep=5;
           homeSummarizeFactors(tools);
         }
       } catch(err) {
@@ -7088,7 +7125,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.73 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.75 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7221,7 +7258,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.73 · '+window._buildTime);
+  status('v3.75 · '+window._buildTime);
 })();
 
 
