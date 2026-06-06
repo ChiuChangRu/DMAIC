@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.75 · AI 輔助統計分析平台</title>
+<title>MedQA v3.76 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.75 · ' + ts;
+    if(el) el.textContent = 'v3.76 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.75</span>
+    <span class="tb-status" id="dmaic-save-status">v3.76</span>
   </div>
 </div>
 
@@ -5473,7 +5473,11 @@ function renderFactorPanel(result) {
 window.homeSummarizeFactors = async function(tools) {
   window._pendingTools = tools || [];
   var panel = document.getElementById('home-factor-panel-content');
+  var panelWrap = document.getElementById('home-factor-panel');
   if(!panel) return;
+
+  // 先顯示面板容器
+  if(panelWrap) panelWrap.style.display = 'block';
 
   // 顯示整理中
   panel.innerHTML = '<div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.5);font-size:11px"><span style="display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#7EC8E3;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 整理中...</div>';
@@ -6008,8 +6012,28 @@ function renderVerificationPlan(result, factors) {
         homeHistory.push({role:'assistant', content:fullText});
         window._homeHistory=homeHistory.slice();
         var conf=calcConfidence(homeHistory,tools,formParts.length);
-        // 顯示信心度條
-        if(typeof appendHomeAI_withConf==='function') appendHomeAI_withConf('',tools,conf);
+
+        // 清除 [TOOLS: ...] 標記，不顯示給使用者
+        var cleanText = fullText.replace(/\[TOOLS:[^\]]*\]/g,'').trim();
+        aiDiv.childNodes[0] && (aiDiv.childNodes[0].textContent = cleanText);
+
+        // 只顯示信心度條，不重複加工具按鈕（串流時已加）
+        if(conf !== undefined){
+          var hist3 = document.getElementById('home-chat-history');
+          if(hist3){
+            var confColor = conf>=75?'#10B981':conf>=50?'#F59E0B':'#EF4444';
+            var confLabel = tools&&tools.length>0 ? '✅ 可開始分析' : conf>=50?'需再補充資訊':'資訊不足';
+            var bar = document.createElement('div');
+            bar.style.cssText='display:flex;align-items:center;gap:8px;margin-top:4px;padding:0 2px';
+            bar.innerHTML='<span style="font-size:10px;color:rgba(255,255,255,.45)">AI 信心度</span>'
+              +'<div style="flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden">'
+              +'<div style="height:100%;width:'+conf+'%;background:'+confColor+';border-radius:3px;transition:.5s"></div></div>'
+              +'<span style="font-size:11px;color:'+confColor+';font-weight:700">'+conf+'%</span>'
+              +'<span style="font-size:10px;color:rgba(255,255,255,.5)">'+confLabel+'</span>';
+            hist3.appendChild(bar);
+            hist3.scrollTop=hist3.scrollHeight;
+          }
+        }
 
         if(tools&&tools.length>0){
           window._pendingTools=tools; window._homeStep=5;
@@ -7125,7 +7149,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.75 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.76 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7258,7 +7282,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.75 · '+window._buildTime);
+  status('v3.76 · '+window._buildTime);
 })();
 
 
