@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.76 · AI 輔助統計分析平台</title>
+<title>MedQA v3.77 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.76 · ' + ts;
+    if(el) el.textContent = 'v3.77 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.76</span>
+    <span class="tb-status" id="dmaic-save-status">v3.77</span>
   </div>
 </div>
 
@@ -532,39 +532,39 @@ tr:hover td{background:#F9FAFB}
 
   <div style="max-width:960px;margin:0 auto;position:relative;z-index:1">
     <div style="text-align:center;margin-bottom:1.5rem">
-      <h2 style="font-size:28px;font-weight:700;line-height:1.3;letter-spacing:-.01em">AI 輔助品質分析平台</h2>
+      <h2 style="font-size:30px;font-weight:700;line-height:1.3;letter-spacing:-.01em">AI 輔助品質分析平台</h2>
     </div>
 
     <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:1.25rem 1.5rem">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
         <span style="font-size:18px">🤖</span>
-        <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,.9)">CAPA 分析助理</span>
-        <span style="font-size:11px;color:rgba(255,255,255,.4)">· 描述問題，引導分析路徑</span>
+        <span style="font-size:14px;font-weight:600;color:rgba(255,255,255,.9)">CAPA 分析助理</span>
+        <span style="font-size:12px;color:rgba(255,255,255,.4)">· 描述問題，引導分析路徑</span>
         <span style="margin-left:auto;width:8px;height:8px;background:#4ADE80;border-radius:50%;animation:fab-pulse 2s ease-in-out infinite;flex-shrink:0"></span>
       </div>
 
       <!-- ══ STEP 1：輸入器材名稱 ══ -->
       <div id="home-step1" style="display:block">
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
           步驟 1 / 5 &nbsp;·&nbsp; 輸入醫療器材名稱
         </div>
-        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:.75rem 1rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:.85rem">
+        <div style="background:rgba(255,255,255,.06);border-radius:10px;padding:.75rem 1rem;font-size:14px;color:rgba(255,255,255,.85);line-height:1.7;margin-bottom:.85rem">
           請先告訴我您要分析的是哪種醫療器材？<br>
-          <span style="font-size:11px;color:rgba(255,255,255,.4)">AI 會先確認器材的材料、結構、用途，確保後續分析不出現不合理的因子。</span>
+          <span style="font-size:12px;color:rgba(255,255,255,.4)">AI 會先確認器材的材料、結構、用途，確保後續分析不出現不合理的因子。</span>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="text" id="home-device-input"
             placeholder="例：檢體針、Pigtail 導管、球囊擴張導管、骨科螺釘..."
             onkeydown="if(event.key==='Enter') homeDeviceSearch()"
-            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;color:#fff;outline:none;transition:border-color .2s"
+            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:14px;font-family:inherit;color:#fff;outline:none;transition:border-color .2s"
             onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
             onblur="this.style.borderColor='rgba(255,255,255,.2)'">
           <button onclick="homeDeviceSearch()"
-            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.65rem 1.2rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.65rem 1.2rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
             識別 →
           </button>
         </div>
-        <div id="home-step1-loading" style="display:none;font-size:12px;color:rgba(255,255,255,.5);padding:.5rem 0;align-items:center;gap:6px">
+        <div id="home-step1-loading" style="display:none;font-size:13px;color:rgba(255,255,255,.5);padding:.5rem 0;align-items:center;gap:6px">
           <span style="display:inline-block;width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite"></span>
           查詢 FDA 資料庫並識別器材...
         </div>
@@ -572,17 +572,17 @@ tr:hover td{background:#F9FAFB}
 
       <!-- ══ STEP 2：確認器材 ══ -->
       <div id="home-step2" style="display:none">
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
           步驟 2 / 5 &nbsp;·&nbsp; 確認醫療器材
         </div>
         <div id="home-device-card" style="background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);border-radius:12px;padding:1rem 1.25rem;margin-bottom:.85rem"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button onclick="homeDeviceConfirm(true)"
-            style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+            style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:8px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">
             ✅ 是的，就是這個
           </button>
           <button onclick="homeDeviceConfirm(false)"
-            style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 20px;font-size:13px;cursor:pointer;font-family:inherit">
+            style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 20px;font-size:14px;cursor:pointer;font-family:inherit">
             ❌ 不是，重新輸入
           </button>
         </div>
@@ -590,30 +590,30 @@ tr:hover td{background:#F9FAFB}
 
       <!-- ══ STEP 3：輸入問題 + 問卷 ══ -->
       <div id="home-step3" style="display:none">
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
           步驟 3 / 5 &nbsp;·&nbsp; 描述問題 + 填問卷
         </div>
         <!-- 器材確認標示 -->
-        <div id="home-device-badge" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:11px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
+        <div id="home-device-badge" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:12px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
           <span>✅</span><span id="home-device-badge-text">器材已確認</span>
         </div>
         <!-- 問題主題 -->
-        <div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:4px;font-weight:600">問題描述 <span style="color:#F87171">*必填</span></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px;font-weight:600">問題描述 <span style="color:#F87171">*必填</span></div>
         <textarea id="home-problem-input" rows="2"
           placeholder="例：親水塗層潤滑度不足，每批都發生，客戶投訴..."
           onkeydown="homeCapaKeydown(event)"
-          style="width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;box-sizing:border-box;transition:border-color .2s;margin-bottom:.75rem"
+          style="width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:14px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;box-sizing:border-box;transition:border-color .2s;margin-bottom:.75rem"
           onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
           onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
         <!-- 問卷 slot -->
         <div id="home-quick-form-slot"></div>
         <div style="display:flex;gap:8px;margin-top:.75rem">
           <button onclick="homeCapaSend()" id="home-send-btn"
-            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.65rem 1.4rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(190,24,93,.4)">
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.65rem 1.4rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(190,24,93,.4)">
             送出 →
           </button>
           <button onclick="homeCapaReset()"
-            style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.65rem .9rem;font-size:12px;cursor:pointer;font-family:inherit">
+            style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.65rem .9rem;font-size:13px;cursor:pointer;font-family:inherit">
             🔄 重設
           </button>
         </div>
@@ -621,10 +621,10 @@ tr:hover td{background:#F9FAFB}
 
       <!-- ══ STEP 4 + 5：AI 追問（上）+ 因子面板（下）══ -->
       <div id="home-step4" style="display:none">
-        <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem" id="home-step4-label">
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.6rem" id="home-step4-label">
           步驟 4 / 5 &nbsp;·&nbsp; AI 深入追問
         </div>
-        <div id="home-device-badge2" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:11px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
+        <div id="home-device-badge2" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:12px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
           <span>✅</span><span id="home-device-badge-text2"></span>
         </div>
 
@@ -634,24 +634,24 @@ tr:hover td{background:#F9FAFB}
           <textarea id="home-chat-input" rows="2"
             placeholder="回答 AI 的問題..."
             onkeydown="homeCapaKeydown(event)"
-            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:13px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
+            style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:14px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
             onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
             onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
           <button onclick="homeCapaSend()" id="home-send-btn"
-            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
+            style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
             送出
           </button>
         </div>
 
         <!-- 因子面板（下方，分類並排） -->
         <div id="home-factor-panel" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:.85rem 1rem;display:none">
-          <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:.6rem">📋 AI 整理的因子</div>
-          <div id="home-factor-panel-content" style="font-size:11px;color:rgba(255,255,255,.4);font-style:italic">
+          <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:.6rem">📋 AI 整理的因子</div>
+          <div id="home-factor-panel-content" style="font-size:12px;color:rgba(255,255,255,.4);font-style:italic">
             對話結束後自動整理
           </div>
           <div id="home-factor-panel-btn" style="margin-top:.85rem;display:none">
             <button onclick="homeConfirmFactors()"
-              style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(5,150,105,.3)">
+              style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(5,150,105,.3)">
               ✅ 確認因子，進入魚骨圖
             </button>
           </div>
@@ -670,7 +670,7 @@ tr:hover td{background:#F9FAFB}
     </div>
 
     <!-- 底部小字 -->
-    <div style="text-align:center;font-size:11px;color:rgba(255,255,255,.25);padding:.75rem 0 1.25rem">
+    <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.25);padding:.75rem 0 1.25rem">
       或直接從下方 DMAIC 工具卡片進入各分析工具
     </div>
   </div>
@@ -685,7 +685,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('fishbone')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#3B7DD8;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🐟</div><div class="tc-name">魚骨圖（石川圖）</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">🐟</div><div class="tc-name">魚骨圖（石川圖）</div>
         <div class="tc-desc">系統化找出根本原因 6M</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
@@ -698,25 +698,25 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('boxplot')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📦</div><div class="tc-name">箱型圖 Box Plot</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">📦</div><div class="tc-name">箱型圖 Box Plot</div>
         <div class="tc-desc">分組比較・離群值偵測</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('msa')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
         <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('histogram')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📉</div><div class="tc-name">直方圖 + 常態檢定</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">📉</div><div class="tc-name">直方圖 + 常態檢定</div>
         <div class="tc-desc">分佈形態・Shapiro-Wilk 常態性</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9CB0;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
         <div class="tc-desc">Xbar-R・I-MR・np・p・c・u 七種圖型</div>
         <span class="tc-tag tag-done">完成</span>
       </div>
@@ -729,25 +729,25 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('scatter')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🔗</div><div class="tc-name">相關性 + 散佈圖</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">🔗</div><div class="tc-name">相關性 + 散佈圖</div>
         <div class="tc-desc">Pearson r・線性迴歸・R²</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('hypothesis')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🔬</div><div class="tc-name">假設檢定</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">🔬</div><div class="tc-name">假設檢定</div>
         <div class="tc-desc">t-test・F-test・卡方檢定</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('msa')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">📐</div><div class="tc-name">MSA 量測系統分析</div>
         <div class="tc-desc">Gage R&amp;R・Bias・Linearity・Stability</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
       <div class="tool-card" onclick="goTool('pb')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#1A9E75;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🔎</div><div class="tc-name">PB 因子篩選</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">🔎</div><div class="tc-name">PB 因子篩選</div>
         <div class="tc-desc">Plackett-Burman・5-11因子快速篩選</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
@@ -760,7 +760,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('doe')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#D4850A;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">🧪</div><div class="tc-name">DOE 實驗設計</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">🧪</div><div class="tc-name">DOE 實驗設計</div>
         <div class="tc-desc">全因子・部分因子・主效應 + 交互作用</div>
         <span class="tc-tag tag-new">可用</span>
       </div>
@@ -773,7 +773,7 @@ tr:hover td{background:#F9FAFB}
     <div class="tools-grid">
       <div class="tool-card" onclick="goTool('spc')">
         <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:#7252C8;border-radius:3px 0 0 3px"></div>
-        <div style="font-size:28px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
+        <div style="font-size:30px;line-height:1;margin-bottom:6px">📈</div><div class="tc-name">SPC 管制圖</div>
         <div class="tc-desc">持續監控・Nelson 8 條規則</div>
         <span class="tc-tag tag-done">完成</span>
       </div>
@@ -786,7 +786,7 @@ tr:hover td{background:#F9FAFB}
 </div>
 
 <!-- Footer -->
-<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:12px;padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
+<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:13px;padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
   <div>MedQA · AI 輔助醫療器材品質管理平台</div>
   <div>Edit by Chiu Chang Ru / Claude</div>
 </div>
@@ -7149,7 +7149,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.76 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.77 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7282,7 +7282,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.76 · '+window._buildTime);
+  status('v3.77 · '+window._buildTime);
 })();
 
 
