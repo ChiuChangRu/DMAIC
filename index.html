@@ -5611,8 +5611,11 @@ window.homeConfirmFactors = async function() {
     console.log('[驗證計畫] worker 回傳：', data);
 
     if(data.result && data.result.plans && data.result.plans.length > 0) {
+      data.result.plans.sort(function(a,b){ return (a.priority||99)-(b.priority||99); });
       window._verificationPlan = data.result;
       renderVerificationPlan(data.result, factors);
+      var isoFactors = data.result.plans.filter(function(p){ return p.iso_relevant || p.pipeline==='compliance'; });
+      runIsoCrosscheck(isoFactors);
     } else {
       var errMsg = data._debug ? JSON.stringify(data._debug) : (data.error || '回傳空結果');
       if(panel) panel.innerHTML =
@@ -5646,74 +5649,92 @@ function proceedToFishbone(factors) {
   window.homeGoTool('fishbone');
 }
 
+var PIPELINE_META = {
+  experiment:    {label:'實驗統計',   icon:'🧪', color:'#7EC8E3', note:'可調變/可量測 → 做實驗或統計分析'},
+  method_dev:    {label:'方法開發',   icon:'🔬', color:'#A78BFA', note:'目前測不到 → 開發量測法或替代指標'},
+  compliance:    {label:'規範符合性', icon:'📐', color:'#DAA520', note:'查核是否符合對應 ISO 規範'},
+  risk_evidence: {label:'風險與證據', icon:'⚠️', color:'#F4A9C7', note:'無法消除/測不出 → 風險管理或臨床證據'},
+  use_side:      {label:'使用端/人因', icon:'👤', color:'#6EE7B7', note:'臨床操作/人員 → 人因、IFU、教育訓練'},
+  supplier:      {label:'供應商來料', icon:'📦', color:'#FBBF24', note:'材料/批次 → 供應商管控與來料檢驗'},
+  uncontrollable:{label:'不可控/外部', icon:'🚫', color:'#9CA3AF', note:'病人/臨床決策 → 記為殘餘風險，不列驗證'}
+};
+var PIPELINE_ORDER = ['experiment','method_dev','compliance','risk_evidence','use_side','supplier','uncontrollable'];
+
+function vpRerender(){ renderVerificationPlan(window._verificationPlan, window._vpFactors); }
+window.vpDelete = function(i){ if(window._verificationPlan&&window._verificationPlan.plans){ window._verificationPlan.plans.splice(i,1); vpRerender(); } };
+window.vpEditVerif = function(i){ var p=window._verificationPlan.plans[i]; var v=prompt('編輯建議動作：',p.verification||''); if(v!==null){ p.verification=v.trim(); vpRerender(); } };
+window.vpEditFactor = function(i){ var p=window._verificationPlan.plans[i]; var v=prompt('編輯因子名稱：',p.factor||''); if(v!==null&&v.trim()){ p.factor=v.trim(); vpRerender(); } };
+window.vpSetPipeline = function(i,val){ var p=window._verificationPlan.plans[i]; p.pipeline=val; p.iso_relevant=(val==='compliance'); vpRerender(); };
+
 function renderVerificationPlan(result, factors) {
   var panel = document.getElementById('home-factor-panel-content');
   if(!panel) return;
+  window._verificationPlan = result; window._vpFactors = factors;
 
-  var TOOL_LABEL = {
-    doe:'DOE', pb:'PB篩選', taguchi:'田口', spc:'SPC',
-    msa:'MSA確效', hypothesis:'假設檢定', observation:'排除觀察', none:'ISO管控'
-  };
   var DATA_COLOR = {
-    '已有數據':     {bg:'#DCFCE7',color:'#166534'},
-    '需收集數據':   {bg:'#FEF3C7',color:'#92400E'},
-    '需開發量測方法':{bg:'#FEE2E2',color:'#991B1B'}
+    '已有數據':      {bg:'rgba(52,211,153,.18)', color:'#6EE7B7'},
+    '需收集數據':    {bg:'rgba(251,191,36,.18)', color:'#FBBF24'},
+    '需開發量測方法':{bg:'rgba(248,113,113,.18)',color:'#FCA5A5'}
   };
   var RISK_DOT = {high:'🔴', medium:'🟡', low:'🟢'};
-
-  // 依優先順序排序
-  var plans = (result.plans||[]).slice().sort(function(a,b){ return (a.priority||99)-(b.priority||99); });
+  var plans = result.plans || [];
 
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.1);line-height:1.5">💡 '+result.summary+'</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.15);line-height:1.55">💡 '+result.summary+'</div>';
   }
 
-  plans.forEach(function(p){
-    var dc = DATA_COLOR[p.data_needed] || DATA_COLOR['需收集數據'];
-    html += '<div style="background:rgba(255,255,255,.06);border-radius:8px;padding:.5rem .65rem;margin-bottom:.4rem">';
+  var pipeOpts = PIPELINE_ORDER.map(function(k){ return '<option value="'+k+'">'+PIPELINE_META[k].icon+' '+PIPELINE_META[k].label+'</option>'; }).join('');
 
-    // 標題行
-    html += '<div style="display:flex;align-items:center;gap:4px;margin-bottom:.3rem;flex-wrap:wrap">';
-    html += '<span style="font-size:11px">'+RISK_DOT[p.risk||'medium']+'</span>';
-    html += '<span style="font-size:13px;font-weight:600;color:#fff;flex:1">'+p.factor+'</span>';
-    html += '<span style="background:'+dc.bg+';color:'+dc.color+';font-size:11px;padding:1px 5px;border-radius:3px;white-space:nowrap">'+p.data_needed+'</span>';
-    html += '</div>';
+  PIPELINE_ORDER.forEach(function(pk){
+    var group=[];
+    plans.forEach(function(p,idx){ if((p.pipeline||'experiment')===pk) group.push({p:p,i:idx}); });
+    if(!group.length) return;
+    var meta = PIPELINE_META[pk];
 
-    // 假設
-    if(p.hypothesis){
-      html += '<div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:.2rem">假設：'+p.hypothesis+'</div>';
-    }
-    // 驗證方法
-    html += '<div style="font-size:12px;color:#7EC8E3;margin-bottom:.2rem">驗證：'+p.verification+'</div>';
-    // 替代指標
-    if(p.surrogate){
-      html += '<div style="font-size:12px;color:rgba(255,255,255,.35)">替代指標：'+p.surrogate+'</div>';
-    }
-    // 工具標籤
-    html += '<div style="margin-top:.3rem">';
-    html += '<span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px;padding:1px 6px;border-radius:3px">'+
-      (TOOL_LABEL[p.tool]||p.tool)+' — '+(p.tool_reason||'')+'</span>';
-    html += '</div>';
+    html += '<div style="margin-bottom:.7rem">';
+    html += '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:.4rem;flex-wrap:wrap">'
+      + '<span style="font-size:13px;font-weight:700;color:'+meta.color+'">'+meta.icon+' '+meta.label+'</span>'
+      + '<span style="font-size:10px;color:rgba(255,255,255,.5)">'+meta.note+'</span></div>';
+
+    group.forEach(function(g){
+      var p=g.p, i=g.i;
+      var dc = DATA_COLOR[p.data_needed] || null;
+      html += '<div style="background:rgba(255,255,255,.07);border-left:3px solid '+meta.color+';border-radius:6px;padding:.5rem .65rem;margin-bottom:.4rem">';
+
+      html += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:.3rem;flex-wrap:wrap">';
+      html += '<span style="font-size:11px">'+(RISK_DOT[p.risk||'medium'])+'</span>';
+      html += '<span style="font-size:13px;font-weight:600;color:#fff;flex:1">'+p.factor+'</span>';
+      if(dc) html += '<span style="background:'+dc.bg+';color:'+dc.color+';font-size:10px;padding:1px 6px;border-radius:3px;white-space:nowrap">'+p.data_needed+'</span>';
+      html += '<span onclick="vpEditFactor('+i+')" title="改名" style="cursor:pointer;color:rgba(255,255,255,.45);font-size:11px">✏</span>';
+      html += '<span onclick="vpDelete('+i+')" title="刪除" style="cursor:pointer;color:rgba(248,113,113,.75);font-size:14px;font-weight:700">×</span>';
+      html += '</div>';
+
+      if(p.subtype) html += '<span style="display:inline-block;background:'+meta.color+'22;color:'+meta.color+';font-size:10px;padding:1px 7px;border-radius:3px;margin-bottom:.25rem">'+p.subtype+(p.iso_relevant?' · ISO':'')+'</span>';
+
+      html += '<div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:.35rem">建議：'
+        + (p.verification||'—')
+        + ' <span onclick="vpEditVerif('+i+')" style="cursor:pointer;color:rgba(126,200,227,.7);font-size:10px">✏編輯</span></div>';
+
+      html += '<div style="font-size:10px;color:rgba(255,255,255,.5)">改管道：<select onchange="vpSetPipeline('+i+',this.value)" '
+        + 'style="background:rgba(0,0,0,.25);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:4px;font-size:10px;padding:1px 3px;font-family:inherit">'
+        + pipeOpts.replace('value="'+pk+'"','value="'+pk+'" selected')+'</select></div>';
+
+      html += '</div>';
+    });
     html += '</div>';
   });
 
-  html += '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:.4rem">🔴需開發量測方法者，建議先定義量測指標再進行 DOE</div>';
+  if(!plans.length) html += '<div style="font-size:11px;color:rgba(255,255,255,.55)">（無因子）</div>';
+  html += '<div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:.3rem;line-height:1.5">※ 管道為 AI 初判，可用每張卡片下拉手動調整；🔴需開發量測法者，先定義量測指標再進實驗。</div>';
   panel.innerHTML = html;
 
-  // 確認按鈕改為「確認計畫，進入魚骨圖」
   var btnWrap = document.getElementById('home-factor-panel-btn');
   if(btnWrap){
     btnWrap.style.display = 'block';
     var btn = btnWrap.querySelector('button');
-    if(btn){
-      btn.textContent = '🐟 確認計畫，進入魚骨圖';
-      btn.onclick = function(){ proceedToFishbone(factors); };
-    }
+    if(btn){ btn.textContent = '🐟 確認計畫，進入魚骨圖'; btn.onclick = function(){ proceedToFishbone(factors); }; }
   }
-
-  // v5.0：驗證計畫畫好後，自動做 ISO 對照（找出 ISO 應驗但計畫沒涵蓋的缺口）
-  runIsoCrosscheck(result.plans);
 }
 
 // ════════════════════════════════════════════════════════
@@ -5752,7 +5773,7 @@ function flattenIsoStandards(map){
 async function runIsoCrosscheck(plans){
   var box = document.getElementById('home-iso-panel');
   if(!box) return;
-  if(!plans || !plans.length){ box.innerHTML=''; return; }
+  if(!plans || !plans.length){ box.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照：本案無「規範符合性」類因子，未觸發逐因子對照。</div>'; return; }
 
   box.innerHTML =
     '<div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.55);font-size:11px;padding:.5rem .2rem">'+
