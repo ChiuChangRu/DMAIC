@@ -5464,19 +5464,17 @@ window.renderFactorPanel = function renderFactorPanel(result) {
     html += '<div style="font-size:10px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.4rem">'+CAT_NAMES[cat]+'</div>';
 
     factors.forEach(function(f, idx){
-      var tb = TOOL_BADGE[f.tool||'none'] || TOOL_BADGE.none;
-      html += '<div style="display:flex;align-items:center;gap:3px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
-      html += '<span style="font-size:9px;flex-shrink:0">'+RISK_DOT[f.risk||'medium']+'</span>';
-      html += '<span style="flex:1;font-size:11px;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+f.name+'">'+f.name+'</span>';
-      html += '<span style="background:'+tb.bg+';color:'+tb.color+';font-size:8px;padding:1px 4px;border-radius:3px;white-space:nowrap;flex-shrink:0;margin:0 2px" title="'+(f.tool_reason||'')+'">'+tb.label+'</span>';
-      html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.3);font-size:11px;cursor:pointer;padding:0 1px;flex-shrink:0;line-height:1">×</button>';
+      html += '<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
+      html += '<span style="font-size:10px;flex-shrink:0">'+RISK_DOT[f.risk||'medium']+'</span>';
+      html += '<span style="flex:1;font-size:12px;color:rgba(255,255,255,.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+f.name+'">'+f.name+'</span>';
+      html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;padding:0 1px;flex-shrink:0;line-height:1">×</button>';
       html += '</div>';
     });
     html += '</div>';
   });
 
   html += '</div>';
-  html += '<div style="margin-top:.6rem;font-size:10px;color:rgba(255,255,255,.3)">× 刪除 ｜ 標籤=建議工具（hover看原因）</div>';
+  html += '<div style="margin-top:.6rem;font-size:10px;color:rgba(255,255,255,.35)">× 刪除因子</div>';
 
   panel.innerHTML = html;
 
@@ -6945,6 +6943,9 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   }
 
   html += '</div>';
+  // 非實驗類管道：從驗證計畫的 pipeline 分類，把不丟統計工具的因子也整理出來
+  html += fbRenderOtherPipelines();
+
   selectorDiv.innerHTML = html;
   selectorDiv.style.display = 'block';
 };
@@ -6968,6 +6969,44 @@ window.fbImportTool = function(tool){
   var names = (window._fbToolSel[tool]||[]).slice();
   if(!names.length){ alert('請先點選要帶入的因子（此工具目前未勾選任何因子）'); return; }
   fbGoToolByList(names, tool);
+};
+
+// 非實驗類管道整理（資訊呈現，不需帶入按鈕）— 來源：驗證計畫的 pipeline 分類
+window.fbRenderOtherPipelines = function(){
+  var vp = window._verificationPlan;
+  if(!vp || !vp.plans || !vp.plans.length) return '';
+  var META = (typeof PIPELINE_META !== 'undefined') ? PIPELINE_META : null;
+  if(!META) return '';
+  var ORDER = ['compliance','method_dev','risk_evidence','use_side','supplier','uncontrollable'];
+  var RISK = {high:'🔴',medium:'🟡',low:'🟢'};
+  if(!vp.plans.some(function(p){ return ORDER.indexOf(p.pipeline)>=0; })) return '';
+
+  var html = '<div class="card" style="margin-top:.75rem;background:#FFFDF5;border:1.5px solid #F0E0B0">';
+  html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.4rem">🗂️ 其他處置（非實驗類）</div>';
+  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.85rem;line-height:1.5">這些因子不靠 DOE/SPC/MSA 解決，而是規範符合性、方法開發、風險、使用端等途徑。以下為建議處置（資訊呈現，不需帶入工具）。</div>';
+
+  ORDER.forEach(function(pk){
+    var grp = vp.plans.filter(function(p){ return p.pipeline===pk; });
+    if(!grp.length) return;
+    var m = META[pk];
+    html += '<div style="border:1.5px solid '+m.color+'33;border-radius:10px;padding:.7rem .9rem;margin-bottom:.7rem;background:#fff">';
+    html += '<div style="font-weight:700;color:'+m.color+';font-size:13px;margin-bottom:.5rem">'+m.icon+' '+m.label
+      +' <span style="font-size:11px;color:#6B7280;font-weight:400;margin-left:4px">'+m.note+'</span></div>';
+    grp.forEach(function(p){
+      html += '<div style="display:flex;gap:8px;padding:5px 0;border-top:1px solid #F3F4F6">';
+      html += '<span style="font-size:11px;flex-shrink:0">'+(RISK[p.risk||'medium'])+'</span>';
+      html += '<div style="flex:1">';
+      html += '<div style="font-size:13px;font-weight:600;color:#1F2937">'+p.factor
+        +(p.subtype?' <span style="background:'+m.color+'22;color:'+m.color+';font-size:10px;padding:1px 6px;border-radius:3px;margin-left:4px">'+p.subtype+(p.iso_relevant?' · ISO':'')+'</span>':'')+'</div>';
+      if(p.verification) html += '<div style="font-size:12px;color:#4B5563;line-height:1.5;margin-top:2px">建議：'+p.verification+'</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<div style="font-size:11px;color:#9CA3AF;margin-top:.2rem">※ 管道分類於「驗證計畫」步驟由 AI 初判，可回上一步用下拉調整。</div>';
+  html += '</div>';
+  return html;
 };
 
 
