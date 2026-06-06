@@ -494,6 +494,7 @@ tr:hover td{background:#F9FAFB}
   </div>
   <div class="topbar-right topbar-actions">
     <span class="tb-status" id="dmaic-save-status">v3.78</span>
+    <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
 
@@ -7281,6 +7282,18 @@ document.addEventListener('click', function(e) {
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
   status('v3.78 · '+window._buildTime);
+
+  // 顯示 Worker 版本
+  fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({mode:'version'})
+  }).then(function(r){return r.json();}).then(function(d){
+    var el = document.getElementById('worker-ver-display');
+    if(el) el.textContent = '| Worker: '+(d.version||'未知');
+  }).catch(function(){
+    var el = document.getElementById('worker-ver-display');
+    if(el) el.textContent = '| Worker: 離線';
+  });
 })();
 
 
