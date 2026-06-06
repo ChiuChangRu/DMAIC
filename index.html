@@ -5779,7 +5779,8 @@ async function runIsoCrosscheck(plans){
       })
     });
     var data = await resp.json();
-    if(data.result && data.result.items){
+    console.log('[ISO 對照] worker 回傳：', data);
+    if(data.result && (data.result.items || data.result.applicable)){
       renderIsoPanel(data.result);
     }else{
       box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.35);padding:.3rem .2rem">📐 ISO 對照：無法判定（'+(data._debug?JSON.stringify(data._debug):(data.error||'空結果'))+'）</div>';
@@ -5816,6 +5817,12 @@ function renderIsoPanel(r){
         (g.note?'<span style="color:rgba(255,255,255,.35)"> — '+g.note+'</span>':'')+'</div>';
     });
     html += '</div>';
+  }else if(!items.length){
+    if(apps.length){
+      html += '<div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:8px;padding:.5rem .65rem;margin-bottom:.45rem;font-size:11px;color:#FBBF24;line-height:1.5">📋 已判定適用標準（'+appLabel+'），但本次未完成逐項缺口比對。可重按「產生驗證計畫」再跑一次，或參考 iso_map 正本逐項確認。</div>';
+    }else{
+      html += '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.5rem .65rem;margin-bottom:.45rem;font-size:11px;color:rgba(255,255,255,.5)">本器材未對應到 iso_map 內已建檔的標準。</div>';
+    }
   }else{
     html += '<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:.45rem .65rem;margin-bottom:.45rem;font-size:11px;color:#6EE7B7">✅ 適用 ISO 應驗項目皆有對應因子（無明顯缺口）</div>';
   }
