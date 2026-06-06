@@ -5646,7 +5646,7 @@ function renderVerificationPlan(result, factors) {
 
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:10px;color:rgba(255,255,255,.5);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.1);line-height:1.5">💡 '+result.summary+'</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.1);line-height:1.5">💡 '+result.summary+'</div>';
   }
 
   plans.forEach(function(p){
@@ -5655,30 +5655,30 @@ function renderVerificationPlan(result, factors) {
 
     // 標題行
     html += '<div style="display:flex;align-items:center;gap:4px;margin-bottom:.3rem;flex-wrap:wrap">';
-    html += '<span style="font-size:9px">'+RISK_DOT[p.risk||'medium']+'</span>';
-    html += '<span style="font-size:11px;font-weight:600;color:#fff;flex:1">'+p.factor+'</span>';
-    html += '<span style="background:'+dc.bg+';color:'+dc.color+';font-size:9px;padding:1px 5px;border-radius:3px;white-space:nowrap">'+p.data_needed+'</span>';
+    html += '<span style="font-size:11px">'+RISK_DOT[p.risk||'medium']+'</span>';
+    html += '<span style="font-size:13px;font-weight:600;color:#fff;flex:1">'+p.factor+'</span>';
+    html += '<span style="background:'+dc.bg+';color:'+dc.color+';font-size:11px;padding:1px 5px;border-radius:3px;white-space:nowrap">'+p.data_needed+'</span>';
     html += '</div>';
 
     // 假設
     if(p.hypothesis){
-      html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:.2rem">假設：'+p.hypothesis+'</div>';
+      html += '<div style="font-size:12px;color:rgba(255,255,255,.45);margin-bottom:.2rem">假設：'+p.hypothesis+'</div>';
     }
     // 驗證方法
-    html += '<div style="font-size:10px;color:#7EC8E3;margin-bottom:.2rem">驗證：'+p.verification+'</div>';
+    html += '<div style="font-size:12px;color:#7EC8E3;margin-bottom:.2rem">驗證：'+p.verification+'</div>';
     // 替代指標
     if(p.surrogate){
-      html += '<div style="font-size:10px;color:rgba(255,255,255,.35)">替代指標：'+p.surrogate+'</div>';
+      html += '<div style="font-size:12px;color:rgba(255,255,255,.35)">替代指標：'+p.surrogate+'</div>';
     }
     // 工具標籤
     html += '<div style="margin-top:.3rem">';
-    html += '<span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:9px;padding:1px 6px;border-radius:3px">'+
+    html += '<span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px;padding:1px 6px;border-radius:3px">'+
       (TOOL_LABEL[p.tool]||p.tool)+' — '+(p.tool_reason||'')+'</span>';
     html += '</div>';
     html += '</div>';
   });
 
-  html += '<div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:.4rem">🔴需開發量測方法者，建議先定義量測指標再進行 DOE</div>';
+  html += '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:.4rem">🔴需開發量測方法者，建議先定義量測指標再進行 DOE</div>';
   panel.innerHTML = html;
 
   // 確認按鈕改為「確認計畫，進入魚骨圖」
@@ -6132,10 +6132,9 @@ function renderIsoPanel(r){
                   var lbl=document.createElement('div'); lbl.style.cssText='width:100%;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:2px'; lbl.textContent='▸ 推薦分析工具';
                   btnArea.appendChild(lbl);
                   tools.forEach(function(tid){
-                    var b=document.createElement('button');
-                    b.style.cssText='background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit';
+                    var b=document.createElement('span');
+                    b.style.cssText='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:default';
                     b.textContent=TOOL_NAMES_HOME[tid]||tid;
-                    b.onclick=(function(t){return function(){window.homeGoTool(t);};})(tid);
                     btnArea.appendChild(b);
                   });
                   aiDiv.appendChild(btnArea);
@@ -6241,12 +6240,9 @@ function renderIsoPanel(r){
       label.textContent = '▸ 推薦分析工具';
       btnArea.appendChild(label);
       tools.forEach(function(toolId) {
-        var btn = document.createElement('button');
-        btn.style.cssText = 'background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s';
+        var btn = document.createElement('span');
+        btn.style.cssText = 'background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:default';
         btn.textContent = TOOL_NAMES_HOME[toolId] || toolId;
-        btn.onmouseover = function(){ this.style.background='rgba(255,255,255,.25)'; };
-        btn.onmouseout  = function(){ this.style.background='rgba(255,255,255,.15)'; };
-        btn.onclick = function() { homeGoTool(toolId); };
         btnArea.appendChild(btn);
       });
       div.appendChild(btnArea);
@@ -6819,77 +6815,110 @@ window.fbToDOE = window.fbToExperiment;
 // ════════════════════════════════════════════════════════
 // 6M 自動分類面板（取代舊的單一選擇）
 // ════════════════════════════════════════════════════════
+window._fbToolSel = {};
 window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   if(!fbCauses || fbCauses.length === 0 || !selectorDiv) return;
 
-  // 工具資訊
   var TOOL_INFO = {
-    doe:        { label:'🧪 DOE / PB 實驗優化',  color:'#D97706', desc:'可調變參數 → 帶入實驗因子欄',        tool:'doe' },
-    pb:         { label:'🔎 PB 因子篩選',         color:'#2563EB', desc:'因子多先篩選 → 帶入 PB 實驗',       tool:'pb'  },
-    taguchi:    { label:'📐 田口 穩健設計',        color:'#7C3AED', desc:'雜訊因子 → 帶入田口實驗',            tool:'doe' },
-    spc:        { label:'📈 SPC 製程管控',         color:'#1A9CB0', desc:'被動監控趨勢 → 帶入量測項目',       tool:'spc' },
-    msa:        { label:'📏 MSA 量測驗證',         color:'#9333EA', desc:'量測/操作一致性 → 帶入量測項目',    tool:'msa' },
-    hypothesis: { label:'🔬 假設檢定',             color:'#DC2626', desc:'批次/群組比較 → 帶入數據',          tool:'hypothesis' },
-    none:       { label:'🏭 ISO 環境管控',         color:'#6B7280', desc:'受 ISO 規範管控，不帶入統計工具',   tool:'iso' }
+    doe:        { label:'🧪 DOE / PB 實驗優化',  color:'#D97706', desc:'可調變參數 → 帶入實驗因子欄',     tool:'doe' },
+    pb:         { label:'🔎 PB 因子篩選',         color:'#2563EB', desc:'因子多先篩選 → 帶入 PB 實驗',    tool:'pb'  },
+    taguchi:    { label:'📐 田口 穩健設計',        color:'#7C3AED', desc:'雜訊因子 → 帶入田口實驗',         tool:'doe' },
+    spc:        { label:'📈 SPC 製程管控',         color:'#1A9CB0', desc:'被動監控趨勢 → 帶入量測項目',    tool:'spc' },
+    msa:        { label:'📏 MSA 量測驗證',         color:'#9333EA', desc:'量測/操作一致性 → 帶入量測項目', tool:'msa' },
+    hypothesis: { label:'🔬 假設檢定',             color:'#DC2626', desc:'批次/群組比較 → 帶入數據',       tool:'hypothesis' },
+    none:       { label:'🏭 ISO 環境管控',         color:'#6B7280', desc:'受 ISO 規範管控，不帶入統計工具', tool:'iso' }
   };
-
-  // 依 tool 欄位分組（優先用因子的 tool，沒有才用 6M 預設）
   var CAT_DEFAULT = {man:'spc', machine:'spc', material:'doe', method:'msa', measure:'msa', env:'none'};
   var CAT_NAMES = {man:'人員', machine:'機器', material:'材料', method:'方法', measure:'量測', env:'環境'};
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
-  var toolGroups = {};
-  fbCauses.forEach(function(f) {
-    var t = f.tool || CAT_DEFAULT[f.catId||''] || 'doe';
-    if(!toolGroups[t]) toolGroups[t] = [];
-    toolGroups[t].push(f);
+  // 每個因子的預設建議工具
+  fbCauses.forEach(function(f){ f._defTool = f.tool || CAT_DEFAULT[f.catId||''] || 'doe'; });
+
+  // 可帶入統計工具的因子（環境/none 歸 ISO，不進統計工具）
+  var selFactors = fbCauses.filter(function(f){ return f._defTool !== 'none'; });
+  var envFactors = fbCauses.filter(function(f){ return f._defTool === 'none'; });
+
+  // 可複選的工具：同一因子可勾選多個
+  var toolOrder = ['doe','pb','taguchi','spc','msa','hypothesis'];
+
+  // 初始勾選：每個因子預設勾在它的 AI 建議工具
+  window._fbToolSel = {};
+  toolOrder.forEach(function(t){ window._fbToolSel[t] = []; });
+  selFactors.forEach(function(f){
+    var t = f._defTool; if(!window._fbToolSel[t]) window._fbToolSel[t]=[];
+    if(window._fbToolSel[t].indexOf(f.name)<0) window._fbToolSel[t].push(f.name);
   });
 
   var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
   html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.5rem">🔀 因子分類 → 帶入對應工具</div>';
-  html += '<div style="font-size:11px;color:#6B7280;margin-bottom:1rem">每個因子依 AI 判斷的建議工具分組，可點按鈕帶入</div>';
+  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:1rem;line-height:1.6">同一因子可<b>跨工具複選</b>（可同時帶入 DOE、SPC、MSA…）。實心高亮＝已選、淡色虛線＝未選，點一下切換；預設為 AI 建議分組。</div>';
 
-  // 按工具重要性排序顯示
-  var toolOrder = ['doe','pb','taguchi','spc','msa','hypothesis','none'];
-  toolOrder.forEach(function(toolKey) {
-    var factors = toolGroups[toolKey];
-    if(!factors || factors.length === 0) return;
+  toolOrder.forEach(function(toolKey){
+    if(!selFactors.length) return;
     var info = TOOL_INFO[toolKey];
-    var isISO = toolKey === 'none';
 
     html += '<div style="border:1.5px solid '+info.color+'33;border-radius:10px;padding:.75rem 1rem;margin-bottom:.75rem;background:#fff">';
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:6px">';
-    html += '<div>';
-    html += '<span style="font-weight:700;color:'+info.color+';font-size:13px">'+info.label+'</span>';
-    html += '<span style="font-size:11px;color:#6B7280;margin-left:8px">'+info.desc+'</span>';
-    html += '</div>';
-    if(!isISO){
-      var namesJson = JSON.stringify(factors.map(function(f){return f.name;})).replace(/"/g,'&quot;');
-      html += '<button onclick="fbGoToolByList(JSON.parse(this.dataset.names),this.dataset.tool)" ';
-      html += 'data-names="'+namesJson+'" data-tool="'+info.tool+'" ';
-      html += 'style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入</button>';
-    }
+    html += '<div><span style="font-weight:700;color:'+info.color+';font-size:13px">'+info.label+'</span>';
+    html += '<span style="font-size:11px;color:#6B7280;margin-left:8px">'+info.desc+'</span></div>';
+    html += '<button data-tool="'+toolKey+'" onclick="fbImportTool(this.dataset.tool)" style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入</button>';
     html += '</div>';
 
-    // 因子列表
     html += '<div style="display:flex;flex-wrap:wrap;gap:.4rem">';
-    factors.forEach(function(f){
-      var isHigh = f.risk === 'high';
-      var clr = isHigh ? '#DC2626' : f.risk === 'medium' ? '#92400E' : '#374151';
-      var bg  = isHigh ? '#FEF2F2' : '#F9FAFB';
-      html += '<span style="background:'+bg+';border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;font-size:12px;color:'+clr+';font-weight:'+(isHigh?'700':'400')+'" title="6M: '+(CAT_NAMES[f.catId||'']||f.cat||'')+'">'+f.name+'</span>';
+    selFactors.forEach(function(f){
+      var on = window._fbToolSel[toolKey].indexOf(f.name) >= 0;
+      var dot = f.risk==='high' ? '<span style="color:#DC2626">\u25cf</span> ' : f.risk==='medium' ? '<span style="color:#D97706">\u25cf</span> ' : '';
+      var st = on
+        ? 'background:'+info.color+'1A;border:1.5px solid '+info.color+';color:'+info.color+';font-weight:600'
+        : 'background:#fff;border:1px dashed #D1D5DB;color:#9CA3AF;font-weight:400';
+      html += '<span class="fb-chip" data-tool="'+toolKey+'" data-name="'+esc(f.name)+'" data-color="'+info.color+'" onclick="fbToggleChip(this)" '
+        + 'style="'+st+';border-radius:5px;padding:3px 10px;font-size:12px;cursor:pointer;user-select:none;transition:all .12s" '
+        + 'title="6M: '+(CAT_NAMES[f.catId||'']||f.cat||'')+'">'+dot+f.name+'</span>';
     });
     html += '</div>';
-
-    if(isISO){
-      html += '<div style="margin-top:.5rem;font-size:11px;color:#6B7280;background:#F3F4F6;border-radius:5px;padding:6px 10px">⚠️ 環境因子受 ISO 13485 / ISO 14644 規範管控，不建議直接帶入統計工具。若超出規格，應啟動 CAPA 流程。</div>';
-    }
     html += '</div>';
   });
+
+  if(envFactors.length){
+    var ei = TOOL_INFO.none;
+    html += '<div style="border:1.5px solid '+ei.color+'33;border-radius:10px;padding:.75rem 1rem;margin-bottom:.25rem;background:#fff">';
+    html += '<div style="font-weight:700;color:'+ei.color+';font-size:13px;margin-bottom:.5rem">'+ei.label+'<span style="font-size:11px;color:#6B7280;font-weight:400;margin-left:6px">'+ei.desc+'</span></div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:.4rem">';
+    envFactors.forEach(function(f){
+      html += '<span style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;font-size:12px;color:#6B7280">'+f.name+'</span>';
+    });
+    html += '</div>';
+    html += '<div style="margin-top:.5rem;font-size:11px;color:#6B7280;background:#F3F4F6;border-radius:5px;padding:6px 10px">\u26a0\ufe0f 環境因子受 ISO 13485 / ISO 14644 規範管控，不建議直接帶入統計工具。若超出規格，應啟動 CAPA 流程。</div>';
+    html += '</div>';
+  }
 
   html += '</div>';
   selectorDiv.innerHTML = html;
   selectorDiv.style.display = 'block';
 };
+
+// 切換因子勾選（可跨工具複選，同一因子可選多個工具）
+window.fbToggleChip = function(el){
+  var tool = el.dataset.tool, name = el.dataset.name, color = el.dataset.color;
+  var arr = window._fbToolSel[tool] || (window._fbToolSel[tool]=[]);
+  var i = arr.indexOf(name);
+  if(i>=0){
+    arr.splice(i,1);
+    el.style.background='#fff'; el.style.border='1px dashed #D1D5DB'; el.style.color='#9CA3AF'; el.style.fontWeight='400';
+  }else{
+    arr.push(name);
+    el.style.background=color+'1A'; el.style.border='1.5px solid '+color; el.style.color=color; el.style.fontWeight='600';
+  }
+};
+
+// 帶入某工具目前勾選的因子
+window.fbImportTool = function(tool){
+  var names = (window._fbToolSel[tool]||[]).slice();
+  if(!names.length){ alert('請先點選要帶入的因子（此工具目前未勾選任何因子）'); return; }
+  fbGoToolByList(names, tool);
+};
+
 
 // 依工具帶入因子列表（新版）
 window.fbGoToolByList = function(names, toolId) {
