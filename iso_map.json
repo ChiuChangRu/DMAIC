@@ -1,0 +1,222 @@
+{
+  "_meta": {
+    "schema": "iso_map v1.0",
+    "purpose": "器材類別 → 適用 ISO 標準 → 該驗證的項目類別。供 MedQA verification_plan 做 ISO 對照與缺口紅旗。",
+    "rules": [
+      "no / title / edition：標準身分為 factual（來源：ISO 目錄 / Open Data）。AI 比對時只能引用本檔已列出的標準，不得自行生成編號（避免幻覺條號）。",
+      "items：為驗證『項目類別』草稿，非正本條文逐字內容。一律以正本最新版次為準，需 RA 核可後將 items_status 改為 'RA_approved'。",
+      "applies_to：用於判斷該標準是否適用於某器材的關鍵詞（intravascular / dialysis / balloon / introducer / needle / 通則 / 跨領域）。"
+    ],
+    "edition_note": "edition 為查詢當下的最新版次，採購/送審前請再確認是否被新版取代或廢止。",
+    "last_reviewed": "2026-06 (seed)",
+    "maintained_by": "RA"
+  },
+
+  "ics": {
+    "11.040.25": {
+      "title": "Syringes, needles and catheters｜注射器、針與導管",
+      "standards": [
+        {
+          "no": "ISO 10555-1",
+          "edition": "2023",
+          "title": "Intravascular catheters — Sterile and single-use catheters — Part 1: General requirements",
+          "title_zh": "血管內導管—無菌單次使用—第1部:通則",
+          "applies_to": ["intravascular", "通則"],
+          "id_verified": true,
+          "items_status": "draft_pending_RA",
+          "items": [
+            { "k": "耐腐蝕", "en": "corrosion resistance" },
+            { "k": "峰值拉伸力(管身/接合)", "en": "peak tensile force" },
+            { "k": "加壓不漏液", "en": "freedom from leakage during pressurization" },
+            { "k": "抽吸不漏氣", "en": "freedom from leakage during aspiration" },
+            { "k": "流速", "en": "flowrate" },
+            { "k": "動力注射爆破壓", "en": "power injection burst pressure" },
+            { "k": "接頭(hub)強度", "en": "hubs" },
+            { "k": "可偵測性(顯影)", "en": "radio-detectability" },
+            { "k": "塗層完整性/微粒", "en": "coating integrity / particulate (依設計適用)" },
+            { "k": "遠端尖端剛性", "en": "distal tip stiffness (神經血管適用)" },
+            { "k": "模擬使用/抗扭結/扭力", "en": "simulated use / kink / torque (依設計適用)" }
+          ]
+        },
+        {
+          "no": "ISO 10555-3",
+          "edition": "*待確認",
+          "title": "Intravascular catheters — Sterile and single-use catheters — Part 3: Central venous catheters",
+          "title_zh": "第3部:中心靜脈導管(對應 HD 長期血管導管)",
+          "applies_to": ["intravascular", "central-venous", "HD"],
+          "id_verified": true,
+          "items_status": "draft_pending_RA",
+          "items": [
+            { "k": "(承 Part 1 通則)", "en": "general per Part 1" },
+            { "k": "尺寸標示", "en": "size designation" },
+            { "k": "管腔流速/可注射性", "en": "flow / injectability — RA 補" }
+          ]
+        },
+        {
+          "no": "ISO 10555-4",
+          "edition": "*待確認",
+          "title": "Intravascular catheters — Sterile and single-use catheters — Part 4: Balloon dilatation catheters",
+          "title_zh": "第4部:球囊擴張導管",
+          "applies_to": ["intravascular", "balloon"],
+          "id_verified": true,
+          "items_status": "draft_pending_RA",
+          "items": [
+            { "k": "額定爆破壓(RBP)", "en": "rated burst pressure" },
+            { "k": "球囊順應性(直徑-壓力)", "en": "compliance" },
+            { "k": "反覆充壓疲勞", "en": "fatigue / repeated inflation" },
+            { "k": "球囊接合強度", "en": "balloon bond strength — RA 補" }
+          ]
+        },
+        {
+          "no": "ISO 10555-8",
+          "edition": "2024",
+          "title": "Intravascular catheters — Sterile and single-use catheters — Part 8: Catheters for extracorporeal blood treatment",
+          "title_zh": "第8部:體外血液處理用導管(血液透析)",
+          "applies_to": ["intravascular", "dialysis", "HD", "extracorporeal"],
+          "id_verified": true,
+          "items_status": "draft_pending_RA",
+          "items": [
+            { "k": "再循環率", "en": "recirculation rate" },
+            { "k": "流量-壓力特性", "en": "flow vs pressure" },
+            { "k": "管腔容積/填充量", "en": "priming/lumen volume — RA 補" },
+            { "k": "(承 Part 1 通則:拉伸/漏液/接頭)", "en": "general per Part 1" }
+          ]
+        },
+        {
+          "no": "ISO 11070",
+          "edition": "*待確認",
+          "title": "Sterile single-use intravascular catheter introducers, dilators and guidewires",
+          "title_zh": "無菌單次使用血管內導引器、擴張器與導絲(對應 Sheath/Guide/同軸導引針)",
+          "applies_to": ["introducer", "sheath", "guidewire", "needle", "guide"],
+          "id_verified": true,
+          "items_status": "draft_pending_RA",
+          "items": [
+            { "k": "導引器/擴張器拉伸", "en": "tensile" },
+            { "k": "導絲彈性/抗扭結", "en": "guidewire flex/kink — RA 補" },
+            { "k": "表面/微粒", "en": "surface / particulate — RA 補" }
+          ]
+        }
+      ]
+    },
+
+    "11.040.40": {
+      "title": "Implants for surgery / urology stents｜植入物與泌尿支架(DJ/Pigtail)",
+      "_note": "輸尿管 DJ/Pigtail 支架非血管內導管，10555 不適用。主規格多為 ASTM F1828*（輸尿管支架），ISO 端以生物相容/滅菌/包裝為主。本區待 RA 依實際送審依據建檔。",
+      "standards": [
+        {
+          "no": "ASTM F1828",
+          "edition": "*非ISO,待確認",
+          "title": "Standard Specification for Ureteral Stents",
+          "title_zh": "輸尿管支架規格(ASTM,非ISO)*",
+          "applies_to": ["ureteral", "DJ", "pigtail", "stent"],
+          "id_verified": false,
+          "items_status": "draft_pending_RA",
+          "items": [
+            { "k": "拉伸/接合強度", "en": "tensile — RA 補" },
+            { "k": "捲曲保持力(pigtail)", "en": "coil retention — RA 補" },
+            { "k": "流速/側孔", "en": "flow — RA 補" }
+          ]
+        }
+      ]
+    }
+  },
+
+  "cross_cutting": {
+    "_note": "跨器材通用，幾乎所有無菌植入/介入器材都需涵蓋。AI 應視器材性質判斷是否納入。",
+    "standards": [
+      {
+        "no": "ISO 10993-1",
+        "edition": "*待確認",
+        "title": "Biological evaluation of medical devices — Part 1: Evaluation and testing within a risk management process",
+        "title_zh": "醫療器材生物相容性評估—第1部:風險管理流程內的評估與試驗",
+        "applies_to": ["跨領域", "biocompat"],
+        "id_verified": true,
+        "items_status": "draft_pending_RA",
+        "items": [
+          { "k": "細胞毒性", "en": "cytotoxicity" },
+          { "k": "致敏性", "en": "sensitization" },
+          { "k": "刺激/皮內反應", "en": "irritation" },
+          { "k": "(依接觸類型與時間擴充)", "en": "per contact category/duration" }
+        ]
+      },
+      {
+        "no": "ISO 11135",
+        "edition": "*待確認",
+        "title": "Sterilization of health care products — Ethylene oxide — Requirements for development, validation and routine control",
+        "title_zh": "EO 環氧乙烷滅菌確效",
+        "applies_to": ["跨領域", "sterilization-EO"],
+        "id_verified": true,
+        "items_status": "draft_pending_RA",
+        "items": [
+          { "k": "滅菌確效(SAL 10^-6)", "en": "validation" },
+          { "k": "EO/ECH 殘留", "en": "residuals (見 10993-7)" }
+        ]
+      },
+      {
+        "no": "ISO 11137-1",
+        "edition": "*待確認",
+        "title": "Sterilization of health care products — Radiation — Part 1: Requirements for development, validation and routine control",
+        "title_zh": "輻射滅菌確效",
+        "applies_to": ["跨領域", "sterilization-radiation"],
+        "id_verified": true,
+        "items_status": "draft_pending_RA",
+        "items": [
+          { "k": "劑量確立(VDmax 等)", "en": "dose setting" },
+          { "k": "材料相容性", "en": "material effects" }
+        ]
+      },
+      {
+        "no": "ISO 11607-1",
+        "edition": "*待確認",
+        "title": "Packaging for terminally sterilized medical devices — Part 1: Requirements for materials, sterile barrier systems and packaging systems",
+        "title_zh": "最終滅菌器材包裝—無菌屏障系統",
+        "applies_to": ["跨領域", "packaging"],
+        "id_verified": true,
+        "items_status": "draft_pending_RA",
+        "items": [
+          { "k": "封口強度/完整性", "en": "seal strength/integrity" },
+          { "k": "老化(實時/加速)", "en": "aging / shelf life" }
+        ]
+      },
+      {
+        "no": "ISO 80369-7",
+        "edition": "*待確認",
+        "title": "Small-bore connectors for liquids and gases in healthcare applications — Part 7: Connectors for intravascular or hypodermic applications",
+        "title_zh": "小口徑連接器—第7部:血管內/皮下(取代舊 Luer ISO 594)",
+        "applies_to": ["intravascular", "connector", "luer", "needle"],
+        "id_verified": true,
+        "items_status": "draft_pending_RA",
+        "items": [
+          { "k": "接頭結合/漏液/分離力", "en": "leakage / separation / overriding" }
+        ]
+      },
+      {
+        "no": "ISO 7864",
+        "edition": "*待確認",
+        "title": "Sterile hypodermic needles for single use — Requirements and test methods",
+        "title_zh": "無菌單次使用皮下注射針(對應針/同軸導引針)",
+        "applies_to": ["needle", "guide"],
+        "id_verified": true,
+        "items_status": "draft_pending_RA",
+        "items": [
+          { "k": "針管與針座結合強度", "en": "hub/needle bond" },
+          { "k": "針尖穿刺力/銳利度", "en": "penetration / sharpness" },
+          { "k": "通暢性/不漏液", "en": "patency" }
+        ]
+      },
+      {
+        "no": "ISO 9626",
+        "edition": "*待確認",
+        "title": "Stainless steel needle tubing for the manufacture of medical devices — Requirements and test methods",
+        "title_zh": "醫療器材用不鏽鋼針管",
+        "applies_to": ["needle", "guide", "tubing"],
+        "id_verified": true,
+        "items_status": "draft_pending_RA",
+        "items": [
+          { "k": "尺寸/壁厚", "en": "dimensions" },
+          { "k": "剛性/抗折", "en": "stiffness / breakage resistance" }
+        ]
+      }
+    ]
+  }
+}
