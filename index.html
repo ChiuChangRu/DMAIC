@@ -5608,6 +5608,7 @@ window.homeConfirmFactors = async function() {
       })
     });
     var data = await resp.json();
+    console.log('[驗證計畫] worker 回傳：', data);
 
     if(data.result && data.result.plans && data.result.plans.length > 0) {
       window._verificationPlan = data.result;
