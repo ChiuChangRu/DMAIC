@@ -542,6 +542,18 @@ tr:hover td{background:#F9FAFB}
         <span style="margin-left:auto;width:8px;height:8px;background:#4ADE80;border-radius:50%;animation:fab-pulse 2s ease-in-out infinite;flex-shrink:0"></span>
       </div>
 
+      <details style="margin-bottom:1rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:.5rem .85rem">
+        <summary style="font-size:12px;color:rgba(255,255,255,.75);cursor:pointer;font-weight:600;list-style:none">📖 使用流程（第一次用先點我）</summary>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.85;margin-top:.5rem">
+          1️⃣ 輸入器材名稱 → AI 查 FDA 幫你確認器材<br>
+          2️⃣ 描述問題 ＋ 填問卷 → AI 追問細節<br>
+          3️⃣ 資訊足夠後按「整理因子」→ AI 列出 6M 因子<br>
+          4️⃣ 確認因子 → AI 產生驗證計畫（含逐因子 ISO 對照）<br>
+          5️⃣ 進入魚骨圖 → 因子帶入小工具／檢視其他處置<br>
+          <span style="color:rgba(255,255,255,.5)">※ 問題描述越具體，AI 信心度越高、因子越準。</span>
+        </div>
+      </details>
+
       <!-- ══ STEP 1：輸入器材名稱 ══ -->
       <div id="home-step1" style="display:block">
         <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
@@ -623,6 +635,7 @@ tr:hover td{background:#F9FAFB}
         <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.6rem" id="home-step4-label">
           步驟 4 / 5 &nbsp;·&nbsp; AI 深入追問
         </div>
+        <div style="font-size:11px;color:rgba(255,255,255,.55);margin-bottom:.6rem;line-height:1.6;background:rgba(255,255,255,.05);border-radius:8px;padding:.45rem .7rem">💬 回答 AI 的追問把細節補齊；信心度足夠時，下方會出現「整理因子」按鈕，按下才會產生因子。</div>
         <div id="home-device-badge2" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:12px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
           <span>✅</span><span id="home-device-badge-text2"></span>
         </div>
@@ -645,8 +658,8 @@ tr:hover td{background:#F9FAFB}
         <!-- 因子面板（下方，分類並排） -->
         <div id="home-factor-panel" style="background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);border-radius:12px;padding:.85rem 1rem;display:none">
           <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:.6rem">📋 AI 整理的因子</div>
-          <div id="home-factor-panel-content" style="font-size:12px;color:rgba(255,255,255,.4);font-style:italic">
-            對話結束後自動整理
+          <div id="home-factor-panel-content" style="font-size:12px;color:rgba(255,255,255,.55);font-style:italic">
+            完成左側對話、按下「整理因子」後，這裡會列出 6M 因子分類。
           </div>
           <div id="home-iso-panel" style="margin-top:.6rem"></div>
           <div id="home-factor-panel-btn" style="margin-top:.85rem;display:none">
@@ -5450,7 +5463,7 @@ window.renderFactorPanel = function renderFactorPanel(result) {
   // 摘要
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-bottom:.75rem;line-height:1.5;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.08)">'+result.summary+'</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,.78);margin-bottom:.75rem;line-height:1.5;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.12)">'+result.summary+'</div>';
   }
 
   // 分類並排網格
@@ -5619,11 +5632,11 @@ window.homeConfirmFactors = async function() {
       if(panel) panel.innerHTML =
         '<div style="font-size:11px;color:#FCA5A5;margin-bottom:.5rem">⚠️ 驗證計畫生成失敗</div>'+
         '<div style="font-size:10px;color:rgba(255,255,255,.3);margin-bottom:.4rem">'+errMsg+'</div>'+
-        '<div style="font-size:10px;color:rgba(255,255,255,.4)">可直接進入魚骨圖</div>';
+        '<div style="font-size:10px;color:rgba(255,255,255,.4)">可略過驗證計畫，直接進入魚骨圖</div>';
       if(btn){
         btn.style.display='block';
         var b=btn.querySelector('button');
-        if(b){ b.textContent='🐟 直接進入魚骨圖'; b.onclick=function(){proceedToFishbone(factors);}; }
+        if(b){ b.textContent='🐟 略過驗證計畫，直接進入魚骨圖'; b.onclick=function(){proceedToFishbone(factors);}; }
       }
     }
   } catch(e) {
@@ -5631,7 +5644,7 @@ window.homeConfirmFactors = async function() {
     if(btn){
       btn.style.display='block';
       var b2=btn.querySelector('button');
-      if(b2){ b2.textContent='🐟 直接進入魚骨圖'; b2.onclick=function(){proceedToFishbone(factors);}; }
+      if(b2){ b2.textContent='🐟 略過驗證計畫，直接進入魚骨圖'; b2.onclick=function(){proceedToFishbone(factors);}; }
     }
   }
 };
@@ -6149,7 +6162,7 @@ function renderIsoPanel(r){
         // 建立 AI 訊息泡泡（串流逐字填入）
         var loadEl = document.getElementById('home-loading'); if(loadEl) loadEl.remove();
         var aiDiv = document.createElement('div');
-        aiDiv.style.cssText = 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;white-space:pre-wrap';
+        aiDiv.style.cssText = 'background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-left:3px solid #7EC8E3;border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.96);line-height:1.7;white-space:pre-wrap';
         aiDiv.textContent = '▋';
         var histEl = document.getElementById('home-chat-history');
         if(histEl){ histEl.appendChild(aiDiv); histEl.scrollTop=histEl.scrollHeight; }
@@ -6209,11 +6222,11 @@ function renderIsoPanel(r){
             var confLabel = tools&&tools.length>0 ? '✅ 可開始分析' : conf>=50?'需再補充資訊':'資訊不足';
             var bar = document.createElement('div');
             bar.style.cssText='display:flex;align-items:center;gap:8px;margin-top:4px;padding:0 2px';
-            bar.innerHTML='<span style="font-size:10px;color:rgba(255,255,255,.45)">AI 信心度</span>'
+            bar.innerHTML='<span style="font-size:10px;color:rgba(255,255,255,.7)">AI 信心度</span>'
               +'<div style="flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden">'
               +'<div style="height:100%;width:'+conf+'%;background:'+confColor+';border-radius:3px;transition:.5s"></div></div>'
               +'<span style="font-size:11px;color:'+confColor+';font-weight:700">'+conf+'%</span>'
-              +'<span style="font-size:10px;color:rgba(255,255,255,.5)">'+confLabel+'</span>';
+              +'<span style="font-size:10px;color:rgba(255,255,255,.75)">'+confLabel+'</span>';
             hist3.appendChild(bar);
             hist3.scrollTop=hist3.scrollHeight;
           }
@@ -6221,7 +6234,17 @@ function renderIsoPanel(r){
 
         if(tools&&tools.length>0){
           window._pendingTools=tools; window._homeStep=5;
-          homeSummarizeFactors(tools);
+          var hist4 = document.getElementById('home-chat-history');
+          if(hist4){
+            var oldBtn = document.getElementById('home-go-factors-btn'); if(oldBtn) oldBtn.remove();
+            var go = document.createElement('button');
+            go.id = 'home-go-factors-btn';
+            go.textContent = '🎯 資訊足夠了，讓 AI 整理因子 →';
+            go.style.cssText = 'margin:10px 2px 2px;background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 2px 8px rgba(37,99,235,.35)';
+            go.onclick = function(){ this.disabled=true; this.style.opacity='.6'; this.textContent='AI 整理因子中...'; homeSummarizeFactors(window._pendingTools||tools); };
+            hist4.appendChild(go);
+            hist4.scrollTop = hist4.scrollHeight;
+          }
         }
       } catch(err) {
         var el3 = document.getElementById('home-loading'); if(el3) el3.remove();
@@ -6249,7 +6272,7 @@ function renderIsoPanel(r){
           :'資訊不足，請填問卷或繼續對話';
       var bar = document.createElement('div');
       bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:.35rem .5rem;margin-top:2px';
-      bar.innerHTML = '<span style="font-size:10px;color:rgba(255,255,255,.45)">AI 信心度</span>'+
+      bar.innerHTML = '<span style="font-size:10px;color:rgba(255,255,255,.7)">AI 信心度</span>'+
         '<div style="width:90px;height:5px;background:rgba(255,255,255,.15);border-radius:3px">'+
           '<div style="height:100%;width:'+conf+'%;background:'+confColor+';border-radius:3px;transition:.5s"></div>'+
         '</div>'+
@@ -6278,14 +6301,14 @@ function renderIsoPanel(r){
     if(!hist) return;
     hist.style.display = 'flex';
     var div = document.createElement('div');
-    div.style.cssText = 'background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.85);line-height:1.7;white-space:pre-wrap';
+    div.style.cssText = 'background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-left:3px solid #7EC8E3;border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.96);line-height:1.7;white-space:pre-wrap';
     div.textContent = text;
 
     if(tools && tools.length > 0) {
       var btnArea = document.createElement('div');
       btnArea.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
       var label = document.createElement('div');
-      label.style.cssText = 'width:100%;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:2px;letter-spacing:.04em';
+      label.style.cssText = 'width:100%;font-size:11px;color:rgba(255,255,255,.62);margin-bottom:2px;letter-spacing:.04em';
       label.textContent = '▸ 推薦分析工具';
       btnArea.appendChild(label);
       tools.forEach(function(toolId) {
