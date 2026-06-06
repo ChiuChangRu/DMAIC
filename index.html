@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v3.77 · AI 輔助統計分析平台</title>
+<title>MedQA v3.78 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v3.77 · ' + ts;
+    if(el) el.textContent = 'v3.78 · ' + ts;
   });
 })();
 </script>
@@ -493,7 +493,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v3.77</span>
+    <span class="tb-status" id="dmaic-save-status">v3.78</span>
   </div>
 </div>
 
@@ -527,12 +527,10 @@ tr:hover td{background:#F9FAFB}
 
 <!-- ══ Hero + 問題輸入對話框 ══ -->
 <div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:visible">
-  <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
-  <div style="position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none"></div>
 
-  <div style="max-width:960px;margin:0 auto;position:relative;z-index:1">
-    <div style="text-align:center;margin-bottom:1.5rem">
-      <h2 style="font-size:30px;font-weight:700;line-height:1.3;letter-spacing:-.01em">AI 輔助品質分析平台</h2>
+  <div style="max-width:1100px;margin:0 auto;padding:0 1.5rem;position:relative;z-index:1">
+    <div style="margin-bottom:1.5rem">
+      <h2 style="font-size:30px;font-weight:700;line-height:1.3;letter-spacing:-.01em;text-align:left">AI 輔助品質分析平台</h2>
     </div>
 
     <div style="background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:16px;padding:1.25rem 1.5rem">
@@ -7149,7 +7147,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.77 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v3.78 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -7282,7 +7280,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v3.77 · '+window._buildTime);
+  status('v3.78 · '+window._buildTime);
 })();
 
 
