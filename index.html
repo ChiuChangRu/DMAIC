@@ -5773,12 +5773,52 @@ async function loadIsoMap(){
 }
 
 // 把 iso_map 攤平成可引用的標準清單（依編號去重）
-function flattenIsoStandards(map){
+// 由器材分類關鍵詞 + 「跨領域」做確定性過濾：
+//  - applies_to 含「跨領域」= 通用（生物相容/滅菌/包裝），任何器材都納入
+//  - 其餘標準：applies_to 與本器材 category_keys 有交集才納入
+// 這樣不同產品不會掛到不相關標準（例如輸尿管支架不會掛 10555）。
+function flattenIsoStandards(map, keys){
   var out = [], seen = {};
-  function push(s){ if(s && s.no && !seen[s.no]){ seen[s.no]=1; out.push(s); } }
+  var ck = Array.isArray(keys) ? keys.map(function(k){ return String(k).toLowerCase(); }) : [];
+  function applies(s){
+    var at = (s.applies_to || []).map(function(x){ return String(x).toLowerCase(); });
+    if(at.indexOf('跨領域') >= 0) return true;
+    if(!ck.length) return false;
+    return at.some(function(a){ return ck.indexOf(a) >= 0; });
+  }
+  function push(s){ if(s && s.no && !seen[s.no] && applies(s)){ seen[s.no]=1; out.push(s); } }
   if(map && map.ics){ Object.keys(map.ics).forEach(function(k){ (map.ics[k].standards||[]).forEach(push); }); }
   if(map && map.cross_cutting){ (map.cross_cutting.standards||[]).forEach(push); }
   return out;
+}
+
+// 取得器材分類關鍵詞：優先用 identify_device 給的 category_keys；
+// 若沒有（舊案或 AI 未輸出），退而用器材文字關鍵字掃描推導（標 * 為推導）。
+function deriveCategoryKeys(info){
+  if(info && Array.isArray(info.category_keys) && info.category_keys.length) return info.category_keys;
+  var txt = ((info&&info.confirmed_name)||'') + ' ' + ((info&&info.structure)||'') + ' ' +
+            ((info&&info.indication)||'') + ' ' + ((info&&info.material)||'');
+  txt = txt.toLowerCase();
+  var VOCAB = {
+    'intravascular': ['intravascular','血管內','vascular','靜脈','動脈','cvc','picc'],
+    'central-venous': ['central venous','中心靜脈','cvc'],
+    'dialysis': ['dialysis','透析','hemodialysis','血液透析','extracorporeal','體外血液'],
+    'balloon': ['balloon','球囊','氣囊','擴張'],
+    'introducer': ['introducer','導引器'],
+    'sheath': ['sheath','鞘管','護鞘'],
+    'guidewire': ['guidewire','導絲'],
+    'needle': ['needle','針','biopsy','切片','穿刺'],
+    'guide': ['coaxial','同軸','導引針'],
+    'ureteral': ['ureteral','輸尿管'],
+    'stent': ['stent','支架','double j','double-j','pigtail','雙j','豬尾'],
+    'connector': ['connector','接頭','luer','魯爾','魯耳'],
+    'tubing': ['tubing','針管','不鏽鋼管','不銹鋼管']
+  };
+  var keys = [];
+  Object.keys(VOCAB).forEach(function(k){
+    if(VOCAB[k].some(function(w){ return txt.indexOf(w) >= 0; })) keys.push(k);
+  });
+  return keys;
 }
 
 async function runIsoCrosscheck(plans){
@@ -5796,8 +5836,13 @@ async function runIsoCrosscheck(plans){
     box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照未啟用（找不到 iso_map.json：'+map.__error+'）</div>';
     return;
   }
-  var standards = flattenIsoStandards(map);
-  if(!standards.length){ box.innerHTML=''; return; }
+  var catKeys = deriveCategoryKeys(window._deviceInfo);
+  console.log('[ISO 對照] 器材分類 category_keys：', catKeys, window._deviceInfo && window._deviceInfo.category_keys ? '(來自 AI)' : '(關鍵字推導*)');
+  var standards = flattenIsoStandards(map, catKeys);
+  if(!standards.length){
+    box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照：依本器材分類（'+(catKeys.join('、')||'未判定')+'）未對應到 iso_map 內標準；僅通用標準適用或尚未建檔。</div>';
+    return;
+  }
 
   try{
     var problem = (document.getElementById('hq-problem')||{}).value || '';
