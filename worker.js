@@ -1,4 +1,5 @@
-// MedQA Worker v4.0 — verification_plan + fishbone_to_doe + summarize_factors + identify_device
+// MedQA Worker v5.0 — + iso_crosscheck（ISO 對照/缺口紅旗）
+// 既有：verification_plan + fishbone_to_doe + summarize_factors + identify_device
 // 部署：Cloudflare Workers，ANTHROPIC_API_KEY 存於 Secret
 
 const ALLOWED_ORIGINS = [
@@ -155,7 +156,7 @@ export default {
 
       // 合法 mode 限制
       const mode = body.mode || 'chat';
-      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'stream_navigate', 'fishbone_to_doe', 'version'];
+      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'stream_navigate', 'fishbone_to_doe', 'version'];
       if (!VALID_MODES.includes(mode)) {
         return new Response(JSON.stringify({ error: '無效的 mode' }), {
           status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
@@ -164,7 +165,7 @@ export default {
 
       // ══ version：回傳 Worker 版本 ══
       if (mode === 'version') {
-        return json({ mode: 'version', version: 'v4.0' }, origin);
+        return json({ mode: 'version', version: 'v5.0' }, origin);
       }
 
       // ══ fishbone_to_doe：魚骨圖因子轉換為 DOE 實驗設計格式 ══
@@ -336,29 +337,26 @@ ${surveyContext}
         const factors = body.factors || [];
 
         const resp = await callClaude(env, MODEL_MAP.sonnet, {  // 改用 sonnet 省成本
-          max_tokens: 3000,
-          system: `你是醫療器材品質驗證專家，為魚骨圖因子設計驗證計畫。
+          max_tokens: 8000,
+          system: `你是醫療器材 CAPA 驗證策略專家。為每個因子判斷該走哪種「驗證/矯正管道」，不要把所有因子都硬塞進統計實驗。
 ${deviceCtx}
 
-【重要觀念】
-- MSA 是量測方法建立後的「確效」，不是量測方法的建立
-- 量測方法本身需要工程判斷，MSA 只是確認該方法可靠
-- 驗證順序：先能「觀察到」→ 再能「量測到」→ 再能「量化比較」→ 再做 DOE
+【判斷順序（決策樹，依序判斷，命中即停）】
+1. 製造商無法控制（病人狀態、臨床決策、臨床留置天數）→ pipeline=uncontrollable
+2. 臨床使用/操作/人員手法/說明書 → pipeline=use_side（subtype：可用性人因62366 / IFU標示 / 教育訓練）
+3. 「是否符合某 ISO 規範」的問題 → pipeline=compliance、iso_relevant=true（subtype：ISO規範符合性 / 生物相容10993 / 滅菌包裝確效 / 製程確效IQ-OQ-PQ / 品質系統13485）
+4. 風險測不到或需證據 → pipeline=method_dev（量測方法開發 / 替代指標）或 pipeline=risk_evidence（風險管理14971 / 臨床評估14155 / 上市後監督PMS）
+5. 供應商/來料品質 → pipeline=supplier
+6. 可調變的設計/製程參數且量測可行 → pipeline=experiment（subtype：DOE / PB / 田口 / SPC / MSA / 假設檢定）
 
-【驗證策略判斷】
-- 已有量測數據 → 直接進統計工具（SPC/假設檢定/散佈圖）
-- 有量測方法但無數據 → 先 MSA 確效，再收數據
-- 不確定要測什麼 → 先定義替代指標（surrogate），再設計量測方法
-- 可主動調變參數 → DOE（前提：量測方法已確立）
-- 設備狀態被動監控 → SPC
-- 排除法（定性觀察）→ 逐一消去，成本低
+【鐵則】
+- 不是每個因子都要 DOE/SPC/MSA。測不到的風險請走 method_dev / risk_evidence，不要硬給統計工具。
+- 只有 compliance 類 iso_relevant=true，其餘一律 false。
+- subtype 一律用上面括號內的詞。
+- verification = 該管道下的具體建議動作（30字內，語氣符合管道：做實驗 / 查核ISO條文 / 開發量測法 / 訓練考核 / 修訂IFU / 列入風險檔 / 供應商稽核…）。
+- link = 每個因子都要寫出它如何導致「使用者陳述的問題」的因果路徑（因子→中間機制→問題現象）。例：問題=「pigtail loop retention 不足」→「基材熱彈性記憶」link 寫「熱彈性記憶不足→定型後回彈→loop retention 下降」。與問題明顯無關的因子不要列。
 
-【data_needed 三選一】
-- "已有數據"：目前已有可用的量測結果
-- "需收集數據"：量測方法已知，但需要執行量測
-- "需開發量測方法"：目前不確定用什麼指標或方法來驗證
-
-繁體中文，驗證建議要實際可行，避免過於學術化`,
+繁體中文，務實、不學術`,
 
           tools: [{
             name: 'verification_plan',
@@ -373,13 +371,15 @@ ${deviceCtx}
                     properties: {
                       factor:       { type: 'string' },
                       risk:         { type: 'string', enum: ['high','medium','low'] },
-                      hypothesis:   { type: 'string', description: '若此因子是根因，預期現象（20字內）' },
-                      verification: { type: 'string', description: '驗證方法（25字內）' },
-                      tool:         { type: 'string', enum: ['doe','pb','taguchi','spc','msa','hypothesis','observation','none'] },
+                      pipeline:     { type: 'string', enum: ['experiment','compliance','method_dev','risk_evidence','use_side','supplier','uncontrollable'] },
+                      subtype:      { type: 'string', description: '細項，如 DOE/SPC/MSA/假設檢定/ISO規範符合性/生物相容(10993)/滅菌包裝確效/製程確效IQ-OQ-PQ/品質系統(13485)/風險管理(14971)/臨床評估(14155)/上市後監督PMS/量測方法開發/替代指標/可用性人因(62366)/IFU標示/教育訓練/供應商管控/不可控' },
+                      verification: { type: 'string', description: '建議動作（30字內）' },
+                      link:         { type: 'string', description: '關聯鏈：此因子如何導致使用者陳述的問題（≤25字，「因子→中間機制→問題現象」）' },
+                      iso_relevant: { type: 'boolean', description: '是否需對照ISO規範條文（僅compliance類true）' },
                       data_needed:  { type: 'string', enum: ['已有數據','需收集數據','需開發量測方法'] },
                       priority:     { type: 'number' }
                     },
-                    required: ['factor','risk','hypothesis','verification','tool','data_needed','priority']
+                    required: ['factor','pipeline','verification']
                   }
                 },
                 summary: { type: 'string' }
@@ -396,12 +396,119 @@ ${deviceCtx}
 
         const tu = resp.content && resp.content.find(c => c.type === 'tool_use');
         const result = (tu && tu.input) || {};
-        const debugInfo = !tu ? {
+        if(!Array.isArray(result.plans)) result.plans = [];
+        const debugInfo = {
           stop_reason: resp.stop_reason,
-          content_types: (resp.content||[]).map(c=>c.type),
-          error: resp.error
-        } : null;
+          tool_fired: !!tu,
+          n_plans: result.plans.length,
+          n_factors: factors.length,
+          content_types: (resp.content||[]).map(c=>c.type)
+        };
         return json({ mode: 'verification_plan', result, _debug: debugInfo }, origin);
+      }
+
+      // ══ iso_crosscheck：ISO 對照 — 把因子/驗證計畫對照 ISO 應驗項目，標出缺口 ══
+      // 重要：模型只能引用 body.isoStandards 內實際存在的標準與項目，嚴禁自行生成標準編號或條號。
+      if (mode === 'iso_crosscheck') {
+        const deviceCtx = body.deviceInfo ? `
+【已確認器材】${body.deviceInfo.confirmed_name}
+材料：${body.deviceInfo.material}
+結構：${body.deviceInfo.structure}
+用途：${body.deviceInfo.indication}
+關鍵品質：${(body.deviceInfo.key_quality||[]).join('、')}` : '';
+
+        const isoStandards = Array.isArray(body.isoStandards) ? body.isoStandards : [];
+        const plans = Array.isArray(body.plans) ? body.plans : [];
+        const factors = Array.isArray(body.factors) ? body.factors : [];
+
+        // 把可引用的標準清單轉成精簡文字（只給編號/標題/適用關鍵詞/項目）
+        const stdText = isoStandards.map(s => {
+          const items = (s.items||[]).map(i => i.k).join('、');
+          return `- ${s.no}${s.edition?(' ('+s.edition+')'):''}｜${s.title_zh||s.title}｜適用:${(s.applies_to||[]).join('/')}｜應驗項目:[${items}]`;
+        }).join('\n');
+
+        // 目前計畫已涵蓋的因子/驗證
+        const planText = plans.length
+          ? plans.map(p => `- 因子「${p.factor}」→ 驗證:${p.verification||''}（工具:${p.tool||''}）`).join('\n')
+          : factors.map(f => `- 因子「${f.name||f}」`).join('\n');
+
+        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+          max_tokens: 3500,
+          system: `你是醫療器材法規/驗證稽核專家。任務：把使用者「因子探討後的驗證計畫」對照 ISO 應驗項目，找出 CAPA 容易踩到的缺口（ISO 應驗但計畫沒涵蓋）。
+${deviceCtx}
+
+【絕對規則 — 防止幻覺】
+1. 你只能引用下方〈可引用標準清單〉裡實際存在的標準編號與項目。
+2. 嚴禁自行發明、補充或修改任何 ISO/ASTM 編號、版次或條號。清單沒有的，一律不准提。
+3. 「應驗項目(items)」是分類草稿、非正本條文；判讀時當作『類別』比對即可，不要捏造數值或允收準則。
+
+【判讀步驟】
+- 先用器材性質 + 各標準的「適用關鍵詞」，判斷清單中哪些標準『適用於本器材』(applicable)，其餘略過。
+- 對每個適用標準的每個應驗項目，比對使用者計畫：
+  · covered＝已有對應因子/驗證明確涵蓋
+  · partial＝有相關因子但驗證方式/指標不完整
+  · gap＝ISO 應驗但計畫完全沒涵蓋（這就是 CAPA 風險，要標紅旗）
+- covered_by 填對應的因子名稱；gap 則留空。
+- note 一句話（20字內），可寫「以正本最新版次為準」之類提醒，不要長篇。
+
+繁體中文。務實，不要學術長文。`,
+          tools: [{
+            name: 'iso_crosscheck',
+            description: 'ISO 應驗項目與驗證計畫的覆蓋比對，標出缺口',
+            input_schema: {
+              type: 'object',
+              properties: {
+                applicable: {
+                  type: 'array',
+                  description: '判定適用於本器材的標準（只能取自清單）',
+                  items: { type: 'object', properties: {
+                    no: { type: 'string' },
+                    reason: { type: 'string', description: '為何適用，15字內' }
+                  }, required: ['no'] }
+                },
+                items: {
+                  type: 'array',
+                  description: '每個適用標準的應驗項目覆蓋判讀',
+                  items: { type: 'object', properties: {
+                    standard:   { type: 'string', description: '標準編號（取自清單）' },
+                    item:       { type: 'string', description: '應驗項目（取自清單）' },
+                    status:     { type: 'string', enum: ['covered','partial','gap'] },
+                    covered_by: { type: 'string', description: '對應因子名稱；gap 留空' },
+                    note:       { type: 'string', description: '20字內提醒' }
+                  }, required: ['standard','item','status'] }
+                },
+                summary: { type: 'string', description: '缺口總結與建議，50字內' }
+              },
+              required: ['items']
+            }
+          }],
+          tool_choice: { type: 'tool', name: 'iso_crosscheck' },
+          messages: [{
+            role: 'user',
+            content: `問題：${body.problem || '未知'}
+
+〈可引用標準清單〉（只能引用這些）：
+${stdText || '(無，請回傳空結果)'}
+
+〈目前因子探討後的驗證計畫〉：
+${planText || '(無)'}
+
+請判定適用標準，並逐項比對覆蓋情形、標出 gap 缺口。`
+          }]
+        });
+
+        const tu = resp.content && resp.content.find(c => c.type === 'tool_use');
+        const result = (tu && tu.input) || {};
+        if(!Array.isArray(result.items)) result.items = [];
+        if(!Array.isArray(result.applicable)) result.applicable = [];
+        const debugInfo = {
+          stop_reason: resp.stop_reason,
+          tool_fired: !!tu,
+          n_applicable: result.applicable.length,
+          n_items: result.items.length,
+          content_types: (resp.content||[]).map(c=>c.type)
+        };
+        return json({ mode: 'iso_crosscheck', result, _debug: debugInfo }, origin);
       }
 
       // ══ summarize_factors：整理因子清單供使用者確認 ══
@@ -422,7 +529,9 @@ ${deviceCtx}
             basis:       { type: 'string', description: '依據來源（20字內）' },
             tool:        { type: 'string', enum: ['doe','pb','taguchi','spc','msa','hypothesis','none'],
                            description: '建議分析工具' },
-            tool_reason: { type: 'string', description: '為何用這個工具（15字內）' }
+            tool_reason: { type: 'string', description: '為何用這個工具（15字內）' },
+            link:        { type: 'string', description: '關聯鏈：此因子如何導致使用者陳述的問題（≤25字，格式「因子→中間機制→問題現象」）' },
+            speculative: { type: 'boolean', description: '若無法說出與本問題的明確因果關聯，設為 true（前端會標「推測*」）' }
           },
           required: ['name','risk','basis','tool','tool_reason']
         };
@@ -471,7 +580,13 @@ ${deviceCtx}
 - 每個因子必須有依據，不可捏造
 - 每個類別 3-5 個
 - 沒有依據的類別回傳空陣列
-- 繁體中文`,
+- 繁體中文
+
+【關聯性 — 必填，這很重要】
+- 先讀懂使用者陳述的「問題現象」。每個因子都要能連回那個現象，並在 link 欄寫出因果路徑（因子→中間機制→問題現象）。
+  例：問題=「透析有效流量下降」→「擠出機螺桿磨損」的 link 應寫「螺桿磨損→押出內徑變異→有效流量下降」。
+- 若某因子寫不出對應「本問題」的因果路徑，仍可列出，但必須設 speculative:true（誠實標記為推測），不要硬湊一條牽強的關聯。
+- 寧可標 speculative，也不要編造關聯。與本問題明顯無關的因子直接不要列。`,
           tools: [{
             name: 'factor_summary',
             description: '整理 6M 因子清單，每個因子含建議工具',
@@ -507,6 +622,7 @@ ${deviceCtx}
           max_tokens: 600,
           system: `你是醫療器材專家，根據器材名稱和 FDA 資料庫資訊，識別並說明這個醫療器材。
 必須呼叫 device_info 工具輸出結構化資訊。
+務必依固定字彙填寫 category_keys（本器材屬於哪些類別），這會決定後續 ISO 對照要拿哪些標準來比——分類錯會掛錯標準，請謹慎、寧缺勿濫。
 用繁體中文填寫（英文術語保留英文），資訊要精確、實用。`,
           tools: [{
             name: 'device_info',
@@ -520,6 +636,7 @@ ${deviceCtx}
                 structure: { type: 'string', description: '結構描述（50字內）' },
                 indication: { type: 'string', description: '適應症/用途（30字內）' },
                 key_quality: { type: 'array', items: { type: 'string' }, description: '關鍵品質特性（3-5項，如：硬度、親水性、密封性）' },
+                category_keys: { type: 'array', items: { type: 'string', enum: ['intravascular','central-venous','dialysis','balloon','introducer','sheath','guidewire','needle','guide','ureteral','stent','connector','luer','tubing','other'] }, description: '器材分類關鍵詞（從清單擇一或多選，供 ISO 對照做確定性過濾）。血管內導管=intravascular（中心靜脈再加 central-venous、血液透析加 dialysis、球囊加 balloon）；導引器/鞘=introducer/sheath；導絲=guidewire；皮下針/切片針=needle；同軸導引針=needle+guide；輸尿管支架(DJ/Pigtail)=ureteral+stent；魯爾接頭=connector/luer；不鏽鋼針管=tubing；都不符=other。寧可少給也不要硬塞不相關類別。' },
                 cannot_be: { type: 'array', items: { type: 'string' }, description: '不可能的失效原因（2-4項，用於排除錯誤的魚骨圖因子）' },
                 confidence: { type: 'number', description: '識別信心度 0-100' }
               },
