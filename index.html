@@ -5463,7 +5463,7 @@ window.renderFactorPanel = function renderFactorPanel(result) {
   // 摘要
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:12px;color:rgba(255,255,255,.78);margin-bottom:.75rem;line-height:1.5;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.12)">'+result.summary+'</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:.75rem;line-height:1.65;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.12)">'+String(result.summary).replace(/；/g,'；<br>').replace(/。(?!$)/g,'。<br>')+'</div>';
   }
 
   // 分類並排網格
@@ -5477,10 +5477,14 @@ window.renderFactorPanel = function renderFactorPanel(result) {
     html += '<div style="font-size:10px;font-weight:700;color:'+CAT_COLORS[cat]+';margin-bottom:.4rem">'+CAT_NAMES[cat]+'</div>';
 
     factors.forEach(function(f, idx){
-      html += '<div style="display:flex;align-items:center;gap:4px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
+      html += '<div style="padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)">';
+      html += '<div style="display:flex;align-items:center;gap:4px">';
       html += '<span style="font-size:10px;flex-shrink:0">'+RISK_DOT[f.risk||'medium']+'</span>';
       html += '<span style="flex:1;font-size:12px;color:rgba(255,255,255,.92);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+f.name+'">'+f.name+'</span>';
+      if(f.speculative) html += '<span style="background:rgba(148,163,184,.28);color:#CBD5E1;font-size:9px;padding:1px 5px;border-radius:3px;flex-shrink:0" title="AI 無法明確說出與本問題的關聯，僅供發想">推測*</span>';
       html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;padding:0 1px;flex-shrink:0;line-height:1">×</button>';
+      html += '</div>';
+      if(f.link) html += '<div style="font-size:10.5px;color:rgba(255,255,255,.5);padding-left:16px;line-height:1.4;margin-top:1px">↳ '+f.link+'</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -5692,7 +5696,7 @@ function renderVerificationPlan(result, factors) {
 
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.15);line-height:1.55">💡 '+result.summary+'</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,.85);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.15);line-height:1.65">💡 '+String(result.summary).replace(/；/g,'；<br>').replace(/。(?!$)/g,'。<br>')+'</div>';
   }
 
   var pipeOpts = PIPELINE_ORDER.map(function(k){ return '<option value="'+k+'">'+PIPELINE_META[k].icon+' '+PIPELINE_META[k].label+'</option>'; }).join('');
@@ -5706,28 +5710,30 @@ function renderVerificationPlan(result, factors) {
     html += '<div style="margin-bottom:.7rem">';
     html += '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:.4rem;flex-wrap:wrap">'
       + '<span style="font-size:13px;font-weight:700;color:'+meta.color+'">'+meta.icon+' '+meta.label+'</span>'
-      + '<span style="font-size:10px;color:rgba(255,255,255,.5)">'+meta.note+'</span></div>';
+      + '<span style="font-size:10px;color:rgba(255,255,255,.62)">'+meta.note+'</span></div>';
 
     group.forEach(function(g){
       var p=g.p, i=g.i;
       var dc = DATA_COLOR[p.data_needed] || null;
-      html += '<div style="background:rgba(255,255,255,.07);border-left:3px solid '+meta.color+';border-radius:6px;padding:.5rem .65rem;margin-bottom:.4rem">';
+      html += '<div style="background:rgba(255,255,255,.11);border-left:3px solid '+meta.color+';border-radius:6px;padding:.5rem .65rem;margin-bottom:.4rem">';
 
       html += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:.3rem;flex-wrap:wrap">';
       html += '<span style="font-size:11px">'+(RISK_DOT[p.risk||'medium'])+'</span>';
       html += '<span style="font-size:13px;font-weight:600;color:#fff;flex:1">'+p.factor+'</span>';
       if(dc) html += '<span style="background:'+dc.bg+';color:'+dc.color+';font-size:10px;padding:1px 6px;border-radius:3px;white-space:nowrap">'+p.data_needed+'</span>';
-      html += '<span onclick="vpEditFactor('+i+')" title="改名" style="cursor:pointer;color:rgba(255,255,255,.45);font-size:11px">✏</span>';
-      html += '<span onclick="vpDelete('+i+')" title="刪除" style="cursor:pointer;color:rgba(248,113,113,.75);font-size:14px;font-weight:700">×</span>';
+      html += '<span onclick="vpEditFactor('+i+')" title="改名" style="cursor:pointer;color:rgba(255,255,255,.5);font-size:11px">✏</span>';
+      html += '<span onclick="vpDelete('+i+')" title="刪除" style="cursor:pointer;color:rgba(248,113,113,.8);font-size:14px;font-weight:700">×</span>';
       html += '</div>';
 
-      if(p.subtype) html += '<span style="display:inline-block;background:'+meta.color+'22;color:'+meta.color+';font-size:10px;padding:1px 7px;border-radius:3px;margin-bottom:.25rem">'+p.subtype+(p.iso_relevant?' · ISO':'')+'</span>';
+      if(p.link) html += '<div style="font-size:11px;color:rgba(255,255,255,.78);line-height:1.45;margin-bottom:.3rem">↳ 關聯：'+p.link+'</div>';
 
-      html += '<div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:.35rem">建議：'
+      if(p.subtype) html += '<span style="display:inline-block;background:'+meta.color+'33;color:'+meta.color+';font-size:10px;padding:1px 7px;border-radius:3px;margin-bottom:.25rem">'+p.subtype+(p.iso_relevant?' · ISO':'')+'</span>';
+
+      html += '<div style="font-size:12px;color:rgba(255,255,255,.93);line-height:1.5;margin-bottom:.35rem">建議：'
         + (p.verification||'—')
-        + ' <span onclick="vpEditVerif('+i+')" style="cursor:pointer;color:rgba(126,200,227,.7);font-size:10px">✏編輯</span></div>';
+        + ' <span onclick="vpEditVerif('+i+')" style="cursor:pointer;color:rgba(126,200,227,.85);font-size:10px">✏編輯</span></div>';
 
-      html += '<div style="font-size:10px;color:rgba(255,255,255,.5)">改管道：<select onchange="vpSetPipeline('+i+',this.value)" '
+      html += '<div style="font-size:10px;color:rgba(255,255,255,.6)">改管道：<select onchange="vpSetPipeline('+i+',this.value)" '
         + 'style="background:rgba(0,0,0,.25);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:4px;font-size:10px;padding:1px 3px;font-family:inherit">'
         + pipeOpts.replace('value="'+pk+'"','value="'+pk+'" selected')+'</select></div>';
 
@@ -5962,17 +5968,20 @@ function renderIsoPanel(r){
       {id:'hq-pattern', label:'問題發生的規律是？', multi:false, opts:[
         ['','— 請選擇 —'],
         ['every','每次／每批都有，很穩定'],
+        ['frequent','經常發生，但非每次'],
+        ['occasional','偶爾發生、不常見（偶發）'],
         ['random','隨機出現，沒有規律'],
         ['specific_machine','只有特定機台或產線才有'],
         ['specific_person','只有特定人員操作才有'],
         ['specific_lot','只有特定批次材料才有']
       ]},
-      {id:'hq-data', label:'目前有沒有可量化的數據？', multi:false, opts:[
+      {id:'hq-data', label:'針對「這個問題現象」，有沒有可量化的數據？', multi:false, note:'※ 只算直接或間接反映「問題現象本身」的數據（如本例的流量、內徑）；與問題無關的量測不算。', opts:[
         ['','— 請選擇 —'],
-        ['measure','有量測數據（尺寸、重量、強度等）'],
-        ['yield','有良率或不良數量的紀錄'],
+        ['measure_direct','有：直接量測本問題的數據（如流量、內徑、強度）'],
+        ['related_yield','有：相關的良率／不良數紀錄'],
+        ['indirect','有數據，但只是間接相關（非直接量這問題）'],
         ['observation','只有目視觀察，沒有數字'],
-        ['none','完全沒有任何數據']
+        ['none','完全沒有相關數據']
       ]},
       {id:'hq-change', label:'問題出現前有沒有任何改變？', multi:true, opts:[
         ['material','材料或供應商有變更'],
@@ -6038,6 +6047,13 @@ function renderIsoPanel(r){
         lbl.textContent = q.label + (q.multi ? '（可複選）' : '');
         lbl.style.cssText = 'color:rgba(255,255,255,.75);font-size:11px;margin-bottom:4px;font-weight:500';
         cell.appendChild(lbl);
+
+        if(q.note){
+          var nt = document.createElement('div');
+          nt.textContent = q.note;
+          nt.style.cssText = 'color:rgba(255,255,255,.5);font-size:10px;line-height:1.45;margin:-2px 0 5px';
+          cell.appendChild(nt);
+        }
 
         if(q.isText){
           // 文字輸入框
@@ -6220,6 +6236,21 @@ function renderIsoPanel(r){
         var reader = streamResp.body.getReader();
         var decoder = new TextDecoder();
         var fullText = ''; var tools = []; var buf = '';
+        var target = ''; var shown = 0; var streamDone = false;
+        function stripTools(t){ return t.replace(/\[TOOLS:[^\]]*\]/g,''); }
+        // 平滑打字機：接收與顯示分離，畫面以穩定節奏吐字（落後越多走稍快，接近時自然減速）
+        var typer = setInterval(function(){
+          if(shown < target.length){
+            var behind = target.length - shown;
+            var step = Math.max(1, Math.ceil(behind / 22));
+            shown = Math.min(target.length, shown + step);
+            aiDiv.textContent = target.slice(0, shown) + ((streamDone && shown >= target.length) ? '' : '▋');
+            if(histEl) histEl.scrollTop = histEl.scrollHeight;
+          } else if(streamDone){
+            clearInterval(typer);
+            aiDiv.textContent = target;
+          }
+        }, 20);
         while(true){
           var res = await reader.read();
           if(res.done) break;
@@ -6229,26 +6260,34 @@ function renderIsoPanel(r){
             var line=lines2[li]; if(!line.startsWith('data: ')) continue;
             try{
               var parsed=JSON.parse(line.slice(6));
-              if(parsed.text){ fullText+=parsed.text; aiDiv.textContent=fullText+'▋'; if(histEl) histEl.scrollTop=histEl.scrollHeight; }
-              if(parsed.done){
-                fullText=parsed.fullText||fullText; tools=parsed.tools||[];
-                aiDiv.textContent=fullText;
-                if(tools.length>0){
-                  var btnArea=document.createElement('div');
-                  btnArea.style.cssText='display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
-                  var lbl=document.createElement('div'); lbl.style.cssText='width:100%;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:2px'; lbl.textContent='▸ 推薦分析工具';
-                  btnArea.appendChild(lbl);
-                  tools.forEach(function(tid){
-                    var b=document.createElement('span');
-                    b.style.cssText='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:default';
-                    b.textContent=TOOL_NAMES_HOME[tid]||tid;
-                    btnArea.appendChild(b);
-                  });
-                  aiDiv.appendChild(btnArea);
-                }
-              }
+              if(parsed.text){ fullText+=parsed.text; target=stripTools(fullText); }
+              if(parsed.done){ fullText=parsed.fullText||fullText; tools=parsed.tools||[]; target=stripTools(fullText); }
             }catch(e){}
           }
+        }
+        streamDone = true;
+        // 讓打字機把剩餘字補完（最多等 ~1.2 秒保險）
+        await new Promise(function(r){
+          var t0 = Date.now();
+          var w = setInterval(function(){
+            if(shown >= target.length || Date.now()-t0 > 1200){ clearInterval(w); r(); }
+          }, 20);
+        });
+        clearInterval(typer);
+        aiDiv.textContent = target;
+        // 打字完成後才加「推薦分析工具」chips
+        if(tools.length>0){
+          var btnArea=document.createElement('div');
+          btnArea.style.cssText='display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
+          var lbl=document.createElement('div'); lbl.style.cssText='width:100%;font-size:11px;color:rgba(255,255,255,.45);margin-bottom:2px'; lbl.textContent='▸ 推薦分析工具';
+          btnArea.appendChild(lbl);
+          tools.forEach(function(tid){
+            var b=document.createElement('span');
+            b.style.cssText='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:default';
+            b.textContent=TOOL_NAMES_HOME[tid]||tid;
+            btnArea.appendChild(b);
+          });
+          aiDiv.appendChild(btnArea);
         }
 
         homeHistory.push({role:'assistant', content:fullText});
