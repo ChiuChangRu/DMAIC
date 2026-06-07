@@ -1,4 +1,4 @@
-// MedQA Worker v5.0 — + iso_crosscheck（ISO 對照/缺口紅旗）
+// MedQA Worker v5.1 — + iso_crosscheck（ISO 對照/缺口紅旗）
 // 既有：verification_plan + fishbone_to_doe + summarize_factors + identify_device
 // 部署：Cloudflare Workers，ANTHROPIC_API_KEY 存於 Secret
 
@@ -165,7 +165,7 @@ export default {
 
       // ══ version：回傳 Worker 版本 ══
       if (mode === 'version') {
-        return json({ mode: 'version', version: 'v5.0' }, origin);
+        return json({ mode: 'version', version: 'v5.1' }, origin);
       }
 
       // ══ fishbone_to_doe：魚骨圖因子轉換為 DOE 實驗設計格式 ══
@@ -421,10 +421,11 @@ ${deviceCtx}
         const plans = Array.isArray(body.plans) ? body.plans : [];
         const factors = Array.isArray(body.factors) ? body.factors : [];
 
-        // 把可引用的標準清單轉成精簡文字（只給編號/標題/適用關鍵詞/項目）
+        // 把可引用的標準清單轉成精簡文字（編號/標題/適用關鍵詞/項目/已建檔章節）
         const stdText = isoStandards.map(s => {
           const items = (s.items||[]).map(i => i.k).join('、');
-          return `- ${s.no}${s.edition?(' ('+s.edition+')'):''}｜${s.title_zh||s.title}｜適用:${(s.applies_to||[]).join('/')}｜應驗項目:[${items}]`;
+          const cls = (s.clauses||[]).map(c => `${c.no} ${c.title_zh||c.title_en||''}${c.verified===false?'(未核)':''}`).join('；');
+          return `- ${s.no}${s.edition?(' ('+s.edition+')'):''}｜${s.title_zh||s.title}｜適用:${(s.applies_to||[]).join('/')}｜應驗項目:[${items}]｜已建檔章節:[${cls||'（無，章節待建檔）'}]`;
         }).join('\n');
 
         // 目前計畫已涵蓋的因子/驗證
@@ -434,24 +435,31 @@ ${deviceCtx}
 
         const resp = await callClaude(env, MODEL_MAP.sonnet, {
           max_tokens: 3500,
-          system: `你是醫療器材法規/驗證稽核專家。任務：把使用者「因子探討後的驗證計畫」對照 ISO 應驗項目，找出 CAPA 容易踩到的缺口（ISO 應驗但計畫沒涵蓋）。
+          system: `你是醫療器材法規/驗證稽核專家。任務：以「問題分析出來的因子」為主軸，逐因子對照對應的 ISO 規範與章節，判斷該因子相關的 ISO 要求有沒有在驗證計畫裡做確實。
 ${deviceCtx}
 
-【絕對規則 — 防止幻覺】
-1. 你只能引用下方〈可引用標準清單〉裡實際存在的標準編號與項目。
-2. 嚴禁自行發明、補充或修改任何 ISO/ASTM 編號、版次或條號。清單沒有的，一律不准提。
-3. 「應驗項目(items)」是分類草稿、非正本條文；判讀時當作『類別』比對即可，不要捏造數值或允收準則。
+【核心原則 — 因子導向，不是攤標準全清單】
+- 主軸是「使用者的問題因子」。針對每個因子，找出它對應到清單裡哪個標準的哪個應驗項目／章節。
+- 不要把某標準的所有項目全列成缺口；只列「與本案因子相關」的。與因子無關的項目不要列。
 
-【判讀步驟】
-- 先用器材性質 + 各標準的「適用關鍵詞」，判斷清單中哪些標準『適用於本器材』(applicable)，其餘略過。
-- 對每個適用標準的每個應驗項目，比對使用者計畫：
-  · covered＝已有對應因子/驗證明確涵蓋
-  · partial＝有相關因子但驗證方式/指標不完整
-  · gap＝ISO 應驗但計畫完全沒涵蓋（這就是 CAPA 風險，要標紅旗）
-- covered_by 填對應的因子名稱；gap 則留空。
-- note 一句話（20字內），可寫「以正本最新版次為準」之類提醒，不要長篇。
+【絕對規則 — 防止幻覺（最重要）】
+1. 只能引用〈可引用標準清單〉裡實際存在的標準編號、項目與「已建檔章節」。
+2. clause（章節）只能填該標準「已建檔章節」清單中列出的；**嚴禁自行發明、推測或補充任何章節號／Annex 代號**。
+3. 若某標準的「已建檔章節」為空或找不到對應章節 → clause 一律填「（章節待建檔）」。標「(未核)」的章節仍可引用，但要在 note 提醒「章節待核可」。
+4. 不要捏造允收數值或準則；項目為類別草稿。
 
-繁體中文。務實，不要學術長文。`,
+【判讀每個因子】
+- standard：該因子對應的標準編號（取自清單）。
+- clause：對應章節（取自該標準已建檔章節；沒有就「（章節待建檔）」）。
+- item：對應的應驗項目（取自清單）。
+- status：covered＝計畫已明確涵蓋；partial＝有相關因子但驗證不完整；gap＝ISO 應驗但計畫沒涵蓋（CAPA 風險）。
+- covered_by：對應的因子/驗證名稱；note：20字內提醒（如「以正本最新版次為準」）。
+
+【特別注意 — 別把「材料間相容/接合」誤判成生物相容】
+- 「黏合、溶脹、接合強度」等屬接合完整性/材料工程 → 對應導管本體標準（如 ISO 10555-1 的接頭/拉伸條款），不是 ISO 10993。
+- ISO 10993 只在「材料對人體/血液的生物安全（細胞毒性/致敏/血液相容/化學溶出）」時才引用。
+
+繁體中文，務實，不要學術長文。`,
           tools: [{
             name: 'iso_crosscheck',
             description: 'ISO 應驗項目與驗證計畫的覆蓋比對，標出缺口',
@@ -468,14 +476,16 @@ ${deviceCtx}
                 },
                 items: {
                   type: 'array',
-                  description: '每個適用標準的應驗項目覆蓋判讀',
+                  description: '逐因子對照：每個問題因子對應的 ISO 標準+章節+覆蓋判讀',
                   items: { type: 'object', properties: {
+                    factor:     { type: 'string', description: '對應的問題因子名稱' },
                     standard:   { type: 'string', description: '標準編號（取自清單）' },
+                    clause:     { type: 'string', description: '對應章節（僅取自該標準「已建檔章節」；無則填「（章節待建檔）」，嚴禁自創）' },
                     item:       { type: 'string', description: '應驗項目（取自清單）' },
                     status:     { type: 'string', enum: ['covered','partial','gap'] },
-                    covered_by: { type: 'string', description: '對應因子名稱；gap 留空' },
+                    covered_by: { type: 'string', description: '對應因子/驗證名稱；gap 留空' },
                     note:       { type: 'string', description: '20字內提醒' }
-                  }, required: ['standard','item','status'] }
+                  }, required: ['standard','status'] }
                 },
                 summary: { type: 'string', description: '缺口總結與建議，50字內' }
               },
@@ -487,13 +497,13 @@ ${deviceCtx}
             role: 'user',
             content: `問題：${body.problem || '未知'}
 
-〈可引用標準清單〉（只能引用這些）：
+〈可引用標準清單〉（只能引用這些；clause 只能取自各標準的「已建檔章節」）：
 ${stdText || '(無，請回傳空結果)'}
 
-〈目前因子探討後的驗證計畫〉：
+〈問題分析出來的因子與驗證計畫〉：
 ${planText || '(無)'}
 
-請判定適用標準，並逐項比對覆蓋情形、標出 gap 缺口。`
+請以「每個因子」為主軸：找出該因子對應的標準與章節（clause 只填已建檔章節，沒有就「（章節待建檔）」），判讀 covered/partial/gap。只列與因子相關的，不要攤標準全清單。`
           }]
         });
 
@@ -636,7 +646,7 @@ ${deviceCtx}
                 structure: { type: 'string', description: '結構描述（50字內）' },
                 indication: { type: 'string', description: '適應症/用途（30字內）' },
                 key_quality: { type: 'array', items: { type: 'string' }, description: '關鍵品質特性（3-5項，如：硬度、親水性、密封性）' },
-                category_keys: { type: 'array', items: { type: 'string', enum: ['intravascular','central-venous','dialysis','balloon','introducer','sheath','guidewire','needle','guide','ureteral','stent','connector','luer','tubing','other'] }, description: '器材分類關鍵詞（從清單擇一或多選，供 ISO 對照做確定性過濾）。血管內導管=intravascular（中心靜脈再加 central-venous、血液透析加 dialysis、球囊加 balloon）；導引器/鞘=introducer/sheath；導絲=guidewire；皮下針/切片針=needle；同軸導引針=needle+guide；輸尿管支架(DJ/Pigtail)=ureteral+stent；魯爾接頭=connector/luer；不鏽鋼針管=tubing；都不符=other。寧可少給也不要硬塞不相關類別。' },
+                category_keys: { type: 'array', items: { type: 'string', enum: ['intravascular','central-venous','dialysis','extracorporeal','bloodline','HD','balloon','introducer','sheath','guidewire','needle','guide','ureteral','stent','connector','luer','tubing','tracheal','tracheostomy','airway','suction','respiratory','anaesthetic','infusion','iv','iv-bag','container','biliary','drainage','urine-bag','other'] }, description: '器材分類關鍵詞（從清單擇一或多選，供 ISO 對照做確定性過濾）。血管內導管=intravascular（中心靜脈+central-venous、血液透析導管+dialysis、球囊+balloon）；血液回路管/體外循環=extracorporeal+bloodline+dialysis；導引器/鞘=introducer/sheath；導絲=guidewire；皮下/切片針=needle；同軸導引針=needle+guide；輸尿管支架=ureteral+stent；魯爾接頭=connector/luer；不鏽鋼針管=tubing；氣管內管=tracheal+airway+respiratory；氣切管=tracheostomy+airway+respiratory；抽痰管=suction+respiratory；麻醉/氧氣面罩=respiratory+anaesthetic；輸液套=infusion+iv；IV軟袋=iv-bag+container+infusion；膽道/鼻膽=biliary；引流管/袋=drainage；尿袋=urine-bag；都不符=other。寧可少給也不要硬塞不相關類別。' },
                 cannot_be: { type: 'array', items: { type: 'string' }, description: '不可能的失效原因（2-4項，用於排除錯誤的魚骨圖因子）' },
                 confidence: { type: 'number', description: '識別信心度 0-100' }
               },

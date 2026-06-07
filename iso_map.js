@@ -1,3 +1,4 @@
+// iso_map v5.1（MedQA）
 // ── MedQA ISO 對照資料（從 index.html 拆出，方便維護）──
 // 維護方式：直接編輯本檔；新增/修改標準、章節都只動這裡。index.html 以 <script src="iso_map.js"> 載入。
 // 規則：標準編號/章節以 ISO 正本為準；查不到公開目錄者用 clauses_note 標『待建檔』，勿自創條號。
