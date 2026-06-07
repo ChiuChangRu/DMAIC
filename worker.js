@@ -239,7 +239,7 @@ export default {
             'anthropic-beta': 'tools-2024-04-04',
           },
           body: JSON.stringify({
-            model: MODEL_MAP.sonnet,
+            model: MODEL_MAP.haiku,  // 省成本：導覽對話用 Haiku
             max_tokens: 800,
             stream: true,
             system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。
@@ -628,7 +628,7 @@ ${deviceCtx}
         const deviceNameEn = body.deviceNameEn || deviceName;
         const fdaData = body.fdaData || '';
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+        const resp = await callClaude(env, MODEL_MAP.haiku, {  // 省成本：器材辨識用 Haiku
           max_tokens: 600,
           system: `你是醫療器材專家，根據器材名稱和 FDA 資料庫資訊，識別並說明這個醫療器材。
 必須呼叫 device_info 工具輸出結構化資訊。
@@ -701,7 +701,7 @@ ${deviceCtx}
 - 近期是否有變更：${body.surveyData.change || '未填'}
 請根據以上問卷答案分析問題方向，只針對【不明確或矛盾】的地方追問。` : '';
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+        const resp = await callClaude(env, MODEL_MAP.haiku, {  // 省成本：導覽建議用 Haiku
           max_tokens: 800,
           system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。
 ${deviceContext}

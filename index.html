@@ -2238,7 +2238,7 @@ function paretoAnalyze(){
 // 魚骨圖工具
 // ════════════════════════════════════════════
 // ════════ 下載計畫書（Word .docx，瀏覽器端產生，不經伺服器/不花 API/離線可用）════════
-function _svgToPngBytes(svgEl, scale){
+function _svgToPngBytes(svgEl, scale, mono){
   return new Promise(function(resolve,reject){
     try{
       var clone=svgEl.cloneNode(true);
@@ -2251,6 +2251,7 @@ function _svgToPngBytes(svgEl, scale){
       img.onload=function(){
         var cv=document.createElement('canvas'); cv.width=Math.round(w*(scale||2)); cv.height=Math.round(h*(scale||2));
         var ctx=cv.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+        if(mono){ try{ ctx.filter='grayscale(1)'; }catch(e){} }
         ctx.drawImage(img,0,0,cv.width,cv.height);
         cv.toBlob(function(blob){ if(!blob){reject(new Error('canvas 轉檔失敗'));return;} var fr=new FileReader(); fr.onload=function(){ resolve({data:new Uint8Array(fr.result),w:w,h:h}); }; fr.onerror=reject; fr.readAsArrayBuffer(blob); },'image/png');
       };
@@ -2258,6 +2259,23 @@ function _svgToPngBytes(svgEl, scale){
       img.src=url;
     }catch(e){ reject(e); }
   });
+}
+
+function _collectSurvey(){
+  var rows=[];
+  try{
+    var els=document.querySelectorAll('select[id^="hq-"], textarea[id^="hq-"]');
+    els.forEach(function(el){
+      if(el.id==='hq-problem') return;
+      var box=el.closest('div'); var lblEl=box?box.querySelector('div'):null;
+      var label=lblEl?lblEl.textContent.replace(/（可複選）/,'').replace(/※.*$/,'').trim():el.id;
+      var val='';
+      if(el.tagName==='SELECT'){ var o=el.options[el.selectedIndex]; val=o?o.text.trim():''; if(!val||val.indexOf('—')>=0||val.indexOf('請選擇')>=0) val=''; }
+      else { val=(el.value||'').trim(); }
+      if(label && val) rows.push([label,val]);
+    });
+  }catch(e){}
+  return rows;
 }
 
 async function downloadPlanDocx(){
@@ -2270,31 +2288,36 @@ async function downloadPlanDocx(){
     var conf=window._confirmedFactors||{};
     var plans=(window._verificationPlan&&window._verificationPlan.plans)||[];
     var iso=(window._isoResult&&window._isoResult.items)||[];
+    var survey=_collectSurvey();
     var CATLBL={man:'人員 Man',machine:'機器 Machine',material:'材料 Material',method:'方法 Method',measure:'量測 Measurement',env:'環境 Environment'};
-    var RISK={high:'DC2626',medium:'92400E',low:'222222'},RLBL={high:'高',medium:'中',low:'低'};
-    var STAT={gap:['缺口','DC2626'],partial:['部分','B45309'],covered:['已涵蓋','047857']};
+    var RLBL={high:'高',medium:'中',low:'低'};
+    var SLBL={gap:'缺口',partial:'部分',covered:'已涵蓋'};
     var PMETA=(typeof PIPELINE_META!=='undefined')?PIPELINE_META:{};
-    var FONT='Microsoft JhengHei',CW=9026,HEAD='1D3B8A',ZEBRA='F4F7FB';
-    var bd={style:D.BorderStyle.SINGLE,size:1,color:'CCCCCC'},borders={top:bd,bottom:bd,left:bd,right:bd};
-    var mg={top:60,bottom:60,left:110,right:110};
-    function tx(s,o){o=o||{};return new D.TextRun({text:String(s==null?'':s),font:FONT,size:o.size||20,bold:!!o.bold,italics:!!o.italics,color:o.color||'222222'});}
-    function cell(runs,o){o=o||{};return new D.TableCell({borders:borders,width:{size:o.w,type:D.WidthType.DXA},margins:mg,shading:o.fill?{fill:o.fill,type:D.ShadingType.CLEAR}:undefined,verticalAlign:D.VerticalAlign.CENTER,children:[new D.Paragraph({alignment:o.align,spacing:{after:0,line:252},children:Array.isArray(runs)?runs:[runs]})]});}
-    function hrow(labels,w){var cs=labels.map(function(l,i){return cell(tx(l,{bold:true,color:'FFFFFF'}),{w:w[i],fill:HEAD,align:D.AlignmentType.CENTER});});return new D.TableRow({tableHeader:true,children:cs});}
+    // 字型：中文標楷體(DFKai-SB) + 西文/數字 Times New Roman；配色僅黑白灰
+    var FONT={ascii:'Times New Roman',hAnsi:'Times New Roman',eastAsia:'DFKai-SB'};
+    var INK='000000', GRAY='666666', HFILL='4D4D4D', ZEBRA='F2F2F2', CW=9026;
+    var bd={style:D.BorderStyle.SINGLE,size:1,color:'BFBFBF'},borders={top:bd,bottom:bd,left:bd,right:bd};
+    var mg={top:90,bottom:90,left:120,right:120};
+    function tx(s,o){o=o||{};return new D.TextRun({text:String(s==null?'':s),font:FONT,size:o.size||22,bold:!!o.bold,italics:!!o.italics,color:o.color||INK});}
+    function cell(runs,o){o=o||{};return new D.TableCell({borders:borders,width:{size:o.w,type:D.WidthType.DXA},margins:mg,shading:o.fill?{fill:o.fill,type:D.ShadingType.CLEAR}:undefined,verticalAlign:D.VerticalAlign.CENTER,children:[new D.Paragraph({alignment:o.align,spacing:{after:0,line:288},children:Array.isArray(runs)?runs:[runs]})]});}
+    function hrow(labels,w){var cs=labels.map(function(l,i){return cell(tx(l,{bold:true,color:'FFFFFF'}),{w:w[i],fill:HFILL,align:D.AlignmentType.CENTER});});return new D.TableRow({tableHeader:true,children:cs});}
     function trow(cells,w,z){var cs=cells.map(function(c,i){return cell(c,{w:w[i],fill:z?ZEBRA:undefined});});return new D.TableRow({children:cs});}
     function tbl(w,header,rows){return new D.Table({width:{size:CW,type:D.WidthType.DXA},columnWidths:w,rows:[hrow(header,w)].concat(rows)});}
-    function H1(n){return new D.Paragraph({heading:D.HeadingLevel.HEADING_1,spacing:{before:260,after:140},children:[tx(n,{size:28,bold:true,color:HEAD})]});}
-    function H2(n){return new D.Paragraph({heading:D.HeadingLevel.HEADING_2,spacing:{before:160,after:90},children:[tx(n,{size:23,bold:true,color:'1a1a2e'})]});}
-    function PP(runs){return new D.Paragraph({spacing:{after:60,line:264},children:Array.isArray(runs)?runs:[runs]});}
+    function H1(n){return new D.Paragraph({heading:D.HeadingLevel.HEADING_1,spacing:{before:380,after:180},children:[tx(n,{size:30,bold:true})]});}
+    function H2(n){return new D.Paragraph({heading:D.HeadingLevel.HEADING_2,spacing:{before:260,after:120},children:[tx(n,{size:24,bold:true})]});}
+    function PP(runs){return new D.Paragraph({spacing:{before:60,after:200,line:312},children:Array.isArray(runs)?runs:[runs]});}
+    function spacer(){return new D.Paragraph({spacing:{after:120},children:[tx('')]});}
 
     var ch=[];
-    ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:40},children:[tx('根本原因分析與驗證計畫書',{size:36,bold:true,color:HEAD})]}));
-    ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:160},children:[tx('Root Cause Analysis & Verification Plan',{size:18,color:'667085'})]}));
+    ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:60},children:[tx('根本原因分析與驗證計畫建議',{size:40,bold:true})]}));
+    ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:240},children:[tx('Root Cause Analysis & Verification Recommendation',{size:18,color:GRAY})]}));
     var hw=[2100,2413,2100,2413];
     ch.push(new D.Table({width:{size:CW,type:D.WidthType.DXA},columnWidths:hw,rows:[
       trow([tx('器材名稱',{bold:true}),tx(dev.confirmed_name||dev.name||'—'),tx('案件編號',{bold:true}),tx('RDC-____')],hw,true),
       trow([tx('製表人',{bold:true}),tx('____________'),tx('製表日期',{bold:true}),tx(new Date().toISOString().slice(0,10))],hw,true),
       trow([tx('版本',{bold:true}),tx('v5.1'),tx('核准',{bold:true}),tx('____________')],hw,true)
     ]}));
+    ch.push(spacer());
 
     ch.push(H1('1. 器材與問題概述'));
     ch.push(H2('1.1 器材識別'));
@@ -2306,69 +2329,73 @@ async function downloadPlanDocx(){
       trow([tx('臨床用途',{bold:true}),tx(dev.indication||dev.use||'—')],dw,true),
       trow([tx('分類',{bold:true}),tx((dev.category_keys&&dev.category_keys.join(' / '))||'—')],dw)
     ]));
-    ch.push(H2('1.2 問題現象描述')); ch.push(PP(tx(problem)));
-    ch.push(H2('1.3 分析目的')); ch.push(PP(tx('釐清「'+problem+'」之根本原因，並規劃對應驗證項目，作為 CAPA 矯正依據。')));
+    ch.push(H2('1.2 問題現象描述'));
+    ch.push(PP(tx(problem)));
+    ch.push(H2('1.3 分析目的'));
+    ch.push(PP(tx('釐清上述問題之根本原因，並就相關因子規劃對應驗證項目，作為矯正預防措施（CAPA）之依據。')));
+
+    ch.push(H1('2. 問題釐清問卷摘要'));
+    if(survey.length){ var sw=[3200,5826];
+      ch.push(tbl(sw,['釐清項目','作答'],survey.map(function(r,i){return trow([tx(r[0],{bold:true}),tx(r[1])],sw,i%2===1);})));
+    }else{ ch.push(PP(tx('（本次未填寫問卷，或問卷欄位不在當前頁面）',{color:GRAY}))); }
 
     var hasFactors=false, frows=[], fi=0;
     ['man','machine','material','method','measure','env'].forEach(function(c){
       (conf[c]||[]).forEach(function(f){ hasFactors=true; var z=(fi++%2===1);
-        frows.push(new D.TableRow({children:[
-          cell(tx(CATLBL[c]),{w:1500,fill:z?ZEBRA:undefined}),
-          cell(tx(f.name,{bold:true}),{w:1900,fill:z?ZEBRA:undefined}),
-          cell(tx(RLBL[f.risk]||'中',{bold:true,color:RISK[f.risk]||'222222'}),{w:760,fill:z?ZEBRA:undefined,align:D.AlignmentType.CENTER}),
-          cell(tx(f.link||'—'),{w:4066,fill:z?ZEBRA:undefined}),
-          cell(tx(f.speculative?'推測*':'',{color:'64748B'}),{w:800,fill:z?ZEBRA:undefined,align:D.AlignmentType.CENTER})
-        ]}));
+        frows.push(trow([
+          tx(CATLBL[c]), tx(f.name,{bold:true}),
+          tx(RLBL[f.risk]||'中',{bold:(f.risk==='high')}),
+          tx(f.link||'—'),
+          tx(f.speculative?'推測*':'',{color:GRAY})
+        ],[1500,1900,760,4066,800],z));
       });
     });
-    ch.push(H1('2. 根本原因分析'));
-    ch.push(H2('2.1 魚骨圖（Ishikawa）'));
+    ch.push(H1('3. 根本原因分析'));
+    ch.push(H2('3.1 魚骨圖（Ishikawa）'));
     var svgEl=document.querySelector('#fb-svg-wrap svg');
-    if(svgEl){ var png=await _svgToPngBytes(svgEl,2);
-      ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{after:120},children:[new D.ImageRun({type:'png',data:png.data,transformation:{width:640,height:Math.round(640*png.h/png.w)}})]}));
-    }else{ ch.push(PP(tx('（尚未產生魚骨圖）',{color:'94A3B8'}))); }
-    ch.push(H2('2.2 因子清單與關聯'));
-    if(hasFactors){ ch.push(tbl([1500,1900,760,4066,800],['分類','因子','風險','因子→問題關聯鏈','推測'],frows)); }
-    else{ ch.push(PP(tx('（無因子資料）',{color:'94A3B8'}))); }
+    if(svgEl){ var png=await _svgToPngBytes(svgEl,2,true);
+      ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{before:60,after:200},children:[new D.ImageRun({type:'png',data:png.data,transformation:{width:640,height:Math.round(640*png.h/png.w)}})]}));
+    }else{ ch.push(PP(tx('（尚未產生魚骨圖）',{color:GRAY}))); }
+    ch.push(H2('3.2 因子清單與關聯'));
+    if(hasFactors){ ch.push(tbl([1500,1900,760,4066,800],['分類','因子','風險','因子→問題關聯鏈','備註'],frows)); }
+    else{ ch.push(PP(tx('（無因子資料）',{color:GRAY}))); }
 
-    ch.push(H1('3. 驗證計畫'));
+    ch.push(H1('4. 驗證計畫'));
     if(plans.length){ var pw=[1700,1100,3666,1400,1160];
       var prows=plans.map(function(p,i){return trow([
-        tx(p.factor,{bold:true}), tx(p.subtype||p.tool||'—',{bold:true,color:HEAD}),
+        tx(p.factor,{bold:true}), tx(p.subtype||p.tool||'—',{bold:true}),
         tx(p.verification||'—'), tx(p.data_needed||'—'),
         tx((PMETA[p.pipeline]&&PMETA[p.pipeline].label)||p.pipeline||'—')
       ],pw,i%2===1);});
       ch.push(tbl(pw,['因子','建議工具','建議驗證動作','所需數據','管道'],prows));
-    }else{ ch.push(PP(tx('（尚未產生驗證計畫）',{color:'94A3B8'}))); }
+    }else{ ch.push(PP(tx('（尚未產生驗證計畫）',{color:GRAY}))); }
 
-    ch.push(H1('4. ISO 規範對照'));
+    ch.push(H1('5. ISO 規範對照'));
     if(iso.length){ var iw=[1500,1500,2500,900,1100,1526];
-      var irows=iso.map(function(r,i){var st=STAT[r.status]||STAT.partial; var wait=String(r.clause||'').indexOf('待建檔')>=0; var z=i%2===1;
-        return new D.TableRow({children:[
-          cell(tx(r.factor||'—'),{w:iw[0],fill:z?ZEBRA:undefined}),
-          cell(tx(r.standard||'—',{bold:true}),{w:iw[1],fill:z?ZEBRA:undefined}),
-          cell(tx(r.clause||'（章節待建檔）',{color:wait?'94A3B8':'1D4ED8',italics:wait}),{w:iw[2],fill:z?ZEBRA:undefined}),
-          cell(tx(st[0],{bold:true,color:st[1]}),{w:iw[3],fill:z?ZEBRA:undefined,align:D.AlignmentType.CENTER}),
-          cell(tx(r.covered_by||''),{w:iw[4],fill:z?ZEBRA:undefined}),
-          cell(tx(r.note||'',{size:18,color:'475569'}),{w:iw[5],fill:z?ZEBRA:undefined})
-        ]});
+      var irows=iso.map(function(r,i){var wait=String(r.clause||'').indexOf('待建檔')>=0; var z=i%2===1;
+        return trow([
+          tx(r.factor||'—'), tx(r.standard||'—',{bold:true}),
+          tx(r.clause||'（章節待建檔）',{color:wait?GRAY:INK,italics:wait}),
+          tx(SLBL[r.status]||'部分',{bold:(r.status==='gap')}),
+          tx(r.covered_by||''), tx(r.note||'',{size:20,color:GRAY})
+        ],iw,z);
       });
       ch.push(tbl(iw,['因子/要求','ISO 標準','章節','狀態','對應','備註'],irows));
-      ch.push(PP([tx('註：章節僅引用已建檔項目；標「（章節待建檔）」者尚未建章節（不自創條號）。一律以 ISO 正本最新版次為準，需 RA 核可。',{size:17,color:'64748B'})]));
-    }else{ ch.push(PP(tx('（尚未產生 ISO 對照，或本器材未對應到標準）',{color:'94A3B8'}))); }
+      ch.push(PP([tx('註：章節僅引用已建檔項目；標「（章節待建檔）」者尚未建章節（不自創條號）。一律以 ISO 正本最新版次為準，需 RA 核可。',{size:19,color:GRAY})]));
+    }else{ ch.push(PP(tx('（尚未產生 ISO 對照，或本器材未對應到標準）',{color:GRAY}))); }
 
     var doc=new D.Document({
-      styles:{default:{document:{run:{font:FONT,size:20}}},
+      styles:{default:{document:{run:{font:FONT,size:22,color:INK}}},
         paragraphStyles:[
-          {id:'Heading1',name:'Heading 1',basedOn:'Normal',next:'Normal',quickFormat:true,run:{size:28,bold:true,font:FONT,color:HEAD},paragraph:{spacing:{before:260,after:140},outlineLevel:0}},
-          {id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',quickFormat:true,run:{size:23,bold:true,font:FONT},paragraph:{spacing:{before:160,after:90},outlineLevel:1}}
+          {id:'Heading1',name:'Heading 1',basedOn:'Normal',next:'Normal',quickFormat:true,run:{size:30,bold:true,font:FONT,color:INK},paragraph:{spacing:{before:380,after:180},outlineLevel:0}},
+          {id:'Heading2',name:'Heading 2',basedOn:'Normal',next:'Normal',quickFormat:true,run:{size:24,bold:true,font:FONT,color:INK},paragraph:{spacing:{before:260,after:120},outlineLevel:1}}
         ]},
       sections:[{
         properties:{page:{size:{width:11906,height:16838},margin:{top:1440,right:1440,bottom:1440,left:1440}}},
         footers:{default:new D.Footer({children:[new D.Paragraph({alignment:D.AlignmentType.CENTER,children:[
-          tx('本文件由 MedQA（AI 輔助）產生，為分析輔助、非法規審查依據；ISO 以正本最新版次為準。　第 ',{size:15,color:'94A3B8'}),
-          new D.TextRun({children:[D.PageNumber.CURRENT],font:FONT,size:15,color:'94A3B8'}),
-          tx(' 頁',{size:15,color:'94A3B8'})
+          tx('本文件由 MedQA 產生，為分析輔助、非法規審查依據；ISO 以正本最新版次為準。　第 ',{size:16,color:GRAY}),
+          new D.TextRun({children:[D.PageNumber.CURRENT],font:FONT,size:16,color:GRAY}),
+          tx(' 頁',{size:16,color:GRAY})
         ]})]})},
         children:ch
       }]
@@ -2376,7 +2403,7 @@ async function downloadPlanDocx(){
     var blob=await D.Packer.toBlob(doc);
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
-    a.download='驗證計畫書_'+String(dev.confirmed_name||dev.name||'medqa').replace(/[\\/:*?"<>|\s]/g,'_').slice(0,20)+'_'+new Date().toISOString().slice(0,10)+'.docx';
+    a.download='根本原因分析與驗證計畫建議_'+String(dev.confirmed_name||dev.name||'medqa').replace(/[\\/:*?"<>|\s]/g,'_').slice(0,18)+'_'+new Date().toISOString().slice(0,10)+'.docx';
     document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
   }catch(e){
@@ -6598,13 +6625,15 @@ function renderIsoPanel(r){
         // 魚頭
         var problemTitle = '';
         var hqProbEl = document.getElementById('hq-problem');
+        var devName = (window._deviceInfo && (window._deviceInfo.confirmed_name||window._deviceInfo.name))||'';
         if(hqProbEl && hqProbEl.value.trim()) {
           problemTitle = hqProbEl.value.trim();
         } else {
+          // 找第一則「描述問題」的訊息，排除器材辨識用的器材名稱（魚頭要的是問題，不是產品名）
           for(var i=0;i<homeHistory.length;i++){
             if(homeHistory[i].role==='user'){
-              problemTitle = homeHistory[i].content.replace(/\n【快速問卷】.*/,'').trim();
-              break;
+              var c = homeHistory[i].content.replace(/\n【快速問卷】.*/,'').trim();
+              if(c && c!==devName && (!devName || c.indexOf(devName)<0)){ problemTitle = c; break; }
             }
           }
         }
