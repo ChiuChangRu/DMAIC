@@ -2280,43 +2280,61 @@ function fishboneDraw(){
     causes: parseCauses(document.getElementById(c.id).value)
   }));
 
-  const VW=820, VH=500;
-  const spineY=250;
-  const spineEndX=640;
-  const BONE_DX=75, BONE_DY=130;
-  const CAUSE_LEN=30;
-  const joints=[200,370,540];
-  const topCats=[data[0],data[2],data[4]];
-  const botCats=[data[1],data[3],data[5]];
+  // 只畫「有因子」的分類；沒因子的骨頭直接不畫
+  const used = data.filter(c => c.causes && c.causes.length > 0);
+  if(!used.length){
+    document.getElementById('fb-svg-wrap').innerHTML =
+      '<div style="padding:2rem;text-align:center;color:#64748b;font-size:13px">尚無因子可繪製，請先在上方各分類加入原因。</div>';
+    document.getElementById('fb-out').style.display='block';
+    return;
+  }
+
+  // 中骨位置/間距參數（依因子數動態計算，避免標籤重疊）
+  const MIN_GAP = 22;                          // 相鄰因子最小間距(px)
+  const T_LO = 0.16, T_HI = 0.92, T_SPAN = T_HI - T_LO;
+  const maxN = Math.max(...used.map(c => c.causes.length));
+  const BONE_DX = 80;
+  const BONE_DY = Math.max(130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
+  const CAUSE_LEN = 30;
+
+  const spineY = 56 + BONE_DY;                 // 上方留白 + 上骨長
+  const VH = spineY + BONE_DY + 64;            // + 下骨長 + 標籤留白
+  const VW = 900;
+  const spineStartX = 40;
+  const spineEndX = VW - 190;                  // 為魚頭留位
+
+  // 每個分類各佔一欄，沿脊骨「均勻分布」，上下交錯
+  const nCols = used.length;
+  const jMin = 150, jMax = spineEndX - 30;
+  const joints = [];
+  for(let i=0;i<nCols;i++){
+    joints.push(nCols===1 ? (jMin+jMax)/2 : jMin + (jMax-jMin)*i/(nCols-1));
+  }
 
   let s=[];
   s.push(`<defs><marker id="fb-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 2L8 5L1 8" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`);
 
   // 脊骨
-  s.push(`<line x1="40" y1="${spineY}" x2="${spineEndX}" y2="${spineY}" stroke="#1a1a2e" stroke-width="3"/>`);
+  s.push(`<line x1="${spineStartX}" y1="${spineY}" x2="${spineEndX}" y2="${spineY}" stroke="#1a1a2e" stroke-width="3"/>`);
 
-  // 魚頭 — 放大框，文字自動分行處理
-  const hw=130, hh=72;
-  // 文字處理：最多兩行，每行最多7字
+  // 魚頭
+  const hw=160, hh=72;
   let plines;
-  if(problem.length <= 7){
-    plines = [problem];
-  } else if(problem.length <= 14){
-    plines = [problem.slice(0,7), problem.slice(7)];
-  } else {
-    plines = [problem.slice(0,7), problem.slice(7,13)+'…'];
-  }
+  if(problem.length <= 7){ plines = [problem]; }
+  else if(problem.length <= 14){ plines = [problem.slice(0,7), problem.slice(7)]; }
+  else { plines = [problem.slice(0,7), problem.slice(7,13)+'…']; }
   s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="10" fill="#1D3B8A"/>`);
   plines.forEach((l,i)=>{
     const ty=spineY+(i-(plines.length-1)/2)*22;
     s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="15" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
   });
 
-  function renderBone(jx, endY, cat, isTop){
-    // 大骨（無箭頭）
+  function renderBone(jx, isTop, cat){
+    const endY = isTop ? spineY - BONE_DY : spineY + BONE_DY;
+    // 大骨
     s.push(`<line x1="${jx-BONE_DX}" y1="${endY}" x2="${jx}" y2="${spineY}" stroke="${cat.color}" stroke-width="2.5"/>`);
 
-    // 要因標籤 — 稍大字體 14px
+    // 要因標籤
     const lblW=Math.max(cat.label.length*8+20,108);
     const lblH=28;
     const lblX=(jx-BONE_DX)-lblW/2;
@@ -2324,29 +2342,21 @@ function fishboneDraw(){
     s.push(`<rect x="${lblX}" y="${lblY}" width="${lblW}" height="${lblH}" rx="5" fill="none" stroke="${cat.color}" stroke-width="1.5"/>`);
     s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="#1a1a2e" font-size="14" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
 
-    // 中骨等間距（t=0.25, 0.50, 0.75）
+    // 中骨：依因子數均分 t，間距固定不重疊
     const ddx=BONE_DX, ddy=isTop?BONE_DY:-BONE_DY;
-    const ts=cat.causes.length<=1?[0.5]:cat.causes.length===2?[0.28,0.68]:
-             cat.causes.length===3?[0.25,0.50,0.75]:
-             cat.causes.length===4?[0.20,0.40,0.60,0.80]:
-             [0.16,0.32,0.50,0.66,0.82];
+    const n=cat.causes.length;
     cat.causes.forEach((cause,ci)=>{
-      const t=ts[Math.min(ci,ts.length-1)];
+      const t = n===1 ? 0.55 : T_LO + T_SPAN*ci/(n-1);
       const bx=(jx-BONE_DX)+ddx*t;
       const by=endY+ddy*t;
-      // 文字顏色依風險等級：高=紅、中=褐色、低=黑
       const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#1a1a2e';
       const riskWeight = cause.risk==='high' ? '700' : '400';
-      // 中骨：從 bx-CAUSE_LEN 到 bx，箭頭在右端
       s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${cat.color}" stroke-width="1.4" marker-end="url(#fb-ar)"/>`);
       s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="11" font-weight="${riskWeight}" font-family="-apple-system,sans-serif">${cause.name}</text>`);
     });
   }
 
-  joints.forEach((jx,gi)=>{
-    renderBone(jx, spineY-BONE_DY, topCats[gi], true);
-    renderBone(jx, spineY+BONE_DY, botCats[gi], false);
-  });
+  used.forEach((cat,i)=> renderBone(joints[i], i%2===0, cat));
 
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
