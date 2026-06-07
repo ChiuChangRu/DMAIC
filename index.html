@@ -480,6 +480,7 @@ tr:hover td{background:#F9FAFB}
   });
 })();
 </script>
+  <script src="iso_map.js"></script>
 </head>
 <body>
 
@@ -2279,43 +2280,66 @@ function fishboneDraw(){
     causes: parseCauses(document.getElementById(c.id).value)
   }));
 
-  const VW=820, VH=500;
-  const spineY=250;
-  const spineEndX=640;
-  const BONE_DX=75, BONE_DY=130;
-  const CAUSE_LEN=30;
-  const joints=[200,370,540];
-  const topCats=[data[0],data[2],data[4]];
-  const botCats=[data[1],data[3],data[5]];
+  // 只畫「有因子」的分類；沒因子的骨頭直接不畫
+  const used = data.filter(c => c.causes && c.causes.length > 0);
+  if(!used.length){
+    document.getElementById('fb-svg-wrap').innerHTML =
+      '<div style="padding:2rem;text-align:center;color:#64748b;font-size:13px">尚無因子可繪製，請先在上方各分類加入原因。</div>';
+    document.getElementById('fb-out').style.display='block';
+    return;
+  }
+
+  // 中骨位置/間距參數（依因子數動態計算，避免標籤重疊）
+  const MIN_GAP = 22;                          // 相鄰因子最小間距(px)
+  const T_LO = 0.16, T_HI = 0.92, T_SPAN = T_HI - T_LO;
+  const maxN = Math.max(...used.map(c => c.causes.length));
+  const BONE_DX = 80;
+  const BONE_DY = Math.max(130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
+  const CAUSE_LEN = 30;
+
+  const spineY = 56 + BONE_DY;                 // 上方留白 + 上骨長
+  const VH = spineY + BONE_DY + 64;            // + 下骨長 + 標籤留白
+  const VW = 900;
+  const spineStartX = 40;
+  const spineEndX = VW - 190;                  // 為魚頭留位
+
+  // 每個分類各佔一欄，沿脊骨分布、上下交錯；設「間距上限」讓分類少時往中間收、不撐滿整條脊骨
+  const nCols = used.length;
+  const jMin = 150, jMax = spineEndX - 30;
+  const MAX_GAP = 165;
+  let jStep = nCols>1 ? (jMax-jMin)/(nCols-1) : 0;
+  if(jStep > MAX_GAP) jStep = MAX_GAP;
+  const totalW = jStep*(nCols-1);
+  const jStart = (jMin+jMax)/2 - totalW/2;     // 置中
+  const joints = [];
+  for(let i=0;i<nCols;i++){
+    joints.push(nCols===1 ? (jMin+jMax)/2 : jStart + jStep*i);
+  }
 
   let s=[];
   s.push(`<defs><marker id="fb-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 2L8 5L1 8" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`);
 
   // 脊骨
-  s.push(`<line x1="40" y1="${spineY}" x2="${spineEndX}" y2="${spineY}" stroke="#1a1a2e" stroke-width="3"/>`);
+  s.push(`<line x1="${spineStartX}" y1="${spineY}" x2="${spineEndX}" y2="${spineY}" stroke="#1a1a2e" stroke-width="3"/>`);
 
-  // 魚頭 — 放大框，文字自動分行處理
-  const hw=130, hh=72;
-  // 文字處理：最多兩行，每行最多7字
+  // 魚頭
+  const hw=160, hh=72;
   let plines;
-  if(problem.length <= 7){
-    plines = [problem];
-  } else if(problem.length <= 14){
-    plines = [problem.slice(0,7), problem.slice(7)];
-  } else {
-    plines = [problem.slice(0,7), problem.slice(7,13)+'…'];
-  }
+  if(problem.length <= 7){ plines = [problem]; }
+  else if(problem.length <= 14){ plines = [problem.slice(0,7), problem.slice(7)]; }
+  else { plines = [problem.slice(0,7), problem.slice(7,13)+'…']; }
   s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="10" fill="#1D3B8A"/>`);
   plines.forEach((l,i)=>{
     const ty=spineY+(i-(plines.length-1)/2)*22;
     s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="15" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
   });
 
-  function renderBone(jx, endY, cat, isTop){
-    // 大骨（無箭頭）
+  function renderBone(jx, isTop, cat){
+    const endY = isTop ? spineY - BONE_DY : spineY + BONE_DY;
+    // 大骨
     s.push(`<line x1="${jx-BONE_DX}" y1="${endY}" x2="${jx}" y2="${spineY}" stroke="${cat.color}" stroke-width="2.5"/>`);
 
-    // 要因標籤 — 稍大字體 14px
+    // 要因標籤
     const lblW=Math.max(cat.label.length*8+20,108);
     const lblH=28;
     const lblX=(jx-BONE_DX)-lblW/2;
@@ -2323,29 +2347,21 @@ function fishboneDraw(){
     s.push(`<rect x="${lblX}" y="${lblY}" width="${lblW}" height="${lblH}" rx="5" fill="none" stroke="${cat.color}" stroke-width="1.5"/>`);
     s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="#1a1a2e" font-size="14" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
 
-    // 中骨等間距（t=0.25, 0.50, 0.75）
+    // 中骨：依因子數均分 t，間距固定不重疊
     const ddx=BONE_DX, ddy=isTop?BONE_DY:-BONE_DY;
-    const ts=cat.causes.length<=1?[0.5]:cat.causes.length===2?[0.28,0.68]:
-             cat.causes.length===3?[0.25,0.50,0.75]:
-             cat.causes.length===4?[0.20,0.40,0.60,0.80]:
-             [0.16,0.32,0.50,0.66,0.82];
+    const n=cat.causes.length;
     cat.causes.forEach((cause,ci)=>{
-      const t=ts[Math.min(ci,ts.length-1)];
+      const t = n===1 ? 0.55 : T_LO + T_SPAN*ci/(n-1);
       const bx=(jx-BONE_DX)+ddx*t;
       const by=endY+ddy*t;
-      // 文字顏色依風險等級：高=紅、中=褐色、低=黑
       const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#1a1a2e';
       const riskWeight = cause.risk==='high' ? '700' : '400';
-      // 中骨：從 bx-CAUSE_LEN 到 bx，箭頭在右端
       s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${cat.color}" stroke-width="1.4" marker-end="url(#fb-ar)"/>`);
       s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="11" font-weight="${riskWeight}" font-family="-apple-system,sans-serif">${cause.name}</text>`);
     });
   }
 
-  joints.forEach((jx,gi)=>{
-    renderBone(jx, spineY-BONE_DY, topCats[gi], true);
-    renderBone(jx, spineY+BONE_DY, botCats[gi], false);
-  });
+  used.forEach((cat,i)=> renderBone(joints[i], i%2===0, cat));
 
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
@@ -5463,7 +5479,7 @@ window.renderFactorPanel = function renderFactorPanel(result) {
   // 摘要
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:12px;color:rgba(255,255,255,.78);margin-bottom:.75rem;line-height:1.5;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.12)">'+result.summary+'</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:.75rem;line-height:1.65;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.12)">'+String(result.summary).replace(/；/g,'；<br>').replace(/。(?!$)/g,'。<br>')+'</div>';
   }
 
   // 分類並排網格
@@ -5629,8 +5645,8 @@ window.homeConfirmFactors = async function() {
       data.result.plans.sort(function(a,b){ return (a.priority||99)-(b.priority||99); });
       window._verificationPlan = data.result;
       renderVerificationPlan(data.result, factors);
-      var isoFactors = data.result.plans.filter(function(p){ return p.iso_relevant || p.pipeline==='compliance'; });
-      runIsoCrosscheck(isoFactors);
+      // ISO 對照：送全部問題因子（不再只限 compliance），讓漏液/密封等問題也能比對到對應 ISO
+      runIsoCrosscheck(data.result.plans);
     } else {
       var errMsg = data._debug ? JSON.stringify(data._debug) : (data.error || '回傳空結果');
       if(panel) panel.innerHTML =
@@ -5696,7 +5712,7 @@ function renderVerificationPlan(result, factors) {
 
   var html = '';
   if(result.summary){
-    html += '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.15);line-height:1.55">💡 '+result.summary+'</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,.85);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(255,255,255,.15);line-height:1.65">💡 '+String(result.summary).replace(/；/g,'；<br>').replace(/。(?!$)/g,'。<br>')+'</div>';
   }
 
   var pipeOpts = PIPELINE_ORDER.map(function(k){ return '<option value="'+k+'">'+PIPELINE_META[k].icon+' '+PIPELINE_META[k].label+'</option>'; }).join('');
@@ -5710,28 +5726,30 @@ function renderVerificationPlan(result, factors) {
     html += '<div style="margin-bottom:.7rem">';
     html += '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:.4rem;flex-wrap:wrap">'
       + '<span style="font-size:13px;font-weight:700;color:'+meta.color+'">'+meta.icon+' '+meta.label+'</span>'
-      + '<span style="font-size:10px;color:rgba(255,255,255,.5)">'+meta.note+'</span></div>';
+      + '<span style="font-size:10px;color:rgba(255,255,255,.62)">'+meta.note+'</span></div>';
 
     group.forEach(function(g){
       var p=g.p, i=g.i;
       var dc = DATA_COLOR[p.data_needed] || null;
-      html += '<div style="background:rgba(255,255,255,.07);border-left:3px solid '+meta.color+';border-radius:6px;padding:.5rem .65rem;margin-bottom:.4rem">';
+      html += '<div style="background:rgba(255,255,255,.11);border-left:3px solid '+meta.color+';border-radius:6px;padding:.5rem .65rem;margin-bottom:.4rem">';
 
       html += '<div style="display:flex;align-items:center;gap:5px;margin-bottom:.3rem;flex-wrap:wrap">';
       html += '<span style="font-size:11px">'+(RISK_DOT[p.risk||'medium'])+'</span>';
       html += '<span style="font-size:13px;font-weight:600;color:#fff;flex:1">'+p.factor+'</span>';
       if(dc) html += '<span style="background:'+dc.bg+';color:'+dc.color+';font-size:10px;padding:1px 6px;border-radius:3px;white-space:nowrap">'+p.data_needed+'</span>';
-      html += '<span onclick="vpEditFactor('+i+')" title="改名" style="cursor:pointer;color:rgba(255,255,255,.45);font-size:11px">✏</span>';
-      html += '<span onclick="vpDelete('+i+')" title="刪除" style="cursor:pointer;color:rgba(248,113,113,.75);font-size:14px;font-weight:700">×</span>';
+      html += '<span onclick="vpEditFactor('+i+')" title="改名" style="cursor:pointer;color:rgba(255,255,255,.5);font-size:11px">✏</span>';
+      html += '<span onclick="vpDelete('+i+')" title="刪除" style="cursor:pointer;color:rgba(248,113,113,.8);font-size:14px;font-weight:700">×</span>';
       html += '</div>';
 
-      if(p.subtype) html += '<span style="display:inline-block;background:'+meta.color+'22;color:'+meta.color+';font-size:10px;padding:1px 7px;border-radius:3px;margin-bottom:.25rem">'+p.subtype+(p.iso_relevant?' · ISO':'')+'</span>';
+      if(p.link) html += '<div style="font-size:11px;color:rgba(255,255,255,.78);line-height:1.45;margin-bottom:.3rem">↳ 關聯：'+p.link+'</div>';
 
-      html += '<div style="font-size:12px;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:.35rem">建議：'
+      if(p.subtype) html += '<span style="display:inline-block;background:'+meta.color+'33;color:'+meta.color+';font-size:10px;padding:1px 7px;border-radius:3px;margin-bottom:.25rem">'+p.subtype+(p.iso_relevant?' · ISO':'')+'</span>';
+
+      html += '<div style="font-size:12px;color:rgba(255,255,255,.93);line-height:1.5;margin-bottom:.35rem">建議：'
         + (p.verification||'—')
-        + ' <span onclick="vpEditVerif('+i+')" style="cursor:pointer;color:rgba(126,200,227,.7);font-size:10px">✏編輯</span></div>';
+        + ' <span onclick="vpEditVerif('+i+')" style="cursor:pointer;color:rgba(126,200,227,.85);font-size:10px">✏編輯</span></div>';
 
-      html += '<div style="font-size:10px;color:rgba(255,255,255,.5)">改管道：<select onchange="vpSetPipeline('+i+',this.value)" '
+      html += '<div style="font-size:10px;color:rgba(255,255,255,.6)">改管道：<select onchange="vpSetPipeline('+i+',this.value)" '
         + 'style="background:rgba(0,0,0,.25);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:4px;font-size:10px;padding:1px 3px;font-family:inherit">'
         + pipeOpts.replace('value="'+pk+'"','value="'+pk+'" selected')+'</select></div>';
 
@@ -5760,7 +5778,7 @@ function renderVerificationPlan(result, factors) {
 // ════════════════════════════════════════════════════════
 window._isoMap = null;
 // v5.0：iso_map 內嵌（免另放 iso_map.json；如部署了同名檔可改回 fetch）
-window._ISO_MAP_EMBEDDED = {"_meta":{"schema":"iso_map v1.0","purpose":"器材類別 → 適用 ISO 標準 → 該驗證的項目類別。供 MedQA verification_plan 做 ISO 對照與缺口紅旗。","rules":["no / title / edition：標準身分為 factual（來源：ISO 目錄 / Open Data）。AI 比對時只能引用本檔已列出的標準，不得自行生成編號（避免幻覺條號）。","items：為驗證『項目類別』草稿，非正本條文逐字內容。一律以正本最新版次為準，需 RA 核可後將 items_status 改為 'RA_approved'。","applies_to：用於判斷該標準是否適用於某器材的關鍵詞（intravascular / dialysis / balloon / introducer / needle / 通則 / 跨領域）。"],"edition_note":"edition 為查詢當下的最新版次，採購/送審前請再確認是否被新版取代或廢止。","last_reviewed":"2026-06 (seed)","maintained_by":"RA"},"ics":{"11.040.25":{"title":"Syringes, needles and catheters｜注射器、針與導管","standards":[{"no":"ISO 10555-1","edition":"2023","title":"Intravascular catheters — Sterile and single-use catheters — Part 1: General requirements","title_zh":"血管內導管—無菌單次使用—第1部:通則","applies_to":["intravascular","通則"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"耐腐蝕","en":"corrosion resistance"},{"k":"峰值拉伸力(管身/接合)","en":"peak tensile force"},{"k":"加壓不漏液","en":"freedom from leakage during pressurization"},{"k":"抽吸不漏氣","en":"freedom from leakage during aspiration"},{"k":"流速","en":"flowrate"},{"k":"動力注射爆破壓","en":"power injection burst pressure"},{"k":"接頭(hub)強度","en":"hubs"},{"k":"可偵測性(顯影)","en":"radio-detectability"},{"k":"塗層完整性/微粒","en":"coating integrity / particulate (依設計適用)"},{"k":"遠端尖端剛性","en":"distal tip stiffness (神經血管適用)"},{"k":"模擬使用/抗扭結/扭力","en":"simulated use / kink / torque (依設計適用)"}]},{"no":"ISO 10555-3","edition":"*待確認","title":"Intravascular catheters — Sterile and single-use catheters — Part 3: Central venous catheters","title_zh":"第3部:中心靜脈導管(對應 HD 長期血管導管)","applies_to":["intravascular","central-venous","HD"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"(承 Part 1 通則)","en":"general per Part 1"},{"k":"尺寸標示","en":"size designation"},{"k":"管腔流速/可注射性","en":"flow / injectability — RA 補"}]},{"no":"ISO 10555-4","edition":"*待確認","title":"Intravascular catheters — Sterile and single-use catheters — Part 4: Balloon dilatation catheters","title_zh":"第4部:球囊擴張導管","applies_to":["intravascular","balloon"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"額定爆破壓(RBP)","en":"rated burst pressure"},{"k":"球囊順應性(直徑-壓力)","en":"compliance"},{"k":"反覆充壓疲勞","en":"fatigue / repeated inflation"},{"k":"球囊接合強度","en":"balloon bond strength — RA 補"}]},{"no":"ISO 10555-8","edition":"2024","title":"Intravascular catheters — Sterile and single-use catheters — Part 8: Catheters for extracorporeal blood treatment","title_zh":"第8部:體外血液處理用導管(血液透析)","applies_to":["intravascular","dialysis","HD","extracorporeal"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"再循環率","en":"recirculation rate"},{"k":"流量-壓力特性","en":"flow vs pressure"},{"k":"管腔容積/填充量","en":"priming/lumen volume — RA 補"},{"k":"(承 Part 1 通則:拉伸/漏液/接頭)","en":"general per Part 1"}]},{"no":"ISO 11070","edition":"*待確認","title":"Sterile single-use intravascular catheter introducers, dilators and guidewires","title_zh":"無菌單次使用血管內導引器、擴張器與導絲(對應 Sheath/Guide/同軸導引針)","applies_to":["introducer","sheath","guidewire","needle","guide"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"導引器/擴張器拉伸","en":"tensile"},{"k":"導絲彈性/抗扭結","en":"guidewire flex/kink — RA 補"},{"k":"表面/微粒","en":"surface / particulate — RA 補"}]}]},"11.040.40":{"title":"Implants for surgery / urology stents｜植入物與泌尿支架(DJ/Pigtail)","_note":"輸尿管 DJ/Pigtail 支架非血管內導管，10555 不適用。主規格多為 ASTM F1828*（輸尿管支架），ISO 端以生物相容/滅菌/包裝為主。本區待 RA 依實際送審依據建檔。","standards":[{"no":"ASTM F1828","edition":"*非ISO,待確認","title":"Standard Specification for Ureteral Stents","title_zh":"輸尿管支架規格(ASTM,非ISO)*","applies_to":["ureteral","DJ","pigtail","stent"],"id_verified":false,"items_status":"draft_pending_RA","items":[{"k":"拉伸/接合強度","en":"tensile — RA 補"},{"k":"捲曲保持力(pigtail)","en":"coil retention — RA 補"},{"k":"流速/側孔","en":"flow — RA 補"}]}]}},"cross_cutting":{"_note":"跨器材通用，幾乎所有無菌植入/介入器材都需涵蓋。AI 應視器材性質判斷是否納入。","standards":[{"no":"ISO 10993-1","edition":"*待確認","title":"Biological evaluation of medical devices — Part 1: Evaluation and testing within a risk management process","title_zh":"醫療器材生物相容性評估—第1部:風險管理流程內的評估與試驗","applies_to":["跨領域","biocompat"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"細胞毒性","en":"cytotoxicity"},{"k":"致敏性","en":"sensitization"},{"k":"刺激/皮內反應","en":"irritation"},{"k":"(依接觸類型與時間擴充)","en":"per contact category/duration"}]},{"no":"ISO 11135","edition":"*待確認","title":"Sterilization of health care products — Ethylene oxide — Requirements for development, validation and routine control","title_zh":"EO 環氧乙烷滅菌確效","applies_to":["跨領域","sterilization-EO"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"滅菌確效(SAL 10^-6)","en":"validation"},{"k":"EO/ECH 殘留","en":"residuals (見 10993-7)"}]},{"no":"ISO 11137-1","edition":"*待確認","title":"Sterilization of health care products — Radiation — Part 1: Requirements for development, validation and routine control","title_zh":"輻射滅菌確效","applies_to":["跨領域","sterilization-radiation"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"劑量確立(VDmax 等)","en":"dose setting"},{"k":"材料相容性","en":"material effects"}]},{"no":"ISO 11607-1","edition":"*待確認","title":"Packaging for terminally sterilized medical devices — Part 1: Requirements for materials, sterile barrier systems and packaging systems","title_zh":"最終滅菌器材包裝—無菌屏障系統","applies_to":["跨領域","packaging"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"封口強度/完整性","en":"seal strength/integrity"},{"k":"老化(實時/加速)","en":"aging / shelf life"}]},{"no":"ISO 80369-7","edition":"*待確認","title":"Small-bore connectors for liquids and gases in healthcare applications — Part 7: Connectors for intravascular or hypodermic applications","title_zh":"小口徑連接器—第7部:血管內/皮下(取代舊 Luer ISO 594)","applies_to":["intravascular","connector","luer","needle"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"接頭結合/漏液/分離力","en":"leakage / separation / overriding"}]},{"no":"ISO 7864","edition":"*待確認","title":"Sterile hypodermic needles for single use — Requirements and test methods","title_zh":"無菌單次使用皮下注射針(對應針/同軸導引針)","applies_to":["needle","guide"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"針管與針座結合強度","en":"hub/needle bond"},{"k":"針尖穿刺力/銳利度","en":"penetration / sharpness"},{"k":"通暢性/不漏液","en":"patency"}]},{"no":"ISO 9626","edition":"*待確認","title":"Stainless steel needle tubing for the manufacture of medical devices — Requirements and test methods","title_zh":"醫療器材用不鏽鋼針管","applies_to":["needle","guide","tubing"],"id_verified":true,"items_status":"draft_pending_RA","items":[{"k":"尺寸/壁厚","en":"dimensions"},{"k":"剛性/抗折","en":"stiffness / breakage resistance"}]}]}};
+// _ISO_MAP_EMBEDDED 已移至獨立檔 iso_map.js（由 <head> 的 <script src="iso_map.js"> 載入）
 
 async function loadIsoMap(){
   if(window._isoMap) return window._isoMap;
@@ -5804,19 +5822,33 @@ function deriveCategoryKeys(info){
             ((info&&info.indication)||'') + ' ' + ((info&&info.material)||'');
   txt = txt.toLowerCase();
   var VOCAB = {
-    'intravascular': ['intravascular','血管內','vascular','靜脈','動脈','cvc','picc'],
+    'intravascular': ['intravascular','血管內','血管','vascular','靜脈','動脈','cvc','picc'],
     'central-venous': ['central venous','中心靜脈','cvc'],
     'dialysis': ['dialysis','透析','hemodialysis','血液透析','extracorporeal','體外血液'],
+    'extracorporeal': ['extracorporeal','體外循環','回路管','blood circuit'],
+    'bloodline': ['bloodline','血液回路','回路管','保護套','transducer protector'],
     'balloon': ['balloon','球囊','氣囊','擴張'],
     'introducer': ['introducer','導引器'],
-    'sheath': ['sheath','鞘管','護鞘'],
-    'guidewire': ['guidewire','導絲'],
-    'needle': ['needle','針','biopsy','切片','穿刺'],
+    'sheath': ['sheath','鞘管','護鞘','安氏','amplatz'],
+    'guidewire': ['guidewire','導絲','導引鋼線'],
+    'needle': ['needle','針','biopsy','切片','穿刺','翼狀針','鈍針'],
     'guide': ['coaxial','同軸','導引針'],
     'ureteral': ['ureteral','輸尿管'],
     'stent': ['stent','支架','double j','double-j','pigtail','雙j','豬尾'],
-    'connector': ['connector','接頭','luer','魯爾','魯耳'],
-    'tubing': ['tubing','針管','不鏽鋼管','不銹鋼管']
+    'connector': ['connector','接頭','luer','魯爾','魯耳','y型','歧管','manifold'],
+    'tubing': ['tubing','針管','不鏽鋼管','不銹鋼管'],
+    'tracheal': ['tracheal','氣管內管','氣管插管','endotracheal'],
+    'tracheostomy': ['tracheostomy','氣切','氣管切開'],
+    'airway': ['airway','氣道'],
+    'suction': ['suction','抽痰','抽吸'],
+    'respiratory': ['respiratory','呼吸','氧氣','面罩','噴霧','mask','oxygen','nebulizer'],
+    'anaesthetic': ['anaesthetic','anesthetic','麻醉'],
+    'infusion': ['infusion','輸液','點滴','延長管','iv set','輸液套'],
+    'iv-bag': ['iv bag','輸液袋','軟袋','iv袋','點滴袋','輸液容器','parenteral'],
+    'container': ['container','容器'],
+    'biliary': ['biliary','膽道','鼻膽','膽管'],
+    'drainage': ['drainage','引流','外科引流'],
+    'urine-bag': ['urine bag','尿袋','集尿','綁腿尿袋']
   };
   var keys = [];
   Object.keys(VOCAB).forEach(function(k){
@@ -5828,7 +5860,7 @@ function deriveCategoryKeys(info){
 async function runIsoCrosscheck(plans){
   var box = document.getElementById('home-iso-panel');
   if(!box) return;
-  if(!plans || !plans.length){ box.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照：本案無「規範符合性」類因子，未觸發逐因子對照。</div>'; return; }
+  if(!plans || !plans.length){ box.innerHTML='<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照：尚無因子可對照（請先產生驗證計畫）。</div>'; return; }
 
   box.innerHTML =
     '<div style="display:flex;align-items:center;gap:6px;color:rgba(255,255,255,.55);font-size:11px;padding:.5rem .2rem">'+
@@ -5878,61 +5910,66 @@ function renderIsoPanel(r){
 
   var apps  = r.applicable || [];
   var items = r.items || [];
-  var gaps  = items.filter(function(i){ return i.status==='gap'; });
-  var parts = items.filter(function(i){ return i.status==='partial'; });
-  var cov   = items.filter(function(i){ return i.status==='covered'; });
-
-  var appLabel = apps.map(function(a){ return a.no; }).join('、') || '—';
 
   var html = '';
   html += '<div style="border-top:1px solid rgba(255,255,255,.12);margin-top:.5rem;padding-top:.6rem">';
-  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.75);margin-bottom:.5rem">📐 ISO 對照 <span style="font-weight:400;color:rgba(255,255,255,.4);font-size:10px">'+appLabel+'</span></div>';
 
-  // ── 缺口紅旗（最重要，永遠展開）──
-  if(gaps.length){
-    html += '<div style="background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.35);border-radius:8px;padding:.55rem .65rem;margin-bottom:.45rem">';
-    html += '<div style="font-size:11px;font-weight:700;color:#FCA5A5;margin-bottom:.35rem">⚠️ ISO 應驗、但因子/計畫未涵蓋（'+gaps.length+' 項 — CAPA 風險）</div>';
-    gaps.forEach(function(g){
-      html += '<div style="font-size:10px;color:rgba(255,255,255,.8);margin-bottom:.22rem;line-height:1.45">'+
-        '<span style="color:#FCA5A5">●</span> <b>'+g.item+'</b> '+
-        '<span style="color:rgba(255,255,255,.4)">（'+g.standard+'）</span>'+
-        (g.note?'<span style="color:rgba(255,255,255,.35)"> — '+g.note+'</span>':'')+'</div>';
-    });
-    html += '</div>';
-  }else if(!items.length){
+  if(!items.length){
+    var appLabel0 = apps.map(function(a){ return a.no; }).join('、');
     if(apps.length){
-      html += '<div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:8px;padding:.5rem .65rem;margin-bottom:.45rem;font-size:11px;color:#FBBF24;line-height:1.5">📋 已判定適用標準（'+appLabel+'），但本次未完成逐項缺口比對。可重按「產生驗證計畫」再跑一次，或參考 iso_map 正本逐項確認。</div>';
+      html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:.4rem">📐 ISO 對照</div>';
+      html += '<div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:8px;padding:.5rem .65rem;font-size:11px;color:#FBBF24;line-height:1.5">📋 已判定適用標準（'+appLabel0+'），但本次未產生逐因子對照。可重按「產生驗證計畫」再跑一次。</div>';
     }else{
-      html += '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.5rem .65rem;margin-bottom:.45rem;font-size:11px;color:rgba(255,255,255,.5)">本器材未對應到 iso_map 內已建檔的標準。</div>';
+      html += '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.5rem .65rem;font-size:11px;color:rgba(255,255,255,.5)">本器材未對應到 iso_map 內已建檔的標準。</div>';
     }
-  }else{
-    html += '<div style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;padding:.45rem .65rem;margin-bottom:.45rem;font-size:11px;color:#6EE7B7">✅ 適用 ISO 應驗項目皆有對應因子（無明顯缺口）</div>';
+    html += '</div>';
+    box.innerHTML = html;
+    return;
   }
 
-  // ── partial（提醒，預設展開）──
-  if(parts.length){
-    html += '<div style="margin-bottom:.4rem">';
-    parts.forEach(function(p){
-      html += '<div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:.2rem;line-height:1.45">'+
-        '<span style="color:#FBBF24">◐</span> '+p.item+' <span style="color:rgba(255,255,255,.35)">（'+p.standard+'）部分涵蓋'+(p.covered_by?'：'+p.covered_by:'')+'</span></div>';
+  var STAT = {
+    gap:     {icon:'⚠️', color:'#FCA5A5', label:'缺口'},
+    partial: {icon:'◐',  color:'#FBBF24', label:'部分'},
+    covered: {icon:'✓',  color:'#6EE7B7', label:'已涵蓋'}
+  };
+
+  // 以「因子」為主軸分組
+  var byFactor = {}, order = [];
+  items.forEach(function(it){
+    var f = it.factor || '（未標因子）';
+    if(!byFactor[f]){ byFactor[f] = []; order.push(f); }
+    byFactor[f].push(it);
+  });
+  var gapCount = items.filter(function(i){ return i.status==='gap'; }).length;
+  var waitCount = items.filter(function(i){ return (i.clause||'').indexOf('待建檔')>=0; }).length;
+
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:.5rem">📐 ISO 對照（因子 ↔ 標準／章節）'
+    + (gapCount? ' <span style="color:#FCA5A5;font-size:10px;font-weight:700">⚠️ '+gapCount+' 缺口</span>':'') + '</div>';
+
+  order.forEach(function(f){
+    html += '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:.5rem .6rem;margin-bottom:.45rem">';
+    html += '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.93);margin-bottom:.35rem">'+f+'</div>';
+    byFactor[f].forEach(function(it){
+      var st = STAT[it.status] || STAT.partial;
+      var clause = it.clause || '';
+      var unfiled = (!clause || clause.indexOf('待建檔')>=0);
+      html += '<div style="font-size:11px;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:.22rem;padding-left:2px">';
+      html += '<span style="color:'+st.color+'">'+st.icon+'</span> ';
+      html += '<b style="color:rgba(255,255,255,.92)">'+(it.standard||'')+'</b>';
+      if(clause) html += ' <span style="color:'+(unfiled?'rgba(255,255,255,.4)':'#7EC8E3')+(unfiled?';font-style:italic':'')+'">'+clause+'</span>';
+      if(it.item) html += ' <span style="color:rgba(255,255,255,.55)">— '+it.item+'</span>';
+      html += ' <span style="color:'+st.color+';font-size:10px">['+st.label+(it.status==='covered'&&it.covered_by?'：'+it.covered_by:'')+']</span>';
+      if(it.note) html += '<div style="color:rgba(255,255,255,.4);font-size:10px;padding-left:16px">· '+it.note+'</div>';
+      html += '</div>';
     });
     html += '</div>';
-  }
-
-  // ── covered（收合）──
-  if(cov.length){
-    html += '<details style="margin-bottom:.3rem"><summary style="font-size:10px;color:rgba(255,255,255,.45);cursor:pointer;list-style:none">▸ 已涵蓋 '+cov.length+' 項</summary><div style="padding-top:.3rem">';
-    cov.forEach(function(c){
-      html += '<div style="font-size:10px;color:rgba(255,255,255,.45);margin-bottom:.18rem;line-height:1.4">'+
-        '<span style="color:#34D399">✓</span> '+c.item+' <span style="color:rgba(255,255,255,.3)">（'+c.standard+(c.covered_by?' ← '+c.covered_by:'')+'）</span></div>';
-    });
-    html += '</div></details>';
-  }
+  });
 
   if(r.summary){
-    html += '<div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:.35rem;line-height:1.5">💡 '+r.summary+'</div>';
+    html += '<div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:.35rem;line-height:1.5">💡 '+String(r.summary).replace(/；/g,'；<br>')+'</div>';
   }
-  html += '<div style="font-size:9px;color:rgba(255,255,255,.3);margin-top:.4rem;line-height:1.4">※ 項目為類別比對草稿，以 ISO 正本最新版次為準，需 RA 核可（見 iso_map.json）。</div>';
+  html += '<div style="font-size:9px;color:rgba(255,255,255,.32);margin-top:.4rem;line-height:1.45">※ 章節僅引用 iso_map 已建檔項目；標「待建檔」者尚未建章節（AI 不自創條號）。一律以 ISO 正本最新版次為準、需 RA 核可。'
+    + (waitCount? '　目前 '+waitCount+' 筆章節待建檔。':'') + '</div>';
   html += '</div>';
 
   box.innerHTML = html;
@@ -5973,7 +6010,7 @@ function renderIsoPanel(r){
         ['specific_person','只有特定人員操作才有'],
         ['specific_lot','只有特定批次材料才有']
       ]},
-      {id:'hq-data', label:'針對「這個問題現象」，有沒有可量化的數據？', multi:false, opts:[
+      {id:'hq-data', label:'針對「這個問題現象」，有沒有可量化的數據？', multi:false, note:'※ 只算直接或間接反映「問題現象本身」的數據（如本例的流量、內徑）；與問題無關的量測不算。', opts:[
         ['','— 請選擇 —'],
         ['measure_direct','有：直接量測本問題的數據（如流量、內徑、強度）'],
         ['related_yield','有：相關的良率／不良數紀錄'],
@@ -6045,6 +6082,13 @@ function renderIsoPanel(r){
         lbl.textContent = q.label + (q.multi ? '（可複選）' : '');
         lbl.style.cssText = 'color:rgba(255,255,255,.75);font-size:11px;margin-bottom:4px;font-weight:500';
         cell.appendChild(lbl);
+
+        if(q.note){
+          var nt = document.createElement('div');
+          nt.textContent = q.note;
+          nt.style.cssText = 'color:rgba(255,255,255,.5);font-size:10px;line-height:1.45;margin:-2px 0 5px';
+          cell.appendChild(nt);
+        }
 
         if(q.isText){
           // 文字輸入框
@@ -6979,8 +7023,24 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   var CAT_NAMES = {man:'人員', machine:'機器', material:'材料', method:'方法', measure:'量測', env:'環境'};
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
 
-  // 每個因子的預設建議工具
-  fbCauses.forEach(function(f){ f._defTool = f.tool || CAT_DEFAULT[f.catId||''] || 'doe'; });
+  // 與主頁計畫書同源：優先用 verification_plan 的 subtype/pipeline 決定每個因子預設工具
+  function subtypeToTool(p){
+    if(!p) return null;
+    if(p.pipeline==='compliance' || p.pipeline==='uncontrollable') return 'none';
+    var s = (p.subtype||'') + ' ' + (p.verification||'');
+    if(/PB|Plackett/i.test(s)) return 'pb';
+    if(/田口|Taguchi/i.test(s)) return 'taguchi';
+    if(/DOE|實驗設計|因子實驗/i.test(s)) return 'doe';
+    if(/SPC|管制圖|製程管控/i.test(s)) return 'spc';
+    if(/MSA|量測系統|Gage|GR&R/i.test(s)) return 'msa';
+    if(/假設|檢定|t-?test|ANOVA|群組比較/i.test(s)) return 'hypothesis';
+    return null;
+  }
+  var _vpPlans = (window._verificationPlan && window._verificationPlan.plans) || [];
+  function planFor(name){ for(var i=0;i<_vpPlans.length;i++){ if(_vpPlans[i].factor===name) return _vpPlans[i]; } return null; }
+
+  // 每個因子的預設建議工具：先看計畫書 → 再 f.tool → 再 6M 預設
+  fbCauses.forEach(function(f){ f._defTool = subtypeToTool(planFor(f.name)) || f.tool || CAT_DEFAULT[f.catId||''] || 'doe'; });
 
   // 可帶入統計工具的因子（環境/none 歸 ISO，不進統計工具）
   var selFactors = fbCauses.filter(function(f){ return f._defTool !== 'none'; });
