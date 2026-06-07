@@ -1085,13 +1085,14 @@ tr:hover td{background:#F9FAFB}
       <div style="margin-top:.6rem;font-size:12px;color:#6B7280;padding:.4rem .5rem">
         大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（高風險=5 / 中風險=3 / 低風險=1）
       </div>
-      <div class="btn-row" style="margin-top:.5rem">
-        <button id="dl-plan-btn" class="btn btn-primary" onclick="downloadPlanDocx()">📄 下載計畫書（Word）</button>
-        <span style="font-size:11px;color:#94A3B8;margin-left:.5rem">彙整器材/問題/問卷/因子關聯/魚骨圖/驗證項目/ISO，於瀏覽器產生 .docx（不經伺服器、不花 API）</span>
-      </div>
     </div>
   </div>
   <div id="fb-factor-selector" style="display:none"></div>
+  <div id="fb-dl-wrap" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1.5px dashed #D1D5DB">
+    <div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">✅ 確認上方因子分類與帶入工具後，可下載完整計畫書：</div>
+    <button id="dl-plan-btn" class="btn btn-primary" onclick="downloadPlanDocx()">📄 下載計畫書（Word）</button>
+    <span style="font-size:11px;color:#94A3B8;margin-left:.5rem">彙整器材/問題/問卷/因子關聯/魚骨圖/驗證項目/其他處置/ISO，於瀏覽器產生 .docx（不經伺服器、不花 API）</span>
+  </div>
 
   <!-- 魚骨圖嵌入式問答助理：已移除（不再使用）。fbChatInit/Send/Reset 仍有 null 防護，呼叫到也不會出錯。 -->
 </div>
@@ -2284,7 +2285,10 @@ async function downloadPlanDocx(){
   if(btn){ btn.disabled=true; btn.dataset.t=btn.textContent; btn.textContent='產生計畫書中…'; }
   try{
     var dev=window._deviceInfo||{};
-    var problem=((document.getElementById('fb-problem')||{}).value)||((document.getElementById('hq-problem')||{}).value)||'（未填）';
+    var _devNm=(dev.confirmed_name||dev.name||'');
+    var _fbV=((document.getElementById('fb-problem')||{}).value||'').trim();
+    var _hqV=((document.getElementById('hq-problem')||{}).value||'').trim();
+    var problem = _fbV || ((_hqV && _hqV!==_devNm && (!_devNm||_devNm.indexOf(_hqV)<0)) ? _hqV : '') || '（未填）';
     var conf=window._confirmedFactors||{};
     var plans=(window._verificationPlan&&window._verificationPlan.plans)||[];
     var iso=(window._isoResult&&window._isoResult.items)||[];
@@ -2360,17 +2364,32 @@ async function downloadPlanDocx(){
     if(hasFactors){ ch.push(tbl([1500,1900,760,4066,800],['分類','因子','風險','因子→問題關聯鏈','備註'],frows)); }
     else{ ch.push(PP(tx('（無因子資料）',{color:GRAY}))); }
 
-    ch.push(H1('4. 驗證計畫'));
-    if(plans.length){ var pw=[1700,1100,3666,1400,1160];
-      var prows=plans.map(function(p,i){return trow([
-        tx(p.factor,{bold:true}), tx(p.subtype||p.tool||'—',{bold:true}),
-        tx(p.verification||'—'), tx(p.data_needed||'—'),
-        tx((PMETA[p.pipeline]&&PMETA[p.pipeline].label)||p.pipeline||'—')
-      ],pw,i%2===1);});
-      ch.push(tbl(pw,['因子','建議工具','建議驗證動作','所需數據','管道'],prows));
-    }else{ ch.push(PP(tx('（尚未產生驗證計畫）',{color:GRAY}))); }
+    var OTHER_ORDER=['compliance','method_dev','risk_evidence','use_side','supplier','uncontrollable'];
+    var expPlans=plans.filter(function(p){ return !p.pipeline || p.pipeline==='experiment'; });
+    var otherPlans=plans.filter(function(p){ return OTHER_ORDER.indexOf(p.pipeline)>=0; });
 
-    ch.push(H1('5. ISO 規範對照'));
+    ch.push(H1('4. 驗證計畫（實驗／統計類）'));
+    if(expPlans.length){ var pw=[1900,1100,3766,2260];
+      var prows=expPlans.map(function(p,i){return trow([
+        tx(p.factor,{bold:true}), tx(p.subtype||p.tool||'—',{bold:true}),
+        tx(p.verification||'—'), tx(p.data_needed||'—')
+      ],pw,i%2===1);});
+      ch.push(tbl(pw,['因子','建議工具','建議驗證動作','所需數據'],prows));
+    }else{ ch.push(PP(tx('（無實驗／統計類驗證項目）',{color:GRAY}))); }
+
+    ch.push(H1('5. 其他處置（非實驗類）'));
+    if(otherPlans.length){
+      ch.push(PP(tx('以下因子不以 DOE／SPC／MSA 等實驗統計處理，而循規範符合性、方法開發、風險、使用端、供應商等途徑處置。',{size:20,color:GRAY})));
+      var ow=[1900,1500,5626];
+      var orows=otherPlans.map(function(p,i){return trow([
+        tx(p.factor,{bold:true}),
+        tx((PMETA[p.pipeline]&&PMETA[p.pipeline].label)||p.pipeline||'—'),
+        tx(p.verification||'—')
+      ],ow,i%2===1);});
+      ch.push(tbl(ow,['因子','處置途徑','建議處置'],orows));
+    }else{ ch.push(PP(tx('（無非實驗類處置項目）',{color:GRAY}))); }
+
+    ch.push(H1('6. ISO 規範對照'));
     if(iso.length){ var iw=[1500,1500,2500,900,1100,1526];
       var irows=iso.map(function(r,i){var wait=String(r.clause||'').indexOf('待建檔')>=0; var z=i%2===1;
         return trow([
@@ -2445,7 +2464,7 @@ function fishboneDraw(){
   if(!used.length){
     document.getElementById('fb-svg-wrap').innerHTML =
       '<div style="padding:2rem;text-align:center;color:#64748b;font-size:13px">尚無因子可繪製，請先在上方各分類加入原因。</div>';
-    document.getElementById('fb-out').style.display='block';
+    document.getElementById('fb-out').style.display='block'; var _dlw=document.getElementById('fb-dl-wrap'); if(_dlw) _dlw.style.display='block';
     return;
   }
 
@@ -2525,7 +2544,7 @@ function fishboneDraw(){
 
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
-  document.getElementById('fb-out').style.display='block';
+  document.getElementById('fb-out').style.display='block'; var _dlw=document.getElementById('fb-dl-wrap'); if(_dlw) _dlw.style.display='block';
 
   // 從卡片資料收集所有因子（含風險等級）
   var fbCauses = [];
@@ -5830,6 +5849,7 @@ window.homeConfirmFactors = async function() {
 };
 
 function proceedToFishbone(factors) {
+  if(window._isoRunning){ alert('ISO 對照仍在產生中，請待其完成後再進入魚骨圖。'); return; }
   var clean = {};
   ['man','machine','material','method','measure','env'].forEach(function(cat){
     clean[cat] = (factors[cat]||[]).map(function(f){
@@ -6017,6 +6037,17 @@ function deriveCategoryKeys(info){
   return keys;
 }
 
+function _setPlanConfirmLock(lock){
+  var w=document.getElementById('home-factor-panel-btn'); if(!w) return;
+  var b=w.querySelector('button'); if(!b) return;
+  b.disabled=!!lock; b.style.opacity=lock?'0.45':''; b.style.cursor=lock?'not-allowed':'';
+  var n=document.getElementById('home-iso-lock-note');
+  if(lock){
+    if(!n){ n=document.createElement('div'); n.id='home-iso-lock-note'; n.style.cssText='font-size:11px;color:#B45309;margin-top:.35rem'; b.parentNode.appendChild(n); }
+    n.textContent='⏳ ISO 對照產生中，完成後才能進入魚骨圖…';
+  } else if(n){ n.remove(); }
+}
+
 async function runIsoCrosscheck(plans){
   var box = document.getElementById('home-iso-panel');
   if(!box) return;
@@ -6027,41 +6058,45 @@ async function runIsoCrosscheck(plans){
     '<span style="display:inline-block;width:10px;height:10px;border:2px solid rgba(255,255,255,.3);border-top-color:#DAA520;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>'+
     '比對 ISO 應驗項目，檢查缺口...</div>';
 
-  var map = await loadIsoMap();
-  if(map && map.__error){
-    box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照未啟用（找不到 iso_map.json：'+map.__error+'）</div>';
-    return;
-  }
-  var catKeys = deriveCategoryKeys(window._deviceInfo);
-  console.log('[ISO 對照] 器材分類 category_keys：', catKeys, window._deviceInfo && window._deviceInfo.category_keys ? '(來自 AI)' : '(關鍵字推導*)');
-  var standards = flattenIsoStandards(map, catKeys);
-  if(!standards.length){
-    box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照：依本器材分類（'+(catKeys.join('、')||'未判定')+'）未對應到 iso_map 內標準；僅通用標準適用或尚未建檔。</div>';
-    return;
-  }
-
+  window._isoRunning = true; _setPlanConfirmLock(true);
   try{
-    var problem = (document.getElementById('hq-problem')||{}).value || '';
-    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        mode:'iso_crosscheck',
-        deviceInfo: window._deviceInfo,
-        problem: problem,
-        plans: plans,
-        isoStandards: standards
-      })
-    });
-    var data = await resp.json();
-    console.log('[ISO 對照] worker 回傳：', data);
-    if(data.result && (data.result.items || data.result.applicable)){
-      window._isoResult = data.result;
-      renderIsoPanel(data.result);
-    }else{
-      box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.35);padding:.3rem .2rem">📐 ISO 對照：無法判定（'+(data._debug?JSON.stringify(data._debug):(data.error||'空結果'))+'）</div>';
+    var map = await loadIsoMap();
+    if(map && map.__error){
+      box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照未啟用（找不到 iso_map.json：'+map.__error+'）</div>';
+      return;
     }
-  }catch(e){
-    box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.35);padding:.3rem .2rem">📐 ISO 對照連線失敗：'+e.message+'</div>';
+    var catKeys = deriveCategoryKeys(window._deviceInfo);
+    console.log('[ISO 對照] 器材分類 category_keys：', catKeys, window._deviceInfo && window._deviceInfo.category_keys ? '(來自 AI)' : '(關鍵字推導*)');
+    var standards = flattenIsoStandards(map, catKeys);
+    if(!standards.length){
+      box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照：依本器材分類（'+(catKeys.join('、')||'未判定')+'）未對應到 iso_map 內標準；僅通用標準適用或尚未建檔。</div>';
+      return;
+    }
+    try{
+      var problem = (document.getElementById('hq-problem')||{}).value || '';
+      var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          mode:'iso_crosscheck',
+          deviceInfo: window._deviceInfo,
+          problem: problem,
+          plans: plans,
+          isoStandards: standards
+        })
+      });
+      var data = await resp.json();
+      console.log('[ISO 對照] worker 回傳：', data);
+      if(data.result && (data.result.items || data.result.applicable)){
+        window._isoResult = data.result;
+        renderIsoPanel(data.result);
+      }else{
+        box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.35);padding:.3rem .2rem">📐 ISO 對照：無法判定（'+(data._debug?JSON.stringify(data._debug):(data.error||'空結果'))+'）</div>';
+      }
+    }catch(e){
+      box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.35);padding:.3rem .2rem">📐 ISO 對照連線失敗：'+e.message+'</div>';
+    }
+  }finally{
+    window._isoRunning = false; _setPlanConfirmLock(false);
   }
 }
 
@@ -6622,18 +6657,20 @@ function renderIsoPanel(r){
       if(typeof goTool==='function') goTool('fishbone');
       setTimeout(function(){
 
-        // 魚頭
+        // 魚頭（要的是「問題」，不是產品名；hq-problem 在確認器材時會被填成器材名，需排除）
         var problemTitle = '';
         var hqProbEl = document.getElementById('hq-problem');
         var devName = (window._deviceInfo && (window._deviceInfo.confirmed_name||window._deviceInfo.name))||'';
-        if(hqProbEl && hqProbEl.value.trim()) {
-          problemTitle = hqProbEl.value.trim();
+        var isDevName = function(s){ return !!(s && devName && (s===devName || devName.indexOf(s)>=0)); };
+        var hqVal = hqProbEl ? hqProbEl.value.trim() : '';
+        if(hqVal && !isDevName(hqVal)) {
+          problemTitle = hqVal;
         } else {
-          // 找第一則「描述問題」的訊息，排除器材辨識用的器材名稱（魚頭要的是問題，不是產品名）
+          // 找第一則描述問題的對話訊息，排除器材辨識用的器材名稱
           for(var i=0;i<homeHistory.length;i++){
             if(homeHistory[i].role==='user'){
               var c = homeHistory[i].content.replace(/\n【快速問卷】.*/,'').trim();
-              if(c && c!==devName && (!devName || c.indexOf(devName)<0)){ problemTitle = c; break; }
+              if(c && !isDevName(c)){ problemTitle = c; break; }
             }
           }
         }
