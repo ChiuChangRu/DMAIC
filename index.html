@@ -12,7 +12,7 @@
   --navy:#0F2044;--navy2:#1D3B8A;--navy3:#2E5FCF;
   --teal:#0E6E6B;--teal2:#1A9E9A;
   --gold:#B8860B;--gold2:#DAA520;
-  --bg:#F0F2F7;--card:#fff;--border:#DDE2EC;
+  --bg:#000000;--card:#fff;--border:#DDE2EC;
   --text:#1a1a2e;--muted:#6B7280;--faint:#9CA3AF;
   --D:#2563EB;--M:#0891B2;--A:#059669;--I:#D97706;--C:#7C3AED;
   --Dl:#EFF6FF;--Ml:#ECFEFF;--Al:#ECFDF5;--Il:#FFFBEB;--Cl:#F5F3FF;
@@ -1261,7 +1261,7 @@ tr:hover td{background:#F9FAFB}
       </div>
       <div id="frac-info" style="display:none;background:#FFF8E1;border-left:3px solid #F59E0B;padding:.5rem .75rem;border-radius:0 5px 5px 0;font-size:12px;margin-bottom:.5rem"></div>
       <div class="field"><label>重複次數</label>
-        <select id="doe-rep"><option value="1">1（不重複）</option><option value="2" selected>2</option><option value="3">3</option></select>
+        <select id="doe-rep" onchange="doeGenMatrix()"><option value="1">1（不重複）</option><option value="2" selected>2</option><option value="3">3</option></select>
       </div>
       <div class="field"><label>反應變數名稱</label><input type="text" id="doe-yname" value="良率 (%)"></div>
     </div>
@@ -2292,6 +2292,7 @@ async function downloadPlanDocx(){
     var conf=window._confirmedFactors||{};
     var plans=(window._verificationPlan&&window._verificationPlan.plans)||[];
     var iso=(window._isoResult&&window._isoResult.items)||[];
+    var isoApps=(window._isoResult&&window._isoResult.applicable)||[];
     var survey=_collectSurvey();
     var CATLBL={man:'人員 Man',machine:'機器 Machine',material:'材料 Material',method:'方法 Method',measure:'量測 Measurement',env:'環境 Environment'};
     var RLBL={high:'高',medium:'中',low:'低'};
@@ -2390,7 +2391,19 @@ async function downloadPlanDocx(){
     }else{ ch.push(PP(tx('（無非實驗類處置項目）',{color:GRAY}))); }
 
     ch.push(H1('6. ISO 規範對照'));
-    if(iso.length){ var iw=[1500,1500,2500,900,1100,1526];
+    var NM=(typeof _isoNameMap==='function')?_isoNameMap():{};
+    function _rtag(no){ var e=NM[no]; if(!e) return ''; if(!e.ed) return '(*待確認)'; return e.ok?('('+e.ed+')'):('('+e.ed+'*)'); }
+    if(isoApps.length){
+      ch.push(H2('6.1 已判定適用標準'));
+      var aw=[1900,1200,4300,1626];
+      var arows=isoApps.map(function(a,i){var e=NM[a.no]||{};return trow([
+        tx(a.no,{bold:true}), tx(_rtag(a.no)), tx(e.title||'—'), tx(a.reason||'')
+      ],aw,i%2===1);});
+      ch.push(tbl(aw,['ISO 標準','版次','名稱','適用理由'],arows));
+    }
+    if(iso.length){
+      ch.push(H2('6.2 因子 ↔ 標準／章節對照'));
+      var iw=[1400,1400,2400,900,1100,1826];
       var irows=iso.map(function(r,i){var wait=String(r.clause||'').indexOf('待建檔')>=0; var z=i%2===1;
         return trow([
           tx(r.factor||'—'), tx(r.standard||'—',{bold:true}),
@@ -2400,6 +2413,10 @@ async function downloadPlanDocx(){
         ],iw,z);
       });
       ch.push(tbl(iw,['因子/要求','ISO 標準','章節','狀態','對應','備註'],irows));
+    }else if(isoApps.length){
+      ch.push(PP(tx('（本次未產生逐因子↔章節對照；可於工具中按「🔄 重新比對 ISO」後再下載）',{color:GRAY})));
+    }
+    if(isoApps.length||iso.length){
       ch.push(PP([tx('註：章節僅引用已建檔項目；標「（章節待建檔）」者尚未建章節（不自創條號）。一律以 ISO 正本最新版次為準，需 RA 核可。',{size:19,color:GRAY})]));
     }else{ ch.push(PP(tx('（尚未產生 ISO 對照，或本器材未對應到標準）',{color:GRAY}))); }
 
@@ -2767,10 +2784,17 @@ function doeLoadEx(){
 function doeAnalyze(){
   var _dt=document.getElementById('doe-design-type');
   if(_dt){ if(_dt.value==='pb'){ if(typeof pbAnalyze==='function') pbAnalyze(); return; } if(_dt.value==='frac'){ if(typeof fracAnalyze==='function') fracAnalyze(); return; } }
-  const nf=parseInt(document.getElementById('doe-nf').value)||3;const runs=2**nf;const rep=parseInt(document.getElementById('doe-rep').value)||2;
-  const matrix=window._doeMatrix||[];const factors=window._doeFacs||[];
-  const yMeans=[];let valid=true;
-  for(let r=0;r<runs;r++){
+  // 以「實際產生的矩陣與已渲染的結果格」為基準（不再用下拉重算，避免設定與矩陣脫鉤造成誤判）
+  const matrix=window._doeMatrix||[];
+  if(!matrix.length || !matrix[0]){ return alert('請先按「重新產生矩陣」建立實驗矩陣'); }
+  const runs=matrix.length;
+  const nf=matrix[0].length;
+  const factors=Array.from({length:nf},(_,i)=>document.getElementById('doe-f'+(i+1))?.value||(window._doeFacs&&window._doeFacs[i])||('F'+(i+1)));
+  // 重複數依「實際渲染的結果輸入格數」推回，與下拉無關
+  const _yInputs=document.querySelectorAll('#doe-matrix-wrap input[id^="doe-y-"]');
+  const rep=runs>0?Math.round(_yInputs.length/runs):0;
+  const yMeans=[];let valid=rep>0;
+  for(let r=0;r<runs&&valid;r++){
     let ys=[];for(let rp=0;rp<rep;rp++){const v=parseFloat(document.getElementById(`doe-y-${r}-${rp}`)?.value);if(isNaN(v)){valid=false;break;}ys.push(v);}
     if(!valid)break;yMeans.push(mean(ys));
   }
@@ -6027,7 +6051,8 @@ function deriveCategoryKeys(info){
     'iv-bag': ['iv bag','輸液袋','軟袋','iv袋','點滴袋','輸液容器','parenteral'],
     'container': ['container','容器'],
     'biliary': ['biliary','膽道','鼻膽','膽管'],
-    'drainage': ['drainage','引流','外科引流'],
+    'drainage': ['drainage','引流','外科引流','腎造廔','腎造瘻','nephrostomy'],
+    'urinary': ['urinary','urethral','尿道','導尿','foley','福來','弗利','泌尿導管','恥骨上','suprapubic','腎造廔','腎造瘻','nephrostomy'],
     'urine-bag': ['urine bag','尿袋','集尿','綁腿尿袋']
   };
   var keys = [];
@@ -6100,21 +6125,49 @@ async function runIsoCrosscheck(plans){
   }
 }
 
+function _isoNameMap(){
+  var m=window._isoMap||{}, out={};
+  function scan(o){ if(!o||typeof o!=='object') return;
+    if(Array.isArray(o.standards)){ o.standards.forEach(function(s){ if(s&&s.no) out[s.no]={title:s.title_zh||s.title||'', ed:s.edition||'', ok:(s.id_verified===true)}; }); }
+    Object.keys(o).forEach(function(k){ if(o[k]&&typeof o[k]==='object') scan(o[k]); });
+  }
+  scan(m); return out;
+}
+function _isoTag(e){ if(!e) return ''; if(!e.ed) return '(*待確認)'; return e.ok?('('+e.ed+')'):('('+e.ed+'*)'); }
+function _isoLabel(no, nm){ var e=nm[no]; if(!e) return no; var t=_isoTag(e); return no+(t?(' '+t):'')+(e.title?('　'+e.title):''); }
+window.rerunIsoCrosscheck=function(){ var p=(window._verificationPlan&&window._verificationPlan.plans)||[]; if(!p.length){ alert('尚無驗證計畫可比對。'); return; } runIsoCrosscheck(p); };
+
 function renderIsoPanel(r){
   var box = document.getElementById('home-iso-panel');
   if(!box) return;
-
   var apps  = r.applicable || [];
   var items = r.items || [];
+  var nm = _isoNameMap();
 
-  var html = '';
-  html += '<div style="border-top:1px solid rgba(255,255,255,.12);margin-top:.5rem;padding-top:.6rem">';
+  var html = '<div style="border-top:1px solid rgba(255,255,255,.12);margin-top:.5rem;padding-top:.6rem">';
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.45rem">';
+  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85)">📐 ISO 對照</div>';
+  html += '<button onclick="rerunIsoCrosscheck()" style="font-size:10px;color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:2px 9px;cursor:pointer;font-family:inherit">🔄 重新比對 ISO</button>';
+  html += '</div>';
+
+  // 已判定適用標準（含名稱）
+  if(apps.length){
+    html += '<div style="font-size:11px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:.25rem">已判定適用標準（'+apps.length+'）</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:.2rem;margin-bottom:.55rem">';
+    apps.forEach(function(a){
+      var e=nm[a.no];
+      html += '<div style="font-size:11px;color:rgba(255,255,255,.82);line-height:1.45;padding-left:2px">'
+        + '<b style="color:rgba(255,255,255,.92)">'+a.no+'</b> <span style="color:rgba(255,255,255,.5)">'+_isoTag(e)+'</span>'
+        + (e&&e.title?(' <span style="color:rgba(255,255,255,.68)">'+e.title+'</span>'):'')
+        + (a.reason?(' <span style="color:rgba(255,255,255,.4)">— '+a.reason+'</span>'):'')
+        + '</div>';
+    });
+    html += '</div>';
+  }
 
   if(!items.length){
-    var appLabel0 = apps.map(function(a){ return a.no; }).join('、');
     if(apps.length){
-      html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.8);margin-bottom:.4rem">📐 ISO 對照</div>';
-      html += '<div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:8px;padding:.5rem .65rem;font-size:11px;color:#FBBF24;line-height:1.5">📋 已判定適用標準（'+appLabel0+'），但本次未產生逐因子對照。可重按「產生驗證計畫」再跑一次。</div>';
+      html += '<div style="background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:8px;padding:.5rem .65rem;font-size:11px;color:#FBBF24;line-height:1.5">📋 已列出適用標準，但本次未產生「逐因子↔章節」對照（可能回覆被截斷）。可按右上「🔄 重新比對 ISO」再跑一次（只重跑 ISO，不需重做整個計畫）。</div>';
     }else{
       html += '<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:8px;padding:.5rem .65rem;font-size:11px;color:rgba(255,255,255,.5)">本器材未對應到 iso_map 內已建檔的標準。</div>';
     }
@@ -6128,20 +6181,13 @@ function renderIsoPanel(r){
     partial: {icon:'◐',  color:'#FBBF24', label:'部分'},
     covered: {icon:'✓',  color:'#6EE7B7', label:'已涵蓋'}
   };
-
-  // 以「因子」為主軸分組
   var byFactor = {}, order = [];
-  items.forEach(function(it){
-    var f = it.factor || '（未標因子）';
-    if(!byFactor[f]){ byFactor[f] = []; order.push(f); }
-    byFactor[f].push(it);
-  });
+  items.forEach(function(it){ var f=it.factor||'（未標因子）'; if(!byFactor[f]){ byFactor[f]=[]; order.push(f); } byFactor[f].push(it); });
   var gapCount = items.filter(function(i){ return i.status==='gap'; }).length;
   var waitCount = items.filter(function(i){ return (i.clause||'').indexOf('待建檔')>=0; }).length;
 
-  html += '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.85);margin-bottom:.5rem">📐 ISO 對照（因子 ↔ 標準／章節）'
+  html += '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.85);margin:.2rem 0 .4rem">因子 ↔ 標準／章節'
     + (gapCount? ' <span style="color:#FCA5A5;font-size:10px;font-weight:700">⚠️ '+gapCount+' 缺口</span>':'') + '</div>';
-
   order.forEach(function(f){
     html += '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:.5rem .6rem;margin-bottom:.45rem">';
     html += '<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.93);margin-bottom:.35rem">'+f+'</div>';
@@ -6149,9 +6195,11 @@ function renderIsoPanel(r){
       var st = STAT[it.status] || STAT.partial;
       var clause = it.clause || '';
       var unfiled = (!clause || clause.indexOf('待建檔')>=0);
+      var e=nm[it.standard];
       html += '<div style="font-size:11px;color:rgba(255,255,255,.85);line-height:1.5;margin-bottom:.22rem;padding-left:2px">';
       html += '<span style="color:'+st.color+'">'+st.icon+'</span> ';
       html += '<b style="color:rgba(255,255,255,.92)">'+(it.standard||'')+'</b>';
+      if(e&&e.title) html += ' <span style="color:rgba(255,255,255,.55)">'+e.title+'</span>';
       if(clause) html += ' <span style="color:'+(unfiled?'rgba(255,255,255,.4)':'#7EC8E3')+(unfiled?';font-style:italic':'')+'">'+clause+'</span>';
       if(it.item) html += ' <span style="color:rgba(255,255,255,.55)">— '+it.item+'</span>';
       html += ' <span style="color:'+st.color+';font-size:10px">['+st.label+(it.status==='covered'&&it.covered_by?'：'+it.covered_by:'')+']</span>';
@@ -6160,14 +6208,10 @@ function renderIsoPanel(r){
     });
     html += '</div>';
   });
-
-  if(r.summary){
-    html += '<div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:.35rem;line-height:1.5">💡 '+String(r.summary).replace(/；/g,'；<br>')+'</div>';
-  }
+  if(r.summary){ html += '<div style="font-size:10px;color:rgba(255,255,255,.55);margin-top:.35rem;line-height:1.5">💡 '+String(r.summary).replace(/；/g,'；<br>')+'</div>'; }
   html += '<div style="font-size:9px;color:rgba(255,255,255,.32);margin-top:.4rem;line-height:1.45">※ 章節僅引用 iso_map 已建檔項目；標「待建檔」者尚未建章節（AI 不自創條號）。一律以 ISO 正本最新版次為準、需 RA 核可。'
     + (waitCount? '　目前 '+waitCount+' 筆章節待建檔。':'') + '</div>';
   html += '</div>';
-
   box.innerHTML = html;
 }
 
