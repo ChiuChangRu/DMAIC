@@ -1936,7 +1936,7 @@ function goTool(id){
   if(id==='doe')doeUpdateFactors();
   if(id==='hypothesis')hyUpdateUI();
   // 實驗類工具：注入「儲存設計／回魚骨圖」操作列，並還原已存設計
-  if(['doe','pb','spc','msa','hypothesis'].indexOf(id)>=0){
+  if(['doe','pb','msa','hypothesis'].indexOf(id)>=0){
     if(typeof window.injectExpSaveBar==='function') window.injectExpSaveBar(id);
     var _fresh = (window._expFreshImport===id);
     window._expFreshImport = null;   // 用完即清
@@ -2309,11 +2309,16 @@ async function downloadPlanDocx(){
     var iso=(window._isoResult&&window._isoResult.items)||[];
     var isoApps=(window._isoResult&&window._isoResult.applicable)||[];
     var survey=_collectSurvey();
+    // SPC 監控特徵（選擇器 SPC 列勾選的因子；_spcInclude 控制是否納入）
+    var spcChars = (window._spcInclude!==false && window._fbToolSel && window._fbToolSel.spc) ? window._fbToolSel.spc.slice() : [];
+    var _spcReasons = {};
     // ── AI 敘事（選用，預設關閉）：僅依本頁已確認事實生成三段文字 ──
     var _aiNarr = null;
     var _aiOn = (document.getElementById('dl-plan-ai')||{}).checked;
-    if(_aiOn){
-      if(btn) btn.textContent='AI 撰寫敘事中…';
+    // SPC 納入且有特徵 → 需要 AI 觀察原因，即使敘事開關關閉也呼叫（只取 spc_reasons）
+    var _needCall = _aiOn || spcChars.length>0;
+    if(_needCall){
+      if(btn) btn.textContent = _aiOn ? 'AI 撰寫敘事中…' : 'AI 整理 SPC 原因中…';
       try{
         var _nr = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
           method:'POST', headers:{'Content-Type':'application/json'},
@@ -2323,16 +2328,22 @@ async function downloadPlanDocx(){
             problem: problem,
             factors: conf,
             plans: plans,
-            iso: { applicable: isoApps, items: iso }
+            iso: { applicable: isoApps, items: iso },
+            spcCharacteristics: spcChars
           })
         });
         var _nd = await _nr.json();
-        if(_nd && _nd.result && (_nd.result.executive_summary||_nd.result.root_cause_narrative||_nd.result.conclusion)){
-          _aiNarr = _nd.result;
+        if(_nd && _nd.result){
+          if(_aiOn && (_nd.result.executive_summary||_nd.result.root_cause_narrative||_nd.result.conclusion)){
+            _aiNarr = _nd.result;   // 只有開關開啟才採用三段敘事
+          }
+          if(_nd.result.spc_reasons && typeof _nd.result.spc_reasons==='object'){
+            _spcReasons = _nd.result.spc_reasons;
+          }
         }else{
-          console.warn('[計畫書] AI 敘事空結果：', _nd && _nd._debug);
+          console.warn('[計畫書] plan_narrative 空結果：', _nd && _nd._debug);
         }
-      }catch(e){ console.warn('[計畫書] AI 敘事失敗，改用純表格：', e && e.message); }
+      }catch(e){ console.warn('[計畫書] plan_narrative 失敗：', e && e.message); }
       if(btn) btn.textContent='產生計畫書中…';
     }
     // 把 AI 敘事段落轉成段落（含免責標示），無內容則回空陣列
@@ -2414,8 +2425,28 @@ async function downloadPlanDocx(){
     }
     ch.push(H2('3.1 魚骨圖（Ishikawa）'));
     var svgEl=document.querySelector('#fb-svg-wrap svg');
-    if(svgEl){ var png=await _svgToPngBytes(svgEl,2,true);
-      ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{before:60,after:200},children:[new D.ImageRun({type:'png',data:png.data,transformation:{width:640,height:Math.round(640*png.h/png.w)}})]}));
+    if(svgEl){ var png=await _svgToPngBytes(svgEl,2,false);   // 彩色輸出
+      ch.push(new D.Paragraph({alignment:D.AlignmentType.CENTER,spacing:{before:60,after:120},children:[new D.ImageRun({type:'png',data:png.data,transformation:{width:660,height:Math.round(660*png.h/png.w)}})]}));
+      // 圖例：顏色 ↔ 風險（因子文字色）＋ 分類配色（骨色）
+      ch.push(new D.Paragraph({spacing:{before:40,after:60},children:[tx('圖例說明',{bold:true,size:20})]}));
+      ch.push(new D.Paragraph({spacing:{after:40,line:300},children:[
+        tx('因子文字顏色＝風險等級：',{size:19}),
+        tx('■ ',{size:19,color:'DC2626'}), tx('紅＝高風險（粗體）　',{size:19}),
+        tx('■ ',{size:19,color:'92400E'}), tx('棕＝中風險　',{size:19}),
+        tx('■ ',{size:19,color:'1A1A2E'}), tx('黑＝低風險。',{size:19})
+      ]}));
+      ch.push(new D.Paragraph({spacing:{after:40,line:300},children:[
+        tx('且因子越靠近魚頭，代表對問題的效應強度越大（高=5／中=3／低=1）。',{size:19})
+      ]}));
+      ch.push(new D.Paragraph({spacing:{after:160,line:300},children:[
+        tx('魚骨（大骨／分類框）顏色＝6M 分類：',{size:19}),
+        tx('■ ',{size:19,color:'1D4ED8'}), tx('人員　',{size:19}),
+        tx('■ ',{size:19,color:'0891B2'}), tx('機器　',{size:19}),
+        tx('■ ',{size:19,color:'059669'}), tx('材料　',{size:19}),
+        tx('■ ',{size:19,color:'D97706'}), tx('方法　',{size:19}),
+        tx('■ ',{size:19,color:'7C3AED'}), tx('量測　',{size:19}),
+        tx('■ ',{size:19,color:'BE185D'}), tx('環境。',{size:19})
+      ]}));
     }else{ ch.push(PP(tx('（尚未產生魚骨圖）',{color:GRAY}))); }
     ch.push(H2('3.2 因子清單與關聯'));
     if(hasFactors){ ch.push(tbl([1500,1900,760,4066,800],['分類','因子','風險','因子→問題關聯鏈','備註'],frows)); }
@@ -2489,16 +2520,35 @@ async function downloadPlanDocx(){
       });
     }
 
+    // 4.x SPC 製程管控（直接寫入，不帶入工具）：列出要監控的特徵與 AI 觀察原因
+    if(spcChars.length){
+      ch.push(H2('4.S SPC 製程管控特徵'));
+      ch.push(PP(tx('以下特徵建議以管制圖（SPC）持續監控製程穩定性；觀察原因由 AI 依本案事實整理（推論標 *）。',{size:20,color:GRAY})));
+      var sw2=[2600,6426];
+      var srows=spcChars.map(function(name,i){
+        var reason = _spcReasons[name] || '（待補觀察原因）';
+        return trow([ tx(name,{bold:true}), tx(reason) ], sw2, i%2===1);
+      });
+      ch.push(tbl(sw2,['監控特性','觀察原因'],srows));
+    }
+
     ch.push(H1('5. 其他處置（非實驗類）'));
-    if(otherPlans.length){
-      ch.push(PP(tx('以下因子不以 DOE／SPC／MSA 等實驗統計處理，而循規範符合性、方法開發、風險、使用端、供應商等途徑處置。',{size:20,color:GRAY})));
+    // 只列已勾選「納入」的其他處置（未勾選者排除；預設為勾選）
+    var dispoSel = window._otherDispoSel || {};
+    var otherPlansInc = otherPlans.filter(function(p){ return dispoSel[p.factor]!==false; });
+    var otherExcluded = otherPlans.length - otherPlansInc.length;
+    if(otherPlansInc.length){
+      ch.push(PP(tx('以下因子不以 DOE／SPC／MSA 等實驗統計處理，而循規範符合性、方法開發、風險、使用端、供應商等途徑處置（僅列已勾選「納入」者）。',{size:20,color:GRAY})));
       var ow=[1900,1500,5626];
-      var orows=otherPlans.map(function(p,i){return trow([
+      var orows=otherPlansInc.map(function(p,i){return trow([
         tx(p.factor,{bold:true}),
         tx((PMETA[p.pipeline]&&PMETA[p.pipeline].label)||p.pipeline||'—'),
         tx(p.verification||'—')
       ],ow,i%2===1);});
       ch.push(tbl(ow,['因子','處置途徑','建議處置'],orows));
+      if(otherExcluded>0) ch.push(PP(tx('（另有 '+otherExcluded+' 項其他處置未勾選納入，已排除。）',{size:18,color:GRAY,italics:true})));
+    }else if(otherPlans.length){
+      ch.push(PP(tx('（其他處置項目均未勾選納入，已全部排除。）',{color:GRAY})));
     }else{ ch.push(PP(tx('（無非實驗類處置項目）',{color:GRAY}))); }
 
     ch.push(H1('6. ISO 規範對照'));
@@ -2604,11 +2654,20 @@ function fishboneDraw(){
   }
 
   // 中骨位置/間距參數（依因子數動態計算，避免標籤重疊）
-  const MIN_GAP = 22;                          // 相鄰因子最小間距(px)
-  const T_LO = 0.16, T_HI = 0.92, T_SPAN = T_HI - T_LO;
+  // 因子少時：放大字體、拉大最小間距，讓版面平均分配不擁擠。
+  const totalCauses = used.reduce(function(s,c){ return s + c.causes.length; }, 0);
   const maxN = Math.max(...used.map(c => c.causes.length));
+  // 字體：因子越少越大（11→18），分類標籤同步放大（14→20），魚頭（15→19）
+  var FZ_CAUSE, FZ_CAT, FZ_HEAD;
+  if(totalCauses <= 4){ FZ_CAUSE=18; FZ_CAT=20; FZ_HEAD=19; }
+  else if(totalCauses <= 8){ FZ_CAUSE=15; FZ_CAT=17; FZ_HEAD=17; }
+  else if(totalCauses <= 14){ FZ_CAUSE=13; FZ_CAT=15; FZ_HEAD=16; }
+  else { FZ_CAUSE=11; FZ_CAT=14; FZ_HEAD=15; }
+  // 最小間距：因子少時加大，使中骨沿大骨平均散開
+  const MIN_GAP = totalCauses <= 4 ? 46 : totalCauses <= 8 ? 34 : 22;
+  const T_LO = 0.16, T_HI = 0.92, T_SPAN = T_HI - T_LO;
   const BONE_DX = 80;
-  const BONE_DY = Math.max(130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
+  const BONE_DY = Math.max(totalCauses<=4?160:130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
   const CAUSE_LEN = 30;
 
   const spineY = 56 + BONE_DY;                 // 上方留白 + 上骨長
@@ -2620,7 +2679,7 @@ function fishboneDraw(){
   // 每個分類各佔一欄，沿脊骨分布、上下交錯；設「間距上限」讓分類少時往中間收、不撐滿整條脊骨
   const nCols = used.length;
   const jMin = 150, jMax = spineEndX - 30;
-  const MAX_GAP = 165;
+  const MAX_GAP = nCols <= 3 ? 230 : 165;      // 分類少時放寬，沿脊骨平均散開不擠中間
   let jStep = nCols>1 ? (jMax-jMin)/(nCols-1) : 0;
   if(jStep > MAX_GAP) jStep = MAX_GAP;
   const totalW = jStep*(nCols-1);
@@ -2645,7 +2704,7 @@ function fishboneDraw(){
   s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="10" fill="#1D3B8A"/>`);
   plines.forEach((l,i)=>{
     const ty=spineY+(i-(plines.length-1)/2)*22;
-    s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="15" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
+    s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="${FZ_HEAD}" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
   });
 
   function renderBone(jx, isTop, cat){
@@ -2654,12 +2713,12 @@ function fishboneDraw(){
     s.push(`<line x1="${jx-BONE_DX}" y1="${endY}" x2="${jx}" y2="${spineY}" stroke="${cat.color}" stroke-width="2.5"/>`);
 
     // 要因標籤
-    const lblW=Math.max(cat.label.length*8+20,108);
-    const lblH=28;
+    const lblW=Math.max(cat.label.length*(FZ_CAT*0.6)+20,108);
+    const lblH=FZ_CAT+14;
     const lblX=(jx-BONE_DX)-lblW/2;
     const lblY=isTop ? endY-lblH-6 : endY+6;
     s.push(`<rect x="${lblX}" y="${lblY}" width="${lblW}" height="${lblH}" rx="5" fill="none" stroke="${cat.color}" stroke-width="1.5"/>`);
-    s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="#1a1a2e" font-size="14" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
+    s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="#1a1a2e" font-size="${FZ_CAT}" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
 
     // 中骨：依因子數均分 t，間距固定不重疊
     const ddx=BONE_DX, ddy=isTop?BONE_DY:-BONE_DY;
@@ -2671,7 +2730,7 @@ function fishboneDraw(){
       const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#1a1a2e';
       const riskWeight = cause.risk==='high' ? '700' : '400';
       s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${cat.color}" stroke-width="1.4" marker-end="url(#fb-ar)"/>`);
-      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="11" font-weight="${riskWeight}" font-family="-apple-system,sans-serif">${cause.name}</text>`);
+      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="${FZ_CAUSE}" font-weight="${riskWeight}" font-family="-apple-system,sans-serif">${cause.name}</text>`);
     });
   }
 
@@ -7455,13 +7514,8 @@ function _captureExperiment(tool){
       savedAt: new Date().toISOString().slice(0,16).replace('T',' ')
     };
   }
-  // SPC / MSA / hypothesis：無 ±1 設計矩陣，存精簡規劃參數
-  if(tool==='spc'){
-    return { tool:tool, label:window.EXP_TOOL_LABEL.spc, params:[
-      ['監控特性', v('spc-char')||v('spc-name')],
-      ['子組大小', v('spc-subgroup')||v('spc-n')]
-    ].filter(function(p){return p[1];}), include:true, savedAt:new Date().toISOString().slice(0,16).replace('T',' ') };
-  }
+  // SPC：依需求不帶入、不存設計，改由 factor selector 勾選特徵後直接寫入計畫書（見 _spcInclude）。
+  // MSA / hypothesis：無 ±1 設計矩陣，存精簡規劃參數
   if(tool==='msa'){
     return { tool:tool, label:window.EXP_TOOL_LABEL.msa, params:[
       ['量測項目', v('grr-part-name')||v('grr-char')],
@@ -7500,7 +7554,6 @@ function _restoreExperiment(tool){
     return true;
   }
   if(exp.params){
-    if(tool==='spc'){ var s=exp.params; s.forEach(function(p){ if(p[0]==='監控特性'){ set('spc-char',p[1]); set('spc-name',p[1]); } }); }
     if(tool==='msa'){ exp.params.forEach(function(p){ if(p[0]==='量測項目'){ set('grr-part-name',p[1]); set('grr-char',p[1]); } }); }
     return true;
   }
@@ -7629,20 +7682,31 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
     html += '<div><span style="font-weight:700;color:'+info.color+';font-size:13px">'+info.label+'</span>';
     html += '<span style="font-size:11px;color:#6B7280;margin-left:8px">'+info.desc+'</span></div>';
     html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-    // 納入計畫書（僅實驗類工具：doe/pb/spc/msa/hypothesis；taguchi 走 doe 故略過）
-    var incTool = (toolKey==='taguchi') ? null : toolKey;
-    if(incTool){
-      var savedExp = (window._savedExperiments||{})[incTool];
-      html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#374151;cursor:pointer;user-select:none" title="儲存設計後可勾選納入計畫書">'
-        + '<input type="checkbox" class="exp-include-cb" data-tool="'+incTool+'" '
-        + (savedExp ? '' : 'disabled ') + (savedExp && savedExp.include!==false ? 'checked ' : '')
-        + 'onchange="(window._savedExperiments[this.dataset.tool]||{}).include=this.checked" '
+    if(toolKey==='spc'){
+      // SPC：不帶入、不存設計；勾選後直接把選取特徵寫入計畫書，並由 AI 補觀察原因
+      if(window._spcInclude===undefined) window._spcInclude = true;   // 預設納入
+      html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#374151;cursor:pointer;user-select:none" title="勾選後，下方選取的特徵將直接寫入計畫書（AI 補觀察原因），無需帶入工具">'
+        + '<input type="checkbox" class="spc-include-cb" data-tool="spc" '
+        + (window._spcInclude!==false ? 'checked ' : '')
+        + 'onchange="window._spcInclude=this.checked" '
         + 'style="width:14px;height:14px;accent-color:'+info.color+';cursor:pointer">納入計畫書</label>';
-      html += '<span class="exp-tool-status" data-tool="'+incTool+'" style="font-size:11px;color:'+(savedExp?'#059669':'#9CA3AF')+'">'
-        + (savedExp ? ('✅ 已儲存設計（'+(savedExp.factors?savedExp.factors.length+' 因子':'規劃')+'）') : '尚未儲存設計')
-        + '</span>';
+      html += '<span style="font-size:11px;color:#1A9CB0">↓ 選取要監控的特徵（直接寫入，免帶入）</span>';
+    } else {
+      // 納入計畫書（實驗類工具：doe/pb/msa/hypothesis；taguchi 走 doe 故略過）
+      var incTool = (toolKey==='taguchi') ? null : toolKey;
+      if(incTool){
+        var savedExp = (window._savedExperiments||{})[incTool];
+        html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#374151;cursor:pointer;user-select:none" title="儲存設計後可勾選納入計畫書">'
+          + '<input type="checkbox" class="exp-include-cb" data-tool="'+incTool+'" '
+          + (savedExp ? '' : 'disabled ') + (savedExp && savedExp.include!==false ? 'checked ' : '')
+          + 'onchange="(window._savedExperiments[this.dataset.tool]||{}).include=this.checked" '
+          + 'style="width:14px;height:14px;accent-color:'+info.color+';cursor:pointer">納入計畫書</label>';
+        html += '<span class="exp-tool-status" data-tool="'+incTool+'" style="font-size:11px;color:'+(savedExp?'#059669':'#9CA3AF')+'">'
+          + (savedExp ? ('✅ 已儲存設計（'+(savedExp.factors?savedExp.factors.length+' 因子':'規劃')+'）') : '尚未儲存設計')
+          + '</span>';
+      }
+      html += '<button data-tool="'+toolKey+'" onclick="fbImportTool(this.dataset.tool)" style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入</button>';
     }
-    html += '<button data-tool="'+toolKey+'" onclick="fbImportTool(this.dataset.tool)" style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入</button>';
     html += '</div>';
     html += '</div>';
 
@@ -7715,8 +7779,10 @@ window.fbRenderOtherPipelines = function(){
 
   var html = '<div class="card" style="margin-top:.75rem;background:#FFFDF5;border:1.5px solid #F0E0B0">';
   html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.4rem">🗂️ 其他處置（非實驗類）</div>';
-  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.85rem;line-height:1.5">這些因子不靠 DOE/SPC/MSA 解決，而是規範符合性、方法開發、風險、使用端等途徑。以下為建議處置（資訊呈現，不需帶入工具）。</div>';
+  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.85rem;line-height:1.5">這些因子不靠 DOE/SPC/MSA 解決，而是規範符合性、方法開發、風險、使用端等途徑。<b>勾選「納入」者才會寫入計畫書</b>（有些不一定相關，可取消勾選排除）。</div>';
 
+  // 納入狀態：預設全部勾選；以因子名為鍵記憶（切頁不丟）
+  window._otherDispoSel = window._otherDispoSel || {};
   ORDER.forEach(function(pk){
     var grp = vp.plans.filter(function(p){ return p.pipeline===pk; });
     if(!grp.length) return;
@@ -7725,7 +7791,15 @@ window.fbRenderOtherPipelines = function(){
     html += '<div style="font-weight:700;color:'+m.color+';font-size:13px;margin-bottom:.5rem">'+m.icon+' '+m.label
       +' <span style="font-size:11px;color:#6B7280;font-weight:400;margin-left:4px">'+m.note+'</span></div>';
     grp.forEach(function(p){
-      html += '<div style="display:flex;gap:8px;padding:5px 0;border-top:1px solid #F3F4F6">';
+      var key = p.factor;
+      if(window._otherDispoSel[key]===undefined) window._otherDispoSel[key] = true;  // 預設納入
+      var checked = window._otherDispoSel[key]!==false;
+      html += '<div style="display:flex;gap:8px;padding:5px 0;border-top:1px solid #F3F4F6;align-items:flex-start">';
+      html += '<label style="display:inline-flex;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;font-size:10px;color:#6B7280" title="勾選＝寫入計畫書">'
+        + '<input type="checkbox" class="dispo-include-cb" data-key="'+String(key).replace(/"/g,'&quot;')+'" '
+        + (checked?'checked ':'')
+        + 'onchange="window._otherDispoSel[this.dataset.key]=this.checked" '
+        + 'style="width:13px;height:13px;accent-color:'+m.color+';cursor:pointer">納入</label>';
       html += '<span style="font-size:11px;flex-shrink:0">'+(RISK[p.risk||'medium'])+'</span>';
       html += '<div style="flex:1">';
       html += '<div style="font-size:13px;font-weight:600;color:#1F2937">'+p.factor

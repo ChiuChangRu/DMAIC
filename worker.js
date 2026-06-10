@@ -156,7 +156,7 @@ export default {
 
       // 合法 mode 限制
       const mode = body.mode || 'chat';
-      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'stream_navigate', 'fishbone_to_doe', 'version'];
+      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'plan_narrative', 'stream_navigate', 'fishbone_to_doe', 'version'];
       if (!VALID_MODES.includes(mode)) {
         return new Response(JSON.stringify({ error: '無效的 mode' }), {
           status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
@@ -239,7 +239,7 @@ export default {
             'anthropic-beta': 'tools-2024-04-04',
           },
           body: JSON.stringify({
-            model: MODEL_MAP.haiku,  // 省成本：導覽對話用 Haiku
+            model: MODEL_MAP.sonnet,
             max_tokens: 800,
             stream: true,
             system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。
@@ -511,14 +511,130 @@ ${planText || '(無)'}
         const result = (tu && tu.input) || {};
         if(!Array.isArray(result.items)) result.items = [];
         if(!Array.isArray(result.applicable)) result.applicable = [];
+
+        // ── 確定性防幻覺閘（後端強制，零信任 AI 輸出）──
+        // 規則：
+        //  1) standard 必須在送入的 isoStandards 清單內，否則整筆丟棄（AI 自創編號）。
+        //  2) clause 必須是該標準「已建檔章節」(clauses[].no) 之一；不符一律改「（章節待建檔）」。
+        //  3) applicable 的 no 同樣必須在清單內，否則丟棄。
+        // 這確保前端與 Word 永遠不會出現 iso_map 沒有的條號。
+        (function gateIsoCrosscheck(){
+          const stdByNo = {};
+          isoStandards.forEach(s => { if(s && s.no) stdByNo[s.no] = s; });
+          const clauseSet = {};   // no -> Set(章節號)
+          isoStandards.forEach(s => {
+            if(!s || !s.no) return;
+            const set = new Set();
+            (s.clauses || []).forEach(c => { if(c && c.no) set.add(String(c.no).trim()); });
+            clauseSet[s.no] = set;
+          });
+          let droppedStd = 0, fixedClause = 0;
+          result.items = result.items.filter(it => {
+            if(!it || !stdByNo[it.standard]){ droppedStd++; return false; }
+            const cl = String(it.clause || '').trim();
+            const isWaitMark = !cl || cl.indexOf('待建檔') >= 0;
+            if(!isWaitMark && !(clauseSet[it.standard] && clauseSet[it.standard].has(cl))){
+              it.clause = '（章節待建檔）';   // AI 給了清單外章節 → 強制降級
+              it.note = (it.note ? it.note + '；' : '') + '原章節未建檔已降級';
+              fixedClause++;
+            } else if(isWaitMark){
+              it.clause = '（章節待建檔）';
+            }
+            return true;
+          });
+          result.applicable = result.applicable.filter(a => a && stdByNo[a.no]);
+          result._gate = { droppedStd, fixedClause };
+        })();
+
         const debugInfo = {
           stop_reason: resp.stop_reason,
           tool_fired: !!tu,
           n_applicable: result.applicable.length,
           n_items: result.items.length,
+          gate: result._gate,
           content_types: (resp.content||[]).map(c=>c.type)
         };
         return json({ mode: 'iso_crosscheck', result, _debug: debugInfo }, origin);
+      }
+
+      // ══ plan_narrative：計畫書敘事（受控，僅依既有事實生成三段文字，不新增事實）══
+      // 目的：Word 計畫書原本只有表格、讀來空洞。此模式只把「已確認的器材／問題／因子／
+      //       驗證計畫／ISO 對照」整理成可讀的執行摘要、根本原因論述、結論與後續行動。
+      // 鐵則（系統提示強制 + 前端標註）：不得引入任何輸入中沒有的事實、數值、標準或條號；
+      //       凡屬判斷/推測一律在句中以（*）標記；語氣務實、非行銷、不誇大。
+      if (mode === 'plan_narrative') {
+        const dev = body.deviceInfo || {};
+        const problem = body.problem || '';
+        const plans = Array.isArray(body.plans) ? body.plans : [];
+        const factors = body.factors || {};   // {man:[...],...} 已確認因子
+        const iso = body.iso || {};            // {applicable:[], items:[]}
+        const spcChars = Array.isArray(body.spcCharacteristics) ? body.spcCharacteristics.filter(Boolean) : [];
+
+        // 把事實整理成精簡文字餵給模型（只給事實，不給模型發揮空間）
+        const factorLines = [];
+        ['man','machine','material','method','measure','env'].forEach(c => {
+          (factors[c] || []).forEach(f => {
+            factorLines.push(`- [${c}] ${f.name}（風險:${f.risk||'?'}）${f.link?('｜關聯:'+f.link):''}${f.speculative?'｜（推測）':''}`);
+          });
+        });
+        const planLines = plans.map(p =>
+          `- 因子「${p.factor}」→管道:${p.pipeline||'?'}／${p.subtype||p.tool||''}｜動作:${p.verification||''}`).join('\n');
+        const isoApps = (iso.applicable || []).map(a => `${a.no}（${a.reason||''}）`).join('、');
+        const isoGap = (iso.items || []).filter(i => i.status === 'gap')
+          .map(i => `${i.factor||''}↔${i.standard||''}`).join('、');
+
+        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+          max_tokens: 2200,
+          system: `你是醫療器材 CAPA 文件撰稿者。任務：把下方「已確認的分析結果」改寫成計畫書用的三段敘事。
+
+【最重要鐵則 — 不得幻覺】
+1. 只能使用輸入中已出現的事實（器材、問題、因子、驗證管道、ISO 標準編號）。
+2. 嚴禁新增任何輸入中沒有的：數值、允收準則、標準編號、條號、檢測方法名稱、法規條文。
+3. 凡屬你的判斷或推論（非輸入明列的事實），必須在該句以（*）標記。
+4. 不要逐字複製因子清單；用連貫文句敘述其邏輯。語氣務實、客觀，**不得行銷化、不得誇大嚴重性**。
+5. 繁體中文，禁用簡體字。每段 3～6 句，精煉。
+
+【三段結構】
+- executive_summary：本案在做什麼、針對什麼問題、整體處置方向（不重列表格）。
+- root_cause_narrative：把因子如何導向問題的邏輯串成論述（用 link 關聯資訊）；指出主要風險因子。
+- conclusion：後續行動建議與待辦（如待補驗證、ISO 缺口、需 RA 核可事項）；若有 gap 要點出。
+
+【SPC 觀察原因（若有提供 SPC 監控特徵）】
+- 針對每個 SPC 監控特徵，寫一句「為何要持續以管制圖監控此特徵」的觀察原因（30字內、務實、扣回問題或製程穩定性），放入 spc_reasons（key=特徵名、value=原因）。不得新增規格數值或條號。`,
+          tools: [{
+            name: 'plan_narrative',
+            description: '計畫書三段敘事',
+            input_schema: {
+              type: 'object',
+              properties: {
+                executive_summary:   { type: 'string', description: '執行摘要（3-6句）' },
+                root_cause_narrative:{ type: 'string', description: '根本原因論述（3-6句）' },
+                conclusion:          { type: 'string', description: '結論與後續行動（3-6句）' },
+                spc_reasons:         { type: 'object', description: 'SPC 監控特徵的觀察原因，key=特徵名、value=原因（30字內）；無 SPC 特徵時可省略' }
+              }
+            }
+          }],
+          tool_choice: { type: 'tool', name: 'plan_narrative' },
+          messages: [{
+            role: 'user',
+            content: `【已確認器材】${dev.confirmed_name||'—'}｜材料:${dev.material||'—'}｜結構:${dev.structure||'—'}｜用途:${dev.indication||'—'}
+【問題現象】${problem || '（未填）'}
+【已確認因子】
+${factorLines.join('\n') || '（無）'}
+【驗證計畫】
+${planLines || '（無）'}
+【ISO 已判定適用】${isoApps || '（無）'}
+【ISO 缺口(gap)】${isoGap || '（無）'}
+【SPC 監控特徵】${spcChars.length ? spcChars.join('、') : '（無）'}
+
+請只依上述事實，生成三段敘事；若有 SPC 監控特徵，另為每個特徵寫一句觀察原因（spc_reasons）。推論標（*），不得新增事實。`
+          }]
+        });
+
+        const tu = resp.content && resp.content.find(c => c.type === 'tool_use');
+        const result = (tu && tu.input) || {};
+        const debugInfo = { stop_reason: resp.stop_reason, tool_fired: !!tu };
+        return json({ mode: 'plan_narrative', result, _debug: debugInfo }, origin);
       }
 
       // ══ summarize_factors：整理因子清單供使用者確認 ══
@@ -628,7 +744,7 @@ ${deviceCtx}
         const deviceNameEn = body.deviceNameEn || deviceName;
         const fdaData = body.fdaData || '';
 
-        const resp = await callClaude(env, MODEL_MAP.haiku, {  // 省成本：器材辨識用 Haiku
+        const resp = await callClaude(env, MODEL_MAP.sonnet, {
           max_tokens: 600,
           system: `你是醫療器材專家，根據器材名稱和 FDA 資料庫資訊，識別並說明這個醫療器材。
 必須呼叫 device_info 工具輸出結構化資訊。
@@ -701,7 +817,7 @@ ${deviceCtx}
 - 近期是否有變更：${body.surveyData.change || '未填'}
 請根據以上問卷答案分析問題方向，只針對【不明確或矛盾】的地方追問。` : '';
 
-        const resp = await callClaude(env, MODEL_MAP.haiku, {  // 省成本：導覽建議用 Haiku
+        const resp = await callClaude(env, MODEL_MAP.sonnet, {
           max_tokens: 800,
           system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。
 ${deviceContext}
