@@ -1935,6 +1935,19 @@ function goTool(id){
   document.getElementById('breadcrumb').innerHTML=`<span class="sep">›</span><span>${TOOL_NAMES[id]||id}</span>`;
   if(id==='doe')doeUpdateFactors();
   if(id==='hypothesis')hyUpdateUI();
+  // 實驗類工具：注入「儲存設計／回魚骨圖」操作列，並還原已存設計
+  if(['doe','pb','spc','msa','hypothesis'].indexOf(id)>=0){
+    if(typeof window.injectExpSaveBar==='function') window.injectExpSaveBar(id);
+    var _fresh = (window._expFreshImport===id);
+    window._expFreshImport = null;   // 用完即清
+    if(!_fresh && window._savedExperiments && window._savedExperiments[id] && typeof _restoreExperiment==='function'){
+      try{ _restoreExperiment(id); }catch(e){ console.warn('還原實驗設計失敗',e); }
+    }
+  }
+  // 回到魚骨圖：刷新各工具的已儲存／納入狀態
+  if(id==='fishbone' && typeof window.fbRefreshExperimentStatus==='function'){
+    setTimeout(function(){ window.fbRefreshExperimentStatus(); }, 50);
+  }
   // 顯示工具列（返回按鈕）
   showToolBar(TOOL_NAMES[id]||id);
   try{window.scrollTo(0,0);}catch(e){}
@@ -2420,6 +2433,61 @@ async function downloadPlanDocx(){
       ],pw,i%2===1);});
       ch.push(tbl(pw,['因子','建議工具','建議驗證動作','所需數據'],prows));
     }else{ ch.push(PP(tx('（無實驗／統計類驗證項目）',{color:GRAY}))); }
+
+    // 4.x 展開「已儲存且勾選納入」的實驗設計（因子表 + 空白設計矩陣）
+    var savedExps = window._savedExperiments || {};
+    var incExps = Object.keys(savedExps)
+      .map(function(k){ return savedExps[k]; })
+      .filter(function(e){ return e && e.include!==false; });
+    if(incExps.length){
+      ch.push(PP(tx('以下為已於各工具儲存並勾選「納入計畫書」之實驗設計（空白設計表，待執行填入數據）：',{size:20,color:GRAY})));
+      var _si = 0;
+      incExps.forEach(function(exp){
+        _si++;
+        ch.push(H2('4.'+_si+' 實驗設計：'+(exp.label||exp.tool)
+          + (exp.factors&&exp.factors.length? ('（'+exp.factors.length+' 因子）') : '')));
+        // 設計後設資訊
+        var metaBits=[];
+        if(exp.designType){ metaBits.push('設計類型：'+({full:'全因子',fractional:'部分因子',pb:'Plackett-Burman'}[exp.designType]||exp.designType)); }
+        if(exp.yname){ metaBits.push('反應變數：'+exp.yname); }
+        if(exp.rep){ metaBits.push('重複數：'+exp.rep); }
+        if(metaBits.length) ch.push(PP(tx(metaBits.join('　｜　'),{size:20,color:GRAY})));
+
+        if(exp.factors && exp.factors.length){
+          // 因子水準表
+          var fw=[1100,3300,2313,2313];
+          var fr=exp.factors.map(function(f,i){return trow([
+            tx('F'+(i+1),{bold:true}), tx(f.name||'—',{bold:true}),
+            tx(f.low||'—'), tx(f.high||'—')
+          ],fw,i%2===1);});
+          ch.push(tbl(fw,['代號','因子名稱','低水準 (−1)','高水準 (+1)'],fr));
+
+          // 空白設計矩陣（係數 ±1 + 空白結果欄）
+          if(exp.matrix && exp.matrix.length){
+            var nf = exp.factors.length;
+            var rep = exp.rep || 1;
+            var mh = ['實驗#'].concat(exp.factors.map(function(f,i){return 'F'+(i+1);}));
+            for(var rp=0; rp<rep; rp++){ mh.push('結果'+(rep>1?(' '+(rp+1)):'')); }
+            var colN = mh.length;
+            var each = Math.floor(9026/colN);
+            var mw = mh.map(function(){ return each; });
+            var mrows = exp.matrix.map(function(row,ri){
+              var cells = [ tx(String(ri+1),{bold:true}) ];
+              for(var c=0;c<nf;c++){ cells.push(tx(row[c]===1?'+1':'−1')); }
+              for(var rp2=0;rp2<rep;rp2++){ cells.push(tx('')); }   // 空白結果
+              return trow(cells, mw, ri%2===1);
+            });
+            ch.push(tbl(mw, mh, mrows));
+            ch.push(PP(tx('（上表為空白設計矩陣；+1／−1 為因子編碼水準，結果欄待實驗後填入。）',{size:18,color:GRAY,italics:true})));
+          }
+        } else if(exp.params && exp.params.length){
+          // 非 DOE 類：規劃參數表
+          var ppw=[3000,6026];
+          var pprows=exp.params.map(function(p,i){return trow([tx(p[0],{bold:true}),tx(p[1]||'—')],ppw,i%2===1);});
+          ch.push(tbl(ppw,['規劃項目','設定'],pprows));
+        }
+      });
+    }
 
     ch.push(H1('5. 其他處置（非實驗類）'));
     if(otherPlans.length){
@@ -7338,6 +7406,166 @@ window.fbToDOE = window.fbToExperiment;
 // 6M 自動分類面板（取代舊的單一選擇）
 // ════════════════════════════════════════════════════════
 window._fbToolSel = {};
+
+// ════════════════════════════════════════════════════════
+// 實驗設計存檔機制（方案A）：每個工具可存一組設計，標記是否納入計畫書。
+//   只存「設計」：因子+水準+設計類型+反應變數+空白矩陣（不含 Y 數據）。
+//   存於 window._savedExperiments[tool]，全域、切頁不丟。
+// ════════════════════════════════════════════════════════
+window._savedExperiments = window._savedExperiments || {};
+window.EXP_TOOL_LABEL = { doe:'DOE 因子實驗', pb:'PB 因子篩選', spc:'SPC 製程管控', msa:'MSA 量測系統分析', hypothesis:'假設檢定' };
+
+// 從某工具頁抓取目前設計參數（純讀 DOM，不改值）
+function _captureExperiment(tool){
+  function v(id){ var e=document.getElementById(id); return e ? (e.value||'').trim() : ''; }
+  if(tool==='doe' || tool==='pb'){
+    var pfx = tool==='doe' ? 'doe' : 'pbp';        // 因子欄前綴
+    var nfId = tool==='doe' ? 'doe-nf' : 'pb-nf';
+    var ynId = tool==='doe' ? 'doe-yname' : 'pb-yname';
+    var nf = parseInt(v(nfId),10) || 0;
+    var factors = [];
+    for(var i=1;i<=nf;i++){
+      var nm = v(pfx+'-f'+i);
+      if(!nm) continue;
+      factors.push({
+        name: nm,
+        low:  v(pfx+'-l'+i),
+        high: v(pfx+'-h'+i)
+      });
+    }
+    var matrix, rep;
+    if(tool==='doe'){
+      matrix = (window._doeMatrix||[]).map(function(r){ return r.slice(); });
+      rep = parseInt(v('doe-rep'),10) || 1;
+    }else{
+      // PB：用 getPBDesign 即時取設計矩陣（頁面未存全域）
+      matrix = [];
+      try{ var _pb = (typeof getPBDesign==='function') ? getPBDesign(factors.length) : null; if(_pb && _pb.matrix) matrix = _pb.matrix.map(function(r){ return r.slice(); }); }catch(e){}
+      rep = 1;
+    }
+    return {
+      tool: tool,
+      label: window.EXP_TOOL_LABEL[tool] || tool,
+      designType: tool==='doe' ? (v('doe-design-type')||'full') : 'pb',
+      yname: v(ynId) || 'Y',
+      rep: rep,
+      factors: factors,
+      matrix: matrix,           // 係數矩陣（±1），空白設計
+      include: true,
+      savedAt: new Date().toISOString().slice(0,16).replace('T',' ')
+    };
+  }
+  // SPC / MSA / hypothesis：無 ±1 設計矩陣，存精簡規劃參數
+  if(tool==='spc'){
+    return { tool:tool, label:window.EXP_TOOL_LABEL.spc, params:[
+      ['監控特性', v('spc-char')||v('spc-name')],
+      ['子組大小', v('spc-subgroup')||v('spc-n')]
+    ].filter(function(p){return p[1];}), include:true, savedAt:new Date().toISOString().slice(0,16).replace('T',' ') };
+  }
+  if(tool==='msa'){
+    return { tool:tool, label:window.EXP_TOOL_LABEL.msa, params:[
+      ['量測項目', v('grr-part-name')||v('grr-char')],
+      ['零件數', v('grr-parts')], ['操作員數', v('grr-ops')], ['重複次數', v('grr-trials')]
+    ].filter(function(p){return p[1];}), include:true, savedAt:new Date().toISOString().slice(0,16).replace('T',' ') };
+  }
+  if(tool==='hypothesis'){
+    var ht=document.getElementById('hy-type');
+    return { tool:tool, label:window.EXP_TOOL_LABEL.hypothesis, params:[
+      ['檢定類型', ht?(ht.options[ht.selectedIndex]||{}).text||'' : '']
+    ].filter(function(p){return p[1];}), include:true, savedAt:new Date().toISOString().slice(0,16).replace('T',' ') };
+  }
+  return null;
+}
+
+// 把已存設計還原回工具頁（進入工具時呼叫）
+function _restoreExperiment(tool){
+  var exp = window._savedExperiments[tool];
+  if(!exp) return false;
+  function set(id,val){ var e=document.getElementById(id); if(e && val!=null){ e.value=val; } }
+  if((tool==='doe'||tool==='pb') && exp.factors){
+    var pfx = tool==='doe' ? 'doe' : 'pbp';
+    if(tool==='doe' && exp.designType){ set('doe-design-type', exp.designType); }
+    set(tool==='doe'?'doe-yname':'pb-yname', exp.yname);
+    if(tool==='doe' && exp.rep) set('doe-rep', String(exp.rep));
+    set(tool==='doe'?'doe-nf':'pb-nf', String(exp.factors.length));
+    // 先重建因子欄位，再填值
+    if(tool==='doe' && typeof doeUpdateFactors==='function') doeUpdateFactors();
+    if(tool==='pb'  && typeof pbPageUpdateFactors==='function') pbPageUpdateFactors();
+    setTimeout(function(){
+      exp.factors.forEach(function(f,i){
+        set(pfx+'-f'+(i+1), f.name); set(pfx+'-l'+(i+1), f.low); set(pfx+'-h'+(i+1), f.high);
+      });
+      if(tool==='doe' && typeof doeGenMatrix==='function') doeGenMatrix();
+    }, 360);
+    return true;
+  }
+  if(exp.params){
+    if(tool==='spc'){ var s=exp.params; s.forEach(function(p){ if(p[0]==='監控特性'){ set('spc-char',p[1]); set('spc-name',p[1]); } }); }
+    if(tool==='msa'){ exp.params.forEach(function(p){ if(p[0]==='量測項目'){ set('grr-part-name',p[1]); set('grr-char',p[1]); } }); }
+    return true;
+  }
+  return false;
+}
+
+// 在工具頁注入「儲存設計 / 回魚骨圖」操作列（僅實驗類工具）
+window.injectExpSaveBar = function(tool){
+  var page = document.getElementById('page-'+tool);
+  if(!page) return;
+  var card = page.querySelector('.card');
+  if(!card) return;
+  var old = card.querySelector('.exp-save-bar'); if(old) old.remove();
+  var bar = document.createElement('div');
+  bar.className = 'exp-save-bar';
+  bar.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#F0F7FF;border:1.5px solid #BBD3F0;border-radius:8px;padding:.55rem .8rem;margin-bottom:.85rem';
+  var saved = window._savedExperiments[tool];
+  bar.innerHTML =
+    '<span style="font-size:12px;color:#1B3A5C;font-weight:700">📋 計畫書整合</span>'+
+    '<button onclick="saveExperimentToPlan(\''+tool+'\')" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">💾 儲存設計到計畫書</button>'+
+    '<button onclick="goTool(\'fishbone\')" style="background:#fff;color:#1B3A5C;border:1px solid #BBD3F0;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">↩ 回魚骨圖</button>'+
+    '<span id="exp-save-status-'+tool+'" style="font-size:11px;color:'+(saved?'#059669':'#94A3B8')+'">'+
+      (saved?('✅ 已儲存（'+saved.savedAt+'）將納入計畫書'):'尚未儲存；儲存後會自動納入計畫書')+'</span>';
+  card.insertBefore(bar, card.firstChild);
+};
+
+// 儲存目前工具設計到計畫書（自動勾選納入）
+window.saveExperimentToPlan = function(tool){
+  var exp = _captureExperiment(tool);
+  if(!exp){ alert('此工具無可儲存的設計參數。'); return; }
+  if((tool==='doe'||tool==='pb') && (!exp.factors || !exp.factors.length)){
+    alert('請先填寫實驗因子名稱再儲存。'); return;
+  }
+  window._savedExperiments[tool] = exp;
+  var st = document.getElementById('exp-save-status-'+tool);
+  if(st){ st.textContent = '✅ 已儲存（'+exp.savedAt+'）將納入計畫書'; st.style.color='#059669'; }
+  // 輕量提示
+  var page = document.getElementById('page-'+tool);
+  if(page){
+    var t = document.createElement('div');
+    t.style.cssText='position:fixed;left:50%;top:18%;transform:translateX(-50%);background:#065F46;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;z-index:9999;box-shadow:0 4px 16px rgba(0,0,0,.25)';
+    t.textContent='✅ 已儲存 '+(window.EXP_TOOL_LABEL[tool]||tool)+' 設計，將納入計畫書';
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; setTimeout(function(){t.remove();},420); }, 1400);
+  }
+};
+
+// 回到魚骨圖時刷新各工具的「已儲存／納入計畫書」狀態
+window.fbRefreshExperimentStatus = function(){
+  document.querySelectorAll('#fb-factor-selector .exp-tool-status').forEach(function(badge){
+    var tool = badge.dataset.tool;
+    var exp = window._savedExperiments[tool];
+    var cb = document.querySelector('#fb-factor-selector .exp-include-cb[data-tool="'+tool+'"]');
+    if(exp){
+      badge.textContent = '✅ 已儲存設計（'+(exp.factors?exp.factors.length+' 因子':'規劃')+'）';
+      badge.style.color = '#059669';
+      if(cb){ cb.disabled=false; cb.checked = (exp.include!==false); }
+    }else{
+      badge.textContent = '尚未儲存設計';
+      badge.style.color = '#9CA3AF';
+      if(cb){ cb.checked=false; cb.disabled=true; }
+    }
+  });
+};
+
 window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   if(!fbCauses || fbCauses.length === 0 || !selectorDiv) return;
 
@@ -7400,7 +7628,22 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:6px">';
     html += '<div><span style="font-weight:700;color:'+info.color+';font-size:13px">'+info.label+'</span>';
     html += '<span style="font-size:11px;color:#6B7280;margin-left:8px">'+info.desc+'</span></div>';
+    html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+    // 納入計畫書（僅實驗類工具：doe/pb/spc/msa/hypothesis；taguchi 走 doe 故略過）
+    var incTool = (toolKey==='taguchi') ? null : toolKey;
+    if(incTool){
+      var savedExp = (window._savedExperiments||{})[incTool];
+      html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#374151;cursor:pointer;user-select:none" title="儲存設計後可勾選納入計畫書">'
+        + '<input type="checkbox" class="exp-include-cb" data-tool="'+incTool+'" '
+        + (savedExp ? '' : 'disabled ') + (savedExp && savedExp.include!==false ? 'checked ' : '')
+        + 'onchange="(window._savedExperiments[this.dataset.tool]||{}).include=this.checked" '
+        + 'style="width:14px;height:14px;accent-color:'+info.color+';cursor:pointer">納入計畫書</label>';
+      html += '<span class="exp-tool-status" data-tool="'+incTool+'" style="font-size:11px;color:'+(savedExp?'#059669':'#9CA3AF')+'">'
+        + (savedExp ? ('✅ 已儲存設計（'+(savedExp.factors?savedExp.factors.length+' 因子':'規劃')+'）') : '尚未儲存設計')
+        + '</span>';
+    }
     html += '<button data-tool="'+toolKey+'" onclick="fbImportTool(this.dataset.tool)" style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入</button>';
+    html += '</div>';
     html += '</div>';
 
     html += '<div style="display:flex;flex-wrap:wrap;gap:.4rem">';
@@ -7503,6 +7746,7 @@ window.fbRenderOtherPipelines = function(){
 window.fbGoToolByList = function(names, toolId) {
   if(!names || names.length === 0) return;
   var targetTool = toolId === 'taguchi' ? 'doe' : toolId;
+  window._expFreshImport = targetTool;   // 標記：本次為新帶入，goTool 不要還原舊設計
   goTool(targetTool);
   setTimeout(function(){
     var msg = document.createElement('div');
@@ -9014,7 +9258,30 @@ window.doeUpdateFactors = function() {
       var chatWrap = document.getElementById('fb-chat-wrap');
       if(chatWrap) chatWrap.style.display = 'none';
       var fbSel = document.getElementById('fb-factor-selector');
-      if(fbSel){ fbSel.innerHTML=''; fbSel.style.display='none'; }
+      if(fbSel){
+        // 若先前已產生過魚骨圖（_fbCauses 仍在），回到魚骨圖時自動重建選擇器，
+        // 以保留「之前的因子分類與已儲存實驗狀態」，符合「回上一頁仍記住」需求。
+        var causes = window._fbCauses;
+        if(causes && causes.length && typeof fbRenderClassifiedSelector==='function'){
+          var prevSel = window._fbToolSel ? JSON.parse(JSON.stringify(window._fbToolSel)) : null;
+          fbRenderClassifiedSelector(causes, fbSel);   // 會重設 _fbToolSel 為 AI 預設
+          // 還原使用者先前的 chip 勾選（若有）
+          if(prevSel && Object.keys(prevSel).length){
+            window._fbToolSel = prevSel;
+            try{
+              fbSel.querySelectorAll('.fb-chip').forEach(function(chip){
+                var t=chip.dataset.tool, nm=chip.dataset.name, col=chip.dataset.color;
+                var on = (prevSel[t]||[]).indexOf(nm)>=0;
+                if(on){ chip.style.background=col+'1A'; chip.style.border='1.5px solid '+col; chip.style.color=col; chip.style.fontWeight='600'; }
+                else { chip.style.background='#fff'; chip.style.border='1px dashed #D1D5DB'; chip.style.color='#9CA3AF'; chip.style.fontWeight='400'; }
+              });
+            }catch(e){}
+          }
+          if(typeof window.fbRefreshExperimentStatus==='function') window.fbRefreshExperimentStatus();
+        }else{
+          fbSel.innerHTML=''; fbSel.style.display='none';
+        }
+      }
       // 只在沒有 localStorage 儲存資料時，才還原 _fbData 為預設值
       var hasSaved = false;
       try{
