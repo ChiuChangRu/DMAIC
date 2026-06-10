@@ -556,6 +556,11 @@ tr:hover td{background:#F9FAFB}
         </div>
       </details>
 
+      <!-- ══ 五步驟進度指示器（stepper）══ -->
+      <div id="home-stepper" style="display:flex;align-items:center;justify-content:space-between;gap:2px;margin:0 0 1.1rem">
+        <!-- 由 buildStepper() 動態產生 -->
+      </div>
+
       <!-- ══ STEP 1：輸入器材名稱 ══ -->
       <div id="home-step1" style="display:block">
         <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:.6rem">
@@ -651,7 +656,7 @@ tr:hover td{background:#F9FAFB}
             style="flex:1;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:10px;padding:.65rem .9rem;font-size:14px;font-family:inherit;resize:none;color:#fff;outline:none;line-height:1.55;transition:border-color .2s"
             onfocus="this.style.borderColor='rgba(126,200,227,.6)'"
             onblur="this.style.borderColor='rgba(255,255,255,.2)'"></textarea>
-          <button onclick="homeCapaSend()" id="home-send-btn"
+          <button onclick="homeCapaSend()" id="home-send-btn2"
             style="background:linear-gradient(135deg,#BE185D,#DB2777);color:#fff;border:none;border-radius:10px;padding:.6rem 1.1rem;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 3px 12px rgba(190,24,93,.4)">
             送出
           </button>
@@ -1092,6 +1097,15 @@ tr:hover td{background:#F9FAFB}
     <div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">✅ 確認上方因子分類與帶入工具後，可下載完整計畫書：</div>
     <button id="dl-plan-btn" class="btn btn-primary" onclick="downloadPlanDocx()">📄 下載計畫書（Word）</button>
     <span style="font-size:11px;color:#94A3B8;margin-left:.5rem">彙整器材/問題/問卷/因子關聯/魚骨圖/驗證項目/其他處置/ISO，於瀏覽器產生 .docx（不經伺服器、不花 API）</span>
+    <div style="margin-top:.6rem">
+      <label style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#475569;cursor:pointer;user-select:none">
+        <input type="checkbox" id="dl-plan-ai" style="width:15px;height:15px;accent-color:#BE185D;cursor:pointer">
+        加入 AI 敘事段落（執行摘要／根本原因論述／結論）
+      </label>
+      <div style="font-size:10.5px;color:#94A3B8;line-height:1.55;margin-top:3px;padding-left:22px">
+        勾選後下載時會額外呼叫一次 AI（耗少量 API）。AI <b>僅依本頁已確認的事實</b>改寫成敘事、不新增任何事實或條號，推論句以（*）標記。表格內容不受影響。
+      </div>
+    </div>
   </div>
 
   <!-- 魚骨圖嵌入式問答助理：已移除（不再使用）。fbChatInit/Send/Reset 仍有 null 防護，呼叫到也不會出錯。 -->
@@ -1911,7 +1925,7 @@ window.addEventListener('popstate', function(e) {
   }
 });
 // 初始狀態
-if(history.replaceState) history.replaceState({page:'home'}, '', location.pathname);
+try{ if(history.replaceState) history.replaceState({page:'home'}, '', location.pathname); }catch(e){}
 
 function goTool(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1982,18 +1996,6 @@ function median(arr) {
 function fDist(f,d1,d2){
   const x=d2/(d2+d1*f);
   return ibeta(x,d2/2,d1/2);
-}
-function chiDist(chi,df){
-  return 1-gammaInc(chi/2,df/2);
-}
-function gammaInc(x,a){
-  if(x<0||a<=0)return 0;
-  if(x===0)return 0;
-  let gln=lgamma(a);
-  if(x<a+1){let ap=a,del=1/a,sum2=del;for(let n=1;n<=100;n++){ap++;del*=x/ap;sum2+=del;if(Math.abs(del)<Math.abs(sum2)*3e-7)break;}return sum2*Math.exp(-x+a*Math.log(x)-gln);}
-  let b=x+1-a,c=1/1e-30,d=1/b,h=d;
-  for(let i=1;i<=100;i++){let an=-i*(i-a),bi=x+2*i+1-a;d=an*d+bi;if(Math.abs(d)<1e-30)d=1e-30;c=bi+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;let del=d*c;h*=del;if(Math.abs(del-1)<3e-7)break;}
-  return 1-(Math.exp(-x+a*Math.log(x)-gln)*h);
 }
 
 let chartInst=[];
@@ -2294,6 +2296,37 @@ async function downloadPlanDocx(){
     var iso=(window._isoResult&&window._isoResult.items)||[];
     var isoApps=(window._isoResult&&window._isoResult.applicable)||[];
     var survey=_collectSurvey();
+    // ── AI 敘事（選用，預設關閉）：僅依本頁已確認事實生成三段文字 ──
+    var _aiNarr = null;
+    var _aiOn = (document.getElementById('dl-plan-ai')||{}).checked;
+    if(_aiOn){
+      if(btn) btn.textContent='AI 撰寫敘事中…';
+      try{
+        var _nr = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            mode:'plan_narrative',
+            deviceInfo: window._deviceInfo,
+            problem: problem,
+            factors: conf,
+            plans: plans,
+            iso: { applicable: isoApps, items: iso }
+          })
+        });
+        var _nd = await _nr.json();
+        if(_nd && _nd.result && (_nd.result.executive_summary||_nd.result.root_cause_narrative||_nd.result.conclusion)){
+          _aiNarr = _nd.result;
+        }else{
+          console.warn('[計畫書] AI 敘事空結果：', _nd && _nd._debug);
+        }
+      }catch(e){ console.warn('[計畫書] AI 敘事失敗，改用純表格：', e && e.message); }
+      if(btn) btn.textContent='產生計畫書中…';
+    }
+    // 把 AI 敘事段落轉成段落（含免責標示），無內容則回空陣列
+    function _narrBlock(title, text){
+      if(!text) return [];
+      return [ H2(title), new D.Paragraph({spacing:{before:60,after:200,line:312},children:[tx(text)]}) ];
+    }
     var CATLBL={man:'人員 Man',machine:'機器 Machine',material:'材料 Material',method:'方法 Method',measure:'量測 Measurement',env:'環境 Environment'};
     var RLBL={high:'高',medium:'中',low:'低'};
     var SLBL={gap:'缺口',partial:'部分',covered:'已涵蓋'};
@@ -2323,6 +2356,13 @@ async function downloadPlanDocx(){
       trow([tx('版本',{bold:true}),tx('v5.1'),tx('核准',{bold:true}),tx('____________')],hw,true)
     ]}));
     ch.push(spacer());
+
+    // AI 執行摘要（選用）
+    if(_aiNarr && _aiNarr.executive_summary){
+      ch.push(H1('0. 執行摘要'));
+      ch.push(new D.Paragraph({spacing:{after:120,line:312},children:[tx(_aiNarr.executive_summary)]}));
+      ch.push(new D.Paragraph({spacing:{after:160},children:[tx('（本段為 AI 依下列已確認資料整理之敘述，未新增事實；推論句以（*）標記。）',{size:18,color:GRAY,italics:true})]}));
+    }
 
     ch.push(H1('1. 器材與問題概述'));
     ch.push(H2('1.1 器材識別'));
@@ -2356,6 +2396,9 @@ async function downloadPlanDocx(){
       });
     });
     ch.push(H1('3. 根本原因分析'));
+    if(_aiNarr && _aiNarr.root_cause_narrative){
+      _narrBlock('3.0 根本原因論述（AI 整理）', _aiNarr.root_cause_narrative).forEach(function(p){ ch.push(p); });
+    }
     ch.push(H2('3.1 魚骨圖（Ishikawa）'));
     var svgEl=document.querySelector('#fb-svg-wrap svg');
     if(svgEl){ var png=await _svgToPngBytes(svgEl,2,true);
@@ -2419,6 +2462,13 @@ async function downloadPlanDocx(){
     if(isoApps.length||iso.length){
       ch.push(PP([tx('註：章節僅引用已建檔項目；標「（章節待建檔）」者尚未建章節（不自創條號）。一律以 ISO 正本最新版次為準，需 RA 核可。',{size:19,color:GRAY})]));
     }else{ ch.push(PP(tx('（尚未產生 ISO 對照，或本器材未對應到標準）',{color:GRAY}))); }
+
+    // AI 結論與後續行動（選用）
+    if(_aiNarr && _aiNarr.conclusion){
+      ch.push(H1('7. 結論與後續行動（AI 整理）'));
+      ch.push(new D.Paragraph({spacing:{after:120,line:312},children:[tx(_aiNarr.conclusion)]}));
+      ch.push(new D.Paragraph({spacing:{after:160},children:[tx('（本段為 AI 依前述已確認資料歸納之建議，未新增事實；推論句以（*）標記，請由 RA／工程依正本標準與實際數據覆核。）',{size:18,color:GRAY,italics:true})]}));
+    }
 
     var doc=new D.Document({
       styles:{default:{document:{run:{font:FONT,size:22,color:INK}}},
@@ -2978,50 +3028,6 @@ function drawDOEInteractionMatrix(){
       });
     });
   }, 80);
-}
-
-function drawDOEInteractionPlot() {
-  var d = window._doeIntData;
-  if(!d) return;
-  var ic = document.getElementById('doe-int-canvas');
-  if(!ic) {
-    // canvas 不存在，重建 HTML
-    var intDiv = document.getElementById('doe-interaction-content');
-    if(!intDiv) return;
-    intDiv.innerHTML = '<div class="alert info" style="margin-bottom:.75rem">顯示 '+d.f1+' × '+d.f2+
-      ' 交互作用圖。平行線 = 無交互作用；交叉線 = 有顯著交互作用。</div>'+
-      '<div class="canvas-wrap"><canvas id="doe-int-canvas" height="260"></canvas></div>';
-    ic = document.getElementById('doe-int-canvas');
-    if(!ic) return;
-  }
-  ic.width = ic.parentElement.offsetWidth || 640;
-  ic.height = 260;
-  var dpr = window.devicePixelRatio||1;
-  if(dpr>1){var w=ic.width,h=ic.height;ic.width=w*dpr;ic.height=h*dpr;ic.style.width=w+'px';ic.style.height=h+'px';ic.getContext('2d').scale(dpr,dpr);}
-
-  function m(arr){ return arr&&arr.length?arr.reduce(function(s,v){return s+v;},0)/arr.length:0; }
-  if(window._doeChartInt){try{window._doeChartInt.destroy();}catch(e){}}
-  window._doeChartInt = new Chart(ic.getContext('2d'),{
-    type:'line',
-    data:{
-      labels:[d.f2+' 低', d.f2+' 高'],
-      datasets:[
-        {label:d.f1+' 低', data:[m(d.lolo), m(d.lohi)], borderColor:'#1D3B8A', borderWidth:2.5, pointRadius:6, fill:false},
-        {label:d.f1+' 高', data:[m(d.hilo), m(d.hihi)], borderColor:'#DC2626', borderWidth:2.5, pointRadius:6, fill:false}
-      ]
-    },
-    options:{
-      responsive:false, animation:false,
-      plugins:{
-        title:{display:true, text:d.f1+' × '+d.f2+' 交互作用圖', font:{size:13,weight:'600'}, padding:{bottom:6}},
-        legend:{labels:{font:{size:11}}}
-      },
-      scales:{
-        x:{title:{display:true, text:d.f2}, ticks:{font:{size:11}}},
-        y:{title:{display:true, text:'Y 均值'}, ticks:{font:{size:10}}}
-      }
-    }
-  });
 }
 
 function drawDOEPareto() {
@@ -5496,12 +5502,65 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   window._homeStep = 1;
   window._deviceInfo = null;
 
+  // ── 五步驟視覺進度指示器 ──
+  var STEPPER_LABELS = ['輸入器材','確認器材','描述問題','AI 追問','驗證計畫'];
+  function buildStepper(){
+    var wrap = document.getElementById('home-stepper');
+    if(!wrap || wrap.dataset.built) return;
+    var html = '';
+    for(var i=1;i<=5;i++){
+      html += '<div class="hstep-node" data-step="'+i+'" style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1;min-width:0">'
+        + '<div class="hstep-dot" style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;transition:all .25s;flex-shrink:0">'+i+'</div>'
+        + '<div class="hstep-lbl" style="font-size:9px;line-height:1.2;text-align:center;transition:color .25s;white-space:nowrap">'+STEPPER_LABELS[i-1]+'</div>'
+        + '</div>';
+      if(i<5){
+        html += '<div class="hstep-arrow" data-arrow="'+i+'" style="flex:0 0 auto;font-size:12px;margin:0 1px;align-self:flex-start;margin-top:7px;transition:color .25s">›</div>';
+      }
+    }
+    wrap.innerHTML = html;
+    wrap.dataset.built = '1';
+  }
+  // 依「邏輯步驟」更新樣式：已完成=綠勾、進行中=粉紅、未做=灰
+  function setUiStep(n){
+    window._uiStep = n;
+    buildStepper();
+    var wrap = document.getElementById('home-stepper');
+    if(!wrap) return;
+    wrap.querySelectorAll('.hstep-node').forEach(function(node){
+      var s = parseInt(node.dataset.step,10);
+      var dot = node.querySelector('.hstep-dot');
+      var lbl = node.querySelector('.hstep-lbl');
+      if(s < n){            // 已完成
+        dot.style.background = 'linear-gradient(135deg,#059669,#10B981)';
+        dot.style.color = '#fff'; dot.style.border = 'none'; dot.textContent = '✓';
+        lbl.style.color = 'rgba(110,231,183,.85)';
+      } else if(s === n){   // 進行中
+        dot.style.background = 'linear-gradient(135deg,#BE185D,#DB2777)';
+        dot.style.color = '#fff'; dot.style.border = 'none'; dot.textContent = s;
+        dot.style.boxShadow = '0 0 0 3px rgba(219,39,119,.25)';
+        lbl.style.color = '#fff'; lbl.style.fontWeight = '700';
+      } else {              // 未做
+        dot.style.background = 'rgba(255,255,255,.08)';
+        dot.style.color = 'rgba(255,255,255,.35)';
+        dot.style.border = '1px solid rgba(255,255,255,.18)';
+        dot.style.boxShadow = 'none'; dot.textContent = s;
+        lbl.style.color = 'rgba(255,255,255,.35)'; lbl.style.fontWeight = '400';
+      }
+    });
+    wrap.querySelectorAll('.hstep-arrow').forEach(function(a){
+      var ai = parseInt(a.dataset.arrow,10);
+      a.style.color = (ai < n) ? 'rgba(110,231,183,.7)' : 'rgba(255,255,255,.25)';
+    });
+  }
+  window.setUiStep = setUiStep;
+
   function showStep(n) {
     window._homeStep = n;
     [1,2,3,4,5].forEach(function(i){
       var el = document.getElementById('home-step'+i);
       if(el) el.style.display = (i===n) ? 'block' : 'none';
     });
+    setUiStep(n);   // 同步更新進度指示器
   }
 
   // ── Step 1：查詢 FDA 510k 識別器材 ──
@@ -5718,6 +5777,7 @@ window.renderFactorPanel = function renderFactorPanel(result) {
   if(panelWrap) panelWrap.style.display = 'block';
   var stepLabel = document.getElementById('home-step4-label');
   if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 確認因子後進入魚骨圖';
+  if(typeof window.setUiStep==='function') window.setUiStep(5);
   var btn = document.getElementById('home-factor-panel-btn');
   if(btn) btn.style.display = 'block';
 }
@@ -5829,6 +5889,7 @@ window.homeConfirmFactors = async function() {
 
   var stepLabel = document.getElementById('home-step4-label');
   if(stepLabel) stepLabel.textContent = '步驟 5 / 5 · 建立驗證計畫';
+  if(typeof window.setUiStep==='function') window.setUiStep(5);
 
   try {
     var problem = (document.getElementById('hq-problem')||{}).value || '';
@@ -6018,10 +6079,37 @@ function flattenIsoStandards(map, keys){
   return out;
 }
 
+// v5.2 生物相容性／材料類標準的「問題相關性閘門」
+//   問題：cross_cutting 內 7 條 10993 皆標「跨領域」，導致任何器材每次都把生物相容性標準
+//         送進 worker，AI 遂把漏液/拉力/流量/製程等非材料因子也亂掛到 10993。
+//   規則：applies_to 含 'biocompat' 者屬「材料/生物」類；僅當問題敘述或任一因子文字
+//         命中材料/生物關鍵字時才放行，否則於送出前移除（生物相容性多於開發/換料階段
+//         已完成，不應對製程確效、尺寸、漏液、流量、標示等問題硬套）。
+//   純前端、確定性、零 token。如需保留 10993-1 當基線參考，見下方註解。
+function gateBiocompat(standards, plans, problemText){
+  var MATBIO = ['材料','原料','材質','塗層','coating','溶出','可溶出','萃取','可萃取',
+    'leachable','extractable','生物相容','biocompat','血液相容','溶血','hemolysis',
+    '血栓','thrombus','凝血','細胞毒','cytotox','致敏','過敏','sensiti','刺激','irritation',
+    '化學特性','化學鑑別','變更材料','換料','更換原料','改材','植入','長期接觸','毒理',
+    '殘留','residual','滅菌殘留','環氧乙烷殘'];
+  var hay = String(problemText||'').toLowerCase();
+  (plans||[]).forEach(function(p){ try{ hay += ' ' + JSON.stringify(p).toLowerCase(); }catch(e){} });
+  var relevant = MATBIO.some(function(w){ return hay.indexOf(String(w).toLowerCase()) >= 0; });
+  if(relevant) return standards; // 問題確涉材料/生物 → 全數放行
+  var kept = standards.filter(function(s){
+    var at = (s.applies_to||[]).map(function(x){ return String(x).toLowerCase(); });
+    return at.indexOf('biocompat') < 0; // 非生物相容類 → 保留
+    // 若想保留 10993-1 當基線，可改成：return at.indexOf('biocompat')<0 || s.no==='ISO 10993-1';
+  });
+  var dropped = standards.length - kept.length;
+  if(dropped>0) console.log('[ISO 對照] 生物相容性閘門：問題未涉材料/生物，已濾除 '+dropped+' 條 10993 類標準');
+  return kept;
+}
+
 // 取得器材分類關鍵詞：優先用 identify_device 給的 category_keys；
 // 若沒有（舊案或 AI 未輸出），退而用器材文字關鍵字掃描推導（標 * 為推導）。
 function deriveCategoryKeys(info){
-  if(info && Array.isArray(info.category_keys) && info.category_keys.length) return info.category_keys;
+  if(info && Array.isArray(info.category_keys) && info.category_keys.length) return expandCategoryKeys(info.category_keys);
   var txt = ((info&&info.confirmed_name)||'') + ' ' + ((info&&info.structure)||'') + ' ' +
             ((info&&info.indication)||'') + ' ' + ((info&&info.material)||'');
   txt = txt.toLowerCase();
@@ -6059,7 +6147,32 @@ function deriveCategoryKeys(info){
   Object.keys(VOCAB).forEach(function(k){
     if(VOCAB[k].some(function(w){ return txt.indexOf(w) >= 0; })) keys.push(k);
   });
-  return keys;
+  return expandCategoryKeys(keys);
+}
+
+// 把器材分類關鍵詞展開為 iso_map applies_to 實際使用的同義鍵集合。
+// 原因：iso_map 的 applies_to 用到 HD / DJ / set / 軟袋 / blood / pigtail 等鍵，
+//   但 AI 輸出的 category_keys 與前端推導未必產生這些鍵，導致掛在這些鍵下的標準
+//   （如血液透析 HD、雙J/pigtail 支架、輸液 set、IV 軟袋）對不到、被漏掉。
+// 純前端、確定性、零 token；只「補入」同義鍵，不移除既有鍵。
+function expandCategoryKeys(keys){
+  var SYN = {
+    'dialysis':    ['HD','blood'],          // 血液透析 → HD（含血液接觸）
+    'central-venous':['intravascular'],     // 中心靜脈為血管內子類
+    'stent':       ['DJ','pigtail'],        // 支架常含雙J/pigtail 子型
+    'ureteral':    ['DJ','pigtail','stent'],
+    'infusion':    ['set','iv'],            // 輸液常為輸液套組(set)
+    'iv-bag':      ['container','軟袋'],     // IV 軟袋
+    'extracorporeal':['blood','bloodline','dialysis','HD'],
+    'connector':   ['luer'],
+    'guide':       ['needle']               // 同軸導引針屬針類
+  };
+  var out = Array.isArray(keys) ? keys.slice() : [];
+  var seen = {}; out.forEach(function(k){ seen[k]=1; });
+  (keys||[]).forEach(function(k){
+    (SYN[k]||[]).forEach(function(s){ if(!seen[s]){ seen[s]=1; out.push(s); } });
+  });
+  return out;
 }
 
 function _setPlanConfirmLock(lock){
@@ -6093,6 +6206,7 @@ async function runIsoCrosscheck(plans){
     var catKeys = deriveCategoryKeys(window._deviceInfo);
     console.log('[ISO 對照] 器材分類 category_keys：', catKeys, window._deviceInfo && window._deviceInfo.category_keys ? '(來自 AI)' : '(關鍵字推導*)');
     var standards = flattenIsoStandards(map, catKeys);
+    standards = gateBiocompat(standards, plans, (document.getElementById('hq-problem')||{}).value || '');
     if(!standards.length){
       box.innerHTML = '<div style="font-size:10px;color:rgba(255,255,255,.4);padding:.3rem .2rem">📐 ISO 對照：依本器材分類（'+(catKeys.join('、')||'未判定')+'）未對應到 iso_map 內標準；僅通用標準適用或尚未建檔。</div>';
       return;
@@ -6134,7 +6248,6 @@ function _isoNameMap(){
   scan(m); return out;
 }
 function _isoTag(e){ if(!e) return ''; if(!e.ed) return '(*待確認)'; return e.ok?('('+e.ed+')'):('('+e.ed+'*)'); }
-function _isoLabel(no, nm){ var e=nm[no]; if(!e) return no; var t=_isoTag(e); return no+(t?(' '+t):'')+(e.title?('　'+e.title):''); }
 window.rerunIsoCrosscheck=function(){ var p=(window._verificationPlan&&window._verificationPlan.plans)||[]; if(!p.length){ alert('尚無驗證計畫可比對。'); return; } runIsoCrosscheck(p); };
 
 function renderIsoPanel(r){
@@ -6430,7 +6543,9 @@ function renderIsoPanel(r){
       // 抓輸入框（Step 3 用 home-problem-input，Step 4 用 home-chat-input）
       var inputId = currentStep <= 3 ? 'home-problem-input' : 'home-chat-input';
       var input = document.getElementById(inputId);
-      var sendBtn = document.getElementById('home-send-btn');
+      // 兩顆送出鈕（步驟3:home-send-btn、步驟4:home-send-btn2）一起控制，避免送出後仍可重複點擊
+      var _sendBtns = [document.getElementById('home-send-btn'), document.getElementById('home-send-btn2')].filter(Boolean);
+      var sendBtn = { set disabled(v){ _sendBtns.forEach(function(b){ b.disabled = v; b.style.opacity = v ? '.6' : ''; }); } };
       if(!input) return;
 
       // Step 3 自動帶入 hq-problem
@@ -6473,6 +6588,7 @@ function renderIsoPanel(r){
         });
         var step4 = document.getElementById('home-step4');
         if(step4) step4.style.display='block';
+        if(typeof window.setUiStep==='function') window.setUiStep(4);
         // 確保 chat history 顯示
         var hist = document.getElementById('home-chat-history');
         if(hist) hist.style.display='flex';
@@ -6611,35 +6727,6 @@ function renderIsoPanel(r){
       }
       if(sendBtn) sendBtn.disabled = false;
     };
-
-    // 新版 appendHomeAI（含信心度）
-    function appendHomeAI_withConf(text, tools, conf){
-      // 用 window.appendHomeAI 確保能找到外層定義的函式
-      if(typeof window.appendHomeAI === 'function'){
-        window.appendHomeAI(text, tools);
-      }
-      if(conf === undefined) return;
-      var hist = document.getElementById('home-chat-history');
-      if(!hist) return;
-      var confColor = conf>=75?'#10B981':conf>=50?'#F59E0B':'#EF4444';
-      // 有推薦工具時，顯示「可開始分析」
-      var confLabel = tools && tools.length > 0
-        ? '✅ 可開始分析'
-        : conf>=90?'高信心，建議立即行動'
-          :conf>=75?'建議足夠，可進行分析'
-          :conf>=50?'需再補充 1-2 個資訊'
-          :'資訊不足，請填問卷或繼續對話';
-      var bar = document.createElement('div');
-      bar.style.cssText = 'display:flex;align-items:center;gap:8px;padding:.35rem .5rem;margin-top:2px';
-      bar.innerHTML = '<span style="font-size:10px;color:rgba(255,255,255,.7)">AI 信心度</span>'+
-        '<div style="width:90px;height:5px;background:rgba(255,255,255,.15);border-radius:3px">'+
-          '<div style="height:100%;width:'+conf+'%;background:'+confColor+';border-radius:3px;transition:.5s"></div>'+
-        '</div>'+
-        '<span style="font-size:11px;color:'+confColor+';font-weight:700">'+conf+'%</span>'+
-        '<span style="font-size:10px;color:rgba(255,255,255,.4)">'+confLabel+'</span>';
-      hist.appendChild(bar);
-      hist.scrollTop = hist.scrollHeight;
-    }
 
     // DOM 就緒後建立問卷
     function init(){
