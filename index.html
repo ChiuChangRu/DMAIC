@@ -2515,15 +2515,26 @@ async function downloadPlanDocx(){
           ch.push(new D.Paragraph({spacing:{after:20,line:300},indent:{left:240},children:[
             tx('風險判定：',{bold:true,size:19}), tx(f.risk_reason||'（待補）',{size:19})
           ]}));
-          // (3) 卡控方式（含驗證工具與 ISO）
+          // (3) 卡控方式（含驗證工具）
           var ctrl = f.control_method||'（待補）';
-          ch.push(new D.Paragraph({spacing:{after:60,line:300},indent:{left:240},children:[
+          ch.push(new D.Paragraph({spacing:{after:30,line:300},indent:{left:240},children:[
             tx('卡控／驗證：',{bold:true,size:19}),
             tx(ctrl,{size:19}),
             (f.tool && VMLBL2[f.tool])?tx('　〔'+VMLBL2[f.tool]+'〕',{size:18,color:'2563EB'}):tx(''),
-            f.iso_hint?tx('〔'+f.iso_hint+'〕',{size:18,color:'7C3AED'}):tx(''),
             f.level_hint?tx('　建議水準：'+f.level_hint,{size:18,color:GRAY}):tx('')
           ]}));
+          // 對到此因子的 ISO（優先用配對結果，標來源；無配對則退回 iso_hint）
+          var fMatched = (window._factorIsoMatch && window._factorIsoMatch[f.name]) || [];
+          if(fMatched.length){
+            var SRCW = {'fda510k':'同類510k實證','iso_map':'應驗基準','fda510k+iso_map':'雙重確認','ai_hint':'AI推測*'};
+            var runs = [tx('　適用 ISO：',{bold:true,size:18,color:'7C3AED'})];
+            fMatched.forEach(function(m,mi){
+              runs.push(tx((mi>0?'、':'')+m.no+'〔'+(SRCW[m.source]||m.source)+'〕',{size:18,color:(m.source==='ai_hint'?GRAY:'7C3AED')}));
+            });
+            ch.push(new D.Paragraph({spacing:{after:60,line:300},indent:{left:360},children:runs}));
+          } else if(f.iso_hint){
+            ch.push(new D.Paragraph({spacing:{after:60,line:300},indent:{left:360},children:[tx('　適用 ISO：'+f.iso_hint+'〔AI推測*〕',{size:18,color:GRAY})]}));
+          }
         });
       });
       ch.push(PP(tx('註：標「(推測*)」者為 AI 無法明確建立與本問題因果關聯之因子，僅供發想；〔工具〕為程式依因子性質強制對應（可調參數→DOE、觀測現象→SPC、量測手法→MSA）；〔ISO …〕須以正本最新版次確認，需 RA 核可。',{size:18,color:GRAY,italics:true})));
@@ -2569,10 +2580,11 @@ async function downloadPlanDocx(){
       ch.push(PP(tx('（如需 AI 產生本案專屬的檢測手法檢討與防呆建議，請於下載前勾選「加入 AI 敘事」或按「AI 篩選監控攔截力檢討」。）',{size:19,color:GRAY})));
     }
 
-    // ── 4. ISO 規範對照（獨立章節，自動帶入）──
-    if(isoApps.length || iso.length){
+    // ── 4. ISO 規範對照（獨立章節）──
+    var fda510k = (window._fda510kResult&&window._fda510kResult.extracted)||[];
+    if(isoApps.length || iso.length || fda510k.length){
       ch.push(H1('4. ISO 規範對照'));
-      ch.push(PP(tx('依本器材分類自動對應之適用標準與驗證項目。標準編號、版次、條號須以正本最新版次為準，需 RA 核可；標（*）者為待確認。',{size:19,color:GRAY})));
+      ch.push(PP(tx('已對應到個別因子的標準，列於 3.2 各因子「適用 ISO」；本章彙整器材級適用標準總表、同類產品(510k)真實驗證佐證，以及未對到特定因子的通用標準。編號/版次/條號須以正本最新版次為準，需 RA 核可。',{size:19,color:GRAY})));
       // 適用標準總表
       if(isoApps.length){
         var iw=[2100,4200,2806];
@@ -2595,6 +2607,29 @@ async function downloadPlanDocx(){
         gaps.forEach(function(g){
           ch.push(new D.Paragraph({spacing:{after:30},bullet:{level:0},children:[tx((typeof g==='string'?g:(g.item||g.desc||JSON.stringify(g))),{size:19})]}));
         });
+      }
+      // 同類 510(k) 真實驗證佐證（若使用者勾選納入）
+      if(fda510k.length && window._fda510kInclude!==false){
+        ch.push(new D.Paragraph({spacing:{before:160,after:40},children:[tx('4.x 同類產品 510(k) 真實驗證佐證',{bold:true,size:22,color:INK})]}));
+        ch.push(PP(tx('以下為 FDA 510(k) 資料庫中同類產品 summary 實際載明之驗證項目與引用標準（逐字萃取，非推論），作為本案驗證規劃之真實市場佐證。',{size:18,color:GRAY})));
+        var fw=[1500,3300,4306];
+        var frows=fda510k.map(function(d,i){
+          return trow([
+            tx(d.k||'',{bold:true}),
+            tx((d.standards||[]).join('、')||'—'),
+            tx((d.tests||[]).join('；')||'—')
+          ],fw,i%2===1);
+        });
+        ch.push(tbl(fw,['510(k) 號','引用標準','驗證項目'],frows));
+        if(window._fda510kResult&&window._fda510kResult.summary){
+          ch.push(PP(tx('同類驗證重點：'+window._fda510kResult.summary,{size:18,color:GRAY,italics:true})));
+        }
+        ch.push(PP(tx('（此為同類產品實際做過、FDA 接受之驗證，僅供參考佐證；本案器材若特性不同(如高壓動力注射)，仍須自行判斷適用性，需 RA 核可。）',{size:18,color:GRAY,italics:true})));
+      }
+      // 未對到特定因子的通用標準
+      if(window._isoUnmatched && window._isoUnmatched.length){
+        ch.push(new D.Paragraph({spacing:{before:120,after:40},children:[tx('器材級通用標準（未對到特定因子，全機適用）',{bold:true,size:20})]}));
+        ch.push(PP(tx(window._isoUnmatched.join('、'),{size:19})));
       }
       ch.push(PP(tx('（ISO 對照由系統依器材分類自動產生，經確定性防幻覺閘過濾——不在已建檔清單的標準/條號會被剔除或標待確認。仍須 RA 依正本覆核。）',{size:18,color:GRAY,italics:true})));
     }
@@ -2670,6 +2705,8 @@ async function runFda510kVerification(){
     var r=data.result||{};
     window._fda510kResult=r;
     renderFda510kPanel(r, data.note);
+    // 510k 來源加入後，重新配對 ISO 到因子
+    if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
   }catch(e){
     panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+(e&&e.name==='AbortError'?'查詢逾時，可稍後再試':('查詢失敗：'+(e&&e.message||'')))+'</div>';
   }finally{
@@ -2710,6 +2747,57 @@ function renderFda510kPanel(r, note){
   window._fda510kInclude=true;
 }
 window.renderFda510kPanel=renderFda510kPanel;
+
+// ════════════════════════════════════════════════════════
+// ISO ↔ 因子配對：彙整 510k萃取 + iso_map + AI iso_hint → AI 配對 → 存因子 → 可手動調整
+// 來源優先：fda510k / iso_map 為主，ai_hint 為輔
+// 結果：window._factorIsoMatch[因子名] = [{no, source, why}]；未對到的 window._isoUnmatched=[...]
+// ════════════════════════════════════════════════════════
+window._factorIsoMatch = {};
+window._isoUnmatched = [];
+function _gatherIsoSources(){
+  var stds = {};  // no -> {no,title,source,items}
+  // 1) iso_map（主）：_isoResult.applicable
+  var apps = (window._isoResult&&window._isoResult.applicable)||[];
+  apps.forEach(function(a){ if(a.no) stds[a.no] = { no:a.no, title:a.title_zh||a.title||'', source:'iso_map', items:a.items||'' }; });
+  // 2) 510k 萃取（主）：覆蓋/補充，標來源 fda510k
+  var ext = (window._fda510kResult&&window._fda510kResult.extracted)||[];
+  ext.forEach(function(d){ (d.standards||[]).forEach(function(no){
+    if(stds[no]) stds[no].source = 'fda510k+iso_map';  // 兩來源都有 → 最可靠
+    else stds[no] = { no:no, title:'', source:'fda510k', items:(d.tests||[]).join('、') };
+  }); });
+  // 3) AI iso_hint（輔）：因子裡的，只補沒有的
+  var conf = window._confirmedFactors||{};
+  ['man','machine','material','method','measure','env'].forEach(function(c){
+    (conf[c]||[]).forEach(function(f){ if(f.iso_hint && !stds[f.iso_hint]) stds[f.iso_hint] = { no:f.iso_hint, title:'', source:'ai_hint', items:'' }; });
+  });
+  return Object.keys(stds).map(function(k){ return stds[k]; });
+}
+async function runIsoFactorMatch(onDone){
+  var conf = window._confirmedFactors||{};
+  var factors = [];
+  ['man','machine','material','method','measure','env'].forEach(function(c){
+    (conf[c]||[]).forEach(function(f){ factors.push({ name:f.name, cat:c, link:f.link||'' }); });
+  });
+  var standards = _gatherIsoSources();
+  if(!factors.length || !standards.length){ if(onDone)onDone(); return; }
+  try{
+    var ac=new AbortController(); var to=setTimeout(function(){ac.abort();},60000);
+    var resp=await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+      method:'POST', headers:{'Content-Type':'application/json'}, signal:ac.signal,
+      body:JSON.stringify({ mode:'iso_factor_match', factors:factors, standards:standards })
+    });
+    clearTimeout(to);
+    var data=await resp.json();
+    var r=data.result||{};
+    window._factorIsoMatch = {};
+    (r.matches||[]).forEach(function(m){ window._factorIsoMatch[m.factor] = m.standards||[]; });
+    window._isoUnmatched = r.unmatched||[];
+    if(typeof renderFactorPanel==='function') renderFactorPanel(window._confirmedFactors);  // 重繪帶入 ISO
+  }catch(e){ console.log('[ISO配因子] 略過:', e&&e.message); }
+  if(onDone)onDone();
+}
+window.runIsoFactorMatch=runIsoFactorMatch;
 
 // ════════════════════════════════════════════════════════
 // 監控攔截力檢討（選用）：AI 篩 2-4 個關鍵監控點 → 勾選清單（預設全勾）→ 下載時寫入 Word
@@ -6129,6 +6217,17 @@ window.renderFactorPanel = function renderFactorPanel(result) {
           + '</div>';
       }
       if(f.control_method) html += '<div style="font-size:10px;color:rgba(255,255,255,.42);padding-left:16px;line-height:1.4">卡控：'+f.control_method+'</div>';
+      // 對到此因子的 ISO（來源優先：fda510k/iso_map 主、ai_hint 輔）；可手動調整
+      var matched = (window._factorIsoMatch && window._factorIsoMatch[f.name]) || [];
+      if(matched.length){
+        var SRC_COLOR = {'fda510k':'#6EE7B7','iso_map':'#A78BFA','fda510k+iso_map':'#34D399','ai_hint':'rgba(255,255,255,.45)'};
+        var SRC_LBL = {'fda510k':'同類510k','iso_map':'應驗','fda510k+iso_map':'雙重確認','ai_hint':'AI推測*'};
+        var isoHtml = matched.map(function(m){
+          var col=SRC_COLOR[m.source]||'rgba(255,255,255,.5)'; var lbl=SRC_LBL[m.source]||m.source;
+          return '<span style="color:'+col+'" title="'+(m.why||'')+'">'+m.no+'〔'+lbl+'〕</span>';
+        }).join('、');
+        html += '<div style="font-size:10px;padding-left:16px;line-height:1.5;margin-top:1px">📐 ISO：'+isoHtml+'</div>';
+      }
       html += '</div>';
     });
     html += '</div>';
@@ -6236,7 +6335,12 @@ window.homeSummarizeFactors = async function(tools) {
             _isoPlans.push({ factor:f.name, pipeline: (f.nature==='compliance'?'compliance':'experiment'), subtype:(f.verify_method||''), iso_hint:f.iso_hint });
           });
         });
-        if(_isoPlans.length && typeof runIsoCrosscheck==='function'){ runIsoCrosscheck(_isoPlans); }
+        if(_isoPlans.length && typeof runIsoCrosscheck==='function'){
+          runIsoCrosscheck(_isoPlans, function(){
+            // ISO 對照完成 → 自動把 ISO 配對到因子（510k 若已查也一併納入）
+            if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
+          });
+        }
       }catch(e){ console.log('[ISO 自動對照] 略過:', e&&e.message); }
     } else {
       var em = data.error ? ('⚠️ '+data.error) : '⚠️ 整理失敗，請手動確認';
