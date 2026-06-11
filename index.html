@@ -2322,6 +2322,14 @@ function _collectSurvey(){
 
 async function downloadPlanDocx(){
   if(!window.docx){ alert('Word 函式庫尚未載入。請確認 docx.umd.js 已與 index.html 一起部署在同層目錄。'); return; }
+  // C 放行閘：每個因子都要至少指派一個處置，否則擋下載並列出孤兒因子
+  if(typeof window.fbCheckCoverage==='function'){
+    var _orphans = window.fbCheckCoverage();
+    if(_orphans && _orphans.length){
+      alert('還有 '+_orphans.length+' 個因子尚未指派任何處置，無法產生計畫書。\n\n請回魚骨圖頁的「逐因子處置指派」表，為以下因子勾選處置（或標為排除）：\n\n• '+_orphans.join('\n• '));
+      return;
+    }
+  }
   var D=window.docx, btn=document.getElementById('dl-plan-btn');
   if(btn){ btn.disabled=true; btn.dataset.t=btn.textContent; btn.textContent='產生計畫書中…'; }
   try{
@@ -7714,157 +7722,121 @@ window.fbRefreshExperimentStatus = function(){
   });
 };
 
+// ════════════════════════════════════════════════════════
+// 逐因子處置指派表（取代舊「帶入工具」selector）
+// 每個因子勾選要做的處置（可複選），未勾任何處置者為「孤兒」，擋下載計畫書。
+// 狀態：window._factorDispo[因子名] = { picks:[處置key,...] }
+// ════════════════════════════════════════════════════════
+var DISPO_DEFS = [
+  {k:'doe',     label:'統計驗證(DOE)', color:'#D97706'},
+  {k:'spc',     label:'製程監控(SPC)', color:'#1A9CB0'},
+  {k:'msa',     label:'量測手法(MSA)', color:'#9333EA'},
+  {k:'hyp',     label:'假設檢定',      color:'#DC2626'},
+  {k:'iso',     label:'ISO確認',       color:'#7C3AED'},
+  {k:'sop',     label:'IFU/SOP',       color:'#0891B2'},
+  {k:'train',   label:'教育訓練',      color:'#2563EB'},
+  {k:'sampling',label:'抽樣加強',      color:'#059669'},
+  {k:'design',  label:'設計變更',      color:'#BE185D'},
+  {k:'exclude', label:'排除',          color:'#9CA3AF'}
+];
+function _natureDefaultDispo(f){
+  var t = f.tool || f._defTool;
+  if(t==='doe'||t==='pb'||t==='taguchi') return 'doe';
+  if(t==='spc') return 'spc';
+  if(t==='msa') return 'msa';
+  if(t==='hypothesis') return 'hyp';
+  if(t==='none') return 'iso';
+  return ({man:'spc',machine:'spc',material:'doe',method:'msa',measure:'msa',env:'iso'})[f.catId||'']||'doe';
+}
+
 window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   if(!fbCauses || fbCauses.length === 0 || !selectorDiv) return;
-
-  var TOOL_INFO = {
-    doe:        { label:'🧪 DOE / PB 實驗優化',  color:'#D97706', desc:'可調變參數 → 帶入實驗因子欄',     tool:'doe' },
-    pb:         { label:'🔎 PB 因子篩選',         color:'#2563EB', desc:'因子多先篩選 → 帶入 PB 實驗',    tool:'pb'  },
-    taguchi:    { label:'📐 田口 穩健設計',        color:'#7C3AED', desc:'雜訊因子 → 帶入田口實驗',         tool:'doe' },
-    spc:        { label:'📈 SPC 製程管控',         color:'#1A9CB0', desc:'被動監控趨勢 → 帶入量測項目',    tool:'spc' },
-    msa:        { label:'📏 MSA 量測驗證',         color:'#9333EA', desc:'量測/操作一致性 → 帶入量測項目', tool:'msa' },
-    hypothesis: { label:'🔬 假設檢定',             color:'#DC2626', desc:'批次/群組比較 → 帶入數據',       tool:'hypothesis' },
-    none:       { label:'🏭 ISO 環境管控',         color:'#6B7280', desc:'受 ISO 規範管控，不帶入統計工具', tool:'iso' }
-  };
-  var CAT_DEFAULT = {man:'spc', machine:'spc', material:'doe', method:'msa', measure:'msa', env:'none'};
   var CAT_NAMES = {man:'人員', machine:'機器', material:'材料', method:'方法', measure:'量測', env:'環境'};
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
-
-  // 與主頁計畫書同源：優先用 verification_plan 的 subtype/pipeline 決定每個因子預設工具
-  function subtypeToTool(p){
-    if(!p) return null;
-    if(p.pipeline==='compliance' || p.pipeline==='uncontrollable') return 'none';
-    var s = (p.subtype||'') + ' ' + (p.verification||'');
-    if(/PB|Plackett/i.test(s)) return 'pb';
-    if(/田口|Taguchi/i.test(s)) return 'taguchi';
-    if(/DOE|實驗設計|因子實驗/i.test(s)) return 'doe';
-    if(/SPC|管制圖|製程管控/i.test(s)) return 'spc';
-    if(/MSA|量測系統|Gage|GR&R/i.test(s)) return 'msa';
-    if(/假設|檢定|t-?test|ANOVA|群組比較/i.test(s)) return 'hypothesis';
-    return null;
-  }
-  var _vpPlans = (window._verificationPlan && window._verificationPlan.plans) || [];
-  function planFor(name){ for(var i=0;i<_vpPlans.length;i++){ if(_vpPlans[i].factor===name) return _vpPlans[i]; } return null; }
-
-  // 每個因子的預設建議工具：先看計畫書 → 再 f.tool → 再 6M 預設
-  fbCauses.forEach(function(f){ f._defTool = subtypeToTool(planFor(f.name)) || f.tool || CAT_DEFAULT[f.catId||''] || 'doe'; });
-
-  // 可帶入統計工具的因子（環境/none 歸 ISO，不進統計工具）
-  var selFactors = fbCauses.filter(function(f){ return f._defTool !== 'none'; });
-  var envFactors = fbCauses.filter(function(f){ return f._defTool === 'none'; });
-
-  // 可複選的工具：同一因子可勾選多個
-  var toolOrder = ['doe','pb','taguchi','spc','msa','hypothesis'];
-
-  // 初始勾選：每個因子預設勾在它的 AI 建議工具
-  window._fbToolSel = {};
-  toolOrder.forEach(function(t){ window._fbToolSel[t] = []; });
-  selFactors.forEach(function(f){
-    var t = f._defTool; if(!window._fbToolSel[t]) window._fbToolSel[t]=[];
-    if(window._fbToolSel[t].indexOf(f.name)<0) window._fbToolSel[t].push(f.name);
+  window._factorDispo = window._factorDispo || {};
+  fbCauses.forEach(function(f){
+    if(!window._factorDispo[f.name]){ window._factorDispo[f.name] = { picks:[ _natureDefaultDispo(f) ] }; }
   });
-
   var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
-  html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.5rem">🔀 因子分類 → 帶入對應工具</div>';
-  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.7rem;line-height:1.6">同一因子可<b>跨工具複選</b>（可同時帶入 DOE、SPC、MSA…）。實心高亮＝已選、淡色虛線＝未選，點一下切換；預設為 AI 建議分組。</div>';
-  // (6) 驗證計畫＋ISO 改為「要才跑」：未產生時顯示按鈕；產生後顯示其他處置/可下載計畫書
-  html += '<div style="background:#fff;border:1px dashed #C7D9F5;border-radius:8px;padding:.55rem .8rem;margin-bottom:.9rem">';
-  if(!window._verificationPlan){
-    html += '<button onclick="fbRunVerificationPlan()" style="background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📋 產生驗證計畫＋ISO 對照（選用）</button>'
-      + '<span style="font-size:10.5px;color:#94A3B8;margin-left:.5rem">產生「其他處置」分類與 ISO 對照，供下載計畫書用；耗 2 次 AI。不需要可直接用魚骨圖與小工具。</span>';
-  } else {
-    html += '<span style="font-size:12px;color:#059669">✅ 驗證計畫與 ISO 對照已產生。</span>'
-      + '<button onclick="fbRunVerificationPlan()" style="margin-left:.6rem;background:#fff;color:#1B3A5C;border:1px solid #C7D9F5;border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit">🔄 重新產生</button>';
-  }
-  html += '<div id="fb-vp-status" style="margin-top:.4rem;display:none"></div>';
-  html += '</div>';
-
-  toolOrder.forEach(function(toolKey){
-    if(!selFactors.length) return;
-    var info = TOOL_INFO[toolKey];
-
-    html += '<div style="border:1.5px solid '+info.color+'33;border-radius:10px;padding:.75rem 1rem;margin-bottom:.75rem;background:#fff">';
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;flex-wrap:wrap;gap:6px">';
-    html += '<div><span style="font-weight:700;color:'+info.color+';font-size:13px">'+info.label+'</span>';
-    html += '<span style="font-size:11px;color:#6B7280;margin-left:8px">'+info.desc+'</span></div>';
-    html += '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-    if(toolKey==='spc'){
-      // SPC：不帶入、不存設計；勾選後直接把選取特徵寫入計畫書，並由 AI 補觀察原因
-      if(window._spcInclude===undefined) window._spcInclude = true;   // 預設納入
-      html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#374151;cursor:pointer;user-select:none" title="勾選後，下方選取的特徵將直接寫入計畫書（AI 補觀察原因），無需帶入工具">'
-        + '<input type="checkbox" class="spc-include-cb" data-tool="spc" '
-        + (window._spcInclude!==false ? 'checked ' : '')
-        + 'onchange="window._spcInclude=this.checked" '
-        + 'style="width:14px;height:14px;accent-color:#10B981;cursor:pointer">納入計畫書</label>';
-      html += '<span style="font-size:11px;color:#1A9CB0">↓ 選取要監控的特徵（直接寫入，免帶入）</span>';
-    } else {
-      // 納入計畫書（實驗類工具：doe/pb/msa/hypothesis；taguchi 走 doe 故略過）
-      var incTool = (toolKey==='taguchi') ? null : toolKey;
-      if(incTool){
-        var savedExp = (window._savedExperiments||{})[incTool];
-        html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#374151;cursor:pointer;user-select:none" title="儲存設計後可勾選納入計畫書">'
-          + '<input type="checkbox" class="exp-include-cb" data-tool="'+incTool+'" '
-          + (savedExp ? '' : 'disabled ') + (savedExp && savedExp.include!==false ? 'checked ' : '')
-          + 'onchange="(window._savedExperiments[this.dataset.tool]||{}).include=this.checked" '
-          + 'style="width:14px;height:14px;accent-color:#10B981;cursor:pointer">納入計畫書</label>';
-        html += '<span class="exp-tool-status" data-tool="'+incTool+'" style="font-size:11px;color:'+(savedExp?'#059669':'#9CA3AF')+'">'
-          + (savedExp ? ('✅ 已儲存設計（'+(savedExp.factors?savedExp.factors.length+' 因子':'規劃')+'）') : '尚未儲存設計')
-          + '</span>';
-      }
-      html += '<button data-tool="'+toolKey+'" onclick="fbImportTool(this.dataset.tool)" style="background:'+info.color+';color:#fff;border:none;border-radius:6px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">→ 帶入</button>';
-    }
-    html += '</div>';
-    html += '</div>';
-
-    html += '<div style="display:flex;flex-wrap:wrap;gap:.4rem">';
-    selFactors.forEach(function(f){
-      var on = window._fbToolSel[toolKey].indexOf(f.name) >= 0;
-      var dot = f.risk==='high' ? '<span style="color:#DC2626">\u25cf</span> ' : f.risk==='medium' ? '<span style="color:#D97706">\u25cf</span> ' : '';
-      var st = on
-        ? 'background:'+info.color+'1A;border:1.5px solid '+info.color+';color:'+info.color+';font-weight:600'
-        : 'background:#fff;border:1px dashed #D1D5DB;color:#9CA3AF;font-weight:400';
-      html += '<span class="fb-chip" data-tool="'+toolKey+'" data-name="'+esc(f.name)+'" data-color="'+info.color+'" onclick="fbToggleChip(this)" '
-        + 'style="'+st+';border-radius:5px;padding:3px 10px;font-size:12px;cursor:pointer;user-select:none;transition:all .12s" '
-        + 'title="6M: '+(CAT_NAMES[f.catId||'']||f.cat||'')+'">'+dot+f.name+'</span>';
+  html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.4rem">✅ 逐因子處置指派</div>';
+  html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem;line-height:1.6">每個因子<b>至少勾一個處置</b>才能下載計畫書（可複選）。預設已勾在系統判定的方式，請逐一確認、調整。實際要跑統計時，可到首頁的 DOE/SPC/MSA 卡片工具操作。</div>';
+  html += '<div id="fb-coverage-bar" style="margin-bottom:.7rem"></div>';
+  ['man','machine','material','method','measure','env'].forEach(function(cat){
+    var arr = fbCauses.filter(function(f){ return (f.catId||'')===cat; });
+    if(!arr.length) return;
+    html += '<div style="font-size:11px;font-weight:700;color:#6B7280;margin:.5rem 0 .3rem">'+(CAT_NAMES[cat]||cat)+'</div>';
+    arr.forEach(function(f){
+      var dot = f.risk==='high' ? '<span style="color:#DC2626">●</span>' : f.risk==='medium' ? '<span style="color:#D97706">●</span>' : '<span style="color:#9CA3AF">●</span>';
+      html += '<div class="fb-factor-row" data-name="'+esc(f.name)+'" style="border:1px solid #E5E7EB;border-radius:8px;padding:.5rem .7rem;margin-bottom:.45rem;background:#fff">';
+      html += '<div style="font-size:13px;font-weight:600;color:#1F2937;margin-bottom:.35rem">'+dot+' '+esc(f.name)
+        + (f.speculative?' <span style="font-size:10px;color:#9CA3AF">(推測*)</span>':'') + '</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:.35rem">';
+      DISPO_DEFS.forEach(function(d){
+        var picks = (window._factorDispo[f.name]||{}).picks||[];
+        var on = picks.indexOf(d.k)>=0;
+        var st = on ? 'background:'+d.color+'1A;border:1.5px solid '+d.color+';color:'+d.color+';font-weight:600'
+                    : 'background:#fff;border:1px dashed #D1D5DB;color:#9CA3AF;font-weight:400';
+        html += '<span class="fb-dispo-chip" data-name="'+esc(f.name)+'" data-k="'+d.k+'" data-color="'+d.color+'" onclick="fbToggleDispo(this)" '
+          + 'style="'+st+';border-radius:5px;padding:3px 9px;font-size:11.5px;cursor:pointer;user-select:none;transition:all .12s">'+d.label+'</span>';
+      });
+      html += '</div></div>';
     });
-    html += '</div>';
-    html += '</div>';
   });
-
-  if(envFactors.length){
-    var ei = TOOL_INFO.none;
-    html += '<div style="border:1.5px solid '+ei.color+'33;border-radius:10px;padding:.75rem 1rem;margin-bottom:.25rem;background:#fff">';
-    html += '<div style="font-weight:700;color:'+ei.color+';font-size:13px;margin-bottom:.5rem">'+ei.label+'<span style="font-size:11px;color:#6B7280;font-weight:400;margin-left:6px">'+ei.desc+'</span></div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:.4rem">';
-    envFactors.forEach(function(f){
-      html += '<span style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:5px;padding:3px 10px;font-size:12px;color:#6B7280">'+f.name+'</span>';
-    });
-    html += '</div>';
-    html += '<div style="margin-top:.5rem;font-size:11px;color:#6B7280;background:#F3F4F6;border-radius:5px;padding:6px 10px">\u26a0\ufe0f 環境因子受 ISO 13485 / ISO 14644 規範管控，不建議直接帶入統計工具。若超出規格，應啟動 CAPA 流程。</div>';
-    html += '</div>';
-  }
-
   html += '</div>';
-  // 非實驗類管道：包進可重繪容器（驗證計畫產生後由 fbRunVerificationPlan 重繪）
-  html += '<div id="fb-other-wrap">' + fbRenderOtherPipelines() + '</div>';
-
   selectorDiv.innerHTML = html;
   selectorDiv.style.display = 'block';
+  fbSyncDispoToLegacy();
+  fbUpdateCoverage();
 };
 
-// 切換因子勾選（可跨工具複選，同一因子可選多個工具）
-window.fbToggleChip = function(el){
-  var tool = el.dataset.tool, name = el.dataset.name, color = el.dataset.color;
-  var arr = window._fbToolSel[tool] || (window._fbToolSel[tool]=[]);
-  var i = arr.indexOf(name);
-  if(i>=0){
-    arr.splice(i,1);
-    el.style.background='#fff'; el.style.border='1px dashed #D1D5DB'; el.style.color='#9CA3AF'; el.style.fontWeight='400';
-  }else{
-    arr.push(name);
-    el.style.background=color+'1A'; el.style.border='1.5px solid '+color; el.style.color=color; el.style.fontWeight='600';
-  }
+window.fbToggleDispo = function(el){
+  var name = el.dataset.name, k = el.dataset.k, color = el.dataset.color;
+  window._factorDispo[name] = window._factorDispo[name] || {picks:[]};
+  var arr = window._factorDispo[name].picks;
+  var i = arr.indexOf(k);
+  if(i>=0){ arr.splice(i,1); el.style.cssText='border-radius:5px;padding:3px 9px;font-size:11.5px;cursor:pointer;user-select:none;transition:all .12s;background:#fff;border:1px dashed #D1D5DB;color:#9CA3AF;font-weight:400'; }
+  else { arr.push(k); el.style.cssText='border-radius:5px;padding:3px 9px;font-size:11.5px;cursor:pointer;user-select:none;transition:all .12s;background:'+color+'1A;border:1.5px solid '+color+';color:'+color+';font-weight:600'; }
+  fbSyncDispoToLegacy();
+  fbUpdateCoverage();
 };
+
+window.fbCheckCoverage = function(){
+  var conf = window._confirmedFactors || {};
+  var orphans = [];
+  ['man','machine','material','method','measure','env'].forEach(function(cat){
+    (conf[cat]||[]).forEach(function(f){
+      var picks = (window._factorDispo[f.name]||{}).picks||[];
+      if(picks.length===0) orphans.push(f.name);
+    });
+  });
+  return orphans;
+};
+function fbUpdateCoverage(){
+  var bar = document.getElementById('fb-coverage-bar');
+  if(!bar) return;
+  var conf = window._confirmedFactors || {};
+  var total=0; ['man','machine','material','method','measure','env'].forEach(function(c){ total += (conf[c]||[]).length; });
+  var orphans = window.fbCheckCoverage();
+  var done = total - orphans.length;
+  if(orphans.length===0){
+    bar.innerHTML = '<div style="background:#ECFDF5;border:1.5px solid #6EE7B7;border-radius:8px;padding:.5rem .8rem;font-size:12px;color:#059669;font-weight:600">✅ 涵蓋度 '+done+'/'+total+'：每個因子都已指派處置，可下載計畫書。</div>';
+  } else {
+    bar.innerHTML = '<div style="background:#FEF2F2;border:1.5px solid #FCA5A5;border-radius:8px;padding:.5rem .8rem;font-size:12px;color:#DC2626;line-height:1.6">⚠️ 涵蓋度 '+done+'/'+total+'：還有 <b>'+orphans.length+'</b> 個因子未指派任何處置，下載計畫書前請先交代：<b>'+orphans.join('、')+'</b></div>';
+  }
+}
+window.fbUpdateCoverage = fbUpdateCoverage;
+
+function fbSyncDispoToLegacy(){
+  var TOOLMAP = {doe:'doe',spc:'spc',msa:'msa',hyp:'hypothesis'};
+  window._fbToolSel = {doe:[],pb:[],taguchi:[],spc:[],msa:[],hypothesis:[]};
+  window._factorDispo = window._factorDispo || {};
+  Object.keys(window._factorDispo).forEach(function(name){
+    var picks = window._factorDispo[name].picks||[];
+    picks.forEach(function(k){ if(TOOLMAP[k] && window._fbToolSel[TOOLMAP[k]]) window._fbToolSel[TOOLMAP[k]].push(name); });
+  });
+  window._spcInclude = true;
+}
+window.fbSyncDispoToLegacy = fbSyncDispoToLegacy;
 
 // 帶入某工具目前勾選的因子
 window.fbImportTool = function(tool){
