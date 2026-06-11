@@ -1103,8 +1103,8 @@ tr:hover td{background:#F9FAFB}
   </div>
   <div id="fb-factor-selector" style="display:none"></div>
   <div id="fb-dl-wrap" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1.5px dashed #D1D5DB">
-    <div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">✅ 確認上方因子分類與帶入工具後，可下載完整計畫書：</div>
-    <button id="dl-plan-btn" class="btn btn-primary" onclick="downloadPlanDocx()">📄 下載計畫書（Word）</button>
+    <div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">✅ 確認上方因子處置指派後，可產生 CAPA 指引（瀏覽器列印／存成 PDF）：</div>
+    <button id="dl-plan-btn" class="btn btn-primary" onclick="generateCapaPdf()">📄 產生 CAPA 指引（PDF）</button>
     <span style="font-size:11px;color:#94A3B8;margin-left:.5rem">彙整器材/問題/問卷/因子關聯/魚骨圖/驗證項目/其他處置/ISO，於瀏覽器產生 .docx（不經伺服器、不花 API）</span>
     <div style="margin-top:.6rem">
       <label style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#475569;cursor:pointer;user-select:none">
@@ -2286,7 +2286,121 @@ function paretoAnalyze(){
 // ════════════════════════════════════════════
 // 魚骨圖工具
 // ════════════════════════════════════════════
-// ════════ 下載計畫書（Word .docx，瀏覽器端產生，不經伺服器/不花 API/離線可用）════════
+// ════════ 產生 CAPA 指引（可列印 HTML → 瀏覽器存成 PDF，中文完美、零字型問題）════════
+async function generateCapaPdf(){
+  // 孤兒擋下載（同 Word 邏輯）
+  if(typeof window.fbCheckCoverage==='function'){
+    var _orph=window.fbCheckCoverage();
+    if(_orph&&_orph.length){ alert('還有 '+_orph.length+' 個因子尚未指派處置，無法產生 CAPA 指引：\n\n• '+_orph.join('\n• ')); return; }
+  }
+  var dev = window._deviceInfo||{};
+  var conf = window._confirmedFactors||{};
+  var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+
+  // 魚骨圖 SVG（取畫面現成的）
+  var svgWrap = document.getElementById('fb-svg-wrap');
+  var svgHtml = svgWrap ? svgWrap.innerHTML : '<p>（魚骨圖未產生）</p>';
+
+  // 問卷彙整（彙整成敘述，不直接印問卷）— 用 AI 把問卷+對話整理成一段
+  var surveyText = '（彙整中…）';
+  try{
+    var sd = window._surveyData||{};
+    var hist = (window._homeHistory||[]).map(function(m){return (m.role==='user'?'問：':'答：')+ (typeof m.content==='string'?m.content:''); }).join('\n').slice(0,2500);
+    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ mode:'chat',
+        system:'你是醫療器材品質工程師。把以下問卷答案與對話，彙整成一段「問題釐清摘要」敘述（150字內，繁體中文），重點是問題如何發生、何時、規律、已知線索，不要逐條列問卷、不要編造。',
+        messages:[{role:'user',content:'問卷：'+JSON.stringify(sd)+'\n\n對話：\n'+hist}] })
+    });
+    var dj = await resp.json();
+    surveyText = (dj.content&&dj.content[0]&&dj.content[0].text)||'（無法彙整）';
+  }catch(e){ surveyText='（彙整失敗，請確認連線）'; }
+
+  // 因子處置 + ISO 彙整
+  var DLBL={doe:'統計驗證(DOE)',spc:'製程監控(SPC)',msa:'量測手法(MSA)',hyp:'假設檢定',iso:'ISO確認',sop:'IFU/SOP',train:'教育訓練',sampling:'抽樣加強',design:'設計變更',exclude:'排除'};
+  var SRCL={'fda510k':'同類510k','iso_map':'應驗','fda510k+iso_map':'雙重確認','ai_hint':'AI推測*'};
+  var CATN={man:'人員',machine:'機器',material:'材料',method:'方法',measure:'量測',env:'環境'};
+  var rowsHtml='';
+  ['man','machine','material','method','measure','env'].forEach(function(c){
+    (conf[c]||[]).forEach(function(f){
+      var picks=((window._factorDispo||{})[f.name]||{}).picks||[];
+      var dispo=picks.map(function(k){return DLBL[k]||k;}).join('、')||'—';
+      var fm=(window._factorIsoMatch||{})[f.name]||[];
+      var iso=fm.map(function(m){return esc(m.no)+'〔'+(SRCL[m.source]||m.source)+'〕';}).join('、')||'—';
+      var rc=f.risk==='high'?'#DC2626':f.risk==='medium'?'#92400E':'#9CA3AF';
+      rowsHtml+='<tr>'
+        +'<td>'+esc(CATN[c])+'</td>'
+        +'<td style="color:'+rc+';font-weight:'+(f.risk==='high'?'700':'400')+'">'+esc(f.name)+(f.speculative?' (推測*)':'')+'</td>'
+        +'<td>'+esc(f.risk==='high'?'高':f.risk==='medium'?'中':'低')+'</td>'
+        +'<td>'+esc(f.link||'—')+'</td>'
+        +'<td>'+esc(f.control_method||'—')+'<br><span style="color:#7C3AED;font-size:9px">'+iso+'</span></td>'
+        +'<td>'+esc(dispo)+'</td>'
+        +'</tr>';
+    });
+  });
+
+  // 510k 適應症/操作手法
+  var indication = dev.indication||'（未取得）';
+  var operation = dev.operation || dev.how_to_use || '（510k 未明確載明，待補）';
+
+  var html = '<!DOCTYPE html><html lang="zh-Hant"><head><meta charset="utf-8"><title>CAPA 指引 - '+esc(dev.confirmed_name||'')+'</title>'
+    +'<style>'
+    +'@page{size:A4;margin:18mm 15mm}'
+    +'*{box-sizing:border-box}body{font-family:"Microsoft JhengHei","PingFang TC",sans-serif;color:#1a1a2e;line-height:1.6;font-size:12px;margin:0}'
+    +'h1{font-size:20px;border-bottom:3px solid #1B3A5C;padding-bottom:6px;color:#1B3A5C;margin:0 0 4px}'
+    +'h2{font-size:15px;color:#1B3A5C;border-left:4px solid #2563EB;padding-left:8px;margin:18px 0 8px}'
+    +'table{width:100%;border-collapse:collapse;margin:8px 0;font-size:10.5px}'
+    +'th,td{border:1px solid #CBD5E1;padding:5px 7px;text-align:left;vertical-align:top}'
+    +'th{background:#1B3A5C;color:#fff;font-weight:600}'
+    +'tr:nth-child(even) td{background:#F8FAFF}'
+    +'.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;background:#F1F5F9;padding:10px 14px;border-radius:6px;font-size:11px}'
+    +'.box{background:#F8FAFF;border:1px solid #C7D9F5;border-radius:6px;padding:10px 14px;margin:8px 0}'
+    +'.fishbone svg{width:100%;height:auto}'
+    +'.note{font-size:10px;color:#64748b;font-style:italic;margin-top:4px}'
+    +'@media print{button{display:none}}'
+    +'</style></head><body>';
+  html += '<button onclick="window.print()" style="position:fixed;top:10px;right:10px;background:#2563EB;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:13px;cursor:pointer;z-index:99">🖨 列印 / 存成 PDF</button>';
+  html += '<h1>CAPA 矯正預防指引</h1>';
+  html += '<div class="note">Root Cause Analysis & Corrective/Preventive Action Guideline｜製表日期：'+new Date().toLocaleDateString('zh-TW')+'</div>';
+
+  html += '<h2>1. 器材資訊</h2><div class="meta">'
+    +'<div><b>器材名稱：</b>'+esc(dev.confirmed_name||'')+'</div>'
+    +'<div><b>FDA Class：</b>'+esc(dev.device_class||'—')+(window._selectedProductCodes&&window._selectedProductCodes.length?('｜代碼：'+esc(window._selectedProductCodes.join(', '))):'')+'</div>'
+    +'<div style="grid-column:1/-1"><b>結構：</b>'+esc(dev.structure||'—')+'</div>'
+    +'<div style="grid-column:1/-1"><b>材料：</b>'+esc(dev.material||'—')+'</div>'
+    +'<div style="grid-column:1/-1"><b>適應症：</b>'+esc(indication)+'</div>'
+    +'<div style="grid-column:1/-1"><b>操作手法：</b>'+esc(operation)+'</div>'
+    +'</div>';
+
+  html += '<h2>2. 問題與釐清摘要</h2>'
+    +'<div class="box"><b>問題現象：</b>'+esc((window._problemText)||(dev.confirmed_name||'')+'｜'+(document.getElementById('fb-problem')?document.getElementById('fb-problem').value:''))+'</div>'
+    +'<div class="box"><b>釐清摘要（AI 彙整問卷與問答）：</b><br>'+esc(surveyText)+'</div>';
+
+  html += '<h2>3. 魚骨圖（根本原因分析）</h2><div class="fishbone">'+svgHtml+'</div>'
+    +'<div class="note">因子文字顏色＝風險等級：紅＝高風險（粗體）、棕＝中風險、灰＝低風險（廣度補充，提醒 scope 外可能性）。</div>';
+
+  html += '<h2>4. 果 → 因 → 驗證建議</h2>'
+    +'<table><thead><tr><th>分類</th><th>因子（因）</th><th>風險</th><th>與問題關聯（果因）</th><th>卡控／ISO 驗證</th><th>處置</th></tr></thead><tbody>'
+    +rowsHtml+'</tbody></table>'
+    +'<div class="note">「應驗」來自 iso_map 應驗基準、「同類510k」來自同類產品實證、「雙重確認」兩者皆有、「AI推測*」為輔助待確認。</div>';
+
+  // 防呆建議
+  var detRev = window._detectionReview || '';
+  html += '<h2>5. 防呆與偵測強化建議</h2>'
+    +'<div class="box">檢測攔截四要點：①方法對此失效要有偵測力；②人員判定/抽樣要一致；③樣本量足夠並涵蓋失效分層；④長期老化型失效須移至設計驗證或上市後監督。AQL 抽樣不保證攔偶發缺陷，攔偶發優先用源頭防呆＋線上自動偵測。</div>'
+    + (detRev?('<div class="box"><b>檢測手法檢討（AI）：</b><br>'+esc(detRev)+'</div>'):'');
+
+  html += '<div class="note" style="margin-top:20px;border-top:1px solid #CBD5E1;padding-top:8px">本指引由 MedQA 系統輔助產生：ISO 條號、統計判定、6M 結構由程式管控；因果論述、彙整由 AI 草擬並標推測(*)，須由 RA／工程依正本標準與實際數據覆核後定稿。</div>';
+  html += '</body></html>';
+
+  var w = window.open('', '_blank');
+  if(!w){ alert('請允許彈出視窗以開啟 CAPA 指引列印頁。'); return; }
+  w.document.write(html);
+  w.document.close();
+}
+window.generateCapaPdf = generateCapaPdf;
+
+
 function _svgToPngBytes(svgEl, scale, mono){
   return new Promise(function(resolve,reject){
     try{
@@ -2683,7 +2797,7 @@ async function runFda510kVerification(){
   if(!panel) return;
   var dev=window._deviceInfo||{};
   var nameEn = dev.name_en || dev.confirmed_name_en || dev.confirmed_name || '';
-  var pc = dev.product_code || dev.productCode || '';
+  var pcs = (window._selectedProductCodes && window._selectedProductCodes.length) ? window._selectedProductCodes : (dev.product_code?[dev.product_code]:[]);
   // 蒐集因子文字供比對
   var facTxt=[];
   var conf=window._confirmedFactors||{};
@@ -2697,7 +2811,7 @@ async function runFda510kVerification(){
     var ac=new AbortController(); var to=setTimeout(function(){ac.abort();},90000);
     var resp=await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
       method:'POST', headers:{'Content-Type':'application/json'}, signal:ac.signal,
-      body:JSON.stringify({ mode:'fda_verification', deviceNameEn:nameEn, productCode:pc, factors:facTxt.join('、'), maxN:5 })
+      body:JSON.stringify({ mode:'fda_verification', deviceNameEn:nameEn, productCodes:pcs, factors:facTxt.join('、'), maxN:5 })
     });
     clearTimeout(to);
     var data=await resp.json();
@@ -2983,10 +3097,12 @@ function fishboneDraw(){
       const t = n===1 ? 0.55 : T_LO + T_SPAN*ci/(n-1);
       const bx=(jx-BONE_DX)+ddx*t;
       const by=endY+ddy*t;
-      const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#1a1a2e';
-      const riskWeight = cause.risk==='high' ? '700' : '400';
-      s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${cat.color}" stroke-width="1.4" marker-end="url(#fb-ar)"/>`);
-      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="${FZ_CAUSE}" font-weight="${riskWeight}" font-family="-apple-system,sans-serif">${cause.name}</text>`);
+      const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#9CA3AF';
+      const riskWeight = cause.risk==='high' ? '700' : cause.risk==='medium' ? '500' : '400';
+      const lineColor = cause.risk==='low' ? '#D1D5DB' : cat.color;
+      const lineW = cause.risk==='low' ? '0.9' : '1.4';
+      s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${lineColor}" stroke-width="${lineW}" marker-end="url(#fb-ar)"/>`);
+      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="${FZ_CAUSE}" font-weight="${riskWeight}" font-family="-apple-system,sans-serif" opacity="${cause.risk==='low'?'0.7':'1'}">${cause.name}</text>`);
     });
   }
 
@@ -6023,19 +6139,29 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         }
       } catch(e) { /* 翻譯失敗就用原文 */ }
 
-      // 前端查 FDA 510k
+      // 前端查 FDA 510k（抓更多筆以蒐集 product_code）
       var fdaUrl = 'https://api.fda.gov/device/510k.json?api_key='+FDA_KEY+'&search=device_name:"'
-        + encodeURIComponent(searchName) + '"&limit=3&sort=decision_date:desc';
+        + encodeURIComponent(searchName) + '"&limit=20&sort=decision_date:desc';
       var fdaData = '';
+      var pcMap = {};   // product_code -> {code, count, sampleName, class}
       try {
         var fdaResp = await fetch(fdaUrl);
         var fdaJson = await fdaResp.json();
         if(fdaJson.results && fdaJson.results.length > 0) {
-          fdaData = fdaJson.results.map(function(r){
-            return r.device_name + ' (' + r.applicant + ', ' + r.decision_date + ', Class:' + (r.device_class||'?') + ')';
+          fdaData = fdaJson.results.slice(0,3).map(function(r){
+            return r.device_name + ' (' + r.applicant + ', ' + r.decision_date + ', Class:' + (r.device_class||'?') + ', PC:' + (r.product_code||'?') + ')';
           }).join('\n');
+          // 蒐集所有出現的 product_code，依出現次數排序
+          fdaJson.results.forEach(function(r){
+            var pc = r.product_code;
+            if(pc){
+              if(!pcMap[pc]) pcMap[pc] = { code:pc, count:0, sampleName:r.device_name, cls:(r.device_class||'?') };
+              pcMap[pc].count++;
+            }
+          });
         }
       } catch(e) { fdaData = '(FDA 查詢失敗，根據器材名稱推斷)'; }
+      window._fdaProductCodes = Object.keys(pcMap).map(function(k){return pcMap[k];}).sort(function(a,b){return b.count-a.count;});
 
       // 送 Worker identify_device
       var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev', {
@@ -6091,8 +6217,39 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       '<div style="font-size:11px;margin-bottom:.4rem"><span style="color:rgba(255,255,255,.5)">關鍵品質特性：</span>'+
         (d.key_quality||[]).map(function(q){ return '<span style="background:rgba(126,200,227,.2);color:#7EC8E3;padding:1px 7px;border-radius:10px;margin-right:4px">'+q+'</span>'; }).join('')+
       '</div>'+
-      '<div style="font-size:11px;color:rgba(255,255,255,.35)">識別信心度：<span style="color:'+confColor+'">'+conf+'%</span></div>';
+      '<div style="font-size:11px;color:rgba(255,255,255,.35)">識別信心度：<span style="color:'+confColor+'">'+conf+'%</span></div>'+
+      _renderProductCodePicker();
   }
+
+  // product_code 確認/複選（供 510k 精準查詢用）
+  function _renderProductCodePicker(){
+    var pcs = window._fdaProductCodes || [];
+    window._selectedProductCodes = window._selectedProductCodes || [];
+    if(!pcs.length){
+      return '<div style="margin-top:.6rem;font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .7rem">未從 FDA 自動帶出 product code，510(k) 查詢將改用器材名稱。可於下方手動輸入 3 碼代碼：<input id="pc-manual" oninput="window._selectedProductCodes=this.value?[this.value.toUpperCase()]:[]" maxlength="3" style="width:60px;margin-left:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:5px;color:#fff;padding:2px 6px;text-transform:uppercase;font-size:11px" placeholder="FMF"></div>';
+    }
+    // 預設選最常出現的第一個
+    if(!window._selectedProductCodes.length && pcs[0]) window._selectedProductCodes=[pcs[0].code];
+    var chips = pcs.slice(0,8).map(function(p){
+      var on = window._selectedProductCodes.indexOf(p.code)>=0;
+      var st = on ? 'background:rgba(110,231,183,.2);border:1.5px solid #6EE7B7;color:#6EE7B7;font-weight:600'
+                  : 'background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.6)';
+      return '<span onclick="_togglePC(this)" data-pc="'+p.code+'" style="'+st+';border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;user-select:none" title="'+p.sampleName+'（Class '+p.cls+'，出現'+p.count+'次）">'+p.code+' <span style="opacity:.6;font-size:9.5px">×'+p.count+'</span></span>';
+    }).join('');
+    return '<div style="margin-top:.7rem;background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.25);border-radius:8px;padding:.55rem .7rem">'
+      + '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:.4rem">📋 FDA 產品代碼（product code）— 請確認/複選正確的，510(k) 將用此精準查詢：</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:.35rem">'+chips+'</div>'
+      + '<div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:.4rem">點選可複選；數字為該代碼在查詢結果出現次數（越高越可能正確）。滑鼠移上去看器材名與 Class。</div></div>';
+  }
+  window._togglePC = function(el){
+    var pc = el.dataset.pc;
+    window._selectedProductCodes = window._selectedProductCodes || [];
+    var i = window._selectedProductCodes.indexOf(pc);
+    if(i>=0){ window._selectedProductCodes.splice(i,1); el.style.cssText='background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.6);border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;user-select:none'; }
+    else { window._selectedProductCodes.push(pc); el.style.cssText='background:rgba(110,231,183,.2);border:1.5px solid #6EE7B7;color:#6EE7B7;font-weight:600;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;user-select:none'; }
+    // 同步到 deviceInfo
+    if(window._deviceInfo) window._deviceInfo.product_code = window._selectedProductCodes[0]||'';
+  };
 
   // ── Step 2：確認器材 ──
   window.homeDeviceConfirm = function(confirmed) {
@@ -8063,6 +8220,14 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
         html += '<div style="font-size:10.5px;color:#6B7280;margin-bottom:.4rem;line-height:1.45;background:#F9FAFB;border-radius:5px;padding:3px 7px">'
           + '<b style="color:#2563EB">AI 建議：'+aiDispoLbl+'</b>'
           + (f.control_method?(' — '+esc(f.control_method)):'')
+          + '</div>';
+      }
+      // 第2點：顯示對應到此因子的 ISO 驗證標準（來自 ISO↔因子配對）
+      var _fm = (window._factorIsoMatch && window._factorIsoMatch[f.name]) || [];
+      if(_fm.length){
+        var _SRCL = {'fda510k':'同類510k','iso_map':'應驗','fda510k+iso_map':'雙重確認','ai_hint':'AI推測*'};
+        html += '<div style="font-size:10px;color:#7C3AED;margin-bottom:.4rem;line-height:1.45">📐 ISO 驗證：'
+          + _fm.map(function(m){ return esc(m.no)+'〔'+(_SRCL[m.source]||m.source)+'〕'; }).join('、')
           + '</div>';
       }
       html += '<div style="display:flex;flex-wrap:wrap;gap:.35rem">';
