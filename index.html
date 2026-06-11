@@ -2562,9 +2562,39 @@ async function downloadPlanDocx(){
       ch.push(PP(tx('（如需 AI 產生本案專屬的檢測手法檢討與防呆建議，請於下載前勾選「加入 AI 敘事」或按「AI 篩選監控攔截力檢討」。）',{size:19,color:GRAY})));
     }
 
-    // ── 4. 結論與後續行動（AI，選用）──
+    // ── 4. ISO 規範對照（獨立章節，自動帶入）──
+    if(isoApps.length || iso.length){
+      ch.push(H1('4. ISO 規範對照'));
+      ch.push(PP(tx('依本器材分類自動對應之適用標準與驗證項目。標準編號、版次、條號須以正本最新版次為準，需 RA 核可；標（*）者為待確認。',{size:19,color:GRAY})));
+      // 適用標準總表
+      if(isoApps.length){
+        var iw=[2100,4200,2806];
+        var irows=isoApps.map(function(a,i){
+          var e=(window._isoResult&&window._isoResult.items)||[];
+          var rel=e.filter(function(r){ return r.standard===a.no; });
+          var items = rel.length ? rel.map(function(r){return r.item||r.k||'';}).filter(Boolean).join('、') : (a.items||'');
+          return trow([
+            tx(a.no,{bold:true}),
+            tx((a.title_zh||a.title||'')),
+            tx(items||(a.reason||'—'))
+          ],iw,i%2===1);
+        });
+        ch.push(tbl(iw,['標準編號','名稱','適用/驗證項目'],irows));
+      }
+      // 缺口紅旗（若有）
+      var gaps = (window._isoResult&&window._isoResult.gaps)||[];
+      if(gaps.length){
+        ch.push(new D.Paragraph({spacing:{before:120,after:40},children:[tx('⚠ 潛在缺口（建議補驗）',{bold:true,size:20,color:'DC2626'})]}));
+        gaps.forEach(function(g){
+          ch.push(new D.Paragraph({spacing:{after:30},bullet:{level:0},children:[tx((typeof g==='string'?g:(g.item||g.desc||JSON.stringify(g))),{size:19})]}));
+        });
+      }
+      ch.push(PP(tx('（ISO 對照由系統依器材分類自動產生，經確定性防幻覺閘過濾——不在已建檔清單的標準/條號會被剔除或標待確認。仍須 RA 依正本覆核。）',{size:18,color:GRAY,italics:true})));
+    }
+
+    // ── 5. 結論與後續行動（AI，選用）──
     if(_aiNarr && _aiNarr.conclusion){
-      ch.push(H1('4. 結論與後續行動（AI 整理）'));
+      ch.push(H1('5. 結論與後續行動（AI 整理）'));
       ch.push(new D.Paragraph({spacing:{after:120,line:312},children:[tx(_aiNarr.conclusion)]}));
       ch.push(new D.Paragraph({spacing:{after:160},children:[tx('（本段為 AI 依前述已確認資料歸納之建議，未新增事實；推論句以（*）標記，請由 RA／工程依正本標準與實際數據覆核。）',{size:18,color:GRAY,italics:true})]}));
     }
@@ -6111,6 +6141,16 @@ window.homeSummarizeFactors = async function(tools) {
     if(data.result) {
       window._confirmedFactors = data.result;
       renderFactorPanel(data.result);
+      // ISO 自動對照：整理因子後立刻跑，確保計畫書一定有 ISO（品質優先，不再靠選用按鈕）
+      try{
+        var _isoPlans = [];
+        ['man','machine','material','method','measure','env'].forEach(function(c){
+          (data.result[c]||[]).forEach(function(f){
+            _isoPlans.push({ factor:f.name, pipeline: (f.nature==='compliance'?'compliance':'experiment'), subtype:(f.verify_method||''), iso_hint:f.iso_hint });
+          });
+        });
+        if(_isoPlans.length && typeof runIsoCrosscheck==='function'){ runIsoCrosscheck(_isoPlans); }
+      }catch(e){ console.log('[ISO 自動對照] 略過:', e&&e.message); }
     } else {
       var em = data.error ? ('⚠️ '+data.error) : '⚠️ 整理失敗，請手動確認';
       panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5;line-height:1.5">'+em+'</div>';
