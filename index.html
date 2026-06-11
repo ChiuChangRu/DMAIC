@@ -669,6 +669,13 @@ tr:hover td{background:#F9FAFB}
             完成左側對話、按下「整理因子」後，這裡會列出 6M 因子分類。
           </div>
           <div id="home-iso-panel" style="margin-top:.6rem"></div>
+          <!-- 同類 510(k) 真實驗證萃取（選用）-->
+          <div id="home-fda510k-wrap" style="margin-top:.6rem;display:none">
+            <button id="fda510k-btn" onclick="runFda510kVerification()"
+              style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:7px 13px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🔍 查同類 510(k) 真實驗證（選用）</button>
+            <span style="font-size:10.5px;color:rgba(255,255,255,.4);margin-left:.5rem">抓最近同類產品 510(k) summary，萃取「實際做過的驗證項目與引用標準」，比對本案因子。耗少量 API。</span>
+            <div id="fda510k-panel" style="margin-top:.6rem"></div>
+          </div>
           <div id="home-factor-panel-btn" style="margin-top:.85rem;display:none">
             <button onclick="homeConfirmFactors()"
               style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(5,150,105,.3)">
@@ -2629,6 +2636,80 @@ async function downloadPlanDocx(){
   }
 }
 window.downloadPlanDocx=downloadPlanDocx;
+
+// ════════════════════════════════════════════════════════
+// 同類 510(k) 真實驗證萃取：查最近同類產品 510(k) summary → 萃取實際驗證項目與標準 → 比對因子
+// 結果存 window._fda510kResult，可納入計畫書
+// ════════════════════════════════════════════════════════
+window._fda510kResult = null;
+async function runFda510kVerification(){
+  var btn=document.getElementById('fda510k-btn');
+  var panel=document.getElementById('fda510k-panel');
+  if(!panel) return;
+  var dev=window._deviceInfo||{};
+  var nameEn = dev.name_en || dev.confirmed_name_en || dev.confirmed_name || '';
+  var pc = dev.product_code || dev.productCode || '';
+  // 蒐集因子文字供比對
+  var facTxt=[];
+  var conf=window._confirmedFactors||{};
+  ['man','machine','material','method','measure','env'].forEach(function(c){
+    (conf[c]||[]).forEach(function(f){ facTxt.push(f.name); });
+  });
+
+  if(btn){ btn.disabled=true; btn.dataset.t=btn.textContent; btn.textContent='查詢中…'; }
+  panel.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.5)">⏳ 查同類 510(k)、抓取 summary、萃取驗證項目中…（約 20–40 秒）</div>';
+  try{
+    var ac=new AbortController(); var to=setTimeout(function(){ac.abort();},90000);
+    var resp=await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+      method:'POST', headers:{'Content-Type':'application/json'}, signal:ac.signal,
+      body:JSON.stringify({ mode:'fda_verification', deviceNameEn:nameEn, productCode:pc, factors:facTxt.join('、'), maxN:5 })
+    });
+    clearTimeout(to);
+    var data=await resp.json();
+    if(data.error){ panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+data.error+'</div>'; return; }
+    var r=data.result||{};
+    window._fda510kResult=r;
+    renderFda510kPanel(r, data.note);
+  }catch(e){
+    panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+(e&&e.name==='AbortError'?'查詢逾時，可稍後再試':('查詢失敗：'+(e&&e.message||'')))+'</div>';
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent=btn.dataset.t||'🔍 查同類 510(k) 真實驗證（選用）'; }
+  }
+}
+window.runFda510kVerification=runFda510kVerification;
+
+function renderFda510kPanel(r, note){
+  var panel=document.getElementById('fda510k-panel');
+  if(!panel) return;
+  var ext=(r&&r.extracted)||[];
+  if(!ext.length){
+    panel.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .7rem">查無可萃取的同類 510(k) 驗證內容'+(note?('：'+note):'')+'。（部分舊案為掃描檔無法解析。）</div>';
+    return;
+  }
+  var html='<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:.7rem .85rem">';
+  html+='<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:.4rem">🔍 同類產品 510(k) 實際驗證（'+ext.length+' 份，真實依據）</div>';
+  if(r.summary) html+='<div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:.5rem;line-height:1.55">'+r.summary+'</div>';
+  ext.forEach(function(d){
+    html+='<div style="border-top:1px solid rgba(255,255,255,.1);padding:.45rem 0">';
+    html+='<div style="font-size:11px;color:rgba(255,255,255,.85);font-weight:600">'+(d.k||'')+(d.device?(' · '+d.device):'')+'</div>';
+    if(d.standards&&d.standards.length) html+='<div style="font-size:10.5px;color:#A78BFA;margin-top:2px">標準：'+d.standards.join('、')+'</div>';
+    if(d.tests&&d.tests.length) html+='<div style="font-size:10.5px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.5">驗證：'+d.tests.join('；')+'</div>';
+    html+='</div>';
+  });
+  if(r.matched_to_factors&&r.matched_to_factors.length){
+    html+='<div style="border-top:1px solid rgba(255,255,255,.1);margin-top:.4rem;padding-top:.4rem"><div style="font-size:11px;font-weight:600;color:#6EE7B7;margin-bottom:.3rem">↔ 與本案因子對應</div>';
+    r.matched_to_factors.forEach(function(m){
+      html+='<div style="font-size:10.5px;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:2px"><b style="color:rgba(255,255,255,.85)">'+m.factor+'</b>：'+m.suggestion+'</div>';
+    });
+    html+='</div>';
+  }
+  html+='<label style="display:flex;align-items:center;gap:6px;margin-top:.5rem;font-size:11px;color:rgba(255,255,255,.7);cursor:pointer"><input type="checkbox" id="fda510k-include" checked onchange="window._fda510kInclude=this.checked" style="width:14px;height:14px;accent-color:#10B981">納入計畫書（作為「同類產品驗證參考」附錄）</label>';
+  html+='<div style="font-size:9.5px;color:rgba(255,255,255,.35);margin-top:.3rem;line-height:1.5">※ 此為同類產品實際做過、FDA 接受之驗證，僅供參考；你的器材若特性不同（如高壓動力注射），仍須自行判斷適用性。</div>';
+  html+='</div>';
+  panel.innerHTML=html;
+  window._fda510kInclude=true;
+}
+window.renderFda510kPanel=renderFda510kPanel;
 
 // ════════════════════════════════════════════════════════
 // 監控攔截力檢討（選用）：AI 篩 2-4 個關鍵監控點 → 勾選清單（預設全勾）→ 下載時寫入 Word
@@ -6146,6 +6227,7 @@ window.homeSummarizeFactors = async function(tools) {
     if(data.result) {
       window._confirmedFactors = data.result;
       renderFactorPanel(data.result);
+      var _fdaWrap=document.getElementById('home-fda510k-wrap'); if(_fdaWrap) _fdaWrap.style.display='block';
       // ISO 自動對照：整理因子後立刻跑，確保計畫書一定有 ISO（品質優先，不再靠選用按鈕）
       try{
         var _isoPlans = [];
@@ -6429,6 +6511,7 @@ function deriveCategoryKeys(info){
     'ureteral': ['ureteral','輸尿管'],
     'stent': ['stent','支架','double j','double-j','pigtail','雙j','豬尾'],
     'connector': ['connector','接頭','luer','魯爾','魯耳','y型','歧管','manifold'],
+    'syringe': ['syringe','注射筒','針筒','注射器','barrel','筒身','活塞','plunger','injector','顯影注射','造影注射','high-pressure injector','power injector','contrast'],
     'tubing': ['tubing','針管','不鏽鋼管','不銹鋼管'],
     'tracheal': ['tracheal','氣管內管','氣管插管','endotracheal'],
     'tracheostomy': ['tracheostomy','氣切','氣管切開'],
@@ -6466,6 +6549,7 @@ function expandCategoryKeys(keys){
     'iv-bag':      ['container','軟袋'],     // IV 軟袋
     'extracorporeal':['blood','bloodline','dialysis','HD'],
     'connector':   ['luer'],
+    'syringe':     ['barrel','注射筒','injector','luer','80369'],  // 注射筒→7886-1/7886-4/80369-7(Luer)
     'guide':       ['needle']               // 同軸導引針屬針類
   };
   var out = Array.isArray(keys) ? keys.slice() : [];
@@ -6927,10 +7011,24 @@ function renderIsoPanel(r){
         var histEl = document.getElementById('home-chat-history');
         if(histEl){ histEl.appendChild(aiDiv); histEl.scrollTop=histEl.scrollHeight; }
 
-        var streamResp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo })
-        });
+        // 串流請求加單次自動重試：Failed to fetch 多為網路瞬斷或 worker 冷啟動，重試一次通常即可
+        var streamResp;
+        try{
+          streamResp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo })
+          });
+        }catch(netErr){
+          await new Promise(function(r){ setTimeout(r, 800); });   // 短暫等待後重試
+          streamResp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo })
+          });
+        }
+        if(!streamResp.ok){
+          var _errTxt = await streamResp.text().catch(function(){return '';});
+          throw new Error('伺服器回應 '+streamResp.status+(streamResp.status===403?'（網域不在 worker 允許清單，請確認用 chiuchangru.github.io 開啟）':'')+' '+(_errTxt||'').slice(0,120));
+        }
 
         var reader = streamResp.body.getReader();
         var decoder = new TextDecoder();

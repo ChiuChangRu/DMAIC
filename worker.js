@@ -173,7 +173,7 @@ export default {
 
       // 合法 mode 限制
       const mode = body.mode || 'chat';
-      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'plan_narrative', 'interception_review', 'stream_navigate', 'fishbone_to_doe', 'version'];
+      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'plan_narrative', 'interception_review', 'fda_verification', 'stream_navigate', 'fishbone_to_doe', 'version'];
       if (!VALID_MODES.includes(mode)) {
         return new Response(JSON.stringify({ error: '無效的 mode' }), {
           status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
@@ -772,6 +772,94 @@ ${planLines || '（無）'}
         if(!Array.isArray(result.reviews)) result.reviews = [];
         if(result.reviews.length > 4) result.reviews = result.reviews.slice(0,4);
         return json({ mode: 'interception_review', result, _debug: { tool_fired: !!tu, n: result.reviews.length } }, origin);
+      }
+
+      // ══ fda_verification：查同類 510(k)→抓 summary PDF→萃取真實驗證項目與 ISO 標準 ══
+      if (mode === 'fda_verification') {
+        const deviceNameEn = body.deviceNameEn || body.deviceName || '';
+        const productCode = body.productCode || '';
+        const factors = body.factors || '';
+        const fdaKey = env.FDA_API_KEY || body.fdaKey || '';
+        const maxN = Math.min(body.maxN || 5, 5);
+
+        let kList = [];
+        try {
+          const q = productCode
+            ? `product_code:${encodeURIComponent(productCode)}`
+            : `device_name:"${encodeURIComponent(deviceNameEn)}"`;
+          const url = `https://api.fda.gov/device/510k.json?${fdaKey?('api_key='+fdaKey+'&'):''}search=${q}&limit=${maxN}&sort=decision_date:desc`;
+          const r = await fetch(url);
+          const j = await r.json();
+          if (j.results) kList = j.results.map(x => ({ k:x.k_number, name:x.device_name, applicant:x.applicant, date:x.decision_date }));
+        } catch(e) {
+          return json({ mode:'fda_verification', result:null, error:'openFDA 查詢失敗：'+(e.message||'') }, origin);
+        }
+        if (!kList.length) return json({ mode:'fda_verification', result:{ devices:[], extracted:[] }, note:'查無同類 510(k) 記錄' }, origin);
+
+        const docs = [];
+        for (const item of kList.slice(0, Math.min(maxN,3))) {
+          const knum = item.k;
+          if (!knum) continue;
+          let yy = knum.length>=3 ? knum.slice(1,3) : '';
+          const tryUrls = [
+            `https://www.accessdata.fda.gov/cdrh_docs/pdf${yy}/${knum}.pdf`,
+            `https://www.accessdata.fda.gov/cdrh_docs/pdf/${knum}.pdf`
+          ];
+          let b64 = null;
+          for (const u of tryUrls) {
+            try {
+              const pr = await fetch(u);
+              if (pr.ok) {
+                const buf = await pr.arrayBuffer();
+                let bin=''; const bytes=new Uint8Array(buf);
+                for (let i=0;i<bytes.length;i++) bin+=String.fromCharCode(bytes[i]);
+                b64 = btoa(bin);
+                break;
+              }
+            } catch(e) {}
+          }
+          if (b64) docs.push({ k:knum, name:item.name, applicant:item.applicant, date:item.date, pdf:b64 });
+        }
+
+        if (!docs.length) {
+          return json({ mode:'fda_verification', result:{ devices:kList, extracted:[] }, note:'查到 K 號但無法取得 summary PDF（可能為舊式掃描檔）' }, origin);
+        }
+
+        const content = [];
+        docs.forEach((d,i) => {
+          content.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data:d.pdf } });
+          content.push({ type:'text', text:`↑ 上面是同類產品 510(k) 第${i+1}份（${d.k}，${d.applicant||''}，${d.date||''}）。` });
+        });
+        content.push({ type:'text', text:`本案因子：\n${factors||'(未提供)'}\n\n請從上述 ${docs.length} 份 510(k) summary 的「Performance Data / 性能測試」段落，萃取真實的「驗證項目」與「引用標準(ISO/IEC/ASTM)」，並指出哪些對應到本案因子。只萃取文件中實際出現的內容，不可自行補充未出現的標準。` });
+
+        const resp = await callClaude(env, MODEL_MAP.haiku, {
+          max_tokens: 2500,
+          system:`你是醫療器材法規工程師。從 510(k) summary 的 Performance Data 段落，萃取「同類產品實際做過的驗證項目與引用標準」。
+【鐵則】只能萃取文件中「實際出現」的標準編號與測試項目，逐字為憑；文件沒寫的絕不補充、不可推測。每個標準要標出處 K 號。繁體中文。`,
+          tools:[{
+            name:'fda_verification',
+            description:'萃取510k驗證項目與標準',
+            input_schema:{ type:'object', properties:{
+              extracted:{ type:'array', items:{ type:'object', properties:{
+                k:{type:'string'}, device:{type:'string'},
+                tests:{ type:'array', items:{type:'string'} },
+                standards:{ type:'array', items:{type:'string'} }
+              }}},
+              matched_to_factors:{ type:'array', items:{ type:'object', properties:{
+                factor:{type:'string'}, suggestion:{type:'string'}
+              }}},
+              summary:{ type:'string' }
+            }, required:['extracted'] }
+          }],
+          tool_choice:{ type:'tool', name:'fda_verification' },
+          messages:[{ role:'user', content }]
+        });
+
+        if (resp._httpError) return json({ mode:'fda_verification', result:null, error:resp._errorMessage }, origin);
+        const tu2 = resp.content && resp.content.find(c => c.type==='tool_use');
+        const result = (tu2 && tu2.input) || { extracted:[] };
+        result.devices = kList;
+        return json({ mode:'fda_verification', result, _debug:{ k_found:kList.length, pdf_extracted:docs.length } }, origin);
       }
 
       // ══ summarize_factors：整理因子清單供使用者確認 ══
