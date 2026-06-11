@@ -6077,15 +6077,36 @@ window.homeSummarizeFactors = async function(tools) {
       + 'AI分析：'+aiLast.slice(0,300)+'\n\n'
       + '請整理魚骨圖 6M 因子清單，每個因子標注依據。';
 
-    var resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        mode:'summarize_factors',
-        deviceInfo: window._deviceInfo,
-        messages:[{role:'user', content:msg}]
-      })
-    });
-    var data = await resp.json();
+    var _ac = new AbortController();
+    var _to = setTimeout(function(){ _ac.abort(); }, 60000);  // 60 秒逾時保護
+    var resp, data;
+    try{
+      resp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        signal:_ac.signal,
+        body: JSON.stringify({
+          mode:'summarize_factors',
+          deviceInfo: window._deviceInfo,
+          messages:[{role:'user', content:msg}]
+        })
+      });
+      clearTimeout(_to);
+      if(!resp.ok){
+        var et = await resp.text().catch(function(){return '';});
+        panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5;line-height:1.5">⚠️ 伺服器錯誤 '+resp.status+'（worker 可能未部署最新版或出錯）<br><span style="color:rgba(255,255,255,.4)">'+(et||'').slice(0,150)+'</span></div>';
+        var _gb=document.getElementById('home-go-btn'); if(_gb){var _b=_gb.querySelector('button');if(_b){_b.disabled=false;_b.style.opacity='';_b.textContent='🎯 重新整理因子 →';}}
+        return;
+      }
+      data = await resp.json();
+    }catch(e){
+      clearTimeout(_to);
+      var emsg = (e && e.name==='AbortError')
+        ? '⚠️ 整理因子逾時（超過 60 秒）。可能是 worker 未部署最新版、API 額度不足或過載。請確認 Cloudflare worker 已部署，再重試。'
+        : '⚠️ 連線失敗：'+(e&&e.message||'');
+      panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5;line-height:1.5">'+emsg+'</div>';
+      var gb2=document.getElementById('home-go-btn'); if(gb2){var b2=gb2.querySelector('button');if(b2){b2.disabled=false;b2.style.opacity='';b2.textContent='🎯 重新整理因子 →';}}
+      return;
+    }
 
     if(data.result) {
       window._confirmedFactors = data.result;
