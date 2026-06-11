@@ -28,7 +28,7 @@ const MODEL_MAP = {
 const MODE_MODEL = {
   verification_plan: 'sonnet',  // 核心：因子→管道→工具→因果鏈，品質關鍵 → 保留 sonnet
   identify_device:   'haiku',   // 器材識別，haiku 足夠
-  summarize_factors: 'haiku',
+  summarize_factors: 'sonnet', // 因子+關聯+驗證方式是報告品質命脈，用 sonnet（合併原 verification_plan，整體仍少一次呼叫）
   iso_crosscheck:    'haiku',   // 有確定性防幻覺閘保護，haiku 可
   plan_narrative:    'haiku',   // 嚴格提示+只用既有事實，haiku 可（省最多）
   interception_review:'haiku',  // 監控攔截力檢討：篩2-4個關鍵點，haiku 足夠
@@ -259,29 +259,34 @@ export default {
             model: modeModel('stream_navigate'),
             max_tokens: 800,
             stream: true,
-            system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。
+            system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。你的任務是「問出問題的關鍵成因」，不是閒聊。
 ${deviceContext}
 ${surveyContext}
 
 核心原則：
-- DMAIC 的 D（Define）階段必須先用魚骨圖釐清根本原因
-- 【魚骨圖永遠是第一個推薦工具】
-- 根因未確認前，直接做統計分析方向可能錯誤
-- 問診時必須根據已確認的器材特性，問出符合該器材的具體問題
+- DMAIC 的 D（Define）階段必須先用魚骨圖釐清根本原因，【魚骨圖永遠是第一個推薦工具】。
+- 你的價值在於「逼出關鍵成因」。每一輪追問都要往「最可能的根因」鑽，不要問空泛的背景題。
 
-問題判斷邏輯：
-- 新產品一開始就有 → 設計問題方向（DOE、材料驗證）
-- 以前OK最近才有 → 製程變異（SPC、假設檢定）
-- 只有某些批次 → 材料/供應商差異（假設檢定、SPC）
-- 只有某些人/機台 → 人員設備差異（MSA）
+【關鍵成因探問策略 — 一定要鑽到這些點】
+依問卷答案決定主攻方向，鎖定後深入追問，不要每個方向都淺淺問一句：
+- 發生規律=「偶發/零星/間歇」→ 這是最難的一種，主攻「獨立事件」：是否某段時間、某台機、某位操作者、某批料才出現？是否伴隨某個動作（換模、清機、換班、補料）？偶發常來自製程偶發失控或單一人為，要問出那個「觸發點」。
+- 出現時機=「新產品一開始」→ 主攻設計/材料：規格、選材、公差是否驗證過。
+- 「以前OK最近才有」→ 主攻製程變異：最近改了什麼（料、機、參數、人、環境、SOP）。
+- 只有某些批次/某些人機 → 主攻差異源：批次/供應商/機台/操作者比較。
+- 一定要問到「製程關鍵參數」與「操作是否有異常」：例如關鍵製程步驟的參數設定、是否有偏離 SOP 的操作、是否有非標準的臨時處置。
+
+【放行判準 — 何時可進魚骨圖】
+- 當你已問出「指向某類根因的具體線索」（例如鎖定到某製程步驟、某操作異常、某變更），即可收斂並推薦魚骨圖。
+- 若連續追問 2-3 輪仍問不出具體線索（使用者一直「不知道」），不要無限追問，誠實說明「現有資訊有限，先用魚骨圖展開所有可能因子，再逐一排查」並放行。
+- 不要在資訊不足時假裝已找到根因。
 
 對話規則：
-- 問題要問「現象」不問「原因」，避免使用專業術語
-- 若使用者說「不知道」→ 換個角度問同一件事
-- 有問卷資料時，最多再追問 1-3 輪；無問卷資料時，最多追問 5 輪
-- 推薦時說明「為什麼用這個工具」（每個工具 20 字內）
+- 問「現象」不問「原因」，避免專業術語，一次聚焦一個關鍵點（不要一次丟 5 個問題）。
+- 使用者說「不知道」→ 換個更具體、更好回答的角度問同一件事。
+- 有問卷資料時最多再追問 1-3 輪；無問卷時最多 5 輪。問到關鍵線索就收斂。
+- 推薦時說明「為什麼用這個工具」（20字內）。
 - **推薦格式**：簡短說明後，最後一行必須是 [TOOLS: fishbone, tool2, ...]
-- 回應總長度控制在 300 字以內
+- 回應總長度 300 字以內。
 
 可推薦工具：fishbone, spc, msa, histogram, hypothesis, scatter, boxplot, pb
 繁體中文，讓非統計背景的工程師也能理解`,
@@ -631,11 +636,15 @@ ${planText || '(無)'}
 【SPC 觀察原因（若有提供 SPC 監控特徵）】
 - 針對每個 SPC 監控特徵，寫一句「為何要持續以管制圖監控此特徵」的觀察原因（30字內、務實、扣回問題或製程穩定性），放入 spc_reasons（key=特徵名、value=原因）。不得新增規格數值或條號。
 
-【檢測手法檢討與防呆（detection_review，務必產出）】
-背景事實：許多醫療器材的不良是在客戶端才被發現，代表「出貨前的檢測/卡關機制失效或不足」（漏檢、檢測無法涵蓋此失效模式、依賴人工目視易疏漏）。
-- 連結問卷提供的「現行檢測手法」，檢討它為何可能擋不住本案問題（如：抽檢比例、僅外觀目視、無功能性測試、無線上偵測、依賴人員判斷）。若問卷未提供檢測手法，明確指出「現行檢測手法未在問卷揭露，建議補充盤點（*）」。
-- 提出 1～3 項適合的防呆(Poka-Yoke)機制建議：優先「源頭預防」(設計/治具/防錯結構) > 「線上自動偵測/全檢」(感測、機器視覺、壓力/洩漏自動測試) > 「警示」。每項註明它擋住的失效環節。
-- 凡屬建議或推論一律標（*）；不得捏造既有檢測設備或數據。語氣務實。`,
+【檢測手法檢討與防呆（detection_review，務必產出，要紮實）】
+背景事實：許多醫療器材的不良是在客戶端才被發現，代表「出貨前的檢測/卡關機制失效或不足」。
+請沿「四道閘」結構化檢討本案的整體檢測手法（每道閘 1～2 句、扣回本案，不要泛泛而談）：
+① 方法偵測力：現行檢測對「本案這個失效模式」有沒有偵測力？是否靈敏度不足、或根本驗不到此失效（如微洩漏目視驗不出、內部劣化外觀看不到）。
+② 人員一致性：是否依賴人工目視/判定，操作者間易不一致；抽樣「怎麼抽」是否主觀（固定位置、只抽方便拿的）。
+③ 樣本數量與分層代表性：抽樣量對偶發/低率缺陷的攔截力（可用 1−(1−p)ⁿ 觀念定性說明，不得捏造 p/n 數值）；樣本是否涵蓋失效的發生分層（模穴/時段/批次/班別）。
+④ 監控範圍邊界：本案失效是否屬「出廠當下不存在、時間或使用累積才顯現」（如長期老化），若是則任何出貨抽樣都無效，須移到設計驗證或上市後監督（PMS）。
+接著提出 1～3 項防呆(Poka-Yoke)機制：優先「源頭預防(設計/治具/防錯結構)」＞「線上自動偵測/全檢(感測、機器視覺、壓力/洩漏自動測試)」＞「警示」，每項註明擋住哪道閘的失效。
+若問卷未提供現行檢測手法，明確指出「現行檢測手法未在問卷揭露，建議補充盤點（*）」。凡推論標（*）；不得捏造既有檢測設備或數據。語氣務實。`,
           tools: [{
             name: 'plan_narrative',
             description: '計畫書三段敘事',
@@ -646,7 +655,7 @@ ${planText || '(無)'}
                 root_cause_narrative:{ type: 'string', description: '根本原因論述（3-6句）' },
                 conclusion:          { type: 'string', description: '結論與後續行動（3-6句）' },
                 spc_reasons:         { type: 'object', description: 'SPC 監控特徵的觀察原因，key=特徵名、value=原因（30字內）；無 SPC 特徵時可省略' },
-                detection_review:    { type: 'string', description: '檢測手法檢討與 Poka-Yoke 防呆建議（4-7句）：檢討現行檢測為何擋不住本案問題、建議1-3項防呆機制，推論標(*)' }
+                detection_review:    { type: 'string', description: '檢測手法檢討（沿四道閘①方法偵測力②人員一致性③樣本數量與分層④監控範圍邊界結構化展開，每道閘扣回本案）＋1-3項Poka-Yoke防呆建議，推論標(*)' }
               }
             }
           }],
@@ -780,67 +789,62 @@ ${planLines || '（無）'}
           properties: {
             name:        { type: 'string', description: '因子名稱（10字以內）' },
             risk:        { type: 'string', enum: ['high','medium','low'] },
+            risk_reason: { type: 'string', description: '【必填】判定此風險高低的原因（為何高/中/低，20-35字，扣回對問題的影響程度與發生可能）' },
             basis:       { type: 'string', description: '依據來源（20字內）' },
-            tool:        { type: 'string', enum: ['doe','pb','taguchi','spc','msa','hypothesis','none'],
-                           description: '建議分析工具' },
-            tool_reason: { type: 'string', description: '為何用這個工具（15字內）' },
-            link:        { type: 'string', description: '關聯鏈：此因子如何導致使用者陳述的問題（≤25字，格式「因子→中間機制→問題現象」）' },
+            nature:      { type: 'string', enum: ['adjustable','observed','method','group_compare','compliance','other'],
+                           description: '【必填，最重要】因子的本質性質，決定後續用什麼工具（工具由程式依此強制對應，你不要自己選工具）：\n- adjustable=可主動設定數值的連續/可調參數（溫度、時間、壓力、濃度、速度、厚度、比例…，含名稱有「控制/設定/調整」者）→ 程式對應 DOE\n- observed=被動發生、無法調整的現象或設備狀態（老化、磨損、漂移、衰退、批次間既成差異）→ 程式對應 SPC 監控\n- method=量測/判定/操作手法的可信度與一致性（量具精度、判定標準、操作者手法、量測重複性）→ 程式對應 MSA\n- group_compare=不同群組的比較（批次A vs B、供應商X vs Y）→ 程式對應 假設檢定\n- compliance=規範符合性（材料/滅菌/包裝/生物相容、文件流程、設計管制）→ 程式對應 ISO確認/GMP\n- other=以上皆非' },
+            level_hint:  { type: 'string', description: '若 nature=adjustable，給「建議調變範圍/水準」供實驗設計帶入（如「熔封溫度 180–200°C」「保壓時間 2–5s」）；不確定具體數值就寫定性範圍並標(*)，不要編造精確值。非 adjustable 留空' },
+            link:        { type: 'string', description: '【必填】因子對問題的關聯說明（root cause）：此因子如何導致使用者陳述的問題，寫出完整因果路徑「因子→中間機制→問題現象」，要具體、扣回本案、可成段論述（40-70字），不可空泛' },
+            control_method:{ type: 'string', description: '【必填】此因子的「卡控方式」論述：實務上要如何防堵/驗證這個因子，明確指出是靠哪種手段——作業標準化(SOP)、使用說明(IFU)、設計驗證(DV)、製程確效(IQ/OQ/PQ)、製程監控(SPC)、量測系統分析(MSA)、統計實驗(DOE)、或 ISO 標準符合性查核(並指出目前是否確實落實/有無缺口)。30-60字，可執行，不可寫「進行驗證」這種空話' },
+            iso_hint:    { type: 'string', description: '若 control_method 涉及 ISO 標準，寫出可能適用的標準編號（如「ISO 11607-1」），不確定就留空，不要編造' },
             speculative: { type: 'boolean', description: '若無法說出與本問題的明確因果關聯，設為 true（前端會標「推測*」）' }
           },
-          required: ['name','risk','basis','tool','tool_reason']
+          required: ['name','risk','risk_reason','nature','link','control_method']
         };
 
-        const resp = await callClaude(env, modeModel('summarize_factors'), {  // 改用 sonnet 省成本
-          max_tokens: 2000,
-          system: `你是醫療器材品質專家，根據對話內容整理魚骨圖 6M 因子清單，並為每個因子指定最適合的分析工具。
+        const resp = await callClaude(env, (body.fastMode ? MODEL_MAP.haiku : modeModel('summarize_factors')), {
+          max_tokens: body.fastMode ? 2000 : 2400,
+          system: `你是醫療器材品質專家，根據對話內容整理魚骨圖 6M 因子清單。這份輸出會直接成為改善計畫書的主體，品質要求高：每個因子都要講清楚「為什麼導致問題」「風險為何高/低」「實務上怎麼卡控」。
 ${deviceCtx}
 
-【工具選擇規則 - 必須嚴格遵守】
+【立場基礎 — 嚴禁杜撰，最高原則】
+- 你只能根據「問卷答案」與「對話中使用者明確講過的內容」推論。使用者沒講的製程細節、設備、數據，一律不可當成事實寫出。
+- 需要補充的工程推論，必須在該句尾標（*）表示「此為推論、待查證」，不可把推論寫成既定事實。
+- 不確定的因子寧可標 speculative:true，也不可編造一條看似合理卻無依據的關聯。
 
-判斷步驟：先看因子「能不能主動設定數值」，能的話才考慮 doe/pb/taguchi。
+【問卷 → 因子方向的明確連結 — 必須遵守（硬規則，非參考）】
+- 發生規律=「偶發/零星/間歇」→ 必須納入「製程偶發失控、單一操作者人為、獨立污染/混料事件、設備間歇異常」這類因子，並在 link 說明其偶發性如何對應問題；不可只列穩定性因子。
+- 出現時機=「新產品一開始」→ 因子重心放在設計/選材/公差未驗證。
+- 「以前OK最近才有」→ 因子重心放在近期變更（料/機/參數/人/環境/SOP）。
+- 只有某些批次/人機 → 因子重心放在批次、供應商、機台、操作者差異。
+- 近期變更欄有填 → 對應變更項必須出現在因子裡。
+- 問卷與對話資訊不足以支撐某方向時，誠實少列，不要灌水湊數。
 
-- doe：因子是**可主動設定高低水準的連續參數**
-  → 溫度、時間、壓力、速度、濃度、角度、厚度、尺寸、比例
-  → 即使名稱含「控制」「設定」「調整」也算 doe
-  → 例：「烘烤溫度控制」=doe、「固化時間設定」=doe、「塗布速度」=doe
+【因子性質 nature — 必填，最重要：你只判性質，不選工具】
+工具(DOE/SPC/MSA…)由程式依 nature 自動對應，你絕對不要自己決定工具，只要正確判斷每個因子的「本質性質」：
+- adjustable（可調變參數）：能主動設定數值的連續/可調參數——溫度、時間、壓力、濃度、速度、厚度、比例、角度。即使名稱含「控制/設定/調整」也算 adjustable。→ 程式會給 DOE。
+- observed（觀測現象）：被動發生、**無法調整**的現象或設備狀態——老化、磨損、漂移、衰退、既成的批次間差異。→ 程式會給 SPC 監控。
+- method（手法/量測）：量測或判定方法的可信度與一致性——量具精度、判定標準、操作者手法、量測重複性。→ 程式會給 MSA。
+- group_compare（群組比較）：不同群組比較——批次A vs B、供應商X vs Y。→ 程式會給假設檢定。
+- compliance（規範符合性）：材料/滅菌/包裝/生物相容、文件流程、設計管制。→ 程式會給 ISO確認/GMP。
+- other：以上皆非。
+【關鍵判斷紀律 — 違反就是錯】
+· 「設備老化/磨損/漂移/衰退」= observed（不是 adjustable！這些不能調，只能監控）。
+· 「溫度/時間/壓力 的設定值」= adjustable（這些能調，要做實驗找最佳值）。
+· 「操作手法/判定一致性/量測誤差」= method。
+· 一個因子若無法「主動設定一個數值去做實驗」，就絕對不是 adjustable。
+· adjustable 因子必須在 level_hint 給出建議調變範圍（供實驗設計帶入），不確定就給定性範圍標(*)，不可編造精確值。
 
-- pb：因子數量 ≥ 5 個且都是可調變參數 → 先用 pb 篩選，再 doe
+【關聯說明 link — 必填】
+- 讀懂使用者陳述的「問題現象」。link 寫出完整因果路徑「因子→中間機制→問題現象」，扣回本案、可成段論述（40-70字），不可空泛。
+  例：問題=「軟袋注射口漏液」→「熔封模溫漂移」的 link：「熔封溫度低於 TPU 熔流區→注射口與袋體界面未完全互融→形成微小未熔合通道→受輸液壓力時沿通道滲漏」。
+- 寫不出對應本問題的因果路徑 → 設 speculative:true，不要硬湊；明顯無關的不列。
 
-- taguchi：因子是**環境雜訊**（使用者無法控制）
-  → 環境溫濕度、操作者個體差異、材料批次間差異（不可控部分）
+【風險原因 risk_reason — 必填】說明為何判 high/medium/low（看對問題的影響嚴重度＋發生可能），不要只給形容詞。
 
-- spc：因子描述的是**被動發生的現象或設備狀態**
-  → 設備老化、磨損、漂移、偏移、不穩定
-  → 「老化」「磨損」「漂移」「衰退」是 spc
-  → 注意：「溫度控制」是 doe，「溫度漂移/不穩定」才是 spc
+【卡控方式 control_method — 必填】論述實務上怎麼防堵/驗證此因子：明確指出靠 SOP／IFU／設計驗證(DV)／製程確效(IQ/OQ/PQ)／製程監控(SPC)／量測系統分析(MSA)／統計實驗(DOE)／或 ISO 標準符合性（並指出目前是否確實落實、有無缺口）。可執行，不可寫「進行驗證」這種空話。涉及 ISO 時 iso_hint 寫編號。
 
-- msa：因子描述**量測或判定方法的差異**
-  → 量具精度、操作者判定標準、量測重複性
-  → 「操作手法」如果指的是量測/判定 → msa
-  → 「操作手法」如果指的是製程操作 → spc 或 doe
-
-- hypothesis：因子是**不同群組之間的比較**
-  → 批次A vs 批次B、供應商X vs 供應商Y
-
-- none：環境類受 ISO 規範管控
-
-【常見錯誤禁止】
-- 設備老化/磨損 → 絕對不是 doe，是 spc
-- 「溫度控制」「時間設定」「壓力調整」→ 絕對是 doe，不是 spc
-- 操作者技能/手法 → 判斷是製程操作（spc）還是量測判定（msa）
-- 因子數 > 5 且都可調 → 優先 pb
-
-規則：
-- 每個因子必須有依據，不可捏造
-- 每個類別 3-5 個
-- 沒有依據的類別回傳空陣列
-- 繁體中文
-
-【關聯性 — 必填，這很重要】
-- 先讀懂使用者陳述的「問題現象」。每個因子都要能連回那個現象，並在 link 欄寫出因果路徑（因子→中間機制→問題現象）。
-  例：問題=「透析有效流量下降」→「擠出機螺桿磨損」的 link 應寫「螺桿磨損→押出內徑變異→有效流量下降」。
-- 若某因子寫不出對應「本問題」的因果路徑，仍可列出，但必須設 speculative:true（誠實標記為推測），不要硬湊一條牽強的關聯。
-- 寧可標 speculative，也不要編造關聯。與本問題明顯無關的因子直接不要列。`,
+規則：每類別 3-5 個、無依據回空陣列、不可捏造、繁體中文（禁簡體）。`,
           tools: [{
             name: 'factor_summary',
             description: '整理 6M 因子清單，每個因子含建議工具',
@@ -863,6 +867,44 @@ ${deviceCtx}
         });
         const tu = resp.content && resp.content.find(c => c.type === 'tool_use');
         const result = (tu && tu.input) || null;
+        if(resp._httpError){ return json({ mode: 'summarize_factors', result: null, error: resp._errorMessage }, origin); }
+        // 程式強制：依 AI 判定的因子性質 nature，硬性對應分析工具（AI 無法再自由選工具）。
+        // adjustable→DOE（多個可調可改 PB）、observed→SPC、method→MSA、group_compare→假設檢定、compliance→none(ISO/GMP)
+        if(result){
+          const NATURE_TOOL = { adjustable:'doe', observed:'spc', method:'msa', group_compare:'hypothesis', compliance:'none', other:'none' };
+          // 程式關鍵字防呆：即使 AI 判錯 nature，用因子名稱關鍵字強制修正（雙保險，不純靠 AI）
+          function correctNature(name, aiNature){
+            const n = String(name||'');
+            // 觀測現象（被動、不可調）→ observed → SPC。老化/磨損/漂移/衰退/不穩定/波動/偏移/劣化
+            if(/老化|磨損|漂移|衰退|衰減|劣化|疲勞|鬆動|鬆脫|不穩定|波動|偏移|偏差|變異|退化|積垢|污染累積/.test(n)) return 'observed';
+            // 量測/判定/手法 → method → MSA
+            if(/量測|測量|判定|判讀|檢測誤差|重複性|再現性|量具|校正|目視|人為判斷|讀值|計量誤差/.test(n)) return 'method';
+            // 群組比較 → hypothesis
+            if(/批次間|供應商|廠商|料號比較|新舊料|對照組|兩組|群組比較/.test(n)) return 'group_compare';
+            // 可調參數（主動設定數值）→ adjustable → DOE。溫度/時間/壓力/濃度/速度/厚度…＋設定/控制值/參數
+            if(/(溫度|時間|壓力|濃度|速度|轉速|流量|厚度|比例|角度|功率|電流|電壓|劑量|張力|間隙|進給)(設定|控制|參數|條件|值)?/.test(n)
+               && !/漂移|不穩定|波動|偏移|老化/.test(n)) return 'adjustable';
+            return aiNature; // 無關鍵字命中 → 沿用 AI 判斷
+          }
+          ['man','machine','material','method','measure','env'].forEach(function(cat){
+            if(Array.isArray(result[cat])){
+              result[cat].forEach(function(f){
+                f._aiNature = f.nature;  // 保留 AI 原判，供除錯
+                f.nature = correctNature(f.name, f.nature);
+              });
+              const adjustables = result[cat].filter(function(f){ return f.nature==='adjustable'; });
+              result[cat].forEach(function(f){
+                const nat = NATURE_TOOL[f.nature] ? f.nature : 'other';
+                f.nature = nat;
+                f.tool = NATURE_TOOL[nat];
+                // 同類別可調因子 ≥5 個 → 改建議 PB 篩選（程式判，不靠 AI）
+                if(f.tool==='doe' && adjustables.length>=5) f.tool='pb';
+                // 衍生驗證方式標籤（供前端/Word 顯示，與 nature 一致，不再由 AI 自由填）
+                f.verify_method = ({doe:'統計實驗',pb:'統計實驗',spc:'製程監控',msa:'量測系統分析(MSA)',hypothesis:'統計實驗',none:(f.nature==='compliance'?'ISO/GMP符合性':'文件/工程評估')})[f.tool];
+              });
+            }
+          });
+        }
         return json({ mode: 'summarize_factors', result }, origin);
       }
 
@@ -1109,6 +1151,16 @@ async function callClaude(env, model, payload) {
     },
     body: JSON.stringify({ model, ...payload }),
   });
+  // 缺陷修正：檢查 HTTP 狀態，讓限流(429)/金鑰錯(401)/額度(402)/過載(529) 明確回報，不再靜默變「空結果」
+  if (!r.ok) {
+    let detail = '';
+    try { const e = await r.json(); detail = (e.error && e.error.message) || JSON.stringify(e); } catch(_) { detail = await r.text().catch(()=> ''); }
+    const hint = r.status === 429 ? '（API 限流，請稍候再試）'
+      : r.status === 401 ? '（API 金鑰無效或過期）'
+      : (r.status === 400 && /credit|balance|billing/i.test(detail)) ? '（帳戶額度不足，請至 Anthropic Console 加值）'
+      : r.status === 529 ? '（Anthropic 服務暫時過載，請稍候再試）' : '';
+    return { _httpError: r.status, _errorMessage: 'API 錯誤 ' + r.status + ' ' + hint + (detail ? '：' + detail.slice(0,200) : ''), content: [] };
+  }
   return await r.json();
 }
 

@@ -2098,6 +2098,132 @@ window._ISO_MAP_EMBEDDED = {
     ],
     "clauses_source": "ISO 官方範圍/多權威來源一致 (2021版/第1版；刺激試驗，2021年自10993-10分出)",
     "clauses_note": "條號/標題取自 ISO 官方公開預覽目次(OBP/iTeh)或一致權威整理，屬事實性目次；未含規範正文。標 verified:false 之子條為依範圍推得待正本確認。一律以正本最新版次為準，需 RA 核可。"
+   },
+   {
+    "no": "ISO 7886-1",
+    "edition": "2017",
+    "title": "Sterile hypodermic syringes for single use — Part 1: Syringes for manual use",
+    "title_zh": "無菌單次使用皮下注射筒-第1部:手動操作注射筒",
+    "applies_to": [
+     "syringe",
+     "barrel",
+     "注射筒",
+     "injector",
+     "infusion",
+     "container"
+    ],
+    "id_verified": true,
+    "items_status": "draft_pending_RA",
+    "items": [
+     {
+      "k": "容量準確度/刻度",
+      "en": "graduated capacity accuracy"
+     },
+     {
+      "k": "活塞與筒身氣密/不漏液",
+      "en": "leakage past piston / air leakage"
+     },
+     {
+      "k": "活塞滑動力(順暢度)",
+      "en": "piston/plunger force"
+     },
+     {
+      "k": "噴嘴(Luer)死腔與接合",
+      "en": "nozzle / luer fitting"
+     }
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "材料(與注射液相容、潤滑)",
+      "verified": false
+     },
+     {
+      "no": "5",
+      "title_zh": "清潔度",
+      "verified": false
+     },
+     {
+      "no": "6",
+      "title_zh": "酸鹼度與可萃取金屬限值",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "潤滑劑",
+      "verified": false
+     },
+     {
+      "no": "8",
+      "title_zh": "容量公差(標稱容量準確度)",
+      "verified": false
+     },
+     {
+      "no": "9",
+      "title_zh": "刻度標尺(graduation)",
+      "verified": false
+     },
+     {
+      "no": "10",
+      "title_zh": "筒身(barrel)",
+      "verified": false
+     },
+     {
+      "no": "11",
+      "title_zh": "活塞與推桿(piston/plunger，氣密、滑動力)",
+      "verified": false
+     },
+     {
+      "no": "12",
+      "title_zh": "噴嘴(nozzle，Luer接頭依ISO 80369-7)",
+      "verified": false
+     },
+     {
+      "no": "13",
+      "title_zh": "無菌與包裝",
+      "verified": false
+     },
+     {
+      "no": "Annex",
+      "title_zh": "各項試驗方法(容量/漏液/滑動力/死腔)",
+      "verified": false
+     }
+    ],
+    "clauses_source": "ISO OBP/iTeh 範圍與一致權威整理 (2017版/第3版；僅收功能結構，子條待正本確認)",
+    "clauses_note": "條號/標題取自 ISO 官方範圍與一致整理，屬功能結構；標 verified:false 之條待正本確認。【重要適用限制】本標準明確排除「與動力注射幫浦併用之注射筒」「玻璃注射筒」「預充填注射筒」；高壓顯影注射筒(數百bar、CT/血管攝影動力注射)不在本標準範圍內，應另對應動力注射器系統與IEC 60601相關標準(*)。一律以正本最新版次為準，需 RA 核可。"
+   },
+   {
+    "no": "ISO 7886-4",
+    "edition": "2018",
+    "title": "Sterile hypodermic syringes for single use — Part 4: Syringes with re-use prevention feature",
+    "title_zh": "無菌單次使用皮下注射筒-第4部:具防止重複使用功能之注射筒",
+    "applies_to": [
+     "syringe",
+     "barrel",
+     "注射筒",
+     "injector"
+    ],
+    "id_verified": true,
+    "items_status": "draft_pending_RA",
+    "items": [
+     {
+      "k": "防重複使用機制有效性",
+      "en": "re-use prevention function"
+     },
+     {
+      "k": "單次使用後自動失能",
+      "en": "auto-disable after single use"
+     }
+    ],
+    "clauses": [
+     {
+      "no": "-",
+      "title_zh": "在ISO 7886-1基礎上增加「防止重複使用」功能要求與試驗",
+      "verified": false
+     }
+    ],
+    "clauses_source": "ISO OBP 範圍 (2018版)；僅收範圍重點",
+    "clauses_note": "本標準為 7886 系列防重複使用版本，要求建立於 7886-1 之上。不適用玻璃注射筒、固定劑量免疫自動失能注射筒(ISO 7886-3)、預充填注射筒。需 RA 以正本確認。"
    }
   ]
  }
