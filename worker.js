@@ -15,13 +15,30 @@ const TOOL_MODEL_POLICY = {
   spc: 'haiku', msa: 'haiku', doe: 'haiku',
   hypothesis: 'haiku', capa: 'haiku',
   pb: 'haiku',
-  fishbone: 'sonnet',  // 魚骨圖用 sonnet
+  fishbone: 'haiku',  // 省成本：魚骨圖改 haiku（原 sonnet）
 };
 const MODEL_MAP = {
   haiku:  'claude-haiku-4-5-20251001',
   sonnet: 'claude-sonnet-4-6',
   opus:   'claude-sonnet-4-6',  // opus 也導向 sonnet 省錢
 };
+
+// 各「模式」省成本分流：只有真正定義分析品質的步驟用 sonnet，其餘一律 haiku。
+// 想調整成本/品質，只改這一張表即可。
+const MODE_MODEL = {
+  verification_plan: 'sonnet',  // 核心：因子→管道→工具→因果鏈，品質關鍵 → 保留 sonnet
+  identify_device:   'haiku',   // 器材識別，haiku 足夠
+  summarize_factors: 'haiku',
+  iso_crosscheck:    'haiku',   // 有確定性防幻覺閘保護，haiku 可
+  plan_narrative:    'haiku',   // 嚴格提示+只用既有事實，haiku 可（省最多）
+  interception_review:'haiku',  // 監控攔截力檢討：篩2-4個關鍵點，haiku 足夠
+  fishbone_generate: 'haiku',
+  fishbone_to_doe:   'haiku',
+  navigate:          'haiku',
+  stream_navigate:   'haiku',
+  analyze:           'haiku'
+};
+function modeModel(mode){ return MODEL_MAP[MODE_MODEL[mode] || 'haiku']; }
 
 // 每個工具的三問題模板
 const TOOL_QUESTIONS = {
@@ -156,7 +173,7 @@ export default {
 
       // 合法 mode 限制
       const mode = body.mode || 'chat';
-      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'plan_narrative', 'stream_navigate', 'fishbone_to_doe', 'version'];
+      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'plan_narrative', 'interception_review', 'stream_navigate', 'fishbone_to_doe', 'version'];
       if (!VALID_MODES.includes(mode)) {
         return new Response(JSON.stringify({ error: '無效的 mode' }), {
           status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
@@ -170,7 +187,7 @@ export default {
 
       // ══ fishbone_to_doe：魚骨圖因子轉換為 DOE 實驗設計格式 ══
       if (mode === 'fishbone_to_doe') {
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+        const resp = await callClaude(env, modeModel('fishbone_to_doe'), {
           max_tokens: 800,
           system: `你是實驗設計（DOE）專家，將魚骨圖選出的可調變因子轉換成 DOE 實驗格式。
 規則：
@@ -239,7 +256,7 @@ export default {
             'anthropic-beta': 'tools-2024-04-04',
           },
           body: JSON.stringify({
-            model: MODEL_MAP.sonnet,
+            model: modeModel('stream_navigate'),
             max_tokens: 800,
             stream: true,
             system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。
@@ -336,7 +353,7 @@ ${surveyContext}
 
         const factors = body.factors || [];
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {  // 改用 sonnet 省成本
+        const resp = await callClaude(env, modeModel('verification_plan'), {  // 改用 sonnet 省成本
           max_tokens: 8000,
           system: `你是醫療器材 CAPA 驗證策略專家。為每個因子判斷該走哪種「驗證/矯正管道」，不要把所有因子都硬塞進統計實驗。
 ${deviceCtx}
@@ -347,7 +364,17 @@ ${deviceCtx}
 3. 「是否符合某 ISO 規範」的問題 → pipeline=compliance、iso_relevant=true（subtype：ISO規範符合性 / 生物相容10993 / 滅菌包裝確效 / 製程確效IQ-OQ-PQ / 品質系統13485）
 4. 風險測不到或需證據 → pipeline=method_dev（量測方法開發 / 替代指標）或 pipeline=risk_evidence（風險管理14971 / 臨床評估14155 / 上市後監督PMS）
 5. 供應商/來料品質 → pipeline=supplier
-6. 可調變的設計/製程參數且量測可行 → pipeline=experiment（subtype：DOE / PB / 田口 / SPC / MSA / 假設檢定）
+6. 可調變的設計/製程參數且量測可行 → pipeline=experiment（subtype 依下列準則嚴格區分）
+
+【experiment 類 subtype 選用準則（重要，勿混用）】
+- DOE / PB / 田口：因子必須是「可主動調變、且可量化設定」的製程/設計參數（連續或可分階的 X，如溫度℃、時間秒、壓力、轉速、濃度%、間隙mm）。只有這種「可設定數值去做實驗」的才給 DOE。
+  · 多個可量化因子要找最佳組合/交互作用 → DOE；因子很多要先篩主效應 → PB。
+  · 反例：抽象、難以設定數值的因子（如「操作手法」「設計裕度」「材料相容性」「儲存條件」）→ 不可給 DOE，改走 method_dev 或 use_side。
+- SPC：因子是「現有產線已在量測、需持續監控其穩定性」的特性（也是 X，但屬監測而非調變）。重點是製程管控/漂移偵測，不是去調參數做實驗。
+  · 反例：需要調變去找最佳值的參數 → 不適合 SPC（那是 DOE）。
+- MSA：因子涉及「量測/檢測數據是否可信」——要釐清變異來自人為(操作者)或檢測手法/設備(量測系統)。用於驗證量測方法本身的再現性/再生性(Gage R&R)。
+  · 凡因子與「檢測結果不一致、量測誤差、操作者間差異、設備量測能力」有關 → MSA。
+- 假設檢定：單純比較兩批/兩群組是否有顯著差異（如新舊料、A/B 供應商），不需設計矩陣。
 
 【鐵則】
 - 不是每個因子都要 DOE/SPC/MSA。測不到的風險請走 method_dev / risk_evidence，不要硬給統計工具。
@@ -433,7 +460,7 @@ ${deviceCtx}
           ? plans.map(p => `- 因子「${p.factor}」→ 驗證:${p.verification||''}（工具:${p.tool||''}）`).join('\n')
           : factors.map(f => `- 因子「${f.name||f}」`).join('\n');
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+        const resp = await callClaude(env, modeModel('iso_crosscheck'), {
           max_tokens: 3500,
           system: `你是醫療器材法規/驗證稽核專家。任務：以「問題分析出來的因子」為主軸，逐因子對照對應的 ISO 規範與章節，判斷該因子相關的 ISO 要求有沒有在驗證計畫裡做確實。
 ${deviceCtx}
@@ -582,8 +609,10 @@ ${planText || '(無)'}
         const isoApps = (iso.applicable || []).map(a => `${a.no}（${a.reason||''}）`).join('、');
         const isoGap = (iso.items || []).filter(i => i.status === 'gap')
           .map(i => `${i.factor||''}↔${i.standard||''}`).join('、');
+        // 問卷中的「檢測手法/出貨檢驗/卡關機制」相關資訊（供檢測手法檢討與 Poka-Yoke 建議）
+        const detectionInfo = body.detectionMethod || '';
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+        const resp = await callClaude(env, modeModel('plan_narrative'), {
           max_tokens: 2200,
           system: `你是醫療器材 CAPA 文件撰稿者。任務：把下方「已確認的分析結果」改寫成計畫書用的三段敘事。
 
@@ -600,7 +629,13 @@ ${planText || '(無)'}
 - conclusion：後續行動建議與待辦（如待補驗證、ISO 缺口、需 RA 核可事項）；若有 gap 要點出。
 
 【SPC 觀察原因（若有提供 SPC 監控特徵）】
-- 針對每個 SPC 監控特徵，寫一句「為何要持續以管制圖監控此特徵」的觀察原因（30字內、務實、扣回問題或製程穩定性），放入 spc_reasons（key=特徵名、value=原因）。不得新增規格數值或條號。`,
+- 針對每個 SPC 監控特徵，寫一句「為何要持續以管制圖監控此特徵」的觀察原因（30字內、務實、扣回問題或製程穩定性），放入 spc_reasons（key=特徵名、value=原因）。不得新增規格數值或條號。
+
+【檢測手法檢討與防呆（detection_review，務必產出）】
+背景事實：許多醫療器材的不良是在客戶端才被發現，代表「出貨前的檢測/卡關機制失效或不足」（漏檢、檢測無法涵蓋此失效模式、依賴人工目視易疏漏）。
+- 連結問卷提供的「現行檢測手法」，檢討它為何可能擋不住本案問題（如：抽檢比例、僅外觀目視、無功能性測試、無線上偵測、依賴人員判斷）。若問卷未提供檢測手法，明確指出「現行檢測手法未在問卷揭露，建議補充盤點（*）」。
+- 提出 1～3 項適合的防呆(Poka-Yoke)機制建議：優先「源頭預防」(設計/治具/防錯結構) > 「線上自動偵測/全檢」(感測、機器視覺、壓力/洩漏自動測試) > 「警示」。每項註明它擋住的失效環節。
+- 凡屬建議或推論一律標（*）；不得捏造既有檢測設備或數據。語氣務實。`,
           tools: [{
             name: 'plan_narrative',
             description: '計畫書三段敘事',
@@ -610,7 +645,8 @@ ${planText || '(無)'}
                 executive_summary:   { type: 'string', description: '執行摘要（3-6句）' },
                 root_cause_narrative:{ type: 'string', description: '根本原因論述（3-6句）' },
                 conclusion:          { type: 'string', description: '結論與後續行動（3-6句）' },
-                spc_reasons:         { type: 'object', description: 'SPC 監控特徵的觀察原因，key=特徵名、value=原因（30字內）；無 SPC 特徵時可省略' }
+                spc_reasons:         { type: 'object', description: 'SPC 監控特徵的觀察原因，key=特徵名、value=原因（30字內）；無 SPC 特徵時可省略' },
+                detection_review:    { type: 'string', description: '檢測手法檢討與 Poka-Yoke 防呆建議（4-7句）：檢討現行檢測為何擋不住本案問題、建議1-3項防呆機制，推論標(*)' }
               }
             }
           }],
@@ -626,8 +662,9 @@ ${planLines || '（無）'}
 【ISO 已判定適用】${isoApps || '（無）'}
 【ISO 缺口(gap)】${isoGap || '（無）'}
 【SPC 監控特徵】${spcChars.length ? spcChars.join('、') : '（無）'}
+【現行檢測手法(問卷)】${detectionInfo || '（問卷未揭露）'}
 
-請只依上述事實，生成三段敘事；若有 SPC 監控特徵，另為每個特徵寫一句觀察原因（spc_reasons）。推論標（*），不得新增事實。`
+請只依上述事實，生成三段敘事；若有 SPC 監控特徵，另為每個特徵寫一句觀察原因（spc_reasons）；並務必產出 detection_review（檢測手法檢討＋Poka-Yoke 防呆建議）。推論標（*），不得新增事實。`
           }]
         });
 
@@ -635,6 +672,97 @@ ${planLines || '（無）'}
         const result = (tu && tu.input) || {};
         const debugInfo = { stop_reason: resp.stop_reason, tool_fired: !!tu };
         return json({ mode: 'plan_narrative', result, _debug: debugInfo }, origin);
+      }
+
+      // ══ interception_review：監控攔截力檢討（聚焦，不對全因子套用）══
+      // 只篩出「真正該檢討偵測力」的少數監控點，逐點做四維檢討，避免每個因子都寫罐頭建議流於空談。
+      if (mode === 'interception_review') {
+        const dev = body.deviceInfo || {};
+        const problem = body.problem || '';
+        const factors = body.factors || {};
+        const plans = Array.isArray(body.plans) ? body.plans : [];
+        const spcChars = Array.isArray(body.spcCharacteristics) ? body.spcCharacteristics.filter(Boolean) : [];
+
+        const factorLines = [];
+        ['man','machine','material','method','measure','env'].forEach(c => {
+          (factors[c] || []).forEach(f => {
+            factorLines.push(`- [${c}] ${f.name}（風險:${f.risk||'?'}）${f.link?('｜關聯:'+f.link):''}`);
+          });
+        });
+        const planLines = plans.map(p =>
+          `- 因子「${p.factor}」→管道:${p.pipeline||'?'}／${p.subtype||''}`).join('\n');
+
+        const resp = await callClaude(env, modeModel('interception_review'), {
+          max_tokens: 2000,
+          system: `你是醫療器材品質工程師，專長「監控/檢測為何攔不住客戶端逃逸的不良」。
+
+【核心觀念（你的判斷依據）】
+監控要能攔到問題，須同時成立四道閘，任一不成立即失效：
+① 方法偵測力：現行檢測對「此失效模式」有沒有偵測力（靈敏度/漏檢率）。方法看不到，再多抽樣也沒用。
+② 人員一致性：目視/判定的操作者間一致性（屬性一致性/再現性），以及「樣本怎麼抽」的主觀性。
+③ 樣本數量與分層代表性：數量＝統計攔截機率 1−(1−p)ⁿ；分層＝樣本是否涵蓋失效的發生型態（模穴/時段/批次/班別）。數量夠但未分層仍會漏。
+④ 監控範圍邊界：有些失效（長期老化、特定使用情境累積劣化）出廠當下根本不存在，任何出貨抽樣都無效，須移到設計驗證或上市後監督。
+
+【最重要：聚焦，不要氾濫】
+- 絕對不要對所有因子都做檢討（每個都寫「提升靈敏度/加強訓練/增加樣本」是空話，會稀釋重點）。
+- 只挑「真正該擔心偵測力」的監控點：同時滿足(高風險) 且 (走檢測/監控/出貨檢驗類，或失效屬偶發/低率/客戶端逃逸型)。
+- 若提供了「SPC 監控特徵」，優先納入這些。
+- 總數嚴格控制在 2～4 個。寧缺勿濫；若真的沒有值得深入的，回空陣列。
+
+【每個監控點輸出】務實、具體、扣回本案，每欄 1～2 句：
+- method：①現行檢測為何可能漏掉此失效（或它的偵測力侷限）。
+- personnel：②人員/抽樣執行的一致性風險。
+- sampling：③樣本數量與分層代表性的疑慮（可用 1−(1−p)ⁿ 觀念說明，但不得捏造具體 p/n 數值，除非輸入有提供；沒有就以定性說明並標(*)）。
+- escape_risk：綜合判斷此監控點的逃逸風險（高/中/低＋一句理由）。
+- disposition_hint：判定傾向——a維持／b強化代表性／c本質無效需改方法或移到開發/上市後——僅給傾向與理由，最終由 RA/工程定案。
+
+繁體中文、禁簡體。凡推論標(*)，不得捏造既有檢測設備或數據。`,
+          tools: [{
+            name: 'interception_review',
+            description: '監控攔截力檢討（聚焦2-4點）',
+            input_schema: {
+              type: 'object',
+              properties: {
+                reviews: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      factor:          { type: 'string', description: '監控點/因子名' },
+                      method:          { type: 'string', description: '①方法偵測力檢討' },
+                      personnel:       { type: 'string', description: '②人員/抽樣一致性' },
+                      sampling:        { type: 'string', description: '③樣本數量與分層代表性' },
+                      escape_risk:     { type: 'string', description: '逃逸風險(高/中/低+理由)' },
+                      disposition_hint:{ type: 'string', description: '判定傾向(a維持/b強化/c改方法)+理由' }
+                    },
+                    required: ['factor','method','escape_risk']
+                  }
+                },
+                note: { type: 'string', description: '一句總結（若無值得深入者，說明原因）' }
+              },
+              required: ['reviews']
+            }
+          }],
+          tool_choice: { type: 'tool', name: 'interception_review' },
+          messages: [{
+            role: 'user',
+            content: `【器材】${dev.confirmed_name||'—'}｜材料:${dev.material||'—'}
+【問題現象】${problem || '（未填）'}
+【因子】
+${factorLines.join('\n') || '（無）'}
+【驗證計畫管道】
+${planLines || '（無）'}
+【SPC 監控特徵(優先納入)】${spcChars.length ? spcChars.join('、') : '（無）'}
+
+請只挑 2～4 個真正該檢討偵測力的關鍵監控點做四維檢討；其餘因子不要列。`
+          }]
+        });
+
+        const tu = resp.content && resp.content.find(c => c.type === 'tool_use');
+        const result = (tu && tu.input) || {};
+        if(!Array.isArray(result.reviews)) result.reviews = [];
+        if(result.reviews.length > 4) result.reviews = result.reviews.slice(0,4);
+        return json({ mode: 'interception_review', result, _debug: { tool_fired: !!tu, n: result.reviews.length } }, origin);
       }
 
       // ══ summarize_factors：整理因子清單供使用者確認 ══
@@ -662,7 +790,7 @@ ${planLines || '（無）'}
           required: ['name','risk','basis','tool','tool_reason']
         };
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {  // 改用 sonnet 省成本
+        const resp = await callClaude(env, modeModel('summarize_factors'), {  // 改用 sonnet 省成本
           max_tokens: 2000,
           system: `你是醫療器材品質專家，根據對話內容整理魚骨圖 6M 因子清單，並為每個因子指定最適合的分析工具。
 ${deviceCtx}
@@ -744,7 +872,7 @@ ${deviceCtx}
         const deviceNameEn = body.deviceNameEn || deviceName;
         const fdaData = body.fdaData || '';
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+        const resp = await callClaude(env, modeModel('identify_device'), {
           max_tokens: 600,
           system: `你是醫療器材專家，根據器材名稱和 FDA 資料庫資訊，識別並說明這個醫療器材。
 必須呼叫 device_info 工具輸出結構化資訊。
@@ -817,7 +945,7 @@ ${deviceCtx}
 - 近期是否有變更：${body.surveyData.change || '未填'}
 請根據以上問卷答案分析問題方向，只針對【不明確或矛盾】的地方追問。` : '';
 
-        const resp = await callClaude(env, MODEL_MAP.sonnet, {
+        const resp = await callClaude(env, modeModel('navigate'), {
           max_tokens: 800,
           system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。
 ${deviceContext}
@@ -864,7 +992,7 @@ ${surveyContext}
       // ══ fishbone_generate：魚骨圖 6M 建議生成（模型可選）══
       if (mode === 'fishbone_generate') {
         // 使用者可選模型：sonnet（省 token）或 opus（品質較高）
-        const fbModel = (body.fbModel === 'opus') ? MODEL_MAP.opus : MODEL_MAP.sonnet;  // 預設 sonnet
+        const fbModel = modeModel('fishbone_generate');  // 省成本：固定 haiku（原預設 sonnet/可選 opus）
         const deviceCtx = body.deviceInfo ? `
 【已確認器材】${body.deviceInfo.confirmed_name}
 材料：${body.deviceInfo.material}
