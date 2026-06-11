@@ -783,7 +783,7 @@ window._ISO_MAP_EMBEDDED = {
    },
    {
     "no": "ISO 11135",
-    "edition": "*待確認",
+    "edition": "2014",
     "title": "Sterilization of health care products — Ethylene oxide — Requirements for development, validation and routine control",
     "title_zh": "EO 環氧乙烷滅菌確效",
     "applies_to": [
@@ -801,11 +801,75 @@ window._ISO_MAP_EMBEDDED = {
       "k": "EO/ECH 殘留",
       "en": "residuals (見 10993-7)"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "品質管理系統元素(文件、管理職責、產品實現)",
+      "verified": true
+     },
+     {
+      "no": "5",
+      "title_zh": "滅菌劑特性鑑定(EO)",
+      "verified": true
+     },
+     {
+      "no": "6",
+      "title_zh": "製程與設備特性鑑定",
+      "verified": true
+     },
+     {
+      "no": "7",
+      "title_zh": "產品定義(材料/包裝/微生物品質)",
+      "verified": true
+     },
+     {
+      "no": "8",
+      "title_zh": "製程定義(循環參數)",
+      "verified": true
+     },
+     {
+      "no": "9",
+      "title_zh": "確效",
+      "verified": true
+     },
+     {
+      "no": "9.x",
+      "title_zh": "安裝/操作/性能確效(IQ/OQ/PQ，含微生物PQ)",
+      "verified": false
+     },
+     {
+      "no": "10",
+      "title_zh": "例行監測與控制",
+      "verified": true
+     },
+     {
+      "no": "11",
+      "title_zh": "從滅菌放行產品(含參數放行)",
+      "verified": true
+     },
+     {
+      "no": "12",
+      "title_zh": "維持製程有效性(再確效)",
+      "verified": true
+     },
+     {
+      "no": "Annex A",
+      "title_zh": "微生物方法(規範性)",
+      "verified": true
+     },
+     {
+      "no": "Annex E",
+      "title_zh": "單批放行(2018修訂)",
+      "verified": true
+     }
+    ],
+    "clauses_source": "ISO 官方/EN ISO/ANSI AAMI 一致 (2014版/第2版，含Amd1:2018 Annex E)",
+    "clauses_note": "條號/標題取自 ISO 官方公開預覽目次(OBP/iTeh)或一致權威整理，屬事實性目次；未含規範正文。標 verified:false 之子條為依範圍推得待正本確認。一律以正本最新版次為準，需 RA 核可。"
    },
    {
     "no": "ISO 11137-1",
-    "edition": "*待確認",
+    "edition": "2006",
     "title": "Sterilization of health care products — Radiation — Part 1: Requirements for development, validation and routine control",
     "title_zh": "輻射滅菌確效",
     "applies_to": [
@@ -823,11 +887,65 @@ window._ISO_MAP_EMBEDDED = {
       "k": "材料相容性",
       "en": "material effects"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "品質管理系統元素(文件、管理職責、產品實現)",
+      "verified": false
+     },
+     {
+      "no": "5",
+      "title_zh": "滅菌劑特性鑑定(輻射：60Co/137Cs/電子束/X射線)",
+      "verified": false
+     },
+     {
+      "no": "6",
+      "title_zh": "製程與設備特性鑑定",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "產品定義(材料/包裝相容性)",
+      "verified": false
+     },
+     {
+      "no": "8",
+      "title_zh": "製程定義(製程參數/劑量)",
+      "verified": false
+     },
+     {
+      "no": "9",
+      "title_zh": "確效(IQ/OQ/PQ)",
+      "verified": false
+     },
+     {
+      "no": "10",
+      "title_zh": "例行監測與控制",
+      "verified": false
+     },
+     {
+      "no": "11",
+      "title_zh": "從滅菌放行產品",
+      "verified": false
+     },
+     {
+      "no": "12",
+      "title_zh": "維持製程有效性(再確效)",
+      "verified": false
+     },
+     {
+      "no": "Annex B",
+      "title_zh": "劑量設定與驗證(配合ISO 11137-2)",
+      "verified": false
+     }
+    ],
+    "clauses_source": "ISO/TC198 滅菌系列共通架構(與已確認之11135一致)；2006版/第2版，注意2025已改版",
+    "clauses_note": "章節架構取自 ISO/TC198 滅菌系列共通編排(已由11135正本確認)，屬功能結構；未含規範正文。標 verified:false 之條為依共通架構推得，精確條號待該標準正本確認。一律以正本最新版次為準，需 RA 核可。"
    },
    {
     "no": "ISO 11607-1",
-    "edition": "*待確認",
+    "edition": "2019",
     "title": "Packaging for terminally sterilized medical devices — Part 1: Requirements for materials, sterile barrier systems and packaging systems",
     "title_zh": "最終滅菌器材包裝—無菌屏障系統",
     "applies_to": [
@@ -845,7 +963,41 @@ window._ISO_MAP_EMBEDDED = {
       "k": "老化(實時/加速)",
       "en": "aging / shelf life"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "一般要求(風險管理、文件)",
+      "verified": false
+     },
+     {
+      "no": "5",
+      "title_zh": "材料與預成型無菌屏障系統之要求",
+      "verified": false
+     },
+     {
+      "no": "5.x",
+      "title_zh": "材料基本屬性(微生物屏障/相容滅菌/毒理)",
+      "verified": false
+     },
+     {
+      "no": "5.x",
+      "title_zh": "密封強度、密封寬度、剝離特性(連續均勻、無分層/撕裂)",
+      "verified": false
+     },
+     {
+      "no": "6",
+      "title_zh": "包裝系統設計與設計確效",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "無菌呈現之可用性評估(2019新增)",
+      "verified": false
+     }
+    ],
+    "clauses_source": "ISO OBP 範圍/ANSI AAMI 一致 (2019版/第2版，2024確認現行，含Amd1；僅收功能結構)",
+    "clauses_note": "功能結構取自 ISO 官方範圍與一致權威整理；未含規範正文。標 verified:false 之條為依範圍/功能推得，精確條號待正本確認。一律以正本最新版次為準，需 RA 核可。"
    },
    {
     "no": "ISO 80369-7",
@@ -1235,7 +1387,7 @@ window._ISO_MAP_EMBEDDED = {
    },
    {
     "no": "ISO 17665",
-    "edition": "2024*",
+    "edition": "2024",
     "title": "Sterilization of health care products — Moist heat",
     "title_zh": "濕熱(蒸氣)滅菌確效",
     "applies_to": [
@@ -1254,11 +1406,75 @@ window._ISO_MAP_EMBEDDED = {
      {
       "k": "週期參數"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "品質管理系統元素(文件、管理職責、產品實現)",
+      "verified": false
+     },
+     {
+      "no": "5",
+      "title_zh": "滅菌劑特性鑑定(濕熱(飽和蒸氣/空氣-蒸氣混合等))",
+      "verified": false
+     },
+     {
+      "no": "6",
+      "title_zh": "製程與設備特性鑑定",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "產品定義(材料/包裝相容性)",
+      "verified": false
+     },
+     {
+      "no": "8",
+      "title_zh": "製程定義(製程參數/劑量)",
+      "verified": false
+     },
+     {
+      "no": "9",
+      "title_zh": "確效(IQ/OQ/PQ)",
+      "verified": false
+     },
+     {
+      "no": "10",
+      "title_zh": "例行監測與控制",
+      "verified": false
+     },
+     {
+      "no": "11",
+      "title_zh": "從滅菌放行產品",
+      "verified": false
+     },
+     {
+      "no": "12",
+      "title_zh": "維持製程有效性(再確效)",
+      "verified": false
+     },
+     {
+      "no": "Annex A",
+      "title_zh": "濕熱滅菌原理與要求依據(資訊性)",
+      "verified": true
+     },
+     {
+      "no": "Annex F",
+      "title_zh": "醫療機構應用指引(資訊性)",
+      "verified": true
+     },
+     {
+      "no": "Annex H",
+      "title_zh": "工業應用指引(資訊性)",
+      "verified": true
+     }
+    ],
+    "clauses_source": "ISO OBP 範圍/ISO/TC198 共通架構；2024版(單一標準，取代17665-1:2006+TS-2+TS-3三合一)",
+    "clauses_note": "章節架構取自 ISO/TC198 滅菌系列共通編排(已由11135正本確認)，屬功能結構；未含規範正文。標 verified:false 之條為依共通架構推得，精確條號待該標準正本確認。一律以正本最新版次為準，需 RA 核可。"
    },
    {
     "no": "ISO 11737-1",
-    "edition": "2018*",
+    "edition": "2018",
     "title": "Sterilization of health care products — Microbiological methods — Part 1: Determination of a population of microorganisms on products",
     "title_zh": "生物負荷(Bioburden)測定",
     "applies_to": [
@@ -1277,11 +1493,50 @@ window._ISO_MAP_EMBEDDED = {
      {
       "k": "定期監測"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "一般要求(風險導向、量測不確定度考量)",
+      "verified": false
+     },
+     {
+      "no": "5",
+      "title_zh": "生物負荷測定—樣本選取與抽樣",
+      "verified": false
+     },
+     {
+      "no": "6",
+      "title_zh": "微生物回收方法(移除/洗提技術)",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "計數技術(平板計數/薄膜過濾/最大可能數MPN)",
+      "verified": false
+     },
+     {
+      "no": "8",
+      "title_zh": "方法適用性試驗(回收效率/校正因子、LOD)",
+      "verified": false
+     },
+     {
+      "no": "9",
+      "title_zh": "生物負荷資料解讀與微生物特性鑑定",
+      "verified": false
+     },
+     {
+      "no": "Annex A",
+      "title_zh": "對Clause 1–9之指引(資訊性)",
+      "verified": true
+     }
+    ],
+    "clauses_source": "ISO 官方範圍/ANSI AAMI 一致 (2018版/第3版，含Amd1:2021；僅收功能結構)",
+    "clauses_note": "條號/標題取自 ISO 官方範圍與一致權威整理，屬事實性結構；未含規範正文。標 verified:false 之條為依範圍/功能推得，精確條號待正本確認。一律以正本最新版次為準，需 RA 核可。"
    },
    {
     "no": "ISO 11737-2",
-    "edition": "2019*",
+    "edition": "2019",
     "title": "Sterilization of health care products — Microbiological methods — Part 2: Tests of sterility performed in the definition, validation and maintenance of a sterilization process",
     "title_zh": "滅菌確效用無菌試驗",
     "applies_to": [
@@ -1300,11 +1555,40 @@ window._ISO_MAP_EMBEDDED = {
      {
       "k": "確效用試驗"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "一般要求",
+      "verified": false
+     },
+     {
+      "no": "5",
+      "title_zh": "無菌試驗—於製程定義/確效/維持之應用",
+      "verified": false
+     },
+     {
+      "no": "6",
+      "title_zh": "試驗方法驗證(培養基適用性、控制懸浮液初始菌數)",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "無菌試驗執行(樣本、培養條件)",
+      "verified": false
+     },
+     {
+      "no": "8",
+      "title_zh": "結果解讀與報告",
+      "verified": false
+     }
+    ],
+    "clauses_source": "ISO 官方範圍/多權威來源一致 (2019版/第3版；僅收功能結構)",
+    "clauses_note": "條號/標題取自 ISO 官方範圍與一致權威整理，屬事實性結構；未含規範正文。標 verified:false 之條為依範圍/功能推得，精確條號待正本確認。一律以正本最新版次為準，需 RA 核可。"
    },
    {
     "no": "ISO 11607-2",
-    "edition": "2019*",
+    "edition": "2019",
     "title": "Packaging for terminally sterilized medical devices — Part 2: Validation requirements for forming, sealing and assembly processes",
     "title_zh": "最終滅菌包裝—成形/密封/組裝製程確效",
     "applies_to": [
@@ -1323,7 +1607,46 @@ window._ISO_MAP_EMBEDDED = {
      {
       "k": "製程穩定性"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "一般要求",
+      "verified": false
+     },
+     {
+      "no": "5",
+      "title_zh": "成形/密封/組裝製程開發",
+      "verified": false
+     },
+     {
+      "no": "6",
+      "title_zh": "製程確效(IQ/OQ/PQ)",
+      "verified": false
+     },
+     {
+      "no": "6.x",
+      "title_zh": "安裝確效IQ",
+      "verified": false
+     },
+     {
+      "no": "6.x",
+      "title_zh": "操作確效OQ(製程參數範圍)",
+      "verified": false
+     },
+     {
+      "no": "6.x",
+      "title_zh": "性能確效PQ(密封完整性/再現性)",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "正常操作中之製程管控與監測",
+      "verified": false
+     }
+    ],
+    "clauses_source": "ISO OBP 範圍/ANSI AAMI 一致 (2019版/第2版，含Amd1；僅收功能結構)",
+    "clauses_note": "功能結構取自 ISO 官方範圍與一致權威整理；未含規範正文。標 verified:false 之條為依範圍/功能推得，精確條號待正本確認。一律以正本最新版次為準，需 RA 核可。"
    },
    {
     "no": "ISO 10993-4",
@@ -1740,7 +2063,41 @@ window._ISO_MAP_EMBEDDED = {
      {
       "k": "判定"
      }
-    ]
+    ],
+    "clauses": [
+     {
+      "no": "4",
+      "title_zh": "一般考量—階段式做法(優先in silico/in vitro，再in vivo)",
+      "verified": true
+     },
+     {
+      "no": "5",
+      "title_zh": "試驗前考量(材料化學資訊/暴露途徑)",
+      "verified": true
+     },
+     {
+      "no": "6",
+      "title_zh": "刺激試驗程序",
+      "verified": true
+     },
+     {
+      "no": "6.x",
+      "title_zh": "in vitro 皮膚刺激(重建人類表皮RhE模型，對應OECD 439)",
+      "verified": false
+     },
+     {
+      "no": "6.x",
+      "title_zh": "in vivo 刺激試驗(必要時)",
+      "verified": false
+     },
+     {
+      "no": "7",
+      "title_zh": "結果解讀關鍵因子",
+      "verified": true
+     }
+    ],
+    "clauses_source": "ISO 官方範圍/多權威來源一致 (2021版/第1版；刺激試驗，2021年自10993-10分出)",
+    "clauses_note": "條號/標題取自 ISO 官方公開預覽目次(OBP/iTeh)或一致權威整理，屬事實性目次；未含規範正文。標 verified:false 之子條為依範圍推得待正本確認。一律以正本最新版次為準，需 RA 核可。"
    }
   ]
  }
