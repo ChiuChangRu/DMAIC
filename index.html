@@ -2522,14 +2522,19 @@ async function downloadPlanDocx(){
       ch.push(PP(tx('註：標「(推測*)」者為 AI 無法明確建立與本問題因果關聯之因子，僅供發想；〔工具〕為程式依因子性質強制對應（可調參數→DOE、觀測現象→SPC、量測手法→MSA）；〔ISO …〕須以正本最新版次確認，需 RA 核可。',{size:18,color:GRAY,italics:true})));
     } else { ch.push(PP(tx('（無因子資料）',{color:GRAY}))); }
 
-    // ── 3.3 防呆與偵測強化策略（與魚骨圖因子不重疊：因子=源頭為何發生，本段=如何攔住流出）──
+    // ── 3.3 防呆與偵測強化策略 ──
     ch.push(H2('3.3 防呆與偵測強化策略'));
-    ch.push(new D.Paragraph({spacing:{before:40,after:60},children:[tx('【定位】因子查核（3.2）處理「不良為何發生」；本段處理「萬一發生，如何在出貨前攔住、不流到客戶端」——兩者不重疊。',{size:19,color:GRAY,italics:true})]}));
-    // 固定觀念框（一律呈現，零 token）
-    ch.push(new D.Paragraph({spacing:{after:40,line:300},children:[tx('許多不良在客戶端才被發現，常因出貨前檢測未涵蓋該失效模式。檢測要能攔住問題，須四道閘皆成立：①方法對此失效有偵測力；②人員判定/抽樣一致；③樣本量足夠且涵蓋失效分層；④失效落在出貨監控範圍內（長期老化等須移至設計驗證或上市後監督）。AQL 抽樣（ISO 2859-1）保護生產者、不保證攔截偶發缺陷，攔偶發應優先源頭防呆＋線上自動偵測。',{size:20})]}));
-    // AI 檢測手法檢討（沿四道閘，若有）
+    ch.push(new D.Paragraph({spacing:{after:60,line:300},children:[
+      tx('本段處理「萬一不良發生，如何在出貨前攔住」，與 3.2（不良為何發生）互補。',{size:19,color:GRAY})
+    ]}));
+    // 精簡重點框（不再長篇四道閘全文）
+    ch.push(new D.Paragraph({spacing:{after:120,line:300},children:[
+      tx('檢測攔截四要點：',{bold:true,size:19}),
+      tx('①方法對此失效要有偵測力；②人員判定/抽樣要一致；③樣本量足夠並涵蓋失效分層；④長期老化型失效須移至設計驗證或上市後監督。AQL 抽樣不保證攔偶發缺陷，攔偶發優先用源頭防呆＋線上自動偵測。',{size:19})
+    ]}));
+    // AI 檢測手法檢討（若有）
     if(_detectionReview){
-      ch.push(new D.Paragraph({spacing:{before:40,after:40},children:[tx('檢測手法檢討與 Poka-Yoke 防呆（AI，沿四道閘）',{bold:true,size:20})]}));
+      ch.push(new D.Paragraph({spacing:{before:40,after:40},children:[tx('檢測手法檢討（AI）',{bold:true,size:20})]}));
       ch.push(new D.Paragraph({spacing:{after:120,line:312},children:[tx(_detectionReview)]}));
     }
     // 聚焦的關鍵監控點攔截力檢討（使用者勾選者，若有）
@@ -5967,6 +5972,20 @@ window.renderFactorPanel = function renderFactorPanel(result) {
 
   // 摘要
   var html = '';
+  // (3) 根因收斂度：因子越多代表問題越發散、越未收斂到根因 → 信心越低；少而明確 → 高
+  var _nFac=0, _nHigh=0;
+  ['man','machine','material','method','measure','env'].forEach(function(c){
+    (result[c]||[]).forEach(function(f){ _nFac++; if(f.risk==='high')_nHigh++; });
+  });
+  if(_nFac>0){
+    // 12 個以上=發散(低)、6 以下=收斂(高)；線性內插
+    var convPct = Math.max(20, Math.min(95, Math.round(110 - _nFac*6)));
+    var convLabel = convPct>=75?'高（問題已收斂到少數因子）':convPct>=50?'中（因子偏多，建議再聚焦）':'低（因子發散，根因尚未收斂，建議回 AI 問答補關鍵線索）';
+    var convColor = convPct>=75?'#34D399':convPct>=50?'#FBBF24':'#F87171';
+    html += '<div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:.6rem;background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .7rem;line-height:1.6">'
+      + '🎯 根因收斂度：<span style="color:'+convColor+';font-weight:700">'+convPct+'%</span>　<span style="color:rgba(255,255,255,.5)">'+convLabel+'</span><br>'
+      + '<span style="color:rgba(255,255,255,.4)">共 '+_nFac+' 個因子（'+_nHigh+' 高風險）。因子越多代表問題越發散；收斂度低時，回 AI 問答補關鍵線索能讓根因更聚焦。</span></div>';
+  }
   if(result.summary){
     html += '<div style="font-size:12px;color:rgba(255,255,255,.8);margin-bottom:.75rem;line-height:1.65;padding-bottom:.5rem;border-bottom:1px solid rgba(255,255,255,.12)">'+String(result.summary).replace(/；/g,'；<br>').replace(/。(?!$)/g,'。<br>')+'</div>';
   }
@@ -7770,6 +7789,14 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
       html += '<div class="fb-factor-row" data-name="'+esc(f.name)+'" style="border:1px solid #E5E7EB;border-radius:8px;padding:.5rem .7rem;margin-bottom:.45rem;background:#fff">';
       html += '<div style="font-size:13px;font-weight:600;color:#1F2937;margin-bottom:.35rem">'+dot+' '+esc(f.name)
         + (f.speculative?' <span style="font-size:10px;color:#9CA3AF">(推測*)</span>':'') + '</div>';
+      // (5) AI 建議：顯示系統判定的處置與理由，供使用者參考（仍可自行調整）
+      var aiDispoLbl = (function(k){ for(var di=0;di<DISPO_DEFS.length;di++){ if(DISPO_DEFS[di].k===k) return DISPO_DEFS[di].label; } return k; })(_natureDefaultDispo(f));
+      if(f.control_method || aiDispoLbl){
+        html += '<div style="font-size:10.5px;color:#6B7280;margin-bottom:.4rem;line-height:1.45;background:#F9FAFB;border-radius:5px;padding:3px 7px">'
+          + '<b style="color:#2563EB">AI 建議：'+aiDispoLbl+'</b>'
+          + (f.control_method?(' — '+esc(f.control_method)):'')
+          + '</div>';
+      }
       html += '<div style="display:flex;flex-wrap:wrap;gap:.35rem">';
       DISPO_DEFS.forEach(function(d){
         var picks = (window._factorDispo[f.name]||{}).picks||[];
