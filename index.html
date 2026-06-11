@@ -2443,24 +2443,10 @@ async function downloadPlanDocx(){
       ch.push(tbl(sw,['釐清項目','作答'],survey.map(function(r,i){return trow([tx(r[0],{bold:true}),tx(r[1])],sw,i%2===1);})));
     }else{ ch.push(PP(tx('（本次未填寫問卷，或問卷欄位不在當前頁面）',{color:GRAY}))); }
 
-    // 逐因子查核表（6M 分組）：每列 = 因子｜風險｜對問題關聯｜驗證方式｜查核動作(含ISO)｜允收(留白)
-    var VMLBL={'統計實驗':'統計實驗','製程監控':'製程監控(SPC)','手法/SOP':'手法/SOP','GMP/品系':'GMP/品系','ISO確認':'ISO確認','文獻/工程評估':'文獻/工程評估'};
-    var hasFactors=false, checkRows=[], fi=0;
+    // 逐因子分析改為論述段落（見 3.2），不再用查核表；此處僅判斷有無因子
+    var hasFactors=false;
     ['man','machine','material','method','measure','env'].forEach(function(c){
-      (conf[c]||[]).forEach(function(f){ hasFactors=true; var z=(fi++%2===1);
-        var vm = f.verify_method ? (VMLBL[f.verify_method]||f.verify_method) : '—';
-        var act = f.verify_detail || '—';
-        if(f.iso_hint) act += '　〔'+f.iso_hint+'〕';
-        checkRows.push(trow([
-          tx(CATLBL[c]),
-          tx((f.name||'')+(f.speculative?' (推測*)':''),{bold:true}),
-          tx(RLBL[f.risk]||'中',{bold:(f.risk==='high')}),
-          tx(f.link||'—'),
-          tx(vm,{bold:true}),
-          tx(act),
-          tx('')   // 允收標準/結果：留白由工程填
-        ],[820,1500,620,2700,1100,2286,900],z));
-      });
+      if((conf[c]||[]).length) hasFactors=true;
     });
     ch.push(H1('3. 根本原因分析'));
     if(_aiNarr && _aiNarr.root_cause_narrative){
@@ -2491,13 +2477,41 @@ async function downloadPlanDocx(){
         tx('■ ',{size:19,color:'BE185D'}), tx('環境。',{size:19})
       ]}));
     }else{ ch.push(PP(tx('（尚未產生魚骨圖）',{color:GRAY}))); }
-    ch.push(H2('3.2 逐因子查核表（6M 分類）'));
-    ch.push(PP(tx('每個因子逐一查核：對問題的關聯說明，以及該用何種方式驗證這條關聯（統計實驗／製程監控／手法/SOP／GMP品系／ISO確認／文獻工程評估）。「允收/結果」欄留白，由工程依實況填入。',{size:19,color:GRAY})));
+    ch.push(H2('3.2 逐因子分析與卡控（6M 分類）'));
+    ch.push(PP(tx('以下依 6M 分類逐一論述每個因子：(1) 與問題的關聯（根本原因）、(2) 風險高低的判定原因、(3) 實務卡控／驗證方式（SOP／IFU／設計驗證／製程確效／SPC／MSA／DOE／ISO 符合性等）。',{size:19,color:GRAY})));
     if(hasFactors){
-      ch.push(tbl([820,1500,620,2700,1100,2286,900],
-        ['分類','因子','風險','對問題的關聯說明','驗證方式','查核動作（含適用 ISO）','允收/結果'],
-        checkRows));
-      ch.push(PP(tx('註：標「(推測*)」者為 AI 無法明確建立與本問題因果關聯之因子，僅供發想；〔ISO …〕為可能適用標準，須以正本最新版次確認，需 RA 核可。',{size:18,color:GRAY,italics:true})));
+      var CATCOLOR6={man:'1D4ED8',machine:'0891B2',material:'059669',method:'D97706',measure:'7C3AED',env:'BE185D'};
+      var VMLBL2={doe:'統計實驗（DOE）',pb:'統計實驗（PB篩選）',spc:'製程監控（SPC）',msa:'量測系統分析（MSA）',hypothesis:'統計實驗（假設檢定）',none:'文件／符合性查核'};
+      ['man','machine','material','method','measure','env'].forEach(function(c){
+        var arr=(conf[c]||[]); if(!arr.length) return;
+        ch.push(new D.Paragraph({spacing:{before:120,after:40},children:[tx('【'+CATLBL[c]+'】',{bold:true,size:21,color:CATCOLOR6[c]||INK})]}));
+        arr.forEach(function(f){
+          // 因子標題行：名稱＋風險
+          ch.push(new D.Paragraph({spacing:{before:80,after:20},children:[
+            tx('● '+(f.name||'')+'　',{bold:true,size:20}),
+            tx('風險：'+(RLBL[f.risk]||'中'),{bold:(f.risk==='high'),size:19,color:(f.risk==='high'?'DC2626':f.risk==='medium'?'92400E':GRAY)}),
+            f.speculative?tx('　(推測*)',{size:18,color:GRAY,italics:true}):tx('')
+          ]}));
+          // (1) 關聯
+          ch.push(new D.Paragraph({spacing:{after:20,line:300},indent:{left:240},children:[
+            tx('關聯（根本原因）：',{bold:true,size:19}), tx(f.link||'（待補）',{size:19})
+          ]}));
+          // (2) 風險原因
+          ch.push(new D.Paragraph({spacing:{after:20,line:300},indent:{left:240},children:[
+            tx('風險判定：',{bold:true,size:19}), tx(f.risk_reason||'（待補）',{size:19})
+          ]}));
+          // (3) 卡控方式（含驗證工具與 ISO）
+          var ctrl = f.control_method||'（待補）';
+          ch.push(new D.Paragraph({spacing:{after:60,line:300},indent:{left:240},children:[
+            tx('卡控／驗證：',{bold:true,size:19}),
+            tx(ctrl,{size:19}),
+            (f.tool && VMLBL2[f.tool])?tx('　〔'+VMLBL2[f.tool]+'〕',{size:18,color:'2563EB'}):tx(''),
+            f.iso_hint?tx('〔'+f.iso_hint+'〕',{size:18,color:'7C3AED'}):tx(''),
+            f.level_hint?tx('　建議水準：'+f.level_hint,{size:18,color:GRAY}):tx('')
+          ]}));
+        });
+      });
+      ch.push(PP(tx('註：標「(推測*)」者為 AI 無法明確建立與本問題因果關聯之因子，僅供發想；〔工具〕為程式依因子性質強制對應（可調參數→DOE、觀測現象→SPC、量測手法→MSA）；〔ISO …〕須以正本最新版次確認，需 RA 核可。',{size:18,color:GRAY,italics:true})));
     } else { ch.push(PP(tx('（無因子資料）',{color:GRAY}))); }
 
     // ── 3.3 防呆與偵測強化策略（與魚骨圖因子不重疊：因子=源頭為何發生，本段=如何攔住流出）──
@@ -5969,13 +5983,14 @@ window.renderFactorPanel = function renderFactorPanel(result) {
       html += '</div>';
       if(f.link) html += '<div style="font-size:10.5px;color:rgba(255,255,255,.5);padding-left:16px;line-height:1.4;margin-top:1px">↳ '+f.link+'</div>';
       if(f.verify_method){
-        var vmColor = {'統計實驗':'#7EC8E3','製程監控':'#34D399','手法/SOP':'#FBBF24','GMP/品系':'#F472B6','ISO確認':'#A78BFA','文獻/工程評估':'#94A3B8'}[f.verify_method]||'#94A3B8';
+        var vmColor = {'統計實驗':'#7EC8E3','製程監控':'#34D399','量測系統分析(MSA)':'#FBBF24','ISO/GMP符合性':'#A78BFA','文件/工程評估':'#94A3B8'}[f.verify_method]||'#94A3B8';
         html += '<div style="font-size:10px;padding-left:16px;line-height:1.4;margin-top:1px">'
           + '<span style="color:'+vmColor+';font-weight:600">⊳ '+f.verify_method+'</span>'
           + (f.iso_hint?(' <span style="color:rgba(167,139,250,.85)">['+f.iso_hint+']</span>'):'')
-          + (f.verify_detail?(' <span style="color:rgba(255,255,255,.45)">'+f.verify_detail+'</span>'):'')
+          + (f.level_hint?(' <span style="color:rgba(255,255,255,.4)">水準:'+f.level_hint+'</span>'):'')
           + '</div>';
       }
+      if(f.control_method) html += '<div style="font-size:10px;color:rgba(255,255,255,.42);padding-left:16px;line-height:1.4">卡控：'+f.control_method+'</div>';
       html += '</div>';
     });
     html += '</div>';
@@ -7910,6 +7925,24 @@ window.fbRenderOtherPipelines = function(){
 };
 
 
+// 依因子名回查因子物件（取 level_hint 等），跨 6M 類別找
+function _findFactorByName(name){
+  var conf = window._confirmedFactors || {};
+  var cats = ['man','machine','material','method','measure','env'];
+  for(var ci=0; ci<cats.length; ci++){
+    var arr = conf[cats[ci]]||[];
+    for(var i=0;i<arr.length;i++){ if(arr[i] && arr[i].name===name) return arr[i]; }
+  }
+  return null;
+}
+// 把 level_hint「180–200°C」「2~5 s」粗略拆成低/高（純為帶入便利，使用者仍須確認）
+function _parseLevelHint(hint){
+  if(!hint) return null;
+  var m = String(hint).match(/(-?\d+\.?\d*)\s*[~\-–—至到]\s*(-?\d+\.?\d*)/);
+  if(m) return { low:m[1], high:m[2] };
+  return null;
+}
+
 // 依工具帶入因子列表（新版）
 window.fbGoToolByList = function(names, toolId) {
   if(!names || names.length === 0) return;
@@ -7923,7 +7956,21 @@ window.fbGoToolByList = function(names, toolId) {
     if(targetTool === 'doe'){
       var nfEl = document.getElementById('doe-nf');
       if(nfEl){ nfEl.value = Math.min(names.length,4); if(typeof doeUpdateFactors==='function') doeUpdateFactors(); }
-      setTimeout(function(){ names.forEach(function(n,i){ var el=document.getElementById('doe-f'+(i+1)); if(el) el.value=n; }); if(typeof doeGenMatrix==='function') doeGenMatrix(); },350);
+      setTimeout(function(){
+        var hints=[];
+        names.forEach(function(n,i){
+          var el=document.getElementById('doe-f'+(i+1)); if(el) el.value=n;
+          // 解脫鉤：把魚骨圖階段 AI 建議的水準範圍帶進 DOE
+          var f=_findFactorByName(n);
+          if(f && f.level_hint){
+            var lv=_parseLevelHint(f.level_hint);
+            if(lv){ var lo=document.getElementById('doe-l'+(i+1)), hi=document.getElementById('doe-h'+(i+1)); if(lo&&!lo.value)lo.value=lv.low; if(hi&&!hi.value)hi.value=lv.high; }
+            hints.push(n+'：'+f.level_hint);
+          }
+        });
+        if(typeof doeGenMatrix==='function') doeGenMatrix();
+        if(hints.length){ var hd=document.createElement('div'); hd.style.cssText='font-size:11px;color:#15803D;margin-top:4px'; hd.innerHTML='建議水準（來自因子分析，請確認）：'+hints.join('；'); msg.appendChild(hd); }
+      },350);
       msg.innerHTML = '✅ 已帶入 <strong>'+names.length+'</strong> 個因子到 DOE：'+names.join('、');
       var c=document.querySelector('#page-doe .card'); if(c){var e=c.querySelector('.fb-import-msg');if(e)e.remove();c.insertBefore(msg,c.firstChild);}
     } else if(targetTool === 'pb'){
