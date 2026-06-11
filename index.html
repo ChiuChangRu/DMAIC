@@ -2443,15 +2443,23 @@ async function downloadPlanDocx(){
       ch.push(tbl(sw,['釐清項目','作答'],survey.map(function(r,i){return trow([tx(r[0],{bold:true}),tx(r[1])],sw,i%2===1);})));
     }else{ ch.push(PP(tx('（本次未填寫問卷，或問卷欄位不在當前頁面）',{color:GRAY}))); }
 
-    var hasFactors=false, frows=[], fi=0;
+    // 逐因子查核表（6M 分組）：每列 = 因子｜風險｜對問題關聯｜驗證方式｜查核動作(含ISO)｜允收(留白)
+    var VMLBL={'統計實驗':'統計實驗','製程監控':'製程監控(SPC)','手法/SOP':'手法/SOP','GMP/品系':'GMP/品系','ISO確認':'ISO確認','文獻/工程評估':'文獻/工程評估'};
+    var hasFactors=false, checkRows=[], fi=0;
     ['man','machine','material','method','measure','env'].forEach(function(c){
       (conf[c]||[]).forEach(function(f){ hasFactors=true; var z=(fi++%2===1);
-        frows.push(trow([
-          tx(CATLBL[c]), tx(f.name,{bold:true}),
+        var vm = f.verify_method ? (VMLBL[f.verify_method]||f.verify_method) : '—';
+        var act = f.verify_detail || '—';
+        if(f.iso_hint) act += '　〔'+f.iso_hint+'〕';
+        checkRows.push(trow([
+          tx(CATLBL[c]),
+          tx((f.name||'')+(f.speculative?' (推測*)':''),{bold:true}),
           tx(RLBL[f.risk]||'中',{bold:(f.risk==='high')}),
           tx(f.link||'—'),
-          tx(f.speculative?'推測*':'',{color:GRAY})
-        ],[1500,1900,760,4066,800],z));
+          tx(vm,{bold:true}),
+          tx(act),
+          tx('')   // 允收標準/結果：留白由工程填
+        ],[820,1500,620,2700,1100,2286,900],z));
       });
     });
     ch.push(H1('3. 根本原因分析'));
@@ -2483,24 +2491,26 @@ async function downloadPlanDocx(){
         tx('■ ',{size:19,color:'BE185D'}), tx('環境。',{size:19})
       ]}));
     }else{ ch.push(PP(tx('（尚未產生魚骨圖）',{color:GRAY}))); }
-    ch.push(H2('3.2 因子清單與關聯'));
-    if(hasFactors){ ch.push(tbl([1500,1900,760,4066,800],['分類','因子','風險','因子→問題關聯鏈','備註'],frows)); }
-    else{ ch.push(PP(tx('（無因子資料）',{color:GRAY}))); }
+    ch.push(H2('3.2 逐因子查核表（6M 分類）'));
+    ch.push(PP(tx('每個因子逐一查核：對問題的關聯說明，以及該用何種方式驗證這條關聯（統計實驗／製程監控／手法/SOP／GMP品系／ISO確認／文獻工程評估）。「允收/結果」欄留白，由工程依實況填入。',{size:19,color:GRAY})));
+    if(hasFactors){
+      ch.push(tbl([820,1500,620,2700,1100,2286,900],
+        ['分類','因子','風險','對問題的關聯說明','驗證方式','查核動作（含適用 ISO）','允收/結果'],
+        checkRows));
+      ch.push(PP(tx('註：標「(推測*)」者為 AI 無法明確建立與本問題因果關聯之因子，僅供發想；〔ISO …〕為可能適用標準，須以正本最新版次確認，需 RA 核可。',{size:18,color:GRAY,italics:true})));
+    } else { ch.push(PP(tx('（無因子資料）',{color:GRAY}))); }
 
-    // ── 3.3 監控攔截力與檢測手法檢討 ──
-    ch.push(H2('3.3 監控攔截力與檢測手法檢討'));
-    // (固定觀念提醒框，一律呈現，零 token，喚醒意識)
-    ch.push(new D.Paragraph({spacing:{before:40,after:60},children:[tx('【為何不良常在客戶端才被發現】',{bold:true,size:21})]}));
-    ch.push(new D.Paragraph({spacing:{after:40,line:300},children:[tx('監控要能攔到問題，須同時成立四道閘，任一不成立即失效：①檢驗方法對「此失效模式」有偵測力（方法看不到，再多抽樣也沒用）；②人員判定與抽樣執行的一致性；③樣本數量足夠且涵蓋失效的發生分層（數量＝攔截機率 1−(1−p)ⁿ，未分層仍會漏）；④失效是否落在出貨監控的範圍內（長期老化等出廠當下不存在的失效，須移到設計驗證或上市後監督）。',{size:20})]}));
-    ch.push(new D.Paragraph({spacing:{after:160,line:300},children:[tx('提醒：AQL 計數抽樣（ISO 2859-1）目的在約束製程平均、保護生產者，本質上不保證攔截偶發/低率缺陷；攔偶發缺陷應優先「源頭防呆（Poka-Yoke）＋線上自動偵測」，而非單純加大樣本數。',{size:20,color:GRAY})]}));
-
-    // (AI 檢測手法檢討與防呆，若有)
+    // ── 3.3 防呆與偵測強化策略（與魚骨圖因子不重疊：因子=源頭為何發生，本段=如何攔住流出）──
+    ch.push(H2('3.3 防呆與偵測強化策略'));
+    ch.push(new D.Paragraph({spacing:{before:40,after:60},children:[tx('【定位】因子查核（3.2）處理「不良為何發生」；本段處理「萬一發生，如何在出貨前攔住、不流到客戶端」——兩者不重疊。',{size:19,color:GRAY,italics:true})]}));
+    // 固定觀念框（一律呈現，零 token）
+    ch.push(new D.Paragraph({spacing:{after:40,line:300},children:[tx('許多不良在客戶端才被發現，常因出貨前檢測未涵蓋該失效模式。檢測要能攔住問題，須四道閘皆成立：①方法對此失效有偵測力；②人員判定/抽樣一致；③樣本量足夠且涵蓋失效分層；④失效落在出貨監控範圍內（長期老化等須移至設計驗證或上市後監督）。AQL 抽樣（ISO 2859-1）保護生產者、不保證攔截偶發缺陷，攔偶發應優先源頭防呆＋線上自動偵測。',{size:20})]}));
+    // AI 檢測手法檢討（沿四道閘，若有）
     if(_detectionReview){
-      ch.push(new D.Paragraph({spacing:{before:40,after:40},children:[tx('檢測手法檢討與防呆（Poka-Yoke）',{bold:true,size:20})]}));
+      ch.push(new D.Paragraph({spacing:{before:40,after:40},children:[tx('檢測手法檢討與 Poka-Yoke 防呆（AI，沿四道閘）',{bold:true,size:20})]}));
       ch.push(new D.Paragraph({spacing:{after:120,line:312},children:[tx(_detectionReview)]}));
     }
-
-    // (聚焦的監控攔截力檢討表——只列使用者勾選納入者；AI 已篩 2-4 個關鍵點，不對全因子套用)
+    // 聚焦的關鍵監控點攔截力檢討（使用者勾選者，若有）
     var intcInc = (window._interceptionReviews||[]).filter(function(x){ return x && x._inc!==false; });
     if(intcInc.length){
       ch.push(new D.Paragraph({spacing:{before:80,after:40},children:[tx('關鍵監控點攔截力檢討（AI 聚焦 '+intcInc.length+' 點，非全因子）',{bold:true,size:20})]}));
@@ -2515,154 +2525,19 @@ async function downloadPlanDocx(){
           tx(detail.join('\n')),
           tx(x.disposition_hint||'—'),
           tx(x.escape_risk||'—'),
-          tx('')   // 留白：最終判定(a維持/b強化/c改方法) 由 RA/工程填
+          tx('')
         ],icw,i%2===1);
       });
       ch.push(tbl(icw,['監控點','①方法 ②人員 ③樣本/分層','判定傾向(AI)','逃逸風險','最終判定'],icrows));
-      ch.push(new D.Paragraph({spacing:{after:160},children:[tx('（上表為 AI 聚焦篩選之關鍵監控點，非全因子逐一探討，以免流於空談；「判定傾向」為 AI 建議，「最終判定」欄留白由 RA／工程依實況定案：a 維持／b 強化代表性／c 本質無效需改方法或移至開發/上市後。推論標（*）。）',{size:18,color:GRAY,italics:true})]}));
+      ch.push(new D.Paragraph({spacing:{after:160},children:[tx('（AI 聚焦關鍵監控點，非全因子逐一探討以免空談；「最終判定」留白由 RA／工程定案：a 維持／b 強化／c 改方法或移至開發/上市後。推論標（*）。）',{size:18,color:GRAY,italics:true})]}));
+    }
+    if(!_detectionReview && !intcInc.length){
+      ch.push(PP(tx('（如需 AI 產生本案專屬的檢測手法檢討與防呆建議，請於下載前勾選「加入 AI 敘事」或按「AI 篩選監控攔截力檢討」。）',{size:19,color:GRAY})));
     }
 
-    var OTHER_ORDER=['compliance','method_dev','risk_evidence','use_side','supplier','uncontrollable'];
-    var expPlans=plans.filter(function(p){ return !p.pipeline || p.pipeline==='experiment'; });
-    var otherPlans=plans.filter(function(p){ return OTHER_ORDER.indexOf(p.pipeline)>=0; });
-
-    ch.push(H1('4. 驗證計畫（實驗／統計類）'));
-    if(expPlans.length){ var pw=[1900,1100,3766,2260];
-      var prows=expPlans.map(function(p,i){return trow([
-        tx(p.factor,{bold:true}), tx(p.subtype||p.tool||'—',{bold:true}),
-        tx(p.verification||'—'), tx(p.data_needed||'—')
-      ],pw,i%2===1);});
-      ch.push(tbl(pw,['因子','建議工具','建議驗證動作','所需數據'],prows));
-    }else{ ch.push(PP(tx('（無實驗／統計類驗證項目）',{color:GRAY}))); }
-
-    // 4.x 展開「已儲存且勾選納入」的實驗設計（因子表 + 空白設計矩陣）
-    var savedExps = window._savedExperiments || {};
-    var incExps = Object.keys(savedExps)
-      .map(function(k){ return savedExps[k]; })
-      .filter(function(e){ return e && e.include!==false; });
-    if(incExps.length){
-      ch.push(PP(tx('以下為已於各工具儲存並勾選「納入計畫書」之實驗設計（空白設計表，待執行填入數據）：',{size:20,color:GRAY})));
-      var _si = 0;
-      incExps.forEach(function(exp){
-        _si++;
-        ch.push(H2('4.'+_si+' 實驗設計：'+(exp.label||exp.tool)
-          + (exp.factors&&exp.factors.length? ('（'+exp.factors.length+' 因子）') : '')));
-        // 設計後設資訊
-        var metaBits=[];
-        if(exp.designType){ metaBits.push('設計類型：'+({full:'全因子',fractional:'部分因子',pb:'Plackett-Burman'}[exp.designType]||exp.designType)); }
-        if(exp.yname){ metaBits.push('反應變數：'+exp.yname); }
-        if(exp.rep){ metaBits.push('重複數：'+exp.rep); }
-        if(metaBits.length) ch.push(PP(tx(metaBits.join('　｜　'),{size:20,color:GRAY})));
-
-        if(exp.factors && exp.factors.length){
-          // 因子水準表
-          var fw=[1100,3300,2313,2313];
-          var fr=exp.factors.map(function(f,i){return trow([
-            tx('F'+(i+1),{bold:true}), tx(f.name||'—',{bold:true}),
-            tx(f.low||'—'), tx(f.high||'—')
-          ],fw,i%2===1);});
-          ch.push(tbl(fw,['代號','因子名稱','低水準 (−1)','高水準 (+1)'],fr));
-
-          // 空白設計矩陣（係數 ±1 + 空白結果欄）
-          if(exp.matrix && exp.matrix.length){
-            var nf = exp.factors.length;
-            var rep = exp.rep || 1;
-            var mh = ['實驗#'].concat(exp.factors.map(function(f,i){return 'F'+(i+1);}));
-            for(var rp=0; rp<rep; rp++){ mh.push('結果'+(rep>1?(' '+(rp+1)):'')); }
-            var colN = mh.length;
-            var each = Math.floor(9026/colN);
-            var mw = mh.map(function(){ return each; });
-            var mrows = exp.matrix.map(function(row,ri){
-              var cells = [ tx(String(ri+1),{bold:true}) ];
-              for(var c=0;c<nf;c++){ cells.push(tx(row[c]===1?'+1':'−1')); }
-              for(var rp2=0;rp2<rep;rp2++){ cells.push(tx('')); }   // 空白結果
-              return trow(cells, mw, ri%2===1);
-            });
-            ch.push(tbl(mw, mh, mrows));
-            ch.push(PP(tx('（上表為空白設計矩陣；+1／−1 為因子編碼水準，結果欄待實驗後填入。）',{size:18,color:GRAY,italics:true})));
-          }
-        } else if(exp.params && exp.params.length){
-          // 非 DOE 類：規劃參數表
-          var ppw=[3000,6026];
-          var pprows=exp.params.map(function(p,i){return trow([tx(p[0],{bold:true}),tx(p[1]||'—')],ppw,i%2===1);});
-          ch.push(tbl(ppw,['規劃項目','設定'],pprows));
-        }
-      });
-    }
-
-    // 4.x SPC 製程管控（直接寫入，不帶入工具）：列出要監控的特徵與 AI 觀察原因
-    if(spcChars.length){
-      ch.push(H2('4.S SPC 製程管控特徵'));
-      ch.push(PP(tx('以下特徵建議以管制圖（SPC）持續監控製程穩定性；觀察原因由 AI 依本案事實整理（推論標 *）。',{size:20,color:GRAY})));
-      var sw2=[2600,6426];
-      var srows=spcChars.map(function(name,i){
-        var reason = _spcReasons[name] || '（待補觀察原因）';
-        return trow([ tx(name,{bold:true}), tx(reason) ], sw2, i%2===1);
-      });
-      ch.push(tbl(sw2,['監控特性','觀察原因'],srows));
-    }
-
-    ch.push(H1('5. 其他處置（非實驗類）'));
-    // 只列已勾選「納入」的其他處置（未勾選者排除；預設為勾選）
-    var dispoSel = window._otherDispoSel || {};
-    var otherPlansInc = otherPlans.filter(function(p){ return dispoSel[p.factor]!==false; });
-    var otherExcluded = otherPlans.length - otherPlansInc.length;
-    if(otherPlansInc.length){
-      ch.push(PP(tx('以下因子不以 DOE／SPC／MSA 等實驗統計處理，而循規範符合性、方法開發、風險、使用端、供應商等途徑處置（僅列已勾選「納入」者）。',{size:20,color:GRAY})));
-      var ow=[1900,1500,5626];
-      var orows=otherPlansInc.map(function(p,i){return trow([
-        tx(p.factor,{bold:true}),
-        tx((PMETA[p.pipeline]&&PMETA[p.pipeline].label)||p.pipeline||'—'),
-        tx(p.verification||'—')
-      ],ow,i%2===1);});
-      ch.push(tbl(ow,['因子','處置途徑','建議處置'],orows));
-      if(otherExcluded>0) ch.push(PP(tx('（另有 '+otherExcluded+' 項其他處置未勾選納入，已排除。）',{size:18,color:GRAY,italics:true})));
-    }else if(otherPlans.length){
-      ch.push(PP(tx('（其他處置項目均未勾選納入，已全部排除。）',{color:GRAY})));
-    }else{ ch.push(PP(tx('（無非實驗類處置項目）',{color:GRAY}))); }
-
-    ch.push(H1('6. ISO 規範對照'));
-    var NM=(typeof _isoNameMap==='function')?_isoNameMap():{};
-    function _rtag(no){ var e=NM[no]; if(!e) return ''; if(!e.ed) return '(*待確認)'; return e.ok?('('+e.ed+')'):('('+e.ed+'*)'); }
-    // 只列勾選「納入」的 ISO 標準（預設勾選）；對照表也僅保留這些標準的項目
-    var isoSel = window._isoInclude || {};
-    var isoAppsInc = isoApps.filter(function(a){ return isoSel[a.no]!==false; });
-    var incNos = {}; isoAppsInc.forEach(function(a){ incNos[a.no]=1; });
-    var isoInc = iso.filter(function(r){ return !r.standard || incNos[r.standard] || Object.keys(incNos).length===0; });
-    var isoExcluded = isoApps.length - isoAppsInc.length;
-    if(isoAppsInc.length){
-      ch.push(H2('6.1 已判定適用標準'));
-      var aw=[1900,1200,4300,1626];
-      var arows=isoAppsInc.map(function(a,i){var e=NM[a.no]||{};return trow([
-        tx(a.no,{bold:true}), tx(_rtag(a.no)), tx(e.title||'—'), tx(a.reason||'')
-      ],aw,i%2===1);});
-      ch.push(tbl(aw,['ISO 標準','版次','名稱','適用理由'],arows));
-      if(isoExcluded>0) ch.push(PP(tx('（另有 '+isoExcluded+' 項適用標準未勾選納入，已排除。）',{size:18,color:GRAY,italics:true})));
-    }else if(isoApps.length){
-      ch.push(PP(tx('（ISO 適用標準均未勾選納入，已全部排除。）',{color:GRAY})));
-    }
-    if(isoInc.length && isoAppsInc.length){
-      ch.push(H2('6.2 因子 ↔ 標準／章節對照'));
-      var iw=[1400,1400,2400,900,1100,1826];
-      var irows=isoInc.map(function(r,i){var wait=String(r.clause||'').indexOf('待建檔')>=0; var z=i%2===1;
-        return trow([
-          tx(r.factor||'—'), tx(r.standard||'—',{bold:true}),
-          tx(r.clause||'（章節待建檔）',{color:wait?GRAY:INK,italics:wait}),
-          tx(SLBL[r.status]||'部分',{bold:(r.status==='gap')}),
-          tx(r.covered_by||''), tx(r.note||'',{size:20,color:GRAY})
-        ],iw,z);
-      });
-      ch.push(tbl(iw,['因子/要求','ISO 標準','章節','狀態','對應','備註'],irows));
-    }else if(isoApps.length){
-      ch.push(PP(tx('（本次未產生逐因子↔章節對照；可於工具中按「🔄 重新比對 ISO」後再下載）',{color:GRAY})));
-    }
-    if(isoApps.length||iso.length){
-      ch.push(PP([tx('註：章節僅引用已建檔項目；標「（章節待建檔）」者尚未建章節（不自創條號）。一律以 ISO 正本最新版次為準，需 RA 核可。',{size:19,color:GRAY})]));
-    }else{ ch.push(PP(tx('（尚未產生 ISO 對照，或本器材未對應到標準）',{color:GRAY}))); }
-
-    // AI 結論與後續行動（選用）
+    // ── 4. 結論與後續行動（AI，選用）──
     if(_aiNarr && _aiNarr.conclusion){
-      ch.push(H1('7. 結論與後續行動（AI 整理）'));
+      ch.push(H1('4. 結論與後續行動（AI 整理）'));
       ch.push(new D.Paragraph({spacing:{after:120,line:312},children:[tx(_aiNarr.conclusion)]}));
       ch.push(new D.Paragraph({spacing:{after:160},children:[tx('（本段為 AI 依前述已確認資料歸納之建議，未新增事實；推論句以（*）標記，請由 RA／工程依正本標準與實際數據覆核。）',{size:18,color:GRAY,italics:true})]}));
     }
@@ -6093,6 +5968,14 @@ window.renderFactorPanel = function renderFactorPanel(result) {
       html += '<button onclick="homeRemoveFactor(this,\''+cat+'\','+idx+')" title="刪除" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;padding:0 1px;flex-shrink:0;line-height:1">×</button>';
       html += '</div>';
       if(f.link) html += '<div style="font-size:10.5px;color:rgba(255,255,255,.5);padding-left:16px;line-height:1.4;margin-top:1px">↳ '+f.link+'</div>';
+      if(f.verify_method){
+        var vmColor = {'統計實驗':'#7EC8E3','製程監控':'#34D399','手法/SOP':'#FBBF24','GMP/品系':'#F472B6','ISO確認':'#A78BFA','文獻/工程評估':'#94A3B8'}[f.verify_method]||'#94A3B8';
+        html += '<div style="font-size:10px;padding-left:16px;line-height:1.4;margin-top:1px">'
+          + '<span style="color:'+vmColor+';font-weight:600">⊳ '+f.verify_method+'</span>'
+          + (f.iso_hint?(' <span style="color:rgba(167,139,250,.85)">['+f.iso_hint+']</span>'):'')
+          + (f.verify_detail?(' <span style="color:rgba(255,255,255,.45)">'+f.verify_detail+'</span>'):'')
+          + '</div>';
+      }
       html += '</div>';
     });
     html += '</div>';
@@ -6166,7 +6049,8 @@ window.homeSummarizeFactors = async function(tools) {
       window._confirmedFactors = data.result;
       renderFactorPanel(data.result);
     } else {
-      panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5">⚠️ 整理失敗，請手動確認</div>';
+      var em = data.error ? ('⚠️ '+data.error) : '⚠️ 整理失敗，請手動確認';
+      panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5;line-height:1.5">'+em+'</div>';
     }
   } catch(e) {
     panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5">⚠️ 連線失敗</div>';
