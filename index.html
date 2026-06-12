@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b03 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -470,12 +470,13 @@ tr:hover td{background:#F9FAFB}
 </style>
 <script>
 (function(){
-  // 建置版本：每次交付固定，用來分辨 html 版本（不再用「開啟時間」，那無法區分新舊）
-  var BUILD = 'b0612-魚頭+中文名+標紅+ISO防呆';
-  window._buildTime = BUILD;
+  // ★版本號（每次交付遞增，方便分辨部署的是哪一版）★
+  var VERSION = 'v5.3-b03';
+  window._appVersion = VERSION;
+  window._buildTime = VERSION;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v5.3 · ' + BUILD;
+    if(el) el.textContent = VERSION;
   });
 })();
 </script>
@@ -494,7 +495,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b03</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -7161,6 +7162,9 @@ function deriveCategoryKeys(info){
     'respiratory': ['respiratory','呼吸','氧氣','面罩','噴霧','mask','oxygen','nebulizer'],
     'anaesthetic': ['anaesthetic','anesthetic','麻醉'],
     'infusion': ['infusion','輸液','點滴','延長管','iv set','輸液套'],
+    'enteral': ['enteral','鼻胃管','餵食管','腸道餵食','灌食','ng tube','feeding tube','enfit'],
+    'drainage': ['drainage','引流','引流管','引流導管','經皮引流','pigtail drainage'],
+    'biliary': ['biliary','鼻膽','鼻膽引流','膽道','epbd','膽管'],
     'iv-bag': ['iv bag','輸液袋','軟袋','iv袋','點滴袋','輸液容器','parenteral'],
     'container': ['container','容器'],
     'biliary': ['biliary','膽道','鼻膽','膽管'],
@@ -7189,9 +7193,14 @@ function expandCategoryKeys(keys){
     'infusion':    ['set','iv'],            // 輸液常為輸液套組(set)
     'iv-bag':      ['container','軟袋'],     // IV 軟袋
     'extracorporeal':['blood','bloodline','dialysis','HD'],
-    'connector':   ['luer'],
-    'syringe':     ['barrel','注射筒','injector','luer','80369'],  // 注射筒→7886-1/7886-4/80369-7(Luer)
-    'guide':       ['needle']               // 同軸導引針屬針類
+    'connector':   ['luer','80369','小口徑'],   // 連接器→80369系列
+    'syringe':     ['barrel','注射筒','injector','luer','80369','注射針','針管'],  // 注射筒→7886/80369-7
+    'needle':      ['注射針','皮下針','針管','hypodermic','biopsy','生檢針','活檢針','切片針'],  // 針→7864/9626/生檢針
+    'guide':       ['needle'],              // 同軸導引針屬針類
+    'enteral':     ['鼻胃管','餵食管','80369-3','ENFit'],   // 腸道餵食→20695/80369-3
+    'biliary':     ['鼻膽引流','EPBD','腸胃','gastroenterology'],
+    'drainage':    ['引流','drainage','經皮引流'],
+    'urology':     ['ureteral','輸尿管','stent','DJ','pigtail']
   };
   var out = Array.isArray(keys) ? keys.slice() : [];
   var seen = {}; out.forEach(function(k){ seen[k]=1; });
@@ -9274,7 +9283,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v5.3 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent=(window._appVersion||'v5.3');},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -9408,7 +9417,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v5.3 · '+window._buildTime);
+  status(window._appVersion||'v5.3');
 
   // 顯示 Worker 版本
   fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{

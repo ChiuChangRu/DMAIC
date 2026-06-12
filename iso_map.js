@@ -1,7 +1,3 @@
-// iso_map v5.1（MedQA）
-// ── MedQA ISO 對照資料（從 index.html 拆出，方便維護）──
-// 維護方式：直接編輯本檔；新增/修改標準、章節都只動這裡。index.html 以 <script src="iso_map.js"> 載入。
-// 規則：標準編號/章節以 ISO 正本為準；查不到公開目錄者用 clauses_note 標『待建檔』，勿自創條號。
 window._ISO_MAP_EMBEDDED = {
  "_meta": {
   "schema": "iso_map v1.0",
@@ -360,6 +356,163 @@ window._ISO_MAP_EMBEDDED = {
        "verified": true
       }
      ]
+    },
+    {
+     "no": "ISO 7864",
+     "edition": "2016",
+     "title": "Sterile hypodermic needles for single use — Requirements and test methods",
+     "title_zh": "無菌單次使用皮下注射針—要求與試驗方法",
+     "applies_to": [
+      "needle",
+      "注射針",
+      "皮下針",
+      "hypodermic",
+      "針"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "針管尺寸/規格(Gauge)",
+       "en": "size designation / gauge"
+      },
+      {
+       "k": "針尖銳利度/穿刺力",
+       "en": "point sharpness / penetration force"
+      },
+      {
+       "k": "針管與針座接合力",
+       "en": "needle tube/hub bond strength"
+      },
+      {
+       "k": "針管剛性/抗彎",
+       "en": "stiffness / resistance to breakage"
+      },
+      {
+       "k": "耐腐蝕",
+       "en": "corrosion resistance"
+      },
+      {
+       "k": "通暢度(不阻塞)",
+       "en": "patency / lumen"
+      },
+      {
+       "k": "潤滑(矽化)",
+       "en": "lubricant"
+      }
+     ],
+     "clauses": []
+    },
+    {
+     "no": "ISO 9626",
+     "edition": "2016",
+     "title": "Stainless steel needle tubing for the manufacture of medical devices — Requirements and test methods",
+     "title_zh": "醫療器材製造用不鏽鋼針管—要求與試驗方法",
+     "applies_to": [
+      "needle",
+      "針管",
+      "tubing",
+      "不鏽鋼針",
+      "針"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "尺寸(外徑/內徑/壁厚)",
+       "en": "dimensions (OD/ID/wall)"
+      },
+      {
+       "k": "抗拉強度",
+       "en": "tensile strength"
+      },
+      {
+       "k": "抗彎剛性(剛性/彈性)",
+       "en": "stiffness / elastic modulus"
+      },
+      {
+       "k": "耐腐蝕",
+       "en": "corrosion resistance"
+      },
+      {
+       "k": "表面/清潔度",
+       "en": "surface / cleanliness"
+      }
+     ],
+     "clauses": []
+    },
+    {
+     "no": "ISO 7886-1",
+     "edition": "2017",
+     "title": "Sterile hypodermic syringes for single use — Part 1: Syringes for manual use",
+     "title_zh": "無菌單次使用皮下注射筒—第1部:手動操作注射筒",
+     "applies_to": [
+      "syringe",
+      "注射筒",
+      "針筒",
+      "barrel",
+      "luer",
+      "注射器"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "容量準確度/刻度",
+       "en": "graduated capacity / scale"
+      },
+      {
+       "k": "活塞滑動力(順暢度)",
+       "en": "force to operate piston"
+      },
+      {
+       "k": "不漏液(密合)",
+       "en": "freedom from leakage past piston"
+      },
+      {
+       "k": "Luer接頭(錐度配合)",
+       "en": "conical fitting (Luer)"
+      },
+      {
+       "k": "死腔",
+       "en": "dead space"
+      }
+     ],
+     "clauses_note": "clauses 待建檔；高壓動力注射筒不在本標準範圍(應對應 IEC 60601-2 系列或設備標準)*",
+     "clauses": []
+    },
+    {
+     "no": "ISO 7886-4",
+     "edition": "2018",
+     "title": "Sterile hypodermic syringes for single use — Part 4: Syringes with re-use prevention feature",
+     "title_zh": "無菌單次使用皮下注射筒—第4部:具防再用功能注射筒",
+     "applies_to": [
+      "syringe",
+      "注射筒",
+      "防再用",
+      "auto-disable"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "防再用機構功能",
+       "en": "re-use prevention function"
+      },
+      {
+       "k": "容量準確度",
+       "en": "graduated capacity"
+      },
+      {
+       "k": "活塞滑動力",
+       "en": "force to operate piston"
+      },
+      {
+       "k": "不漏液",
+       "en": "freedom from leakage"
+      }
+     ],
+     "clauses": []
     }
    ]
   },
@@ -369,31 +522,45 @@ window._ISO_MAP_EMBEDDED = {
    "standards": [
     {
      "no": "ASTM F1828",
-     "edition": "*非ISO,待確認",
+     "edition": "(2017)",
      "title": "Standard Specification for Ureteral Stents",
      "title_zh": "輸尿管支架規格(ASTM,非ISO)*",
      "applies_to": [
       "ureteral",
+      "輸尿管",
+      "stent",
+      "支架",
       "DJ",
       "pigtail",
-      "stent"
+      "雙j",
+      "豬尾"
      ],
-     "id_verified": false,
+     "id_verified": true,
      "items_status": "draft_pending_RA",
      "items": [
       {
-       "k": "拉伸/接合強度",
-       "en": "tensile — RA 補"
+       "k": "尺寸(管徑/長度)",
+       "en": "dimensions"
       },
       {
-       "k": "捲曲保持力(pigtail)",
-       "en": "coil retention — RA 補"
+       "k": "放射不透性",
+       "en": "radio-opacity"
       },
       {
-       "k": "流速/側孔",
-       "en": "flow — RA 補"
+       "k": "抗拉強度",
+       "en": "tensile strength"
+      },
+      {
+       "k": "線圈保持力(retention coil)",
+       "en": "coil retention strength"
+      },
+      {
+       "k": "流量(內腔通暢)",
+       "en": "flow / patency"
       }
-     ]
+     ],
+     "clauses_note": "輸尿管支架主要對應 ASTM F1828(美規)；ISO 無單一專屬支架標準，材料/塗層另對應 10993、生物降解性依設計；以同類510k(K number)實證為主要驗證依據*",
+     "clauses": []
     }
    ]
   },
@@ -680,6 +847,603 @@ window._ISO_MAP_EMBEDDED = {
        "k": "標示/相容性"
       }
      ]
+    }
+   ]
+  },
+  "11.040.30": {
+   "title": "Surgical instruments / biopsy needles｜手術器械與生檢針",
+   "standards": [
+    {
+     "no": "ISO 7864",
+     "edition": "2016",
+     "title": "(see needle standard) — biopsy needle tube portion may reference",
+     "title_zh": "(生檢針之針管部分可參考 ISO 7864/9626)",
+     "applies_to": [
+      "biopsy",
+      "生檢針",
+      "活檢針",
+      "切片針",
+      "needle"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "針尖銳利度/穿刺力",
+       "en": "point sharpness / puncture force"
+      },
+      {
+       "k": "針管剛性/抗斷裂",
+       "en": "stiffness / resistance to breakage"
+      }
+     ],
+     "clauses": [],
+     "clauses_note": "生檢針無單一專屬ISO橫向標準；機械性能多參考 ISO 7864/9626(針)+ 廠內規格 + 同類510k實證(K number)。取樣量/擊發力/組織切取屬功能驗證，以同類510k為主*"
+    }
+   ]
+  },
+  "11.040.25_connectors": {
+   "title": "Small-bore connectors｜小口徑連接器(80369系列)",
+   "standards": [
+    {
+     "no": "ISO 80369-1",
+     "edition": "2018",
+     "title": "Small-bore connectors for liquids and gases in healthcare applications — Part 1: General requirements",
+     "title_zh": "醫療用液體與氣體小口徑連接器—第1部:通則",
+     "applies_to": [
+      "connector",
+      "連接器",
+      "小口徑",
+      "luer",
+      "80369"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "不互連性(防誤接)",
+       "en": "non-interconnectable design"
+      },
+      {
+       "k": "洩漏(正壓/負壓)",
+       "en": "leakage (positive/negative pressure)"
+      },
+      {
+       "k": "分離力/結合力",
+       "en": "separation force / assembly"
+      },
+      {
+       "k": "應力開裂",
+       "en": "stress cracking"
+      }
+     ],
+     "clauses": []
+    },
+    {
+     "no": "ISO 80369-7",
+     "edition": "2021",
+     "title": "Small-bore connectors — Part 7: Connectors for intravascular or hypodermic applications (Luer)",
+     "title_zh": "小口徑連接器—第7部:血管內或皮下用連接器(Luer)",
+     "applies_to": [
+      "connector",
+      "luer",
+      "血管內",
+      "注射",
+      "80369",
+      "注射筒",
+      "導管"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "Luer錐度尺寸配合",
+       "en": "luer taper dimensions"
+      },
+      {
+       "k": "液體洩漏",
+       "en": "fluid leakage"
+      },
+      {
+       "k": "分離力/過扭力",
+       "en": "separation / overriding torque"
+      },
+      {
+       "k": "耐壓(300kPa)",
+       "en": "resistance to pressure (300 kPa)"
+      },
+      {
+       "k": "應力開裂",
+       "en": "stress cracking"
+      }
+     ],
+     "clauses_note": "Luer 僅驗到 300kPa；高壓動力注射(>300kPa)超出本標準範圍，應另對應導管本體爆破壓(ISO 10555-1)或設備標準*",
+     "clauses": []
+    },
+    {
+     "no": "ISO 80369-20",
+     "edition": "2015",
+     "title": "Small-bore connectors — Part 20: Common test methods",
+     "title_zh": "小口徑連接器—第20部:通用試驗方法",
+     "applies_to": [
+      "connector",
+      "80369",
+      "試驗方法",
+      "luer"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "洩漏試驗方法",
+       "en": "leakage test method"
+      },
+      {
+       "k": "應力開裂試驗",
+       "en": "stress cracking test"
+      },
+      {
+       "k": "分離/結合力試驗",
+       "en": "separation/assembly force test"
+      }
+     ],
+     "clauses": []
+    }
+   ]
+  },
+  "_horizontal": {
+   "title": "通用橫向標準｜Horizontal standards (器材級，非逐技術因子)",
+   "_note": "這些是全器材通用框架標準。配對時只在『該因子本質就是該標準核心議題』時才配，否則列為器材級通用，不逐因子氾濫。",
+   "standards": [
+    {
+     "no": "ISO 10993-1",
+     "edition": "2018",
+     "title": "Biological evaluation of medical devices — Part 1: Evaluation and testing within a risk management process",
+     "title_zh": "醫療器材生物相容性評估—第1部:風險管理流程內的評估與試驗",
+     "applies_to": [
+      "生物相容",
+      "材料",
+      "接觸",
+      "biocompat",
+      "10993"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "生物相容性評估策略(依接觸類型/時間)",
+       "en": "biological evaluation per contact category"
+      },
+      {
+       "k": "細胞毒性(10993-5)",
+       "en": "cytotoxicity"
+      },
+      {
+       "k": "致敏(10993-10)",
+       "en": "sensitization"
+      },
+      {
+       "k": "皮內反應(10993-23)",
+       "en": "irritation"
+      },
+      {
+       "k": "急毒/熱原(10993-11)",
+       "en": "systemic toxicity / pyrogen"
+      },
+      {
+       "k": "血液相容(10993-4)",
+       "en": "haemocompatibility"
+      }
+     ],
+     "clauses_note": "只配『材料/組織接觸/溶出』類因子；不配操作/製程/尺寸因子",
+     "clauses": []
+    },
+    {
+     "no": "ISO 11135",
+     "edition": "2014",
+     "title": "Sterilization of health-care products — Ethylene oxide — Requirements for development, validation and routine control",
+     "title_zh": "醫療產品滅菌—環氧乙烷(EO)—確效與例行管制要求",
+     "applies_to": [
+      "滅菌",
+      "無菌",
+      "EO",
+      "環氧乙烷",
+      "sterli",
+      "11135"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "滅菌確效(IQ/OQ/PQ)",
+       "en": "sterilization validation"
+      },
+      {
+       "k": "無菌保證水準(SAL 10^-6)",
+       "en": "sterility assurance level"
+      },
+      {
+       "k": "EO殘留",
+       "en": "EO residuals (ref ISO 10993-7)"
+      }
+     ],
+     "clauses_note": "只配滅菌/無菌因子",
+     "clauses": []
+    },
+    {
+     "no": "ISO 11137-1",
+     "edition": "2025",
+     "title": "Sterilization of health-care products — Radiation — Part 1: Requirements",
+     "title_zh": "醫療產品滅菌—輻射—第1部:要求",
+     "applies_to": [
+      "滅菌",
+      "無菌",
+      "輻射",
+      "radiation",
+      "gamma",
+      "11137"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "輻射滅菌劑量確效",
+       "en": "radiation dose validation"
+      },
+      {
+       "k": "無菌保證水準",
+       "en": "SAL"
+      },
+      {
+       "k": "材料輻射相容性",
+       "en": "material radiation compatibility"
+      }
+     ],
+     "clauses_note": "只配滅菌/無菌因子",
+     "clauses": []
+    },
+    {
+     "no": "ISO 17665",
+     "edition": "2024",
+     "title": "Sterilization of health care products — Moist heat — Requirements for development, validation and routine control",
+     "title_zh": "醫療產品滅菌—濕熱(蒸氣)—確效與例行管制要求",
+     "applies_to": [
+      "滅菌",
+      "蒸氣",
+      "濕熱",
+      "steam",
+      "17665"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "濕熱滅菌確效",
+       "en": "moist heat validation"
+      },
+      {
+       "k": "無菌保證水準",
+       "en": "SAL"
+      }
+     ],
+     "clauses_note": "只配滅菌/無菌因子；2024已三合一",
+     "clauses": []
+    },
+    {
+     "no": "ISO 11607-1",
+     "edition": "2019",
+     "title": "Packaging for terminally sterilized medical devices — Part 1: Requirements for materials, sterile barrier systems and packaging systems",
+     "title_zh": "最終滅菌醫療器材包裝—第1部:材料、無菌屏障系統與包裝系統要求",
+     "applies_to": [
+      "包裝",
+      "無菌屏障",
+      "封口",
+      "packag",
+      "11607"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "無菌屏障完整性",
+       "en": "sterile barrier integrity"
+      },
+      {
+       "k": "密封強度",
+       "en": "seal strength"
+      },
+      {
+       "k": "包裝材料性能",
+       "en": "material performance"
+      }
+     ],
+     "clauses_note": "指『無菌包裝袋/泡殼封口』，不是導管Hub接合；只配包裝/封口因子",
+     "clauses": []
+    },
+    {
+     "no": "ISO 11607-2",
+     "edition": "2019",
+     "title": "Packaging for terminally sterilized medical devices — Part 2: Validation requirements for forming, sealing and assembly processes",
+     "title_zh": "最終滅菌醫療器材包裝—第2部:成形/密封/組裝製程確效要求",
+     "applies_to": [
+      "包裝",
+      "封口",
+      "製程確效",
+      "packag",
+      "11607"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "成形/密封/組裝製程確效(IQ/OQ/PQ)",
+       "en": "forming/sealing/assembly process validation"
+      },
+      {
+       "k": "密封製程參數確認",
+       "en": "seal process parameters"
+      }
+     ],
+     "clauses_note": "指『無菌包裝封口製程』，不是導管熱熔接合；只配包裝封口因子",
+     "clauses": []
+    },
+    {
+     "no": "ISO 13485",
+     "edition": "2016",
+     "title": "Medical devices — Quality management systems — Requirements for regulatory purposes",
+     "title_zh": "醫療器材—品質管理系統—法規用途要求",
+     "applies_to": [
+      "品質系統",
+      "QMS",
+      "製程確效",
+      "13485"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "製程確效",
+       "en": "process validation (7.5.6)"
+      },
+      {
+       "k": "設計管制",
+       "en": "design control (7.3)"
+      },
+      {
+       "k": "監測量測設備管制",
+       "en": "control of monitoring/measuring equipment (7.6)"
+      }
+     ],
+     "clauses_note": "全廠QMS框架；列為器材級通用，原則上不逐技術因子配",
+     "clauses": []
+    },
+    {
+     "no": "ISO 14971",
+     "edition": "2019",
+     "title": "Medical devices — Application of risk management to medical devices",
+     "title_zh": "醫療器材—風險管理應用",
+     "applies_to": [
+      "風險管理",
+      "FMEA",
+      "risk",
+      "14971"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "風險分析/評估",
+       "en": "risk analysis/evaluation"
+      },
+      {
+       "k": "風險管制措施",
+       "en": "risk control"
+      },
+      {
+       "k": "整體剩餘風險評估",
+       "en": "overall residual risk"
+      }
+     ],
+     "clauses_note": "只配『需風險分析/FMEA才能判定』的因子；不逐因子氾濫",
+     "clauses": []
+    },
+    {
+     "no": "IEC 62366-1",
+     "edition": "2015",
+     "title": "Medical devices — Part 1: Application of usability engineering to medical devices",
+     "title_zh": "醫療器材—第1部:可用性工程應用",
+     "applies_to": [
+      "可用性",
+      "人因",
+      "使用者",
+      "usability",
+      "62366",
+      "操作"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "使用相關風險分析",
+       "en": "use-related risk analysis"
+      },
+      {
+       "k": "形成性評估",
+       "en": "formative evaluation"
+      },
+      {
+       "k": "總結性評估",
+       "en": "summative evaluation"
+      }
+     ],
+     "clauses_note": "只配『使用者操作介面/人因』因子",
+     "clauses": []
+    }
+   ]
+  },
+  "11.040.20_enteral": {
+   "title": "Enteral feeding / NG tube｜腸道餵食與鼻胃管",
+   "standards": [
+    {
+     "no": "ISO 20695",
+     "edition": "2020",
+     "title": "Enteral feeding systems — Design and testing",
+     "title_zh": "腸道餵食系統—設計與測試(鼻胃管/餵食管)",
+     "applies_to": [
+      "鼻胃管",
+      "餵食管",
+      "腸道餵食",
+      "enteral",
+      "NG tube",
+      "feeding"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "接合強度(管身/接頭)",
+       "en": "tensile / junction strength"
+      },
+      {
+       "k": "管路通暢/不阻塞",
+       "en": "patency"
+      },
+      {
+       "k": "洩漏(液體)",
+       "en": "leakage"
+      },
+      {
+       "k": "放射不透標記(可定位)",
+       "en": "radio-opacity / position marking"
+      },
+      {
+       "k": "連接器防誤接(ENFit, ISO 80369-3)",
+       "en": "enteral connector (ENFit)"
+      },
+      {
+       "k": "標記耐久性(油墨/刻度)",
+       "en": "marking durability"
+      }
+     ],
+     "clauses_note": "連接器另對應 ISO 80369-3 (ENFit 腸道專用，防與靜脈系統誤接)；油墨標記耐久屬本標準+廠內規格*",
+     "clauses": []
+    },
+    {
+     "no": "ISO 80369-3",
+     "edition": "2016",
+     "title": "Small-bore connectors — Part 3: Connectors for enteral applications (ENFit)",
+     "title_zh": "小口徑連接器—第3部:腸道用連接器(ENFit)",
+     "applies_to": [
+      "鼻胃管",
+      "餵食管",
+      "腸道",
+      "enteral",
+      "ENFit",
+      "connector",
+      "連接器"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "不互連性(防與IV/Luer誤接)",
+       "en": "non-interconnectable with IV"
+      },
+      {
+       "k": "洩漏",
+       "en": "leakage"
+      },
+      {
+       "k": "分離力",
+       "en": "separation force"
+      }
+     ],
+     "clauses": []
+    }
+   ]
+  },
+  "11.040.25_drainage": {
+   "title": "Drainage catheters｜引流導管(經皮/外科引流)",
+   "standards": [
+    {
+     "no": "ISO 10555-1",
+     "edition": "2023",
+     "title": "(General requirements apply to drainage catheters)",
+     "title_zh": "血管內導管通則(引流導管之管身/接合/洩漏可參考)",
+     "applies_to": [
+      "drainage",
+      "引流",
+      "drainage catheter",
+      "pigtail引流",
+      "經皮引流"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "管身峰值拉伸力/接合強度",
+       "en": "tensile / bond strength"
+      },
+      {
+       "k": "洩漏(加壓不漏)",
+       "en": "leakage"
+      },
+      {
+       "k": "放射不透性",
+       "en": "radio-opacity"
+      },
+      {
+       "k": "線圈保持力(pigtail型)",
+       "en": "coil retention (pigtail)"
+      },
+      {
+       "k": "流量/通暢",
+       "en": "flow / patency"
+      }
+     ],
+     "clauses_note": "引流導管無單一專屬ISO橫向標準；管身/接合/洩漏參考 ISO 10555-1 通則 + 廠內規格 + 同類510k；外科引流管材料另對應 10993*",
+     "clauses": []
+    }
+   ]
+  },
+  "11.040.55_gi": {
+   "title": "Gastroenterology｜腸胃科(鼻膽引流/EPBD)",
+   "standards": [
+    {
+     "no": "ISO 10555-1",
+     "edition": "2023",
+     "title": "(General requirements may apply to biliary drainage catheters)",
+     "title_zh": "導管通則(鼻膽引流管之管身/接合/洩漏可參考)",
+     "applies_to": [
+      "鼻膽引流",
+      "biliary",
+      "EPBD",
+      "gastroenterology",
+      "腸胃",
+      "引流"
+     ],
+     "id_verified": true,
+     "items_status": "draft_pending_RA",
+     "items": [
+      {
+       "k": "管身拉伸/接合強度",
+       "en": "tensile / bond"
+      },
+      {
+       "k": "洩漏",
+       "en": "leakage"
+      },
+      {
+       "k": "放射不透性",
+       "en": "radio-opacity"
+      },
+      {
+       "k": "流量/通暢",
+       "en": "flow / patency"
+      }
+     ],
+     "clauses_note": "鼻膽引流管/EPBD無單一專屬ISO；參考導管通則 ISO 10555-1 + 球囊部分參考 10555-4 + 廠內 + 同類510k；多為ODM代工案*",
+     "clauses": []
     }
    ]
   }
