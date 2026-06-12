@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.1 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -476,7 +476,7 @@ tr:hover td{background:#F9FAFB}
   window._buildTime = ts;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v5.1 · ' + ts;
+    if(el) el.textContent = 'v5.3 · ' + ts;
   });
 })();
 </script>
@@ -495,7 +495,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.1</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -6127,6 +6127,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     try {
       // 中文 → 英文（查 FDA 用）
       var FDA_KEY = 'feGMbWYwCzBlC7Fmbvx4uSyySdcan5QYVhzgOIz2';
+      window.FDA_KEY = FDA_KEY;
       var searchName = name;
       try {
         var hasChinese = /[\u4e00-\u9fff]/.test(name);
@@ -6179,6 +6180,25 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
       if(data.result) {
         window._deviceInfo = data.result;
+        // 若用中文直譯查不到 product code，改用 AI 給的「FDA 正式英文名」重查一次
+        if((!window._fdaProductCodes || !window._fdaProductCodes.length) && data.result.fda_search_name){
+          try{
+            var rq = 'https://api.fda.gov/device/510k.json?api_key='+FDA_KEY+'&search=device_name:"'
+              + encodeURIComponent(data.result.fda_search_name) + '"&limit=20&sort=decision_date:desc';
+            var rr = await fetch(rq); var rj = await rr.json();
+            if(rj.results && rj.results.length){
+              var pm2={};
+              rj.results.forEach(function(r){ var pc=r.product_code; if(pc){ if(!pm2[pc])pm2[pc]={code:pc,count:0,sampleName:r.device_name,cls:(r.device_class||'?')}; pm2[pc].count++; } });
+              window._fdaProductCodes = Object.keys(pm2).map(function(k){return pm2[k];}).sort(function(a,b){return b.count-a.count;});
+              window._deviceInfo._fdaSearchUsed = data.result.fda_search_name;
+            }
+          }catch(e){}
+        }
+        // AI 若直接給了 product_code_guess，補進候選
+        if(data.result.product_code_guess && (!window._fdaProductCodes||!window._fdaProductCodes.some(function(p){return p.code===data.result.product_code_guess;}))){
+          window._fdaProductCodes = window._fdaProductCodes||[];
+          window._fdaProductCodes.push({ code:data.result.product_code_guess, count:0, sampleName:'(AI 建議代碼)', cls:'?' });
+        }
         renderDeviceCard(data.result);
         showStep(2);
       } else {
@@ -6226,7 +6246,14 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     var pcs = window._fdaProductCodes || [];
     window._selectedProductCodes = window._selectedProductCodes || [];
     if(!pcs.length){
-      return '<div style="margin-top:.6rem;font-size:11px;color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .7rem">未從 FDA 自動帶出 product code，510(k) 查詢將改用器材名稱。可於下方手動輸入 3 碼代碼：<input id="pc-manual" oninput="window._selectedProductCodes=this.value?[this.value.toUpperCase()]:[]" maxlength="3" style="width:60px;margin-left:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:5px;color:#fff;padding:2px 6px;text-transform:uppercase;font-size:11px" placeholder="FMF"></div>';
+      var hint = (window._deviceInfo&&window._deviceInfo.fda_search_name)?(' 系統已試過「'+window._deviceInfo.fda_search_name+'」仍無結果。'):'';
+      return '<div style="margin-top:.6rem;font-size:11px;color:rgba(255,255,255,.55);background:rgba(255,255,255,.05);border-radius:8px;padding:.6rem .8rem;line-height:1.7">'
+        + '🔎 <b>未從 FDA 自動帶出 product code。</b>'+hint+'<br>'
+        + '可換個 FDA 慣用英文名稱重查（例：angiographic injector、piston syringe、contrast injector）：<br>'
+        + '<input id="pc-research" placeholder="輸入英文名稱" style="width:200px;margin-top:4px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:5px;color:#fff;padding:3px 8px;font-size:11px">'
+        + '<button onclick="researchProductCode()" style="margin-left:6px;background:#2563EB;color:#fff;border:none;border-radius:5px;padding:3px 12px;font-size:11px;cursor:pointer">重查</button>'
+        + '<div style="margin-top:6px">或直接手動輸入 3 碼代碼：<input id="pc-manual" oninput="window._selectedProductCodes=this.value?[this.value.toUpperCase()]:[]" maxlength="3" style="width:60px;margin-left:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);border-radius:5px;color:#fff;padding:2px 6px;text-transform:uppercase;font-size:11px" placeholder="DXT"></div>'
+        + '<div id="pc-research-result" style="margin-top:6px"></div></div>';
     }
     // 預設選最常出現的第一個
     if(!window._selectedProductCodes.length && pcs[0]) window._selectedProductCodes=[pcs[0].code];
@@ -6249,6 +6276,31 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     else { window._selectedProductCodes.push(pc); el.style.cssText='background:rgba(110,231,183,.2);border:1.5px solid #6EE7B7;color:#6EE7B7;font-weight:600;border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;user-select:none'; }
     // 同步到 deviceInfo
     if(window._deviceInfo) window._deviceInfo.product_code = window._selectedProductCodes[0]||'';
+  };
+
+  // 使用者換英文關鍵字重查 product code（問到懂為止）
+  window.researchProductCode = async function(){
+    var inp = document.getElementById('pc-research');
+    var out = document.getElementById('pc-research-result');
+    var kw = inp ? inp.value.trim() : '';
+    if(!kw){ if(out) out.innerHTML='<span style="color:#FCA5A5">請先輸入英文名稱</span>'; return; }
+    if(out) out.innerHTML='<span style="color:rgba(255,255,255,.5)">查詢中…</span>';
+    try{
+      var FDA_KEY = window.FDA_KEY || '';
+      var q='https://api.fda.gov/device/510k.json?'+(FDA_KEY?('api_key='+FDA_KEY+'&'):'')+'search=device_name:"'+encodeURIComponent(kw)+'"&limit=20&sort=decision_date:desc';
+      var r=await fetch(q); var j=await r.json();
+      if(j.results && j.results.length){
+        var pm={};
+        j.results.forEach(function(x){ var pc=x.product_code; if(pc){ if(!pm[pc])pm[pc]={code:pc,count:0,sampleName:x.device_name,cls:(x.device_class||'?')}; pm[pc].count++; } });
+        window._fdaProductCodes = Object.keys(pm).map(function(k){return pm[k];}).sort(function(a,b){return b.count-a.count;});
+        window._selectedProductCodes = window._fdaProductCodes[0]?[window._fdaProductCodes[0].code]:[];
+        if(window._deviceInfo) window._deviceInfo.product_code = window._selectedProductCodes[0]||'';
+        // 重繪器材卡帶出代碼晶片
+        if(typeof renderDeviceCard==='function') renderDeviceCard(window._deviceInfo);
+      } else {
+        if(out) out.innerHTML='<span style="color:#FCA5A5">「'+kw+'」仍查無結果，換個更通用的 FDA 名稱再試（如去掉品牌、用器材類別名）。</span>';
+      }
+    }catch(e){ if(out) out.innerHTML='<span style="color:#FCA5A5">查詢失敗：'+(e&&e.message||'')+'</span>'; }
   };
 
   // ── Step 2：確認器材 ──
@@ -8786,7 +8838,7 @@ document.addEventListener('click', function(e) {
   var APP_VER='dmaic-v2-records';
   function activePage(){return document.querySelector('.page.active')||document.getElementById('page-home');}
   function pageKey(){var p=activePage();return p ? p.id : 'page-home';}
-  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v5.0 · '+window._buildTime;},2200);}}
+  function status(msg){var el=document.getElementById('dmaic-save-status');if(el){el.textContent=msg;setTimeout(function(){el.textContent='v5.3 · '+window._buildTime;},2200);}}
   function today(){return new Date().toISOString().slice(0,10);}
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
@@ -8919,7 +8971,7 @@ document.addEventListener('click', function(e) {
 
   window.dmaicEnhanceRecords();
   window.dmaicRestoreCurrent();
-  status('v5.0 · '+window._buildTime);
+  status('v5.3 · '+window._buildTime);
 
   // 顯示 Worker 版本
   fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
