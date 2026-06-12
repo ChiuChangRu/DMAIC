@@ -3209,7 +3209,7 @@ function fishboneDraw(){
   else { FZ_CAUSE=11; FZ_CAT=14; FZ_HEAD=15; }
   // 最小間距：因子少時加大，使中骨沿大骨平均散開
   const MIN_GAP = totalCauses <= 4 ? 46 : totalCauses <= 8 ? 34 : 22;
-  const T_LO = 0.16, T_HI = 0.92, T_SPAN = T_HI - T_LO;
+  const T_LO = 0.42, T_HI = 0.94, T_SPAN = T_HI - T_LO;   // 因子集中在大骨偏魚頭段(42%~94%)，魚尾端留白不放因子、避免被畫布邊緣切到
   const BONE_DX = 80;
   const BONE_DY = Math.max(totalCauses<=4?160:130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
   const CAUSE_LEN = 30;
@@ -3279,7 +3279,7 @@ function fishboneDraw(){
     var sorted = cat.causes.slice().sort(function(a,b){ return (RANK[a.risk]||2)-(RANK[b.risk]||2); });
     const n=sorted.length;
     sorted.forEach((cause,ci)=>{
-      const t = n===1 ? 0.55 : T_LO + T_SPAN*ci/(n-1);
+      const t = n===1 ? 0.72 : T_LO + T_SPAN*ci/(n-1);
       const bx=(jx-BONE_DX)+ddx*t;
       const by=endY+ddy*t;
       const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#9CA3AF';
@@ -6339,20 +6339,16 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         }
       } catch(e) { /* 翻譯失敗就用原文 */ }
 
-      // 前端查 FDA 510k（抓更多筆以蒐集 product_code）
-      var fdaUrl = 'https://api.fda.gov/device/510k.json?api_key='+FDA_KEY+'&search=device_name:"'
-        + encodeURIComponent(searchName) + '"&limit=20&sort=decision_date:desc';
+      // 第2點：器材搜尋改「多策略漸進」，大幅提高命中率（單一精確匹配太死、常搜不到）
       var fdaData = '';
       var pcMap = {};   // product_code -> {code, count, sampleName, class}
       try {
-        var fdaResp = await fetch(fdaUrl);
-        var fdaJson = await fdaResp.json();
-        if(fdaJson.results && fdaJson.results.length > 0) {
-          fdaData = fdaJson.results.slice(0,3).map(function(r){
-            return r.device_name + ' (' + r.applicant + ', ' + r.decision_date + ', Class:' + (r.device_class||'?') + ', PC:' + (r.product_code||'?') + ')';
+        var hits = await fdaMultiSearch(searchName, FDA_KEY);
+        if(hits.length){
+          fdaData = hits.slice(0,3).map(function(r){
+            return r.device_name + ' (' + (r.applicant||'') + ', ' + (r.decision_date||'') + ', Class:' + (r.device_class||'?') + ', PC:' + (r.product_code||'?') + ')';
           }).join('\n');
-          // 蒐集所有出現的 product_code，依出現次數排序
-          fdaJson.results.forEach(function(r){
+          hits.forEach(function(r){
             var pc = r.product_code;
             if(pc){
               if(!pcMap[pc]) pcMap[pc] = { code:pc, count:0, sampleName:r.device_name, cls:(r.device_class||'?') };
@@ -6379,15 +6375,13 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
 
       if(data.result) {
         window._deviceInfo = data.result;
-        // 若用中文直譯查不到 product code，改用 AI 給的「FDA 正式英文名」重查一次
+        // 若用中文直譯查不到 product code，改用 AI 給的「FDA 正式英文名」用多策略重查
         if((!window._fdaProductCodes || !window._fdaProductCodes.length) && data.result.fda_search_name){
           try{
-            var rq = 'https://api.fda.gov/device/510k.json?api_key='+FDA_KEY+'&search=device_name:"'
-              + encodeURIComponent(data.result.fda_search_name) + '"&limit=20&sort=decision_date:desc';
-            var rr = await fetch(rq); var rj = await rr.json();
-            if(rj.results && rj.results.length){
+            var rj2 = await fdaMultiSearch(data.result.fda_search_name, FDA_KEY);
+            if(rj2.length){
               var pm2={};
-              rj.results.forEach(function(r){ var pc=r.product_code; if(pc){ if(!pm2[pc])pm2[pc]={code:pc,count:0,sampleName:r.device_name,cls:(r.device_class||'?')}; pm2[pc].count++; } });
+              rj2.forEach(function(r){ var pc=r.product_code; if(pc){ if(!pm2[pc])pm2[pc]={code:pc,count:0,sampleName:r.device_name,cls:(r.device_class||'?')}; pm2[pc].count++; } });
               window._fdaProductCodes = Object.keys(pm2).map(function(k){return pm2[k];}).sort(function(a,b){return b.count-a.count;});
               window._deviceInfo._fdaSearchUsed = data.result.fda_search_name;
             }
@@ -8837,6 +8831,42 @@ async function gtTranslate(text) {
     return text; // 翻譯失敗回傳原文
   }
 }
+
+// 第2點：FDA 器材多策略漸進搜尋 — 大幅提高命中率
+// 策略順序：① 510k device_name 精確片語 → ② 不加引號(分詞OR) → ③ 關鍵字AND →
+//          ④ classification 官方分類名 → ⑤ 單一最關鍵字(最後手段)；合併去重
+async function fdaMultiSearch(name, key){
+  if(!name) return [];
+  var kp = key ? ('api_key='+key+'&') : '';
+  var seen = {}; var out = [];
+  function add(results){
+    (results||[]).forEach(function(r){
+      var id = (r.k_number||r.product_code||'')+(r.device_name||'');
+      if(id && !seen[id]){ seen[id]=1; out.push(r); }
+    });
+  }
+  async function tryFetch(url){
+    try{ var r=await fetch(url); var j=await r.json(); return (j.results||[]); }catch(e){ return []; }
+  }
+  var nameClean = String(name).replace(/[^\w\s,-]/g,' ').trim();
+  var words = nameClean.split(/\s+/).filter(function(w){ return w.length>=3; });
+
+  add(await tryFetch('https://api.fda.gov/device/510k.json?'+kp+'search=device_name:"'+encodeURIComponent(nameClean)+'"&limit=20&sort=decision_date:desc'));
+  if(out.length<3) add(await tryFetch('https://api.fda.gov/device/510k.json?'+kp+'search=device_name:'+encodeURIComponent(nameClean)+'&limit=20&sort=decision_date:desc'));
+  if(out.length<3 && words.length>=2){
+    var andq = words.slice(0,3).map(function(w){return 'device_name:'+encodeURIComponent(w);}).join('+AND+');
+    add(await tryFetch('https://api.fda.gov/device/510k.json?'+kp+'search='+andq+'&limit=20&sort=decision_date:desc'));
+  }
+  if(out.length<3){
+    add(await tryFetch('https://api.fda.gov/device/classification.json?'+kp+'search=device_name:'+encodeURIComponent(nameClean)+'&limit=10'));
+  }
+  if(out.length<1 && words.length){
+    var mainWord = words.slice().sort(function(a,b){return b.length-a.length;})[0];
+    add(await tryFetch('https://api.fda.gov/device/510k.json?'+kp+'search=device_name:'+encodeURIComponent(mainWord)+'&limit=20&sort=decision_date:desc'));
+  }
+  return out;
+}
+window.fdaMultiSearch = fdaMultiSearch;
 
 // 第2點：用 product_code 查 FDA MAUDE 真實不良事件，萃取常見問題供 AI 追問
 // 結果存 window._maudeProblems = [{type, count}]、window._maudeSamples = [原文摘要]
