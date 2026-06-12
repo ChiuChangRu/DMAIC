@@ -2375,7 +2375,7 @@ async function generateCapaPdf(){
     +'tr:nth-child(even) td{background:#F8FAFF}'
     +'.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;background:#F1F5F9;padding:10px 14px;border-radius:6px;font-size:11px}'
     +'.box{background:#F8FAFF;border:1px solid #C7D9F5;border-radius:6px;padding:10px 14px;margin:8px 0}'
-    +'.fishbone{text-align:center;margin:8px 0}.fishbone svg{width:100%;max-width:520px;height:auto}'
+    +'.fishbone{text-align:center;margin:10px 0}.fishbone svg{width:100%;max-width:660px;height:auto}'
     +'.note{font-size:10px;color:#64748b;font-style:italic;margin-top:4px}'
     +'@media print{button{display:none}}'
     +'</style></head><body>';
@@ -2424,11 +2424,28 @@ async function generateCapaPdf(){
     html += '<div class="note" style="margin-top:6px">（尚未查詢同類 510(k) 驗證，或查無可萃取內容。可於因子確認頁按「查同類 510(k) 真實驗證」後再產生本指引。）</div>';
   }
 
-  // 防呆建議
+  // 防呆建議（結構化四道閘優先）
   var detRev = window._detectionReview || '';
+  var gatesHtml = '';
+  if(window._detectionGates){
+    var GN2={method:'①方法偵測力',people:'②人員一致性',sampling:'③樣本數量與分層',boundary:'④監控範圍邊界'};
+    var RK2={high:'高',medium:'中',low:'低'};
+    var RC2={high:'#DC2626',medium:'#92400E',low:'#6B7280'};
+    gatesHtml = '<table><thead><tr><th>檢測閘</th><th>現況</th><th>風險</th><th>對策</th></tr></thead><tbody>'
+      + ['method','people','sampling','boundary'].map(function(g){
+          var d=window._detectionGates[g]||{};
+          return '<tr><td><b>'+GN2[g]+'</b></td><td>'+esc(d.status||'—')+'</td><td style="color:'+(RC2[d.risk]||'#6B7280')+';font-weight:'+(d.risk==='high'?'700':'400')+'">'+(RK2[d.risk]||'—')+'</td><td>'+esc(d.action||'—')+'</td></tr>';
+        }).join('')
+      + '</tbody></table>';
+    if((window._pokaYoke||[]).length){
+      gatesHtml += '<div class="box"><b>防呆（Poka-Yoke）建議：</b><br>'
+        + window._pokaYoke.map(function(p){ return '・'+esc(p.measure||'')+(p.gate?('（擋'+esc({method:'方法',people:'人員',sampling:'樣本',boundary:'邊界'}[p.gate]||p.gate)+'）'):''); }).join('<br>')
+        + '</div>';
+    }
+  }
   html += '<h2>5. 防呆與偵測強化建議</h2>'
     +'<div class="box">檢測攔截四要點：①方法對此失效要有偵測力；②人員判定/抽樣要一致；③樣本量足夠並涵蓋失效分層；④長期老化型失效須移至設計驗證或上市後監督。AQL 抽樣不保證攔偶發缺陷，攔偶發優先用源頭防呆＋線上自動偵測。</div>'
-    + (detRev?('<div class="box"><b>檢測手法檢討（AI）：</b><br>'+esc(detRev)+'</div>'):'');
+    + (gatesHtml || (detRev?('<div class="box"><b>檢測手法檢討（AI）：</b><br>'+esc(detRev)+'</div>'):''));
 
   html += '<div class="note" style="margin-top:20px;border-top:1px solid #CBD5E1;padding-top:8px">本指引由 MedQA 系統輔助產生：ISO 條號、統計判定、6M 結構由程式管控；因果論述、彙整由 AI 草擬並標推測(*)，須由 RA／工程依正本標準與實際數據覆核後定稿。</div>';
   html += '</body></html>';
@@ -2543,7 +2560,19 @@ async function downloadPlanDocx(){
           if(_nd.result.spc_reasons && typeof _nd.result.spc_reasons==='object'){
             _spcReasons = _nd.result.spc_reasons;
           }
-          if(_nd.result.detection_review){ _detectionReview = _nd.result.detection_review; }  // 不綁敘事開關
+          // 結構化四道閘（新）：存結構供表格顯示，並組一段文字相容舊顯示
+          if(_nd.result.detection_review_gates){
+            window._detectionGates = _nd.result.detection_review_gates;
+            window._pokaYoke = _nd.result.poka_yoke || [];
+            var GATEN={method:'方法偵測力',people:'人員一致性',sampling:'樣本數量與分層',boundary:'監控範圍邊界'};
+            var RK={high:'高',medium:'中',low:'低'};
+            var parts=[];
+            ['method','people','sampling','boundary'].forEach(function(g){
+              var d=_nd.result.detection_review_gates[g]; if(d&&(d.status||d.action)) parts.push(GATEN[g]+'（風險'+(RK[d.risk]||'中')+'）：'+(d.status||'')+(d.action?(' → '+d.action):''));
+            });
+            if((_nd.result.poka_yoke||[]).length) parts.push('防呆：'+_nd.result.poka_yoke.map(function(p){return p.measure;}).join('；'));
+            _detectionReview = parts.join('\n');
+          } else if(_nd.result.detection_review){ _detectionReview = _nd.result.detection_review; }
         }else{
           console.warn('[計畫書] plan_narrative 空結果：', _nd && _nd._debug);
         }
@@ -2704,8 +2733,25 @@ async function downloadPlanDocx(){
       tx('檢測攔截四要點：',{bold:true,size:19}),
       tx('①方法對此失效要有偵測力；②人員判定/抽樣要一致；③樣本量足夠並涵蓋失效分層；④長期老化型失效須移至設計驗證或上市後監督。AQL 抽樣不保證攔偶發缺陷，攔偶發優先用源頭防呆＋線上自動偵測。',{size:19})
     ]}));
-    // AI 檢測手法檢討（若有）
-    if(_detectionReview){
+    // 檢測手法檢討：優先用結構化四道閘表格（程式定骨架），否則退回文字
+    if(window._detectionGates){
+      ch.push(new D.Paragraph({spacing:{before:40,after:40},children:[tx('檢測手法檢討（四道閘）',{bold:true,size:20})]}));
+      var GN={method:'①方法偵測力',people:'②人員一致性',sampling:'③樣本數量與分層',boundary:'④監控範圍邊界'};
+      var RKW={high:'高',medium:'中',low:'低'};
+      var gw=[1600,3600,1000,2486];
+      var grows=['method','people','sampling','boundary'].map(function(g,i){
+        var d=window._detectionGates[g]||{};
+        var rc=d.risk==='high'?'DC2626':d.risk==='medium'?'92400E':'6B7280';
+        return trow([tx(GN[g],{bold:true}),tx(d.status||'—'),tx(RKW[d.risk]||'—',{bold:(d.risk==='high'),color:rc}),tx(d.action||'—')],gw,i%2===1);
+      });
+      ch.push(tbl(gw,['檢測閘','現況','風險','對策'],grows));
+      if((window._pokaYoke||[]).length){
+        ch.push(new D.Paragraph({spacing:{before:80,after:40},children:[tx('防呆（Poka-Yoke）建議',{bold:true,size:19})]}));
+        window._pokaYoke.forEach(function(p){
+          ch.push(new D.Paragraph({spacing:{after:20},bullet:{level:0},children:[tx((p.measure||'')+(p.gate?('（擋'+({method:'方法',people:'人員',sampling:'樣本',boundary:'邊界'}[p.gate]||p.gate)+'）'):''),{size:19})]}));
+        });
+      }
+    } else if(_detectionReview){
       ch.push(new D.Paragraph({spacing:{before:40,after:40},children:[tx('檢測手法檢討（AI）',{bold:true,size:20})]}));
       ch.push(new D.Paragraph({spacing:{after:120,line:312},children:[tx(_detectionReview)]}));
     }
@@ -3160,7 +3206,12 @@ function fishboneDraw(){
     var factors = window._fbData && window._fbData[cid];
     if(!factors||!factors.length) return;
     factors.forEach(function(f){
-      if(f.name && f.name.trim()) fbCauses.push({name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', catId:cid, risk:f.risk||'medium', tool:f.tool||''});
+      if(f.name && f.name.trim()) fbCauses.push({
+        name:f.name.trim(), cat:FB_CAT_NAMES[cid]||'', catId:cid, risk:f.risk||'medium', tool:f.tool||'',
+        link:f.link, risk_reason:f.risk_reason, control_method:f.control_method,
+        nature:f.nature, verify_method:f.verify_method,
+        iso_hint:f.iso_hint, level_hint:f.level_hint, speculative:f.speculative
+      });
     });
   });
   window._fbCauses = fbCauses;
@@ -5907,7 +5958,16 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         });
       } else {
         window._fbData[cid] = arr.map(function(item){
-          return { name: item.name||'', risk: item.risk||'medium' };
+          // 保留首頁整理的完整欄位（關聯/卡控/性質/ISO/水準），不只 name/risk，
+          // 避免進魚骨圖後資訊流失、後續又要重算
+          return {
+            name: item.name||'', risk: item.risk||'medium',
+            link: item.link, risk_reason: item.risk_reason,
+            control_method: item.control_method, nature: item.nature,
+            tool: item.tool, verify_method: item.verify_method,
+            iso_hint: item.iso_hint, level_hint: item.level_hint,
+            speculative: item.speculative, basis: item.basis
+          };
         });
       }
     });
@@ -6674,7 +6734,14 @@ function proceedToFishbone(factors) {
   var clean = {};
   ['man','machine','material','method','measure','env'].forEach(function(cat){
     clean[cat] = (factors[cat]||[]).map(function(f){
-      return {name:f.name, risk:f.risk||'medium', tool:f.tool||''};
+      // 保留完整欄位，避免首頁整理的關聯/卡控/性質/ISO 在進魚骨圖時流失
+      return {
+        name:f.name, risk:f.risk||'medium', tool:f.tool||'',
+        link:f.link, risk_reason:f.risk_reason, control_method:f.control_method,
+        nature:f.nature, verify_method:f.verify_method,
+        iso_hint:f.iso_hint, level_hint:f.level_hint,
+        speculative:f.speculative, basis:f.basis
+      };
     });
   });
   window._fbData = clean;
@@ -7425,7 +7492,10 @@ function renderIsoPanel(r){
         });
         clearInterval(typer);
         aiDiv.textContent = target;
-        // 打字完成後才加「推薦分析工具」chips
+        // 對話完不再顯示「推薦分析工具」chips：工具選擇已統一在魚骨圖頁的「逐因子處置指派」，
+        // 此處再推薦會與主流程重複、造成混淆。tools 仍解析供信心度計算用，但不渲染按鈕。
+        // （如需恢復，取消下方註解）
+        /*
         if(tools.length>0){
           var btnArea=document.createElement('div');
           btnArea.style.cssText='display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
@@ -7439,6 +7509,7 @@ function renderIsoPanel(r){
           });
           aiDiv.appendChild(btnArea);
         }
+        */
 
         homeHistory.push({role:'assistant', content:fullText});
         window._homeHistory=homeHistory.slice();
@@ -7509,7 +7580,8 @@ function renderIsoPanel(r){
     div.style.cssText = 'background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.22);border-left:3px solid #7EC8E3;border-radius:10px 10px 10px 3px;padding:.65rem .9rem;font-size:13px;color:rgba(255,255,255,.96);line-height:1.7;white-space:pre-wrap';
     div.textContent = text;
 
-    if(tools && tools.length > 0) {
+    // 對話完不再顯示推薦工具按鈕（已統一在處置指派）
+    if(false && tools && tools.length > 0) {
       var btnArea = document.createElement('div');
       btnArea.style.cssText = 'display:flex;flex-wrap:wrap;gap:7px;margin-top:.65rem;padding-top:.6rem;border-top:1px solid rgba(255,255,255,.12)';
       var label = document.createElement('div');
