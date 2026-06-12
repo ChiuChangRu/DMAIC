@@ -2384,6 +2384,26 @@ async function generateCapaPdf(){
     +rowsHtml+'</tbody></table>'
     +'<div class="note">「應驗」來自 iso_map 應驗基準、「同類510k」來自同類產品實證、「雙重確認」兩者皆有、「AI推測*」為輔助待確認。</div>';
 
+  // 4.x 同類 510(k) 真實驗證項目（若有查到）
+  var capaFda = (window._fda510kResult && window._fda510kResult.extracted) || [];
+  if(capaFda.length){
+    html += '<h2>4.1 同類產品 510(k) 真實驗證項目</h2>'
+      +'<div class="note" style="margin-bottom:6px">以下為 FDA 510(k) 同類產品實際載明的驗證項目與引用標準（逐字萃取），作為本案驗證規劃之真實佐證。</div>'
+      +'<table><thead><tr><th>510(k) 號</th><th>引用標準</th><th>驗證項目</th></tr></thead><tbody>';
+    capaFda.forEach(function(d){
+      html += '<tr><td><b>'+esc(d.k||'')+'</b></td><td>'+esc((d.standards||[]).join('、')||'—')+'</td><td>'+esc((d.tests||[]).join('；')||'—')+'</td></tr>';
+    });
+    html += '</tbody></table>';
+    if(window._fda510kResult.summary) html += '<div class="note">同類驗證重點：'+esc(window._fda510kResult.summary)+'</div>';
+    if(window._fda510kResult.matched_to_factors && window._fda510kResult.matched_to_factors.length){
+      html += '<div class="box" style="margin-top:6px"><b>與本案因子對應：</b><br>'
+        + window._fda510kResult.matched_to_factors.map(function(m){ return '・<b>'+esc(m.factor)+'</b>：'+esc(m.suggestion); }).join('<br>')
+        + '</div>';
+    }
+  } else {
+    html += '<div class="note" style="margin-top:6px">（尚未查詢同類 510(k) 驗證，或查無可萃取內容。可於因子確認頁按「查同類 510(k) 真實驗證」後再產生本指引。）</div>';
+  }
+
   // 防呆建議
   var detRev = window._detectionReview || '';
   html += '<h2>5. 防呆與偵測強化建議</h2>'
