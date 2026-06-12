@@ -470,13 +470,12 @@ tr:hover td{background:#F9FAFB}
 </style>
 <script>
 (function(){
-  var now = new Date();
-  var pad = function(n){ return n < 10 ? '0'+n : n; };
-  var ts = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+pad(now.getHours())+':'+pad(now.getMinutes());
-  window._buildTime = ts;
+  // 建置版本：每次交付固定，用來分辨 html 版本（不再用「開啟時間」，那無法區分新舊）
+  var BUILD = 'b0612-魚頭+中文名+標紅+ISO防呆';
+  window._buildTime = BUILD;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = 'v5.3 · ' + ts;
+    if(el) el.textContent = 'v5.3 · ' + BUILD;
   });
 })();
 </script>
@@ -6496,11 +6495,13 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       // 器材名稱：優先用官方分類名(officialName)，否則用樣本名(sampleName)
       var dname = p.officialName || p.sampleName || '';
       var dnameShort = dname.length>34 ? dname.slice(0,33)+'…' : dname;
+      var dnameZh = _fdaNameZh(dname);   // 中文標示
       return '<span onclick="_togglePC(this)" data-pc="'+p.code+'" '
-        + 'style="'+st+';border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;user-select:none;display:inline-flex;flex-direction:column;line-height:1.35;max-width:230px" '
-        + 'title="'+esc2(dname)+'（Class '+p.cls+'，出現'+p.count+'次）">'
+        + 'style="'+st+';border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;user-select:none;display:inline-flex;flex-direction:column;line-height:1.35;max-width:240px" '
+        + 'title="'+esc2(dname)+(dnameZh?('（'+dnameZh+'）'):'')+'（Class '+p.cls+'，出現'+p.count+'次）">'
         + '<span style="font-weight:700;font-size:12px">'+p.code+' <span style="opacity:.55;font-size:9.5px;font-weight:400">×'+p.count+(p.cls&&p.cls!=='?'?(' · Class '+p.cls):'')+'</span></span>'
-        + (dnameShort?('<span style="opacity:.78;font-size:10px;margin-top:1px">'+esc2(dnameShort)+'</span>'):'')
+        + (dnameZh?('<span style="opacity:.92;font-size:10.5px;margin-top:1px;font-weight:600">'+esc2(dnameZh)+'</span>'):'')
+        + (dnameShort?('<span style="opacity:.6;font-size:9px;margin-top:1px">'+esc2(dnameShort)+'</span>'):'')
         + '</span>';
     }).join('');
     return '<div style="margin-top:.7rem;background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.25);border-radius:8px;padding:.55rem .7rem">'
@@ -6510,6 +6511,46 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
   }
   // 小工具：HTML escape（晶片 title/名稱用）
   function esc2(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // FDA 器材名英→中翻譯（關鍵字對照，逐詞翻；翻不到的保留英文）
+  function _fdaNameZh(en){
+    if(!en) return '';
+    var DICT = [
+      // 針/注射相關
+      ['Needle, Hypodermic, Single Lumen','皮下注射針(單腔)'],['Hypodermic','皮下注射'],['Needle','針'],
+      ['Syringe, Piston','活塞注射筒'],['Syringe','注射筒'],['Injector','注射器'],['Injection','注射'],
+      ['Cannula','套管'],['Stylet','探針'],['Trocar','套管針'],
+      // 導管/鞘相關
+      ['Introducer, Catheter','導管導引器'],['Introducer','導引器'],['Catheter','導管'],['Sheath','鞘'],
+      ['Guidewire','導絲'],['Guide Wire','導絲'],['Dilator','擴張器'],['Stent','支架'],
+      ['Thrombus Retriever','血栓取出器'],['Thrombectomy','取栓'],['Drainage','引流'],
+      // 內視鏡相關
+      ['Endoscopic Injection Needle','內視鏡注射針'],['Endoscope','內視鏡'],['Endoscopic','內視鏡'],
+      ['Cystoscope','膀胱鏡'],['Laparoscope','腹腔鏡'],['Bronchoscope','支氣管鏡'],['Gastroenterology','腸胃科'],
+      // 採樣/活檢
+      ['Biopsy','切片/活檢'],['Sample','採樣'],['Aspiration','抽吸'],['Applicator','敷貼器'],
+      // 其他常見
+      ['System','系統'],['Set','組'],['Kit','套組'],['Tubing','管路'],['Blood','血液'],['Radionuclide','放射性核種'],
+      ['Valve','閥'],['Connector','連接器'],['Pump','幫浦'],['Filter','過濾器'],['Tube','管'],['Port','輸液座'],
+      ['General & Plastic Surgery','一般及整形外科'],['Surgery','外科'],['Cardiovascular','心血管'],
+      ['Urological','泌尿'],['Gastroenterology-Urology','腸胃-泌尿科']
+    ];
+    var s = en;
+    var zhParts = [];
+    // 逐關鍵字比對（長詞優先，避免 Needle 先吃掉 Needle, Hypodermic）
+    DICT.sort(function(a,b){return b[0].length-a[0].length;});
+    var usedEn = '';   // 已匹配的英文片段，避免子詞重複（如 Needle 已被 "Needle, Hypodermic" 涵蓋）
+    DICT.forEach(function(pair){
+      var re = new RegExp(pair[0].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');
+      if(re.test(s)){
+        // 若這個英文關鍵字已被先前更長的匹配涵蓋，跳過（避免「針」重複）
+        if(usedEn.toLowerCase().indexOf(pair[0].toLowerCase())>=0) return;
+        zhParts.push(pair[1]);
+        usedEn += ' '+pair[0];
+      }
+    });
+    return zhParts.slice(0,3).join('、');   // 最多取3個關鍵詞組成中文
+  }
 
   // 用 product_code 查 FDA 官方器材分類名稱（比單筆 510k device_name 更標準），查到就更新晶片
   window.enrichProductCodeNames = async function(){
