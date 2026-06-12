@@ -2355,7 +2355,7 @@ async function generateCapaPdf(){
     +'tr:nth-child(even) td{background:#F8FAFF}'
     +'.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;background:#F1F5F9;padding:10px 14px;border-radius:6px;font-size:11px}'
     +'.box{background:#F8FAFF;border:1px solid #C7D9F5;border-radius:6px;padding:10px 14px;margin:8px 0}'
-    +'.fishbone svg{width:100%;height:auto}'
+    +'.fishbone{text-align:center;margin:8px 0}.fishbone svg{width:100%;max-width:520px;height:auto}'
     +'.note{font-size:10px;color:#64748b;font-style:italic;margin-top:4px}'
     +'@media print{button{display:none}}'
     +'</style></head><body>';
@@ -8241,8 +8241,9 @@ function _natureDefaultDispo(f){
   if(t==='spc') return 'spc';
   if(t==='msa') return 'msa';
   if(t==='hypothesis') return 'hyp';
+  if(t==='train') return 'train';
   if(t==='none') return 'iso';
-  return ({man:'spc',machine:'spc',material:'doe',method:'msa',measure:'msa',env:'iso'})[f.catId||'']||'doe';
+  return ({man:'train',machine:'spc',material:'doe',method:'msa',measure:'msa',env:'iso'})[f.catId||'']||'doe';
 }
 
 window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
