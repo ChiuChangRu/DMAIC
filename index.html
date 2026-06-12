@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b03 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b05 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -471,7 +471,7 @@ tr:hover td{background:#F9FAFB}
 <script>
 (function(){
   // ★版本號（每次交付遞增，方便分辨部署的是哪一版）★
-  var VERSION = 'v5.3-b03';
+  var VERSION = 'v5.3-b05';
   window._appVersion = VERSION;
   window._buildTime = VERSION;
   document.addEventListener('DOMContentLoaded', function(){
@@ -495,7 +495,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b03</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b05</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -3269,6 +3269,18 @@ function fishboneDraw(){
   for(let i=0;i<nCols;i++){
     joints.push(nCols===1 ? (jMin+jMax)/2 : jStart + jStep*i);
   }
+  // 關鍵：讓「有因子的大類」拿到靠魚頭(右/x大)的位置，空類別放魚尾(左)。
+  // 否則人員=第1欄永遠在最左，因子全擠在左邊、右側大片空白。
+  // joints 已由小到大排序；把它依「該大類有無因子」重新指派：有因子→大x、空→小x。
+  const sortedJoints = joints.slice().sort((a,b)=>a-b);
+  const idxWithCause = [], idxEmpty = [];
+  used.forEach((cat,i)=>{ if(cat.causes && cat.causes.length>0) idxWithCause.push(i); else idxEmpty.push(i); });
+  const assignedJoint = new Array(nCols);
+  // 空類別拿最小的幾個 x（魚尾側），有因子的拿較大的 x（魚頭側）
+  idxEmpty.forEach((catIdx,k)=>{ assignedJoint[catIdx] = sortedJoints[k]; });
+  idxWithCause.forEach((catIdx,k)=>{ assignedJoint[catIdx] = sortedJoints[idxEmpty.length + k]; });
+  // 覆寫 joints 為重新指派後的位置
+  for(let i=0;i<nCols;i++){ joints[i] = assignedJoint[i]; }
 
   let s=[];
   s.push(`<defs><marker id="fb-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1 2L8 5L1 8" fill="none" stroke="context-stroke" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`);
