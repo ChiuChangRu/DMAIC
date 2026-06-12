@@ -615,6 +615,8 @@ tr:hover td{background:#F9FAFB}
         <div id="home-device-badge" style="background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.4);border-radius:8px;padding:6px 12px;font-size:12px;color:#6EE7B7;margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
           <span>✅</span><span id="home-device-badge-text">器材已確認</span>
         </div>
+        <!-- 第2點：MAUDE 真實問題提示 -->
+        <div id="home-maude-tip" style="display:none;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:8px;padding:7px 12px;font-size:11.5px;color:#FCD34D;margin-bottom:.75rem;line-height:1.6"></div>
         <!-- 問題主題 -->
         <div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:4px;font-weight:600">問題描述 <span style="color:#F87171">*必填</span></div>
         <textarea id="home-problem-input" rows="2"
@@ -2355,10 +2357,11 @@ async function generateCapaPdf(){
       var iso;
       if(fm.length){
         iso=fm.map(function(m){return esc(m.no)+'〔'+(SRCL[m.source]||m.source)+'〕';}).join('、');
-      } else if(f.iso_hint){
-        iso=esc(f.iso_hint)+'〔AI推測*〕';   // 保底：配對無結果時用 AI 建議
+      } else if(f.iso_hint && !(/10993|11135|11137|17665|11737/.test(f.iso_hint) && !/材料|溶出|塗層|生物相容|組織接觸|毒性|滅菌|無菌/.test(f.name))){
+        // 保底：用 AI 建議，但生物相容/滅菌標準不可硬塞給操作/製程類因子（1-1）
+        iso=esc(f.iso_hint)+'〔AI推測*〕';
       } else {
-        iso='';   // 第1點：沒確實對應到 ISO 就留空，不放「待對應」佔位
+        iso='';   // 沒確實對應到 ISO 就留空（K number 統一列在 4.1 同類510k表）
       }
       var isoCell = iso ? ('<br><span style="color:#7C3AED;font-size:9px">'+iso+'</span>') : '';
       var rc=f.risk==='high'?'#DC2626':f.risk==='medium'?'#92400E':'#9CA3AF';
@@ -6472,6 +6475,21 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
       var name = window._deviceInfo ? window._deviceInfo.confirmed_name : '已確認';
       if(badge) badge.textContent = '器材：'+name;
       if(badge2) badge2.textContent = '器材：'+name;
+      // 第2點：用選定的 product code 查 MAUDE 真實問題，供對話追問參考
+      var _pc = (window._selectedProductCodes&&window._selectedProductCodes[0]) || (window._deviceInfo&&window._deviceInfo.product_code) || '';
+      if(_pc && typeof fetchMaudeProblems==='function'){
+        fetchMaudeProblems(_pc).then(function(r){
+          if(r && r.problems && r.problems.length){
+            var tip=document.getElementById('home-maude-tip');
+            if(tip){
+              tip.style.display='block';
+              tip.innerHTML='💡 FDA MAUDE 顯示同類產品（代碼 '+_pc+'）常見問題：'
+                + r.problems.slice(0,5).map(function(p){return p.type+'（'+p.count+'）';}).join('、')
+                + '。AI 追問時會參考這些真實案例。';
+            }
+          }
+        });
+      }
       showStep(3);
     } else {
       // 回到 Step 1
@@ -7497,13 +7515,13 @@ function renderIsoPanel(r){
         try{
           streamResp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
             method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo })
+            body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo, maudeProblems:(window._maudeProblems||[]).slice(0,6).map(function(p){return p.type;}) })
           });
         }catch(netErr){
           await new Promise(function(r){ setTimeout(r, 800); });   // 短暫等待後重試
           streamResp = await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
             method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo })
+            body: JSON.stringify({ mode:'stream_navigate', messages:homeHistory, surveyData:surveyData, deviceInfo:window._deviceInfo, maudeProblems:(window._maudeProblems||[]).slice(0,6).map(function(p){return p.type;}) })
           });
         }
         if(!streamResp.ok){
@@ -8730,6 +8748,37 @@ async function gtTranslate(text) {
     return text; // 翻譯失敗回傳原文
   }
 }
+
+// 第2點：用 product_code 查 FDA MAUDE 真實不良事件，萃取常見問題供 AI 追問
+// 結果存 window._maudeProblems = [{type, count}]、window._maudeSamples = [原文摘要]
+window._maudeProblems = null;
+window._maudeSamples = null;
+async function fetchMaudeProblems(productCode){
+  if(!productCode) return null;
+  try{
+    var FDA_KEY = window.FDA_KEY || '';
+    // 用 product_code 查最近不良事件，統計問題類型
+    var url = 'https://api.fda.gov/device/event.json?'+(FDA_KEY?('api_key='+FDA_KEY+'&'):'')
+      + 'search=device.device_report_product_code:'+encodeURIComponent(productCode)
+      + '&limit=20&sort=date_received:desc';
+    var resp = await fetch(url);
+    var data = await resp.json();
+    if(!data.results || !data.results.length) return null;
+    // 統計問題類型（product_problems / patient problem / mdr_text 關鍵字）
+    var probCount = {};
+    var samples = [];
+    data.results.forEach(function(r){
+      (r.product_problems||[]).forEach(function(p){ probCount[p]=(probCount[p]||0)+1; });
+      var t = (r.mdr_text&&r.mdr_text[0]&&r.mdr_text[0].text)||'';
+      if(t && samples.length<5) samples.push(t.slice(0,180));
+    });
+    var problems = Object.keys(probCount).map(function(k){return {type:k,count:probCount[k]};}).sort(function(a,b){return b.count-a.count;});
+    window._maudeProblems = problems;
+    window._maudeSamples = samples;
+    return { problems:problems, samples:samples };
+  }catch(e){ console.log('[MAUDE] 查詢略過:', e&&e.message); return null; }
+}
+window.fetchMaudeProblems = fetchMaudeProblems;
 
 window.fbSearchFDA = async function() {
   var kw = (document.getElementById('fb-fda-keyword')||{}).value;
