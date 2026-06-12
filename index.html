@@ -6758,12 +6758,12 @@ window.homeSummarizeFactors = async function(tools) {
     var resp, data;
     try{
       try{
-        resp = await _callFactors(90000, false);   // 第一次：品質模式（Sonnet），90 秒
+        resp = await _callFactors(150000, false);   // 第一次：品質模式（Sonnet），150 秒（因子判斷是大腦，給足時間跑完通則，不輕易降級）
       }catch(e1){
         if(e1 && e1.name==='AbortError'){
           // 逾時 → 自動降級：改用快速模式（Haiku）重試一次，確保有結果不卡死
-          if(panel) panel.innerHTML = '<div style="font-size:11px;color:#FBBF24;line-height:1.5">⏳ 品質模式較久，自動切換快速模式重試中…</div>';
-          resp = await _callFactors(45000, true);
+          if(panel) panel.innerHTML = '<div style="font-size:11px;color:#FBBF24;line-height:1.5">⏳ 品質模式較久，先用快速模式產出（因子廣度可能略減）。如需最佳因子判斷，可稍後再按一次「整理因子」讓品質模式重跑。</div>';
+          resp = await _callFactors(60000, true);
         } else { throw e1; }
       }
       if(!resp.ok){
@@ -8562,9 +8562,9 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
       html += '</div>';
       // 第5點：人工補充處置欄（可填不同的處置措施，預設帶 AI 建議的卡控方式）
       window._factorDispo[f.name] = window._factorDispo[f.name] || {picks:[]};
-      var noteVal = (window._factorDispo[f.name].note!==undefined) ? window._factorDispo[f.name].note : (f.control_method||'');
+      var noteVal = (window._factorDispo[f.name].note!==undefined) ? window._factorDispo[f.name].note : '';
       html += '<div style="margin-top:.5rem">'
-        + '<div style="font-size:10px;color:#9CA3AF;margin-bottom:2px">補充處置措施（可自行修改／AI 已預填建議）：</div>'
+        + '<div style="font-size:10px;color:#9CA3AF;margin-bottom:2px">補充處置措施（選填，可自行補不同的處置／驗證做法）：</div>'
         + '<textarea data-name="'+esc(f.name)+'" oninput="fbUpdateDispoNote(this)" rows="2" '
         + 'style="width:100%;box-sizing:border-box;font-size:11px;border:1px solid #E5E7EB;border-radius:6px;padding:5px 8px;font-family:inherit;color:#374151;resize:vertical" '
         + 'placeholder="此因子的具體處置／驗證做法...">'+esc(noteVal)+'</textarea></div>';
