@@ -2418,7 +2418,16 @@ async function generateCapaPdf(){
     +'</div>';
 
   html += '<h2>2. 問題與釐清摘要</h2>'
-    +'<div class="box"><b>問題現象：</b>'+esc((window._problemText)||(dev.confirmed_name||'')+'｜'+(document.getElementById('fb-problem')?document.getElementById('fb-problem').value:''))+'</div>'
+    +'<div class="box"><b>問題現象：</b>'+esc((function(){
+        var dn=dev.confirmed_name||'';
+        var raw=(window._problemText)||(document.getElementById('fb-problem')?document.getElementById('fb-problem').value:'')||'';
+        // 去掉重複的器材名前綴（避免「器材名｜器材名｜現象」）
+        var parts=raw.split('｜').map(function(x){return x.trim();}).filter(Boolean);
+        var seen={}; var cleaned=[];
+        parts.forEach(function(p){ if(p && p!==dn && !seen[p]){ seen[p]=1; cleaned.push(p); } });
+        var phenom=cleaned.join('；')||raw||'（未填）';
+        return dn ? (dn+'：'+phenom) : phenom;
+      })())+'</div>'
     +'<div class="box"><b>釐清摘要（AI 彙整問卷與問答）：</b><br>'+esc(surveyText)+'</div>';
 
   html += '<h2>3. 魚骨圖（根本原因分析）</h2><div class="fishbone">'+svgHtml+'</div>'
@@ -2440,7 +2449,35 @@ async function generateCapaPdf(){
     var relKw = [];
     relTerms.join('').match(/[\u4e00-\u9fff]{2,}/g)?.forEach(function(w){ if(w.length<=6) relKw.push(w); });
     // 中→英對照（常見驗證項目英文）
-    var zh2en = {'漏':'leak|seal|integrity','密封':'seal|leak|integrity','洩漏':'leak|integrity','擊發':'fire|firing|trigger|actuat','觸發':'fire|firing|trigger|actuat','彈簧':'spring|force|fire','力':'force','尺寸':'dimension|size','磨損':'wear|durab','穿刺':'puncture|penetrat','針':'needle|puncture','切割':'cut|slic|sharp','銳利':'sharp|point','取樣':'sampl|acqui','生物相容':'biocompat|cytotox|10993','滅菌':'steril','包裝':'packag','腐蝕':'corros','破裂':'breakage|tensile'};
+    var zh2en = {
+      '漏':'leak|seal|integrity|洩漏|滲漏|漏液|洩露|密封',
+      '密封':'seal|leak|integrity|密封|洩漏|滲漏',
+      '洩漏':'leak|integrity|洩漏|滲漏|漏液',
+      '接合':'bond|joint|weld|tensile|接合|黏結|熔接|拉張|拉力',
+      '熱熔':'bond|weld|joint|熔接|接合|黏結',
+      '壓合':'bond|joint|接合|壓合|黏結',
+      'hub':'hub|bond|joint|接合|樞紐',
+      '擊發':'fire|firing|trigger|actuat|擊發|觸發|發射',
+      '觸發':'fire|firing|trigger|actuat|擊發|觸發',
+      '彈簧':'spring|force|fire|彈簧|發射力',
+      '力':'force|tensile|strength|力|拉力|拉張|強度',
+      '尺寸':'dimension|size|尺寸|內徑|外徑|長度',
+      '磨損':'wear|durab|磨損|耐久|老化',
+      '穿刺':'puncture|penetrat|穿刺|穿透',
+      '針':'needle|puncture|針|穿刺',
+      '切割':'cut|slic|sharp|切割|銳利',
+      '銳利':'sharp|point|銳利|尖端',
+      '取樣':'sampl|acqui|取樣|採樣|樣本',
+      '生物相容':'biocompat|cytotox|10993|生物相容|細胞毒|致敏|溶血',
+      '滅菌':'steril|滅菌|無菌|環氧乙烷',
+      '包裝':'packag|包裝|泡泡|封口',
+      '腐蝕':'corros|腐蝕',
+      '破裂':'breakage|tensile|burst|破裂|爆裂|破壞|拉力',
+      '壓力':'pressure|burst|壓力|爆裂|破裂',
+      '溫度':'temperature|溫度|熱',
+      '塗層':'coating|塗層|潤滑|親水',
+      '流量':'flow|flux|流量|灌流'
+    };
     var relRe = [];
     Object.keys(zh2en).forEach(function(k){ if(relTerms.join('').indexOf(k)>=0 || problemTxt.indexOf(k)>=0) relRe.push(zh2en[k]); });
     function isRelevant(test){
