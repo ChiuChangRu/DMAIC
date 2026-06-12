@@ -3029,6 +3029,32 @@ function _gatherIsoSources(){
   return Object.keys(stds).map(function(k){ return stds[k]; });
 }
 async function runIsoFactorMatch(onDone){
+  // 統一來源：直接用 iso_crosscheck 的結果（_isoResult.items，就是首頁顯示的那套含缺口分析），
+  // 不再另外呼叫 AI 配對，避免「首頁一套、報告另一套」的不一致。
+  var items = (window._isoResult && window._isoResult.items) || [];
+  if(items.length){
+    window._factorIsoMatch = {};
+    items.forEach(function(it){
+      if(!it.factor || !it.standard) return;
+      window._factorIsoMatch[it.factor] = window._factorIsoMatch[it.factor] || [];
+      // 來源標記：iso_crosscheck 來自 iso_map 應驗基準；status 帶入供顯示涵蓋程度
+      window._factorIsoMatch[it.factor].push({
+        no: it.standard, source: 'iso_map',
+        why: it.item || it.clause || '', status: it.status, clause: it.clause, note: it.note
+      });
+    });
+    // 510k 萃取若有對到因子，補充進來（標 fda510k）
+    var fbf = (window._fda510kResult && window._fda510kResult.matched_to_factors) || [];
+    fbf.forEach(function(m){
+      if(!m.factor) return;
+      // 510k 對應以文字 suggestion 為主，另存供報告用；此處不重複塞 ISO 編號避免污染
+    });
+    window._isoUnmatched = (window._isoResult && window._isoResult.gaps) ? [] : (window._isoUnmatched||[]);
+    if(typeof renderFactorPanel==='function') renderFactorPanel(window._confirmedFactors);
+    if(onDone)onDone();
+    return;
+  }
+  // 後備：若沒有 iso_crosscheck 結果，才退回原本的 AI 配對
   var conf = window._confirmedFactors||{};
   var factors = [];
   ['man','machine','material','method','measure','env'].forEach(function(c){
@@ -3048,7 +3074,7 @@ async function runIsoFactorMatch(onDone){
     window._factorIsoMatch = {};
     (r.matches||[]).forEach(function(m){ window._factorIsoMatch[m.factor] = m.standards||[]; });
     window._isoUnmatched = r.unmatched||[];
-    if(typeof renderFactorPanel==='function') renderFactorPanel(window._confirmedFactors);  // 重繪帶入 ISO
+    if(typeof renderFactorPanel==='function') renderFactorPanel(window._confirmedFactors);
   }catch(e){ console.log('[ISO配因子] 略過:', e&&e.message); }
   if(onDone)onDone();
 }
@@ -8515,8 +8541,13 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
       var _fm = (window._factorIsoMatch && window._factorIsoMatch[f.name]) || [];
       if(_fm.length){
         var _SRCL = {'fda510k':'同類510k','iso_map':'應驗','fda510k+iso_map':'雙重確認','ai_hint':'AI推測*'};
-        html += '<div style="font-size:10px;color:#7C3AED;margin-bottom:.4rem;line-height:1.45">📐 ISO 驗證：'
-          + _fm.map(function(m){ return esc(m.no)+'〔'+(_SRCL[m.source]||m.source)+'〕'; }).join('、')
+        var _STAT = {'gap':'缺口','partial':'部分','covered':'已涵蓋'};
+        var _STATC = {'gap':'#DC2626','partial':'#D97706','covered':'#059669'};
+        html += '<div style="font-size:10px;color:#7C3AED;margin-bottom:.4rem;line-height:1.55">📐 ISO 驗證：'
+          + _fm.map(function(m){
+              var stTxt = m.status ? ('<span style="color:'+(_STATC[m.status]||'#6B7280')+'">['+(_STAT[m.status]||m.status)+']</span>') : '';
+              return esc(m.no)+'〔'+(_SRCL[m.source]||m.source)+'〕'+stTxt;
+            }).join('、')
           + '</div>';
       }
       html += '<div style="display:flex;flex-wrap:wrap;gap:.35rem">';
