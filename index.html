@@ -7700,6 +7700,19 @@ function renderIsoPanel(r){
             hist4.appendChild(go);
             hist4.scrollTop = hist4.scrollHeight;
           }
+        } else {
+          // 即使 AI 還想追問，也讓使用者可以隨時「直接整理因子」，不被追問卡住
+          var hist5 = document.getElementById('home-chat-history');
+          if(hist5){
+            var oldSkip = document.getElementById('home-skip-factors-btn'); if(oldSkip) oldSkip.remove();
+            var skip = document.createElement('button');
+            skip.id = 'home-skip-factors-btn';
+            skip.textContent = '⏭ 資訊夠了，直接整理因子（跳過追問）';
+            skip.style.cssText = 'margin:8px 2px 2px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;width:100%';
+            skip.onclick = function(){ this.disabled=true; this.style.opacity='.6'; this.textContent='AI 整理因子中...'; homeSummarizeFactors(['fishbone']); };
+            hist5.appendChild(skip);
+            hist5.scrollTop = hist5.scrollHeight;
+          }
         }
       } catch(err) {
         var el3 = document.getElementById('home-loading'); if(el3) el3.remove();
