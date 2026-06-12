@@ -2346,6 +2346,11 @@ async function generateCapaPdf(){
   var DLBL={doe:'統計驗證(DOE)',spc:'製程監控(SPC)',msa:'量測手法(MSA)',hyp:'假設檢定',iso:'ISO確認',sop:'IFU/SOP',train:'教育訓練',sampling:'抽樣加強',design:'設計變更',exclude:'排除'};
   var SRCL={'fda510k':'同類510k','iso_map':'應驗','fda510k+iso_map':'雙重確認','ai_hint':'AI推測*'};
   var CATN={man:'人員',machine:'機器',material:'材料',method:'方法',measure:'量測',env:'環境'};
+  // A：建立「因子 → 510k 真實驗證對應」查找表（以 K number 驗證為主）
+  var fdaByFactor = {};
+  ((window._fda510kResult&&window._fda510kResult.matched_to_factors)||[]).forEach(function(m){
+    if(m.factor) fdaByFactor[m.factor] = m.suggestion||'';
+  });
   var rowsHtml='';
   ['man','machine','material','method','measure','env'].forEach(function(c){
     (conf[c]||[]).forEach(function(f){
@@ -2363,14 +2368,17 @@ async function generateCapaPdf(){
       } else {
         iso='';   // 沒確實對應到 ISO 就留空（K number 統一列在 4.1 同類510k表）
       }
-      var isoCell = iso ? ('<br><span style="color:#7C3AED;font-size:9px">'+iso+'</span>') : '';
+      var isoCell = iso ? ('<br><span style="color:#7C3AED;font-size:9px">輔　ISO：'+iso+'</span>') : '';
+      // A：510k 真實驗證對應為主（K number + 具體 test），放在卡控論述後、ISO 之前
+      var fdaMatch = fdaByFactor[f.name] || '';
+      var fdaCell = fdaMatch ? ('<br><span style="color:#047857;font-size:9px">▶ 510k 驗證：'+esc(fdaMatch)+'</span>') : '';
       var rc=f.risk==='high'?'#DC2626':f.risk==='medium'?'#92400E':'#9CA3AF';
       rowsHtml+='<tr>'
         +'<td>'+esc(CATN[c])+'</td>'
         +'<td style="color:'+rc+';font-weight:'+(f.risk==='high'?'700':'400')+'">'+esc(f.name)+(f.speculative?' (推測*)':'')+'</td>'
         +'<td>'+esc(f.risk==='high'?'高':f.risk==='medium'?'中':'低')+'</td>'
         +'<td>'+esc(f.link||'—')+'</td>'
-        +'<td>'+esc(f.control_method||'—')+isoCell+'</td>'
+        +'<td>'+esc(f.control_method||'—')+fdaCell+isoCell+'</td>'
         +'<td>'+dispoCell+'</td>'
         +'</tr>';
     });
@@ -2417,7 +2425,7 @@ async function generateCapaPdf(){
     +'<div class="note">因子文字顏色＝風險等級：紅＝高風險（粗體）、棕＝中風險、灰＝低風險（廣度補充，提醒 scope 外可能性）。</div>';
 
   html += '<h2>4. 風險驗證（因子 → 風險 → 驗證）</h2>'
-    +'<table><thead><tr><th>分類</th><th>因子（因）</th><th>風險</th><th>與問題關聯（果因）</th><th>卡控／ISO 驗證</th><th>處置</th></tr></thead><tbody>'
+    +'<table><thead><tr><th>分類</th><th>因子（因）</th><th>風險</th><th>與問題關聯（果因）</th><th>卡控／510k 驗證對應（ISO 為輔）</th><th>處置</th></tr></thead><tbody>'
     +rowsHtml+'</tbody></table>'
     +'<div class="note">「應驗」來自 iso_map 應驗基準、「同類510k」來自同類產品實證、「雙重確認」兩者皆有、「AI推測*」為輔助待確認。</div>';
 
@@ -3239,9 +3247,12 @@ function fishboneDraw(){
     }
 
     // 中骨：依因子數均分 t，間距固定不重疊
+    // 重要因子往魚頭：依風險排序（低→高），高風險 ci 較大 → t 較大 → 靠近魚頭（脊骨端）
     const ddx=BONE_DX, ddy=isTop?BONE_DY:-BONE_DY;
-    const n=cat.causes.length;
-    cat.causes.forEach((cause,ci)=>{
+    var RANK={high:3,medium:2,low:1};
+    var sorted = cat.causes.slice().sort(function(a,b){ return (RANK[a.risk]||2)-(RANK[b.risk]||2); });
+    const n=sorted.length;
+    sorted.forEach((cause,ci)=>{
       const t = n===1 ? 0.55 : T_LO + T_SPAN*ci/(n-1);
       const bx=(jx-BONE_DX)+ddx*t;
       const by=endY+ddy*t;
@@ -6363,6 +6374,8 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         }
         renderDeviceCard(data.result);
         showStep(2);
+        // 非同步查 FDA 官方器材名稱，補強代碼晶片（避免選錯）
+        if(typeof window.enrichProductCodeNames==='function') window.enrichProductCodeNames();
       } else {
         var errDiv = document.getElementById('home-step1-error');
         if(!errDiv){
@@ -6421,15 +6434,46 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     if(!window._selectedProductCodes.length && pcs[0]) window._selectedProductCodes=[pcs[0].code];
     var chips = pcs.slice(0,8).map(function(p){
       var on = window._selectedProductCodes.indexOf(p.code)>=0;
-      var st = on ? 'background:rgba(110,231,183,.2);border:1.5px solid #6EE7B7;color:#6EE7B7;font-weight:600'
-                  : 'background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.6)';
-      return '<span onclick="_togglePC(this)" data-pc="'+p.code+'" style="'+st+';border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;user-select:none" title="'+p.sampleName+'（Class '+p.cls+'，出現'+p.count+'次）">'+p.code+' <span style="opacity:.6;font-size:9.5px">×'+p.count+'</span></span>';
+      var st = on ? 'background:rgba(110,231,183,.2);border:1.5px solid #6EE7B7;color:#6EE7B7'
+                  : 'background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.3);color:rgba(255,255,255,.65)';
+      // 器材名稱：優先用官方分類名(officialName)，否則用樣本名(sampleName)
+      var dname = p.officialName || p.sampleName || '';
+      var dnameShort = dname.length>34 ? dname.slice(0,33)+'…' : dname;
+      return '<span onclick="_togglePC(this)" data-pc="'+p.code+'" '
+        + 'style="'+st+';border-radius:7px;padding:5px 11px;font-size:11px;cursor:pointer;user-select:none;display:inline-flex;flex-direction:column;line-height:1.35;max-width:230px" '
+        + 'title="'+esc2(dname)+'（Class '+p.cls+'，出現'+p.count+'次）">'
+        + '<span style="font-weight:700;font-size:12px">'+p.code+' <span style="opacity:.55;font-size:9.5px;font-weight:400">×'+p.count+(p.cls&&p.cls!=='?'?(' · Class '+p.cls):'')+'</span></span>'
+        + (dnameShort?('<span style="opacity:.78;font-size:10px;margin-top:1px">'+esc2(dnameShort)+'</span>'):'')
+        + '</span>';
     }).join('');
     return '<div style="margin-top:.7rem;background:rgba(110,231,183,.08);border:1px solid rgba(110,231,183,.25);border-radius:8px;padding:.55rem .7rem">'
-      + '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:.4rem">📋 FDA 產品代碼（product code）— 請確認/複選正確的，510(k) 將用此精準查詢：</div>'
-      + '<div style="display:flex;flex-wrap:wrap;gap:.35rem">'+chips+'</div>'
-      + '<div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:.4rem">點選可複選；數字為該代碼在查詢結果出現次數（越高越可能正確）。滑鼠移上去看器材名與 Class。</div></div>';
+      + '<div style="font-size:11px;color:rgba(255,255,255,.7);margin-bottom:.4rem">📋 FDA 產品代碼（product code）— 請確認/複選正確的器材，510(k) 將用此精準查詢：</div>'
+      + '<div style="display:flex;flex-wrap:wrap;gap:.4rem">'+chips+'</div>'
+      + '<div style="font-size:9.5px;color:rgba(255,255,255,.4);margin-top:.4rem">每個代碼下方為對應器材名稱；數字為查詢結果出現次數（越高越可能正確）。點選可複選。</div></div>';
   }
+  // 小工具：HTML escape（晶片 title/名稱用）
+  function esc2(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // 用 product_code 查 FDA 官方器材分類名稱（比單筆 510k device_name 更標準），查到就更新晶片
+  window.enrichProductCodeNames = async function(){
+    var pcs = window._fdaProductCodes || [];
+    if(!pcs.length) return;
+    var FDA_KEY = window.FDA_KEY || '';
+    await Promise.all(pcs.slice(0,8).map(async function(p){
+      if(p.officialName) return;
+      try{
+        var url='https://api.fda.gov/device/classification.json?'+(FDA_KEY?('api_key='+FDA_KEY+'&'):'')
+          +'search=product_code:'+encodeURIComponent(p.code)+'&limit=1';
+        var r=await fetch(url); var j=await r.json();
+        if(j.results && j.results[0]){
+          p.officialName = j.results[0].device_name || p.sampleName;
+          if(j.results[0].device_class && (!p.cls||p.cls==='?')) p.cls=j.results[0].device_class;
+        }
+      }catch(e){}
+    }));
+    // 重繪器材卡帶出官方名稱
+    if(typeof renderDeviceCard==='function' && window._deviceInfo) renderDeviceCard(window._deviceInfo);
+  };
   window._togglePC = function(el){
     var pc = el.dataset.pc;
     window._selectedProductCodes = window._selectedProductCodes || [];
@@ -6459,6 +6503,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
         if(window._deviceInfo) window._deviceInfo.product_code = window._selectedProductCodes[0]||'';
         // 重繪器材卡帶出代碼晶片
         if(typeof renderDeviceCard==='function') renderDeviceCard(window._deviceInfo);
+        if(typeof window.enrichProductCodeNames==='function') window.enrichProductCodeNames();
       } else {
         if(out) out.innerHTML='<span style="color:#FCA5A5">「'+kw+'」仍查無結果，換個更通用的 FDA 名稱再試（如去掉品牌、用器材類別名）。</span>';
       }
