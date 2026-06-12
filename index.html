@@ -1103,25 +1103,31 @@ tr:hover td{background:#F9FAFB}
   </div>
   <div id="fb-factor-selector" style="display:none"></div>
   <div id="fb-dl-wrap" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1.5px dashed #D1D5DB">
-    <div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">✅ 確認上方因子處置指派後，可產生 CAPA 指引（瀏覽器列印／存成 PDF）：</div>
-    <button id="dl-plan-btn" class="btn btn-primary" onclick="generateCapaPdf()">📄 產生 CAPA 指引（PDF）</button>
-    <span style="font-size:11px;color:#94A3B8;margin-left:.5rem">彙整器材/問題/問卷/因子關聯/魚骨圖/驗證項目/其他處置/ISO，於瀏覽器產生 .docx（不經伺服器、不花 API）</span>
-    <div style="margin-top:.6rem">
-      <label style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#475569;cursor:pointer;user-select:none">
-        <input type="checkbox" id="dl-plan-ai" style="width:15px;height:15px;accent-color:#BE185D;cursor:pointer">
-        加入 AI 敘事段落（執行摘要／根本原因論述／結論）
-      </label>
-      <div style="font-size:10.5px;color:#94A3B8;line-height:1.55;margin-top:3px;padding-left:22px">
-        勾選後下載時會額外呼叫一次 AI（耗少量 API）。AI <b>僅依本頁已確認的事實</b>改寫成敘事、不新增任何事實或條號，推論句以（*）標記。表格內容不受影響。
-      </div>
+
+    <!-- 第7點：監控攔截力檢討放在產報告前面，且為強制關卡 -->
+    <div style="margin-bottom:.85rem;padding:.7rem .85rem;background:#F0FDFA;border:1.5px solid #5EEAD4;border-radius:10px">
+      <div style="font-size:12px;color:#0F766E;font-weight:700;margin-bottom:.4rem">步驟 ①　先做監控攔截力檢討（必要）</div>
+      <button id="intc-btn" class="btn" onclick="runInterceptionReview()"
+        style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">🎯 AI 監控攔截力檢討</button>
+      <span style="font-size:10.5px;color:#5B7C78;margin-left:.5rem">為何很多不良在客戶端才發現？AI 挑 2–4 個關鍵監控點檢討偵測力，結果會寫入報告。<b>須先完成才能產生報告。</b></span>
+      <div id="intc-panel" style="display:none;margin-top:.6rem"></div>
     </div>
 
-    <!-- 監控攔截力檢討（選用，AI 篩選 → 勾選 → 寫入 Word）-->
-    <div style="margin-top:.85rem;padding-top:.7rem;border-top:1px dashed #E2E8F0">
-      <button id="intc-btn" class="btn" onclick="runInterceptionReview()"
-        style="background:#fff;color:#0F766E;border:1.5px solid #5EEAD4;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🎯 AI 篩選監控攔截力檢討（選用）</button>
-      <span style="font-size:10.5px;color:#94A3B8;margin-left:.5rem">為何很多不良在客戶端才發現？AI 只挑 2–4 個關鍵監控點檢討偵測力（不對全因子套用、避免空談），耗少量 API。</span>
-      <div id="intc-panel" style="display:none;margin-top:.6rem"></div>
+    <!-- 第7點：產報告按鈕預設置灰，監控檢討完成後才解鎖 -->
+    <div style="padding:.7rem .85rem;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px">
+      <div style="font-size:12px;color:#6B7280;margin-bottom:.5rem">步驟 ②　產生 CAPA 指引（瀏覽器列印／存成 PDF）：</div>
+      <button id="dl-plan-btn" class="btn btn-primary" onclick="generateCapaPdf()" disabled
+        style="opacity:.45;cursor:not-allowed">📄 產生 CAPA 指引（PDF）</button>
+      <span id="dl-plan-hint" style="font-size:11px;color:#DC2626;margin-left:.5rem">⤺ 請先完成上方「監控攔截力檢討」</span>
+      <div style="margin-top:.6rem">
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:12px;color:#475569;cursor:pointer;user-select:none">
+          <input type="checkbox" id="dl-plan-ai" style="width:15px;height:15px;accent-color:#BE185D;cursor:pointer">
+          加入 AI 敘事段落（執行摘要／根本原因論述／結論）
+        </label>
+        <div style="font-size:10.5px;color:#94A3B8;line-height:1.55;margin-top:3px;padding-left:22px">
+          勾選後下載時會額外呼叫一次 AI（耗少量 API）。AI <b>僅依本頁已確認的事實</b>改寫成敘事、不新增任何事實或條號，推論句以（*）標記。表格內容不受影響。
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2288,6 +2294,11 @@ function paretoAnalyze(){
 // ════════════════════════════════════════════
 // ════════ 產生 CAPA 指引（可列印 HTML → 瀏覽器存成 PDF，中文完美、零字型問題）════════
 async function generateCapaPdf(){
+  // 第7點：強制關卡 — 須先完成監控攔截力檢討
+  if(!window._interceptionDone){
+    alert('請先完成上方「監控攔截力檢討」，再產生 CAPA 指引。\n\n（監控檢討會分析為何不良可能逃逸到客戶端，並寫入報告。）');
+    return;
+  }
   // 孤兒擋下載（同 Word 邏輯）
   if(typeof window.fbCheckCoverage==='function'){
     var _orph=window.fbCheckCoverage();
@@ -2338,6 +2349,8 @@ async function generateCapaPdf(){
     (conf[c]||[]).forEach(function(f){
       var picks=((window._factorDispo||{})[f.name]||{}).picks||[];
       var dispo=picks.map(function(k){return DLBL[k]||k;}).join('、')||'—';
+      var dispoNote=((window._factorDispo||{})[f.name]||{}).note||'';
+      var dispoCell = dispo + (dispoNote?('<br><span style="font-size:9px;color:#475569">'+esc(dispoNote)+'</span>'):'');
       var fm=(window._factorIsoMatch||{})[f.name]||[];
       var iso;
       if(fm.length){
@@ -2345,16 +2358,17 @@ async function generateCapaPdf(){
       } else if(f.iso_hint){
         iso=esc(f.iso_hint)+'〔AI推測*〕';   // 保底：配對無結果時用 AI 建議
       } else {
-        iso='（待對應 ISO）';
+        iso='';   // 第1點：沒確實對應到 ISO 就留空，不放「待對應」佔位
       }
+      var isoCell = iso ? ('<br><span style="color:#7C3AED;font-size:9px">'+iso+'</span>') : '';
       var rc=f.risk==='high'?'#DC2626':f.risk==='medium'?'#92400E':'#9CA3AF';
       rowsHtml+='<tr>'
         +'<td>'+esc(CATN[c])+'</td>'
         +'<td style="color:'+rc+';font-weight:'+(f.risk==='high'?'700':'400')+'">'+esc(f.name)+(f.speculative?' (推測*)':'')+'</td>'
         +'<td>'+esc(f.risk==='high'?'高':f.risk==='medium'?'中':'低')+'</td>'
         +'<td>'+esc(f.link||'—')+'</td>'
-        +'<td>'+esc(f.control_method||'—')+'<br><span style="color:#7C3AED;font-size:9px">'+iso+'</span></td>'
-        +'<td>'+esc(dispo)+'</td>'
+        +'<td>'+esc(f.control_method||'—')+isoCell+'</td>'
+        +'<td>'+dispoCell+'</td>'
         +'</tr>';
     });
   });
@@ -2399,7 +2413,7 @@ async function generateCapaPdf(){
   html += '<h2>3. 魚骨圖（根本原因分析）</h2><div class="fishbone">'+svgHtml+'</div>'
     +'<div class="note">因子文字顏色＝風險等級：紅＝高風險（粗體）、棕＝中風險、灰＝低風險（廣度補充，提醒 scope 外可能性）。</div>';
 
-  html += '<h2>4. 果 → 因 → 驗證建議</h2>'
+  html += '<h2>4. 風險驗證（因子 → 風險 → 驗證）</h2>'
     +'<table><thead><tr><th>分類</th><th>因子（因）</th><th>風險</th><th>與問題關聯（果因）</th><th>卡控／ISO 驗證</th><th>處置</th></tr></thead><tbody>'
     +rowsHtml+'</tbody></table>'
     +'<div class="note">「應驗」來自 iso_map 應驗基準、「同類510k」來自同類產品實證、「雙重確認」兩者皆有、「AI推測*」為輔助待確認。</div>';
@@ -2407,21 +2421,40 @@ async function generateCapaPdf(){
   // 4.x 同類 510(k) 真實驗證項目（若有查到）
   var capaFda = (window._fda510kResult && window._fda510kResult.extracted) || [];
   if(capaFda.length){
+    // 第2點：建立「與本案相關」關鍵字（取自因子名、問題、卡控），用於標紅相關驗證項目
+    var relTerms = [];
+    var problemTxt = (window._problemText)||(document.getElementById('fb-problem')?document.getElementById('fb-problem').value:'')||'';
+    ['man','machine','material','method','measure','env'].forEach(function(c){ (conf[c]||[]).forEach(function(f){ if(f.name) relTerms.push(f.name); if(f.control_method) relTerms.push(f.control_method); }); });
+    // 把中文因子名拆成關鍵詞 + 加入問題關鍵字 + 英文對應詞
+    var relKw = [];
+    relTerms.join('').match(/[\u4e00-\u9fff]{2,}/g)?.forEach(function(w){ if(w.length<=6) relKw.push(w); });
+    // 中→英對照（常見驗證項目英文）
+    var zh2en = {'漏':'leak|seal|integrity','密封':'seal|leak|integrity','洩漏':'leak|integrity','擊發':'fire|firing|trigger|actuat','觸發':'fire|firing|trigger|actuat','彈簧':'spring|force|fire','力':'force','尺寸':'dimension|size','磨損':'wear|durab','穿刺':'puncture|penetrat','針':'needle|puncture','切割':'cut|slic|sharp','銳利':'sharp|point','取樣':'sampl|acqui','生物相容':'biocompat|cytotox|10993','滅菌':'steril','包裝':'packag','腐蝕':'corros','破裂':'breakage|tensile'};
+    var relRe = [];
+    Object.keys(zh2en).forEach(function(k){ if(relTerms.join('').indexOf(k)>=0 || problemTxt.indexOf(k)>=0) relRe.push(zh2en[k]); });
+    function isRelevant(test){
+      var t=String(test).toLowerCase();
+      if(relRe.some(function(re){ return new RegExp(re,'i').test(t); })) return true;
+      return relKw.some(function(w){ return test.indexOf(w)>=0; });
+    }
     html += '<h2>4.1 同類產品 510(k) 真實驗證項目</h2>'
-      +'<div class="note" style="margin-bottom:6px">以下為 FDA 510(k) 同類產品實際載明的驗證項目與引用標準（逐字萃取），作為本案驗證規劃之真實佐證。</div>'
-      +'<table><thead><tr><th>510(k) 號</th><th>引用標準</th><th>驗證項目</th></tr></thead><tbody>';
+      +'<div class="note" style="margin-bottom:6px">以下為 FDA 510(k) 同類產品實際載明的驗證項目與引用標準（逐字萃取）。<b style="color:#DC2626">紅字粗體</b>＝與本案問題疑似相關、應優先納入本案驗證的項目。</div>'
+      +'<table><thead><tr><th>510(k) 號</th><th>引用標準</th><th>驗證項目（紅=與本案相關）</th></tr></thead><tbody>';
     capaFda.forEach(function(d){
-      html += '<tr><td><b>'+esc(d.k||'')+'</b></td><td>'+esc((d.standards||[]).join('、')||'—')+'</td><td>'+esc((d.tests||[]).join('；')||'—')+'</td></tr>';
+      var testsHtml = (d.tests||[]).map(function(t){
+        return isRelevant(t) ? '<b style="color:#DC2626">'+esc(t)+'</b>' : esc(t);
+      }).join('；')||'—';
+      html += '<tr><td><b>'+esc(d.k||'')+'</b></td><td>'+esc((d.standards||[]).join('、')||'—')+'</td><td>'+testsHtml+'</td></tr>';
     });
     html += '</tbody></table>';
     if(window._fda510kResult.summary) html += '<div class="note">同類驗證重點：'+esc(window._fda510kResult.summary)+'</div>';
     if(window._fda510kResult.matched_to_factors && window._fda510kResult.matched_to_factors.length){
-      html += '<div class="box" style="margin-top:6px"><b>與本案因子對應：</b><br>'
+      html += '<div class="box" style="margin-top:6px"><b>與本案因子對應（紅字項目應納入對應因子的驗證計畫）：</b><br>'
         + window._fda510kResult.matched_to_factors.map(function(m){ return '・<b>'+esc(m.factor)+'</b>：'+esc(m.suggestion); }).join('<br>')
         + '</div>';
     }
   } else {
-    html += '<div class="note" style="margin-top:6px">（尚未查詢同類 510(k) 驗證，或查無可萃取內容。可於因子確認頁按「查同類 510(k) 真實驗證」後再產生本指引。）</div>';
+    html += '<div class="note" style="margin-top:6px">（同類 510(k) 查無可萃取內容，或為舊式掃描檔。）</div>';
   }
 
   // 防呆建議（結構化四道閘優先）
@@ -2446,6 +2479,18 @@ async function generateCapaPdf(){
   html += '<h2>5. 防呆與偵測強化建議</h2>'
     +'<div class="box">檢測攔截四要點：①方法對此失效要有偵測力；②人員判定/抽樣要一致；③樣本量足夠並涵蓋失效分層；④長期老化型失效須移至設計驗證或上市後監督。AQL 抽樣不保證攔偶發缺陷，攔偶發優先用源頭防呆＋線上自動偵測。</div>'
     + (gatesHtml || (detRev?('<div class="box"><b>檢測手法檢討（AI）：</b><br>'+esc(detRev)+'</div>'):''));
+
+  // 第7點：監控攔截力檢討（必做關卡的結果）寫入報告
+  var intcInc = (window._interceptionReviews||[]).filter(function(x){ return x && x._inc!==false; });
+  if(intcInc.length){
+    html += '<h2>5.1 關鍵監控點攔截力檢討</h2>'
+      +'<div class="note" style="margin-bottom:6px">AI 聚焦 '+intcInc.length+' 個關鍵監控點，檢討「為何不良可能逃逸到客戶端」。</div>'
+      +'<table><thead><tr><th>監控點</th><th>①方法</th><th>②人員</th><th>③樣本/分層</th><th>逃逸風險</th></tr></thead><tbody>';
+    intcInc.forEach(function(x){
+      html += '<tr><td><b>'+esc(x.factor||'')+'</b></td><td>'+esc(x.method||'—')+'</td><td>'+esc(x.personnel||'—')+'</td><td>'+esc(x.sampling||'—')+'</td><td>'+esc(x.escape_risk||'—')+'</td></tr>';
+    });
+    html += '</tbody></table>';
+  }
 
   html += '<div class="note" style="margin-top:20px;border-top:1px solid #CBD5E1;padding-top:8px">本指引由 MedQA 系統輔助產生：ISO 條號、統計判定、6M 結構由程式管控；因果論述、彙整由 AI 草擬並標推測(*)，須由 RA／工程依正本標準與實際數據覆核後定稿。</div>';
   html += '</body></html>';
@@ -2877,10 +2922,10 @@ window.downloadPlanDocx=downloadPlanDocx;
 // 結果存 window._fda510kResult，可納入計畫書
 // ════════════════════════════════════════════════════════
 window._fda510kResult = null;
-async function runFda510kVerification(){
+async function runFda510kVerification(silent){
   var btn=document.getElementById('fda510k-btn');
   var panel=document.getElementById('fda510k-panel');
-  if(!panel) return;
+  if(!panel && !silent) return;
   var dev=window._deviceInfo||{};
   var nameEn = dev.name_en || dev.confirmed_name_en || dev.confirmed_name || '';
   var pcs = (window._selectedProductCodes && window._selectedProductCodes.length) ? window._selectedProductCodes : (dev.product_code?[dev.product_code]:[]);
@@ -2892,7 +2937,7 @@ async function runFda510kVerification(){
   });
 
   if(btn){ btn.disabled=true; btn.dataset.t=btn.textContent; btn.textContent='查詢中…'; }
-  panel.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.5)">⏳ 查同類 510(k)、抓取 summary、萃取驗證項目中…（約 20–40 秒）</div>';
+  if(panel) panel.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.5)">⏳ 查同類 510(k)、抓取 summary、萃取驗證項目中…（約 20–40 秒）</div>';
   try{
     var ac=new AbortController(); var to=setTimeout(function(){ac.abort();},90000);
     var resp=await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
@@ -2901,16 +2946,15 @@ async function runFda510kVerification(){
     });
     clearTimeout(to);
     var data=await resp.json();
-    if(data.error){ panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+data.error+'</div>'; return; }
+    if(data.error){ if(panel) panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+data.error+'</div>'; return; }
     var r=data.result||{};
     window._fda510kResult=r;
-    renderFda510kPanel(r, data.note);
-    // 510k 來源加入後，重新配對 ISO 到因子
+    if(panel) renderFda510kPanel(r, data.note);
     if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
   }catch(e){
-    panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+(e&&e.name==='AbortError'?'查詢逾時，可稍後再試':('查詢失敗：'+(e&&e.message||'')))+'</div>';
+    if(panel) panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+(e&&e.name==='AbortError'?'查詢逾時，可稍後再試':('查詢失敗：'+(e&&e.message||'')))+'</div>';
   }finally{
-    if(btn){ btn.disabled=false; btn.textContent=btn.dataset.t||'🔍 查同類 510(k) 真實驗證（選用）'; }
+    if(btn){ btn.disabled=false; btn.textContent=btn.dataset.t||'🔍 查同類 510(k) 真實驗證'; }
   }
 }
 window.runFda510kVerification=runFda510kVerification;
@@ -3043,6 +3087,12 @@ function renderInterceptionPanel(reviews, note){
   var panel = document.getElementById('intc-panel');
   if(!panel) return;
   panel.style.display='block';
+  // 第7點：監控檢討已執行 → 解鎖產生報告按鈕
+  window._interceptionDone = true;
+  var _dlBtn=document.getElementById('dl-plan-btn');
+  if(_dlBtn){ _dlBtn.disabled=false; _dlBtn.style.opacity=''; _dlBtn.style.cursor='pointer'; }
+  var _dlHint=document.getElementById('dl-plan-hint');
+  if(_dlHint){ _dlHint.textContent='✓ 監控檢討已完成，可產生報告'; _dlHint.style.color='#059669'; }
   if(!reviews.length){
     panel.innerHTML = '<div style="background:#F0FDFA;border:1px solid #99F6E4;border-radius:8px;padding:.6rem .8rem;font-size:11px;color:#0F766E;line-height:1.6">AI 判定本案沒有特別需要深入檢討偵測力的監控點'
       + (note?('：'+note):'') + '。（計畫書仍會保留「監控攔截力觀念提醒」一段。）</div>';
@@ -3100,9 +3150,10 @@ function fishboneDraw(){
     causes: parseCauses(document.getElementById(c.id).value)
   }));
 
-  // 只畫「有因子」的分類；沒因子的骨頭直接不畫
-  const used = data.filter(c => c.causes && c.causes.length > 0);
-  if(!used.length){
+  // 第4點：所有 6M 主分類都畫骨架（空分類也保留、用灰色），避免報告看起來很虛。
+  const used = data;
+  const hasAny = data.some(c => c.causes && c.causes.length > 0);
+  if(!hasAny){
     document.getElementById('fb-svg-wrap').innerHTML =
       '<div style="padding:2rem;text-align:center;color:#64748b;font-size:13px">尚無因子可繪製，請先在上方各分類加入原因。</div>';
     document.getElementById('fb-out').style.display='block'; var _dlw=document.getElementById('fb-dl-wrap'); if(_dlw) _dlw.style.display='block';
@@ -3111,8 +3162,8 @@ function fishboneDraw(){
 
   // 中骨位置/間距參數（依因子數動態計算，避免標籤重疊）
   // 因子少時：放大字體、拉大最小間距，讓版面平均分配不擁擠。
-  const totalCauses = used.reduce(function(s,c){ return s + c.causes.length; }, 0);
-  const maxN = Math.max(...used.map(c => c.causes.length));
+  const totalCauses = used.reduce(function(s,c){ return s + (c.causes?c.causes.length:0); }, 0);
+  const maxN = Math.max(1, ...used.map(c => c.causes?c.causes.length:0));
   // 字體：因子越少越大（11→18），分類標籤同步放大（14→20），魚頭（15→19）
   var FZ_CAUSE, FZ_CAT, FZ_HEAD;
   if(totalCauses <= 4){ FZ_CAUSE=18; FZ_CAT=20; FZ_HEAD=19; }
@@ -3165,16 +3216,24 @@ function fishboneDraw(){
 
   function renderBone(jx, isTop, cat){
     const endY = isTop ? spineY - BONE_DY : spineY + BONE_DY;
+    const isEmpty = !cat.causes || cat.causes.length===0;
+    const boneColor = isEmpty ? '#CBD5E1' : cat.color;       // 空分類灰色
+    const labelTextColor = isEmpty ? '#94A3B8' : '#1a1a2e';
     // 大骨
-    s.push(`<line x1="${jx-BONE_DX}" y1="${endY}" x2="${jx}" y2="${spineY}" stroke="${cat.color}" stroke-width="2.5"/>`);
+    s.push(`<line x1="${jx-BONE_DX}" y1="${endY}" x2="${jx}" y2="${spineY}" stroke="${boneColor}" stroke-width="${isEmpty?'1.6':'2.5'}"/>`);
 
     // 要因標籤
     const lblW=Math.max(cat.label.length*(FZ_CAT*0.6)+20,108);
     const lblH=FZ_CAT+14;
     const lblX=(jx-BONE_DX)-lblW/2;
     const lblY=isTop ? endY-lblH-6 : endY+6;
-    s.push(`<rect x="${lblX}" y="${lblY}" width="${lblW}" height="${lblH}" rx="5" fill="none" stroke="${cat.color}" stroke-width="1.5"/>`);
-    s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="#1a1a2e" font-size="${FZ_CAT}" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
+    s.push(`<rect x="${lblX}" y="${lblY}" width="${lblW}" height="${lblH}" rx="5" fill="none" stroke="${boneColor}" stroke-width="1.5"/>`);
+    s.push(`<text x="${jx-BONE_DX}" y="${lblY+lblH/2}" text-anchor="middle" dominant-baseline="central" fill="${labelTextColor}" font-size="${FZ_CAT}" font-weight="700" font-family="-apple-system,sans-serif">${cat.label}</text>`);
+    if(isEmpty){
+      // 空分類提示「（無顯著因子）」
+      s.push(`<text x="${jx-BONE_DX}" y="${isTop?endY+18:endY-18}" text-anchor="middle" fill="#B0BAC9" font-size="${Math.max(FZ_CAUSE-2,9)}" font-style="italic" font-family="-apple-system,sans-serif">（無顯著因子）</text>`);
+      return;
+    }
 
     // 中骨：依因子數均分 t，間距固定不重疊
     const ddx=BONE_DX, ddy=isTop?BONE_DY:-BONE_DY;
@@ -6635,22 +6694,23 @@ window.homeSummarizeFactors = async function(tools) {
     if(data.result) {
       window._confirmedFactors = data.result;
       renderFactorPanel(data.result);
-      var _fdaWrap=document.getElementById('home-fda510k-wrap'); if(_fdaWrap) _fdaWrap.style.display='block';
-      // ISO 自動對照：整理因子後立刻跑，確保計畫書一定有 ISO（品質優先，不再靠選用按鈕）
-      try{
-        var _isoPlans = [];
-        ['man','machine','material','method','measure','env'].forEach(function(c){
-          (data.result[c]||[]).forEach(function(f){
-            _isoPlans.push({ factor:f.name, pipeline: (f.nature==='compliance'?'compliance':'experiment'), subtype:(f.verify_method||''), iso_hint:f.iso_hint });
+      // 第3點：510k 改為自動查（不再選用按鈕）。先查 510k → 再 ISO 對照 → 再配對，讓三來源齊全
+      (async function(){
+        try{ if(typeof runFda510kVerification==='function') await runFda510kVerification(true); }catch(e){ console.log('[510k 自動] 略過:', e&&e.message); }
+        try{
+          var _isoPlans = [];
+          ['man','machine','material','method','measure','env'].forEach(function(c){
+            (data.result[c]||[]).forEach(function(f){
+              _isoPlans.push({ factor:f.name, pipeline: (f.nature==='compliance'?'compliance':'experiment'), subtype:(f.verify_method||''), iso_hint:f.iso_hint });
+            });
           });
-        });
-        if(_isoPlans.length && typeof runIsoCrosscheck==='function'){
-          runIsoCrosscheck(_isoPlans, function(){
-            // ISO 對照完成 → 自動把 ISO 配對到因子（510k 若已查也一併納入）
-            if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
-          });
-        }
-      }catch(e){ console.log('[ISO 自動對照] 略過:', e&&e.message); }
+          if(_isoPlans.length && typeof runIsoCrosscheck==='function'){
+            runIsoCrosscheck(_isoPlans, function(){
+              if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
+            });
+          } else if(typeof runIsoFactorMatch==='function'){ runIsoFactorMatch(); }
+        }catch(e){ console.log('[ISO 自動對照] 略過:', e&&e.message); }
+      })();
     } else {
       var em = data.error ? ('⚠️ '+data.error) : '⚠️ 整理失敗，請手動確認';
       panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5;line-height:1.5">'+em+'</div>';
@@ -7151,21 +7211,21 @@ function renderIsoPanel(r){
     var QS = [
       {id:'hq-problem', label:'問題主題', multi:false, isText:true,
        placeholder:'例：親水塗層潤滑度不足、檢體針取樣量不足、封口強度不夠...'},
-      {id:'hq-timing', label:'這個問題什麼時候出現？', multi:false, opts:[
+      {id:'hq-timing', label:'這個問題什麼時候出現？', multi:false, def:'regression', opts:[
         ['','— 請選擇 —'],
         ['new','新產品／新設計一開始就有這個問題'],
         ['regression','以前沒問題，最近才出現'],
         ['always','一直都有，現在想改善'],
         ['unknown','不確定']
       ]},
-      {id:'hq-stage', label:'在哪個階段發現的？', multi:false, opts:[
+      {id:'hq-stage', label:'在哪個階段發現的？', multi:false, def:'customer', opts:[
         ['','— 請選擇 —'],
         ['design','設計驗證或樣品階段'],
         ['production','量產生產過程中'],
         ['qc','出廠前 QC 或最終檢驗'],
         ['customer','客戶端使用後回報']
       ]},
-      {id:'hq-pattern', label:'問題發生的規律是？', multi:false, opts:[
+      {id:'hq-pattern', label:'問題發生的規律是？', multi:false, def:'occasional', opts:[
         ['','— 請選擇 —'],
         ['every','每次／每批都有，很穩定'],
         ['frequent','經常發生，但非每次'],
@@ -7175,7 +7235,7 @@ function renderIsoPanel(r){
         ['specific_person','只有特定人員操作才有'],
         ['specific_lot','只有特定批次材料才有']
       ]},
-      {id:'hq-data', label:'針對「這個問題現象」，有沒有可量化的數據？', multi:false, note:'※ 只算直接或間接反映「問題現象本身」的數據（如本例的流量、內徑）；與問題無關的量測不算。', opts:[
+      {id:'hq-data', label:'針對「這個問題現象」，有沒有可量化的數據？', multi:false, def:'none', note:'※ 只算直接或間接反映「問題現象本身」的數據（如本例的流量、內徑）；與問題無關的量測不算。', opts:[
         ['','— 請選擇 —'],
         ['measure_direct','有：直接量測本問題的數據（如流量、內徑、強度）'],
         ['related_yield','有：相關的良率／不良數紀錄'],
@@ -7303,6 +7363,7 @@ function renderIsoPanel(r){
           q.opts.forEach(function(o){
             var opt = document.createElement('option');
             opt.value = o[0]; opt.textContent = o[1];
+            if(q.def && o[0]===q.def) opt.selected = true;   // 第6點：套用預設值
             sel.appendChild(opt);
           });
           sel.addEventListener('change', updateFormProgress);
@@ -8404,7 +8465,16 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
         html += '<span class="fb-dispo-chip" data-name="'+esc(f.name)+'" data-k="'+d.k+'" data-color="'+d.color+'" onclick="fbToggleDispo(this)" '
           + 'style="'+st+';border-radius:5px;padding:3px 9px;font-size:11.5px;cursor:pointer;user-select:none;transition:all .12s">'+d.label+'</span>';
       });
-      html += '</div></div>';
+      html += '</div>';
+      // 第5點：人工補充處置欄（可填不同的處置措施，預設帶 AI 建議的卡控方式）
+      window._factorDispo[f.name] = window._factorDispo[f.name] || {picks:[]};
+      var noteVal = (window._factorDispo[f.name].note!==undefined) ? window._factorDispo[f.name].note : (f.control_method||'');
+      html += '<div style="margin-top:.5rem">'
+        + '<div style="font-size:10px;color:#9CA3AF;margin-bottom:2px">補充處置措施（可自行修改／AI 已預填建議）：</div>'
+        + '<textarea data-name="'+esc(f.name)+'" oninput="fbUpdateDispoNote(this)" rows="2" '
+        + 'style="width:100%;box-sizing:border-box;font-size:11px;border:1px solid #E5E7EB;border-radius:6px;padding:5px 8px;font-family:inherit;color:#374151;resize:vertical" '
+        + 'placeholder="此因子的具體處置／驗證做法...">'+esc(noteVal)+'</textarea></div>';
+      html += '</div>';
     });
   });
   html += '</div>';
@@ -8412,6 +8482,13 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
   selectorDiv.style.display = 'block';
   fbSyncDispoToLegacy();
   fbUpdateCoverage();
+};
+
+// 第5點：儲存人工補充的處置措施
+window.fbUpdateDispoNote = function(el){
+  var name = el.dataset.name;
+  window._factorDispo[name] = window._factorDispo[name] || {picks:[]};
+  window._factorDispo[name].note = el.value;
 };
 
 window.fbToggleDispo = function(el){
@@ -8956,6 +9033,7 @@ document.addEventListener('click', function(e) {
   function safeName(s){return (s||'DMAIC').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,80);}
 
   window.dmaicEnhanceRecords=function(){
+    return;  // 第3點：移除各工具頁的「分析紀錄/報告輸出」摺疊區（主流程已用 CAPA 指引輸出）
     document.querySelectorAll('.tool-page').forEach(function(tp){
       if(tp.querySelector('[data-quality-record]')) return;
       var page=tp.closest('.page');
