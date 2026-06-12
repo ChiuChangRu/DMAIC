@@ -2297,6 +2297,19 @@ async function generateCapaPdf(){
   var conf = window._confirmedFactors||{};
   var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
 
+  // 確保 ISO↔因子配對已完成：若還沒配對但有 ISO 來源，當場補跑一次，避免表格 ISO 全空
+  try{
+    var hasMatch = window._factorIsoMatch && Object.keys(window._factorIsoMatch).length>0;
+    if(!hasMatch){
+      // 先確保 iso_crosscheck 有結果（用因子當輸入）
+      if((!window._isoResult || !(window._isoResult.applicable||[]).length) && typeof runIsoCrosscheck==='function'){
+        var _ip=[]; ['man','machine','material','method','measure','env'].forEach(function(c){ (conf[c]||[]).forEach(function(f){ _ip.push({factor:f.name,pipeline:(f.nature==='compliance'?'compliance':'experiment'),subtype:(f.verify_method||''),iso_hint:f.iso_hint}); }); });
+        if(_ip.length) await new Promise(function(res){ runIsoCrosscheck(_ip, res); setTimeout(res, 30000); });
+      }
+      if(typeof runIsoFactorMatch==='function') await runIsoFactorMatch();
+    }
+  }catch(e){ console.log('[CAPA ISO 配對補跑] 略過:', e&&e.message); }
+
   // 魚骨圖 SVG（取畫面現成的）
   var svgWrap = document.getElementById('fb-svg-wrap');
   var svgHtml = svgWrap ? svgWrap.innerHTML : '<p>（魚骨圖未產生）</p>';
@@ -2326,7 +2339,14 @@ async function generateCapaPdf(){
       var picks=((window._factorDispo||{})[f.name]||{}).picks||[];
       var dispo=picks.map(function(k){return DLBL[k]||k;}).join('、')||'—';
       var fm=(window._factorIsoMatch||{})[f.name]||[];
-      var iso=fm.map(function(m){return esc(m.no)+'〔'+(SRCL[m.source]||m.source)+'〕';}).join('、')||'—';
+      var iso;
+      if(fm.length){
+        iso=fm.map(function(m){return esc(m.no)+'〔'+(SRCL[m.source]||m.source)+'〕';}).join('、');
+      } else if(f.iso_hint){
+        iso=esc(f.iso_hint)+'〔AI推測*〕';   // 保底：配對無結果時用 AI 建議
+      } else {
+        iso='（待對應 ISO）';
+      }
       var rc=f.risk==='high'?'#DC2626':f.risk==='medium'?'#92400E':'#9CA3AF';
       rowsHtml+='<tr>'
         +'<td>'+esc(CATN[c])+'</td>'
