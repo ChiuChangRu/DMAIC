@@ -1,5 +1,7 @@
-// MedQA Worker v5.1 — + iso_crosscheck（ISO 對照/缺口紅旗）
-// 既有：verification_plan + fishbone_to_doe + summarize_factors + identify_device
+// MedQA Worker v5.3-b01 — 因子判斷通則 + ISO配對防呆(10993/13485/11607) + MAUDE + 510k萃取
+// 部署辨識：Ctrl+F 搜「v5.3-b01」或「PACKAGE_RE」搜得到 = 已是最新版
+// WORKER_V53
+// 既有：verification_plan + fishbone_to_doe + summarize_factors + identify_device + iso_crosscheck
 // 部署：Cloudflare Workers，ANTHROPIC_API_KEY 存於 Secret
 
 const ALLOWED_ORIGINS = [
@@ -173,7 +175,7 @@ export default {
 
       // 合法 mode 限制
       const mode = body.mode || 'chat';
-      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'plan_narrative', 'interception_review', 'fda_verification', 'stream_navigate', 'fishbone_to_doe', 'version'];
+      const VALID_MODES = ['navigate', 'analyze', 'chat', 'fishbone_generate', 'identify_device', 'summarize_factors', 'verification_plan', 'iso_crosscheck', 'iso_factor_match', 'plan_narrative', 'interception_review', 'fda_verification', 'stream_navigate', 'fishbone_to_doe', 'version'];
       if (!VALID_MODES.includes(mode)) {
         return new Response(JSON.stringify({ error: '無效的 mode' }), {
           status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) }
@@ -182,7 +184,7 @@ export default {
 
       // ══ version：回傳 Worker 版本 ══
       if (mode === 'version') {
-        return json({ mode: 'version', version: 'v5.1' }, origin);
+        return json({ mode: 'version', version: 'v5.3-b01', features: ['因子判斷通則','ISO配對防呆(10993/13485/11607)','MAUDE','510k萃取','510k標紅中英'] }, origin);
       }
 
       // ══ fishbone_to_doe：魚骨圖因子轉換為 DOE 實驗設計格式 ══
@@ -247,6 +249,11 @@ export default {
 - 近期是否有變更：${body.surveyData.change || '未填'}
 請根據以上問卷答案分析問題方向，只針對【不明確或矛盾】的地方追問。` : '';
 
+        const maudeContext = (body.maudeProblems && body.maudeProblems.length) ? `
+【FDA MAUDE 同類產品真實不良事件】
+同類產品在 FDA 不良事件資料庫中常見的問題類型：${body.maudeProblems.join('、')}
+追問時可參考這些真實案例，主動詢問使用者「這次的問題是否與其中某類相關」，讓追問更具體。但不要假設使用者的問題一定是這些；以使用者實際描述為準。` : '';
+
         const streamResp = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
@@ -262,6 +269,7 @@ export default {
             system: `你是醫療器材品質工程師的 CAPA 引導助理，遵循 DMAIC 流程。你的任務是「問出問題的關鍵成因」，不是閒聊。
 ${deviceContext}
 ${surveyContext}
+${maudeContext}
 
 核心原則：
 - DMAIC 的 D（Define）階段必須先用魚骨圖釐清根本原因，【魚骨圖永遠是第一個推薦工具】。
@@ -491,6 +499,15 @@ ${deviceCtx}
 - 「黏合、溶脹、接合強度」等屬接合完整性/材料工程 → 對應導管本體標準（如 ISO 10555-1 的接頭/拉伸條款），不是 ISO 10993。
 - ISO 10993 只在「材料對人體/血液的生物安全（細胞毒性/致敏/血液相容/化學溶出）」時才引用。
 
+【特別注意 — ISO 11607 是「無菌包裝封口」，不是「導管接合」】
+- ISO 11607（最終滅菌包裝成形/密封/組裝確效）的「密封」指的是【無菌包裝袋/泡殼的封口】，只配「包裝、封口、無菌屏障」類因子。
+- 「導管 Hub 熱熔接合漏水、壓合、熔接界面」等屬【導管本體接合完整性】，對應 ISO 10555-1 的接頭/拉伸/洩漏條款，【絕不是 ISO 11607】。看到「接合、熱熔、壓合、Hub、漏水」不要配 11607。
+
+【特別注意 — 通用品質/風險標準不要逐因子氾濫（重要）】
+- ISO 13485（品質管理系統）、ISO 14971（風險管理）、ISO 62366（可用性）是「全器材通用」的框架標準，幾乎任何因子都能勉強扯上關係，但這樣配【沒有鑑別力、等於沒講】。
+- 規則：13485/14971/62366 只在「該因子的本質就是該框架的核心議題」時才配——例如 14971 只配「需要風險分析/FMEA 才能判定」的因子；62366 只配「使用者操作介面/人因」因子；13485 原則上【不配給個別技術因子】（製程確效、設備管理屬全廠 QMS，列為器材級通用即可，不要每個因子都掛 13485）。
+- 寧可讓某因子「沒有對應 ISO」（留空，由 K number 510k 驗證補），也不要用 13485 這種萬用標準填滿每個因子。一個因子若只能對到 13485，多半代表 iso_map 還沒有更貼切的專屬標準 → 該因子的 ISO 留空，不要硬配 13485。
+
 繁體中文，務實，不要學術長文。`,
           tools: [{
             name: 'iso_crosscheck',
@@ -575,7 +592,32 @@ ${planText || '(無)'}
             return true;
           });
           result.applicable = result.applicable.filter(a => a && stdByNo[a.no]);
-          result._gate = { droppedStd, fixedClause };
+
+          // 通用標準氾濫防呆：13485/14971/62366 是全器材框架標準，若被配給多個因子＝沒鑑別力。
+          // 統計每個通用標準被配給的因子數，>1 就從 items 移除（保留在 applicable 當器材級通用）。
+          const GENERIC_RE = /13485|14971|62366/;
+          const genericCount = {};   // standard -> 配給幾個不同因子
+          result.items.forEach(it => {
+            if(it && it.standard && GENERIC_RE.test(it.standard)){
+              genericCount[it.standard] = (genericCount[it.standard]||0) + 1;
+            }
+          });
+          let droppedGeneric = 0;
+          const movedGeneric = new Set();
+          result.items = result.items.filter(it => {
+            if(it && it.standard && GENERIC_RE.test(it.standard) && (genericCount[it.standard]||0) > 1){
+              movedGeneric.add(it.standard); droppedGeneric++; return false;  // 氾濫 → 從逐因子移除
+            }
+            return true;
+          });
+          // 移除的通用標準補進 applicable（器材級通用，只列一次）
+          movedGeneric.forEach(no => {
+            if(!result.applicable.some(a => a.no === no) && stdByNo[no]){
+              result.applicable.push({ no:no, title_zh:(stdByNo[no].title_zh||stdByNo[no].title||''), title:(stdByNo[no].title||''), _generic:true });
+            }
+          });
+
+          result._gate = { droppedStd, fixedClause, droppedGeneric };
         })();
 
         const debugInfo = {
@@ -636,15 +678,14 @@ ${planText || '(無)'}
 【SPC 觀察原因（若有提供 SPC 監控特徵）】
 - 針對每個 SPC 監控特徵，寫一句「為何要持續以管制圖監控此特徵」的觀察原因（30字內、務實、扣回問題或製程穩定性），放入 spc_reasons（key=特徵名、value=原因）。不得新增規格數值或條號。
 
-【檢測手法檢討與防呆（detection_review，務必產出，要紮實）】
-背景事實：許多醫療器材的不良是在客戶端才被發現，代表「出貨前的檢測/卡關機制失效或不足」。
-請沿「四道閘」結構化檢討本案的整體檢測手法（每道閘 1～2 句、扣回本案，不要泛泛而談）：
-① 方法偵測力：現行檢測對「本案這個失效模式」有沒有偵測力？是否靈敏度不足、或根本驗不到此失效（如微洩漏目視驗不出、內部劣化外觀看不到）。
-② 人員一致性：是否依賴人工目視/判定，操作者間易不一致；抽樣「怎麼抽」是否主觀（固定位置、只抽方便拿的）。
-③ 樣本數量與分層代表性：抽樣量對偶發/低率缺陷的攔截力（可用 1−(1−p)ⁿ 觀念定性說明，不得捏造 p/n 數值）；樣本是否涵蓋失效的發生分層（模穴/時段/批次/班別）。
-④ 監控範圍邊界：本案失效是否屬「出廠當下不存在、時間或使用累積才顯現」（如長期老化），若是則任何出貨抽樣都無效，須移到設計驗證或上市後監督（PMS）。
-接著提出 1～3 項防呆(Poka-Yoke)機制：優先「源頭預防(設計/治具/防錯結構)」＞「線上自動偵測/全檢(感測、機器視覺、壓力/洩漏自動測試)」＞「警示」，每項註明擋住哪道閘的失效。
-若問卷未提供現行檢測手法，明確指出「現行檢測手法未在問卷揭露，建議補充盤點（*）」。凡推論標（*）；不得捏造既有檢測設備或數據。語氣務實。`,
+【檢測手法檢討（detection_review_gates，務必產出，結構化）】
+背景：許多醫療器材不良在客戶端才被發現，代表「出貨前檢測/卡關失效」。程式已定義固定的「四道閘」骨架，你只需為每道閘填三個短欄位：現況(status，一句扣回本案)、風險(risk: high/medium/low)、對策(action，一句)。不要寫長篇散文。
+- method（方法偵測力）：現行檢測對「本案失效模式」有無偵測力？是否驗不到（微洩漏目視驗不出等）。
+- people（人員一致性）：是否依賴人工目視判定、操作者間易不一致、抽樣主觀。
+- sampling（樣本數量與分層）：抽樣量對偶發/低率缺陷的攔截力；是否涵蓋失效分層（模穴/時段/批次/班別）。不得捏造 p/n 數值。
+- boundary（監控範圍邊界）：本案失效是否屬「出廠當下不存在、時間/使用累積才顯現」（老化型）；若是則出貨抽樣無效，須移設計驗證或上市後監督。
+另填 poka_yoke：1-3 項防呆，優先源頭預防＞線上自動偵測＞警示，每項註明擋哪道閘。
+凡推論標（*）；不得捏造既有檢測設備或數據。`,
           tools: [{
             name: 'plan_narrative',
             description: '計畫書三段敘事',
@@ -655,7 +696,17 @@ ${planText || '(無)'}
                 root_cause_narrative:{ type: 'string', description: '根本原因論述（3-6句）' },
                 conclusion:          { type: 'string', description: '結論與後續行動（3-6句）' },
                 spc_reasons:         { type: 'object', description: 'SPC 監控特徵的觀察原因，key=特徵名、value=原因（30字內）；無 SPC 特徵時可省略' },
-                detection_review:    { type: 'string', description: '檢測手法檢討（沿四道閘①方法偵測力②人員一致性③樣本數量與分層④監控範圍邊界結構化展開，每道閘扣回本案）＋1-3項Poka-Yoke防呆建議，推論標(*)' }
+                detection_review_gates: {
+                  type: 'object',
+                  description: '四道閘檢測檢討（程式已定四道閘骨架，你只填每道閘的三個短欄位）',
+                  properties: {
+                    method:   { type:'object', properties:{ status:{type:'string',description:'方法偵測力現況（一句，扣回本案，≤30字）'}, risk:{type:'string',enum:['high','medium','low']}, action:{type:'string',description:'對策（一句，≤30字）'} } },
+                    people:   { type:'object', properties:{ status:{type:'string',description:'人員一致性現況（一句，≤30字）'}, risk:{type:'string',enum:['high','medium','low']}, action:{type:'string',description:'對策（一句，≤30字）'} } },
+                    sampling: { type:'object', properties:{ status:{type:'string',description:'樣本數量與分層現況（一句，≤30字）'}, risk:{type:'string',enum:['high','medium','low']}, action:{type:'string',description:'對策（一句，≤30字）'} } },
+                    boundary: { type:'object', properties:{ status:{type:'string',description:'監控範圍邊界現況：是否屬老化型出貨驗不到（一句，≤30字）'}, risk:{type:'string',enum:['high','medium','low']}, action:{type:'string',description:'對策（一句，≤30字）'} } }
+                  }
+                },
+                poka_yoke: { type:'array', items:{ type:'object', properties:{ measure:{type:'string',description:'防呆機制（一句）'}, gate:{type:'string',description:'擋住哪道閘：method/people/sampling/boundary'} } }, description:'1-3項防呆，優先源頭預防＞線上自動偵測＞警示' }
               }
             }
           }],
@@ -777,20 +828,20 @@ ${planLines || '（無）'}
       // ══ fda_verification：查同類 510(k)→抓 summary PDF→萃取真實驗證項目與 ISO 標準 ══
       if (mode === 'fda_verification') {
         const deviceNameEn = body.deviceNameEn || body.deviceName || '';
-        const productCode = body.productCode || '';
+        const productCodes = body.productCodes || (body.productCode ? [body.productCode] : []);
         const factors = body.factors || '';
         const fdaKey = env.FDA_API_KEY || body.fdaKey || '';
         const maxN = Math.min(body.maxN || 5, 5);
 
         let kList = [];
         try {
-          const q = productCode
-            ? `product_code:${encodeURIComponent(productCode)}`
+          const q = productCodes.length
+            ? '(' + productCodes.map(c=>`product_code:${encodeURIComponent(c)}`).join('+') + ')'
             : `device_name:"${encodeURIComponent(deviceNameEn)}"`;
           const url = `https://api.fda.gov/device/510k.json?${fdaKey?('api_key='+fdaKey+'&'):''}search=${q}&limit=${maxN}&sort=decision_date:desc`;
           const r = await fetch(url);
           const j = await r.json();
-          if (j.results) kList = j.results.map(x => ({ k:x.k_number, name:x.device_name, applicant:x.applicant, date:x.decision_date }));
+          if (j.results) kList = j.results.map(x => ({ k:x.k_number, name:x.device_name, applicant:x.applicant, date:x.decision_date, pc:x.product_code }));
         } catch(e) {
           return json({ mode:'fda_verification', result:null, error:'openFDA 查詢失敗：'+(e.message||'') }, origin);
         }
@@ -860,6 +911,79 @@ ${planLines || '（無）'}
         const result = (tu2 && tu2.input) || { extracted:[] };
         result.devices = kList;
         return json({ mode:'fda_verification', result, _debug:{ k_found:kList.length, pdf_extracted:docs.length } }, origin);
+      }
+
+      // ══ iso_factor_match：把查到的 ISO（510k萃取+iso_map+ai_hint）配對到各因子 ══
+      // 來源優先序：510k萃取/iso_map 為主、ai_hint 為輔。AI 配對，使用者可手動調整。
+      if (mode === 'iso_factor_match') {
+        const factors = body.factors || [];       // [{name, cat, link}]
+        const standards = body.standards || [];    // [{no, title, source, items}]  source: fda510k|iso_map|ai_hint
+        if (!factors.length || !standards.length) {
+          return json({ mode:'iso_factor_match', result:{ matches:[], unmatched:[] }, note:'因子或標準清單為空' }, origin);
+        }
+        const facLines = factors.map((f,i)=>`${i+1}. ${f.name}${f.link?('（'+f.link.slice(0,50)+'）'):''}`).join('\n');
+        const stdLines = standards.map(s=>`- ${s.no}（${s.title||''}）[來源:${s.source||'?'}]${s.items?('｜驗證項目:'+(Array.isArray(s.items)?s.items.join('、'):s.items)):''}`).join('\n');
+
+        const resp = await callClaude(env, MODEL_MAP.haiku, {
+          max_tokens: 2500,
+          system:`你是醫療器材法規工程師。把「已查證的 ISO 標準清單」配對到「魚骨圖因子」，判斷每條標準是否真的能驗證該因子。
+【最高原則：寧缺勿濫，不相關就不要配】
+- 只有當標準的測試主題「直接驗證」該因子的失效機制時，才可配對。主題不相關就絕對不要硬塞，寧可放進 unmatched。
+- 嚴禁亂塞：生物相容性(ISO 10993 系列)只能配給「材料毒性/組織接觸/溶出物」類因子，絕不可配給「操作手法、培訓、力道、磨損、尺寸公差、製程參數」這類因子（它們與生物相容性無關）。
+- 滅菌標準(11135/11137/17665)只配滅菌/無菌因子；包裝標準(11607)只配密封/包裝完整性因子；尺寸/性能/機械標準才配結構/製程/力學因子。
+【配對方式】
+- 一條標準可對多個「主題真的相關」的因子；一個因子可有多條相關標準；但若某因子找不到主題相關的標準，就讓它沒有 ISO（不要硬給）。
+- 只能用清單中實際提供的標準，不可自行新增。
+- 來源優先：[來源:fda510k]、[來源:iso_map] 為可靠主來源；[來源:ai_hint] 為輔助，採用時在 why 標「AI推測」。
+- 對不到任何因子的標準（特別是生物相容、滅菌這種「器材級」標準），放進 unmatched，它們會以「同類 510k 參考標準」列出、標 K number，而非硬掛到因子。
+繁體中文。`,
+          tools:[{
+            name:'iso_factor_match',
+            description:'ISO配對到因子',
+            input_schema:{ type:'object', properties:{
+              matches:{ type:'array', items:{ type:'object', properties:{
+                factor:{ type:'string', description:'因子名稱（需與輸入一致）' },
+                standards:{ type:'array', items:{ type:'object', properties:{
+                  no:{type:'string'}, source:{type:'string',description:'fda510k|iso_map|ai_hint'},
+                  why:{type:'string',description:'為何此標準驗證此因子（20字內）'}
+                }}}
+              }}},
+              unmatched:{ type:'array', items:{type:'string'}, description:'對不到因子的標準編號（器材級通用）' }
+            }, required:['matches'] }
+          }],
+          tool_choice:{ type:'tool', name:'iso_factor_match' },
+          messages:[{ role:'user', content:`【因子清單】\n${facLines}\n\n【已查證 ISO 標準清單】\n${stdLines}\n\n請把標準配對到因子。` }]
+        });
+
+        if (resp._httpError) return json({ mode:'iso_factor_match', result:null, error:resp._errorMessage }, origin);
+        const tu3 = resp.content && resp.content.find(c => c.type==='tool_use');
+        const result = (tu3 && tu3.input) || { matches:[], unmatched:[] };
+
+        // 程式防呆：強制擋掉主題明顯不相關的硬塞配對（即使 AI 還是亂配）
+        // 生物相容(10993)、滅菌(11135/11137/17665/11737)只能配「材料/接觸/滅菌」類因子
+        const BIO_RE = /10993/;
+        const STERILE_RE = /11135|11137|17665|11737/;
+        const PACKAGE_RE = /11607/;   // 無菌包裝成形/密封/組裝確效（是「包裝袋封口」，不是導管Hub接合）
+        const movedToUnmatched = new Set();
+        (result.matches||[]).forEach(m => {
+          const fname = String(m.factor||'');
+          const factorIsMaterial = /材料|溶出|塗層|生物相容|組織接觸|毒性|殘留|塑化劑|添加劑/.test(fname);
+          const factorIsSterile = /滅菌|無菌|滅菌確效|sterli|生物負荷|bioburden/i.test(fname);
+          // 「包裝封口」因子才配 11607；導管Hub熱熔接合的「密封/接合」不算包裝
+          const factorIsPackage = /包裝|封口|無菌屏障|packag|pouch|tray|seal.*pack/i.test(fname) && !/熱熔|壓合|hub|接合|導管|管材/i.test(fname);
+          m.standards = (m.standards||[]).filter(st => {
+            const no = String(st.no||'');
+            if (BIO_RE.test(no) && !factorIsMaterial) { movedToUnmatched.add(no); return false; }   // 10993 只配材料類
+            if (STERILE_RE.test(no) && !factorIsSterile) { movedToUnmatched.add(no); return false; } // 滅菌只配滅菌類
+            if (PACKAGE_RE.test(no) && !factorIsPackage) { movedToUnmatched.add(no); return false; } // 11607 只配包裝封口類，不配導管接合
+            return true;
+          });
+        });
+        // 被擋掉的標準併入 unmatched（去重）
+        result.unmatched = Array.from(new Set([...(result.unmatched||[]), ...movedToUnmatched]));
+        // 清掉沒有任何標準的 match 項
+        result.matches = (result.matches||[]).filter(m => (m.standards||[]).length>0);
+        return json({ mode:'iso_factor_match', result }, origin);
       }
 
       // ══ summarize_factors：整理因子清單供使用者確認 ══
@@ -932,7 +1056,25 @@ ${deviceCtx}
 
 【卡控方式 control_method — 必填】論述實務上怎麼防堵/驗證此因子：明確指出靠 SOP／IFU／設計驗證(DV)／製程確效(IQ/OQ/PQ)／製程監控(SPC)／量測系統分析(MSA)／統計實驗(DOE)／或 ISO 標準符合性（並指出目前是否確實落實、有無缺口）。可執行，不可寫「進行驗證」這種空話。涉及 ISO 時 iso_hint 寫編號。
 
-規則：每類別 3-5 個、無依據回空陣列、不可捏造、繁體中文（禁簡體）。`,
+【因子判斷通則 — 軟體大腦，務必逐項執行】
+產生 6M 因子時，不要只想「直接成因」，而要沿下列三層框架系統性掃描，確保因子全面、不漏關鍵面向：
+
+(A)【失效鏈骨架 — 完整掃描每一關】沿「設計→來料(供應商)→製程(機台/治具/參數)→出貨檢驗(量測/抽樣)→包裝滅菌→運輸儲存→臨床使用」逐關自問「這一關是否可能貢獻此失效」。每一關若有合理因子就列出，避免只集中在 1-2 關。
+
+(B)【FMEA 雙軸 — 每個失效都問兩件事】
+- 發生(Occurrence)：為何會產生此失效？（彈簧、尺寸、手法、材料…等直接成因）
+- 流出(Detection)：為何出貨前沒攔住它流到下游/客戶端？→ 這對應「量測」與「方法」構面的「檢測逃逸因子」。只要問題是在下游/客戶端/臨床才發現，量測與方法【絕不可空或只有低風險】，必須列至少一個中或高風險的檢測逃逸因子（如：出廠檢驗未涵蓋此失效／抽樣量不足以攔偶發／量測方法無偵測力／製程缺管制點）。
+
+(C)【問題類型聚焦 — 依特徵加重該查的構面】依問卷/描述的問題特徵，加重對應構面的風險判定：
+- 偶發/低率 → 量測抽樣代表性、製程穩定性(SPC)、邊界值產品逃逸。
+- 只有特定批次 → 材料/供應商、來料檢驗。
+- 只有特定機台/產線 → 機器、治具、製程參數。
+- 只有特定人員 → 人員手法、培訓、可用性人因。
+- 尺寸/幾何 → 機器、模具、製程方法、量測系統。
+- 隨使用時間/次數才出現(老化磨損) → 設計裕度、上市後監督；提醒「出貨抽樣對老化型失效無效，須移設計驗證或PMS」。
+
+【6M 完整覆蓋】每一個 6M 類別（人員/機器/材料/方法/量測/環境）都至少列 2-3 個因子，不可有空類別。高風險因子（與線索吻合者）標 high；低風險廣度補充標 low 並可標 speculative。
+規則：每類別至少 2-3 個、依上述通則確保「發生+流出」雙面與失效鏈各關都涵蓋、不可捏造具體數據、繁體中文（禁簡體）。`,
           tools: [{
             name: 'factor_summary',
             description: '整理 6M 因子清單，每個因子含建議工具',
@@ -959,36 +1101,40 @@ ${deviceCtx}
         // 程式強制：依 AI 判定的因子性質 nature，硬性對應分析工具（AI 無法再自由選工具）。
         // adjustable→DOE（多個可調可改 PB）、observed→SPC、method→MSA、group_compare→假設檢定、compliance→none(ISO/GMP)
         if(result){
-          const NATURE_TOOL = { adjustable:'doe', observed:'spc', method:'msa', group_compare:'hypothesis', compliance:'none', other:'none' };
+          const NATURE_TOOL = { adjustable:'doe', observed:'spc', method:'msa', group_compare:'hypothesis', training:'train', compliance:'none', other:'none' };
           // 程式關鍵字防呆：即使 AI 判錯 nature，用因子名稱關鍵字強制修正（雙保險，不純靠 AI）
-          function correctNature(name, aiNature){
+          // 規則：可調參數→DOE、監控數據→SPC、量測判定→MSA、人員訓練→教育訓練、環境行政法規→ISO
+          function correctNature(name, aiNature, cat){
             const n = String(name||'');
-            // 觀測現象（被動、不可調）→ observed → SPC。老化/磨損/漂移/衰退/不穩定/波動/偏移/劣化
+            // 量測/判定/手法 → method → MSA（先判，避免「判定一致」被其他規則搶走）
+            if(/量測|測量|判定|判讀|檢測誤差|重複性|再現性|量具|校正|目視判定|讀值|計量誤差|Gage|GR&R/.test(n)) return 'method';
+            // 人員訓練/技能/操作手法 → training → 教育訓練（你的規則：跟人員有關＝教育訓練或MSA）
+            if(/訓練|培訓|教育|技能|熟練|手法|施力|操作一致|作業一致|遵循|SOP遵守|人為操作|操作差異|裝配手法|使用者操作|終端使用者|客戶操作|客戶使用|操作熟悉|經驗不足|認知/.test(n)) return 'training';
+            // 觀測現象（被動、不可調）→ observed → SPC
             if(/老化|磨損|漂移|衰退|衰減|劣化|疲勞|鬆動|鬆脫|不穩定|波動|偏移|偏差|變異|退化|積垢|污染累積/.test(n)) return 'observed';
-            // 量測/判定/手法 → method → MSA
-            if(/量測|測量|判定|判讀|檢測誤差|重複性|再現性|量具|校正|目視|人為判斷|讀值|計量誤差/.test(n)) return 'method';
             // 群組比較 → hypothesis
             if(/批次間|供應商|廠商|料號比較|新舊料|對照組|兩組|群組比較/.test(n)) return 'group_compare';
-            // 可調參數（主動設定數值）→ adjustable → DOE。溫度/時間/壓力/濃度/速度/厚度…＋設定/控制值/參數
+            // 可調參數（主動設定數值）→ adjustable → DOE
             if(/(溫度|時間|壓力|濃度|速度|轉速|流量|厚度|比例|角度|功率|電流|電壓|劑量|張力|間隙|進給)(設定|控制|參數|條件|值)?/.test(n)
                && !/漂移|不穩定|波動|偏移|老化/.test(n)) return 'adjustable';
-            return aiNature; // 無關鍵字命中 → 沿用 AI 判斷
+            // 環境/行政/法規/文件 → compliance → ISO（你的規則：跟環境與行政有關＝ISO）
+            if(/環境|溫濕度|潔淨度|無塵|法規|文件|紀錄|記錄管理|流程|稽核|變更管制|設計管制|滅菌確效|包裝確效|生物相容|材料符合/.test(n)) return 'compliance';
+            if(cat==='env') return 'compliance';  // 環境類別預設偏 ISO
+            return aiNature;
           }
           ['man','machine','material','method','measure','env'].forEach(function(cat){
             if(Array.isArray(result[cat])){
               result[cat].forEach(function(f){
                 f._aiNature = f.nature;  // 保留 AI 原判，供除錯
-                f.nature = correctNature(f.name, f.nature);
+                f.nature = correctNature(f.name, f.nature, cat);
               });
               const adjustables = result[cat].filter(function(f){ return f.nature==='adjustable'; });
               result[cat].forEach(function(f){
                 const nat = NATURE_TOOL[f.nature] ? f.nature : 'other';
                 f.nature = nat;
                 f.tool = NATURE_TOOL[nat];
-                // 同類別可調因子 ≥5 個 → 改建議 PB 篩選（程式判，不靠 AI）
                 if(f.tool==='doe' && adjustables.length>=5) f.tool='pb';
-                // 衍生驗證方式標籤（供前端/Word 顯示，與 nature 一致，不再由 AI 自由填）
-                f.verify_method = ({doe:'統計實驗',pb:'統計實驗',spc:'製程監控',msa:'量測系統分析(MSA)',hypothesis:'統計實驗',none:(f.nature==='compliance'?'ISO/GMP符合性':'文件/工程評估')})[f.tool];
+                f.verify_method = ({doe:'統計實驗',pb:'統計實驗',spc:'製程監控',msa:'量測系統分析(MSA)',hypothesis:'統計實驗',train:'教育訓練',none:(f.nature==='compliance'?'ISO/GMP符合性':'文件/工程評估')})[f.tool];
               });
             }
           });
@@ -1020,11 +1166,13 @@ ${deviceCtx}
                 structure: { type: 'string', description: '結構描述（50字內）' },
                 indication: { type: 'string', description: '適應症/用途（30字內）' },
                 key_quality: { type: 'array', items: { type: 'string' }, description: '關鍵品質特性（3-5項，如：硬度、親水性、密封性）' },
-                category_keys: { type: 'array', items: { type: 'string', enum: ['intravascular','central-venous','dialysis','extracorporeal','bloodline','HD','balloon','introducer','sheath','guidewire','needle','guide','ureteral','stent','connector','luer','tubing','tracheal','tracheostomy','airway','suction','respiratory','anaesthetic','infusion','iv','iv-bag','container','biliary','drainage','urine-bag','other'] }, description: '器材分類關鍵詞（從清單擇一或多選，供 ISO 對照做確定性過濾）。血管內導管=intravascular（中心靜脈+central-venous、血液透析導管+dialysis、球囊+balloon）；血液回路管/體外循環=extracorporeal+bloodline+dialysis；導引器/鞘=introducer/sheath；導絲=guidewire；皮下/切片針=needle；同軸導引針=needle+guide；輸尿管支架=ureteral+stent；魯爾接頭=connector/luer；不鏽鋼針管=tubing；氣管內管=tracheal+airway+respiratory；氣切管=tracheostomy+airway+respiratory；抽痰管=suction+respiratory；麻醉/氧氣面罩=respiratory+anaesthetic；輸液套=infusion+iv；IV軟袋=iv-bag+container+infusion；膽道/鼻膽=biliary；引流管/袋=drainage；尿袋=urine-bag；都不符=other。寧可少給也不要硬塞不相關類別。' },
+                category_keys: { type: 'array', items: { type: 'string', enum: ['intravascular','central-venous','dialysis','extracorporeal','bloodline','HD','balloon','introducer','sheath','guidewire','needle','guide','ureteral','stent','connector','luer','syringe','tubing','tracheal','tracheostomy','airway','suction','respiratory','anaesthetic','infusion','iv','iv-bag','container','biliary','drainage','urine-bag','other'] }, description: '器材分類關鍵詞（從清單擇一或多選，供 ISO 對照做確定性過濾）。血管內導管=intravascular（中心靜脈+central-venous、血液透析導管+dialysis、球囊+balloon）；血液回路管/體外循環=extracorporeal+bloodline+dialysis；導引器/鞘=introducer/sheath；導絲=guidewire；皮下/切片針=needle；同軸導引針=needle+guide；輸尿管支架=ureteral+stent；魯爾接頭=connector/luer；注射筒/針筒/高壓顯影注射器=syringe（高壓顯影注射器另加 intravascular）；不鏽鋼針管=tubing；氣管內管=tracheal+airway+respiratory；氣切管=tracheostomy+airway+respiratory；抽痰管=suction+respiratory；麻醉/氧氣面罩=respiratory+anaesthetic；輸液套=infusion+iv；IV軟袋=iv-bag+container+infusion；膽道/鼻膽=biliary；引流管/袋=drainage；尿袋=urine-bag；都不符=other。寧可少給也不要硬塞不相關類別。' },
+                fda_search_name: { type: 'string', description: '【供 FDA 510k 查詢用】此器材在 FDA 資料庫的「正式英文通用名稱」，要用 FDA 慣用的器材分類名稱，不是字面直譯。例：高壓顯影注射筒→"angiographic injector"（FDA 870.1650 的正式名稱）；注射筒→"piston syringe"；中心靜脈導管→"catheter, intravascular"。用最可能在 openFDA device_name 查到結果的詞。' },
+                product_code_guess: { type: 'string', description: '若你確知此器材的 FDA product code（3碼字母），填入；不確定就留空，不要亂猜。例：高壓顯影注射器常為 DXT/870.1650。' },
                 cannot_be: { type: 'array', items: { type: 'string' }, description: '不可能的失效原因（2-4項，用於排除錯誤的魚骨圖因子）' },
                 confidence: { type: 'number', description: '識別信心度 0-100' }
               },
-              required: ['confirmed_name','material','structure','indication','key_quality','cannot_be','confidence']
+              required: ['confirmed_name','material','structure','indication','key_quality','cannot_be','confidence','fda_search_name']
             }
           }],
           tool_choice: { type: 'tool', name: 'device_info' },
