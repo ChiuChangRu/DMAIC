@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b08 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b09 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -472,8 +472,8 @@ tr:hover td{background:#F9FAFB}
 (function(){
   // ★版本號（每次交付遞增 + 寫死建置時間，一眼分辨有沒有改成功）★
   // 注意：BUILD_TIME 是「交付當下寫死的時間」，不是 new Date()（那是開啟時間，分不出新舊）
-  var VERSION = 'v5.3-b08';
-  var BUILD_TIME = '06/13 22:55';   // 台灣時間，每次交付更新
+  var VERSION = 'v5.3-b09';
+  var BUILD_TIME = '06/13 23:30';   // 台灣時間，每次交付更新
   var VERSION_FULL = VERSION + ' · ' + BUILD_TIME;
   window._appVersion = VERSION_FULL;
   window._buildTime = BUILD_TIME;
@@ -498,7 +498,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b08 · 06/13 22:55</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b09 · 06/13 23:30</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -1105,6 +1105,18 @@ tr:hover td{background:#F9FAFB}
         大骨等長 150px・角度 60°・靠近魚頭 = 效應強度越大（高風險=5 / 中風險=3 / 低風險=1）
       </div>
     </div>
+  </div>
+  <!-- 選B：510k + ISO 改手動按鈕（省 token，要才查） -->
+  <div id="fb-source-btns" style="display:none;margin:0 0 1rem;padding:.75rem .9rem;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px">
+    <div style="font-size:12px;color:#475569;font-weight:700;margin-bottom:.5rem">📚 補充驗證來源（選用，要才查 — 會花 API token）</div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+      <button id="fb-510k-btn" onclick="fbQuerySources('510k')"
+        style="background:#1D3B8A;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔍 查同類 510(k) 驗證</button>
+      <button id="fb-iso-btn" onclick="fbQuerySources('iso')"
+        style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📐 比對 ISO 對照</button>
+      <span id="fb-source-status" style="font-size:10.5px;color:#94A3B8;margin-left:.3rem">尚未查詢（不查也能出報告，但報告無 510k/ISO 對應內容）</span>
+    </div>
+    <div id="fda510k-panel" style="display:none;margin-top:.6rem"></div>
   </div>
   <div id="fb-factor-selector" style="display:none"></div>
   <div id="fb-dl-wrap" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1.5px dashed #D1D5DB">
@@ -2313,18 +2325,16 @@ async function generateCapaPdf(){
   var conf = window._confirmedFactors||{};
   var esc = function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
 
-  // 確保 ISO↔因子配對已完成：若還沒配對但有 ISO 來源，當場補跑一次，避免表格 ISO 全空
+  // 選B：產報告「不再自動跑」iso_crosscheck（那會偷花 token）。
+  // 只用「使用者已按按鈕查過」的結果；若還沒配對但已有 iso_crosscheck 結果，做一次本地配對（不花 API）。
   try{
     var hasMatch = window._factorIsoMatch && Object.keys(window._factorIsoMatch).length>0;
-    if(!hasMatch){
-      // 先確保 iso_crosscheck 有結果（用因子當輸入）
-      if((!window._isoResult || !(window._isoResult.applicable||[]).length) && typeof runIsoCrosscheck==='function'){
-        var _ip=[]; ['man','machine','material','method','measure','env'].forEach(function(c){ (conf[c]||[]).forEach(function(f){ _ip.push({factor:f.name,pipeline:(f.nature==='compliance'?'compliance':'experiment'),subtype:(f.verify_method||''),iso_hint:f.iso_hint}); }); });
-        if(_ip.length) await new Promise(function(res){ runIsoCrosscheck(_ip, res); setTimeout(res, 30000); });
-      }
-      if(typeof runIsoFactorMatch==='function') await runIsoFactorMatch();
+    var hasIsoResult = window._isoResult && (window._isoResult.items||window._isoResult.applicable||[]).length;
+    if(!hasMatch && hasIsoResult && typeof runIsoFactorMatch==='function'){
+      await runIsoFactorMatch();  // runIsoFactorMatch 優先用 _isoResult，不呼叫 API
     }
-  }catch(e){ console.log('[CAPA ISO 配對補跑] 略過:', e&&e.message); }
+    // 若使用者完全沒按過 ISO 查詢 → 不自動跑、不花錢，報告 ISO 欄留空（已在按鈕區提示過）
+  }catch(e){ console.log('[CAPA ISO 配對] 略過:', e&&e.message); }
 
   // 魚骨圖 SVG（取畫面現成的）
   var svgWrap = document.getElementById('fb-svg-wrap');
@@ -3134,6 +3144,35 @@ async function runIsoFactorMatch(onDone){
 }
 window.runIsoFactorMatch=runIsoFactorMatch;
 
+// 選B：510k / ISO 手動查詢（要才花 token）
+window.fbQuerySources = async function(which){
+  var statusEl = document.getElementById('fb-source-status');
+  if(which==='510k'){
+    var btn=document.getElementById('fb-510k-btn');
+    if(btn){ btn.disabled=true; btn.style.opacity='.6'; btn.textContent='查詢中…'; }
+    if(statusEl) statusEl.textContent='查 510(k) 中…（讀 PDF，約 20–40 秒）';
+    try{
+      // 確保有 panel 容器
+      if(typeof runFda510kVerification==='function') await runFda510kVerification(false);
+      if(statusEl) statusEl.textContent='✓ 510(k) 已查詢完成';
+    }catch(e){ if(statusEl) statusEl.textContent='510(k) 查詢失敗：'+(e&&e.message||''); }
+    finally{ if(btn){ btn.disabled=false; btn.style.opacity=''; btn.textContent='🔍 查同類 510(k) 驗證'; } }
+  } else if(which==='iso'){
+    var ibtn=document.getElementById('fb-iso-btn');
+    if(ibtn){ ibtn.disabled=true; ibtn.style.opacity='.6'; ibtn.textContent='比對中…'; }
+    if(statusEl) statusEl.textContent='比對 ISO 對照中…';
+    try{
+      var conf=window._confirmedFactors||{};
+      var _ip=[]; ['man','machine','material','method','measure','env'].forEach(function(c){ (conf[c]||[]).forEach(function(f){ _ip.push({factor:f.name,pipeline:(f.nature==='compliance'?'compliance':'experiment'),subtype:(f.verify_method||''),iso_hint:f.iso_hint}); }); });
+      if(_ip.length && typeof runIsoCrosscheck==='function'){
+        await new Promise(function(res){ runIsoCrosscheck(_ip, function(){ if(typeof runIsoFactorMatch==='function') runIsoFactorMatch(); res(); }); setTimeout(res, 30000); });
+      }
+      if(statusEl) statusEl.textContent='✓ ISO 對照已完成';
+    }catch(e){ if(statusEl) statusEl.textContent='ISO 比對失敗：'+(e&&e.message||''); }
+    finally{ if(ibtn){ ibtn.disabled=false; ibtn.style.opacity=''; ibtn.textContent='📐 比對 ISO 對照'; } }
+  }
+};
+
 // ════════════════════════════════════════════════════════
 // 監控攔截力檢討（選用）：AI 篩 2-4 個關鍵監控點 → 勾選清單（預設全勾）→ 下載時寫入 Word
 // 結果存 window._interceptionReviews = [{factor,method,personnel,sampling,escape_risk,disposition_hint,_inc}]
@@ -3247,7 +3286,7 @@ function fishboneDraw(){
   if(!hasAny){
     document.getElementById('fb-svg-wrap').innerHTML =
       '<div style="padding:2rem;text-align:center;color:#64748b;font-size:13px">尚無因子可繪製，請先在上方各分類加入原因。</div>';
-    document.getElementById('fb-out').style.display='block'; var _dlw=document.getElementById('fb-dl-wrap'); if(_dlw) _dlw.style.display='block';
+    document.getElementById('fb-out').style.display='block'; var _dlw=document.getElementById('fb-dl-wrap'); if(_dlw) _dlw.style.display='block'; var _sb=document.getElementById('fb-source-btns'); if(_sb) _sb.style.display='block';
     return;
   }
 
@@ -3361,7 +3400,7 @@ function fishboneDraw(){
 
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
-  document.getElementById('fb-out').style.display='block'; var _dlw=document.getElementById('fb-dl-wrap'); if(_dlw) _dlw.style.display='block';
+  document.getElementById('fb-out').style.display='block'; var _dlw=document.getElementById('fb-dl-wrap'); if(_dlw) _dlw.style.display='block'; var _sb=document.getElementById('fb-source-btns'); if(_sb) _sb.style.display='block';
 
   // 從卡片資料收集所有因子（含風險等級）
   var fbCauses = [];
@@ -6885,23 +6924,8 @@ window.homeSummarizeFactors = async function(tools) {
     if(data.result) {
       window._confirmedFactors = data.result;
       renderFactorPanel(data.result);
-      // 第3點：510k 改為自動查（不再選用按鈕）。先查 510k → 再 ISO 對照 → 再配對，讓三來源齊全
-      (async function(){
-        try{ if(typeof runFda510kVerification==='function') await runFda510kVerification(true); }catch(e){ console.log('[510k 自動] 略過:', e&&e.message); }
-        try{
-          var _isoPlans = [];
-          ['man','machine','material','method','measure','env'].forEach(function(c){
-            (data.result[c]||[]).forEach(function(f){
-              _isoPlans.push({ factor:f.name, pipeline: (f.nature==='compliance'?'compliance':'experiment'), subtype:(f.verify_method||''), iso_hint:f.iso_hint });
-            });
-          });
-          if(_isoPlans.length && typeof runIsoCrosscheck==='function'){
-            runIsoCrosscheck(_isoPlans, function(){
-              if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
-            });
-          } else if(typeof runIsoFactorMatch==='function'){ runIsoFactorMatch(); }
-        }catch(e){ console.log('[ISO 自動對照] 略過:', e&&e.message); }
-      })();
+      // 選B（省 token）：整理因子後「不再自動」跑 510k+ISO（那會自動花 ~0.13）。
+      // 改成進魚骨圖頁由使用者按按鈕才跑。重整理因子時就完全不觸發 510k/ISO，省最多。
     } else {
       var em = data.error ? ('⚠️ '+data.error) : '⚠️ 整理失敗，請手動確認';
       panel.innerHTML = '<div style="font-size:11px;color:#FCA5A5;line-height:1.5">'+em+'</div>';
