@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b05 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b06 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -471,7 +471,7 @@ tr:hover td{background:#F9FAFB}
 <script>
 (function(){
   // ★版本號（每次交付遞增，方便分辨部署的是哪一版）★
-  var VERSION = 'v5.3-b05';
+  var VERSION = 'v5.3-b06';
   window._appVersion = VERSION;
   window._buildTime = VERSION;
   document.addEventListener('DOMContentLoaded', function(){
@@ -495,7 +495,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b05</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b06</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -7079,21 +7079,35 @@ function renderVerificationPlan(result, factors) {
 //        項目為「類別」草稿，一律以正本為準、需 RA 核可。
 // ════════════════════════════════════════════════════════
 window._isoMap = null;
-// v5.0：iso_map 內嵌（免另放 iso_map.json；如部署了同名檔可改回 fetch）
-// _ISO_MAP_EMBEDDED 已移至獨立檔 iso_map.js（由 <head> 的 <script src="iso_map.js"> 載入）
+// iso_map 載入策略（v5.3-b06）：
+// 優先順序：① GitHub 上的 iso_map.json（線上最新，改 JSON 即更新，不必重部署整包）
+//          ② 同層 iso_map.json（若有放）
+//          ③ 內嵌 _ISO_MAP_EMBEDDED（離線後備，確保一定能用）
+// 想改 ISO 標準：只要更新 GitHub 上的 iso_map.json，MedQA 自動載入最新版（解決「更新錯版本」問題）。
+var ISO_MAP_URL = 'https://raw.githubusercontent.com/ChiuChangRu/DMAIC/main/iso_map.json';
 
 async function loadIsoMap(){
-  if(window._isoMap) return window._isoMap;
-  if(window._ISO_MAP_EMBEDDED){ window._isoMap = window._ISO_MAP_EMBEDDED; return window._isoMap; }
+  if(window._isoMap && !window._isoMap.__error) return window._isoMap;
+  // ① 先試 GitHub raw（線上最新版）
   try{
-    var r = await fetch('iso_map.json', {cache:'no-cache'});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    window._isoMap = await r.json();
-    return window._isoMap;
-  }catch(e){
-    window._isoMap = {__error: e.message};
-    return window._isoMap;
-  }
+    var r = await fetch(ISO_MAP_URL, {cache:'no-cache'});
+    if(r.ok){
+      var j = await r.json();
+      if(j && j.ics){ window._isoMap = j; window._isoMapSource = 'github'; console.log('[iso_map] 載入 GitHub 線上版'); return window._isoMap; }
+    }
+  }catch(e){ console.log('[iso_map] GitHub 讀取失敗，改用後備:', e&&e.message); }
+  // ② 試同層 iso_map.json
+  try{
+    var r2 = await fetch('iso_map.json', {cache:'no-cache'});
+    if(r2.ok){
+      var j2 = await r2.json();
+      if(j2 && j2.ics){ window._isoMap = j2; window._isoMapSource = 'local-json'; return window._isoMap; }
+    }
+  }catch(e){}
+  // ③ 內嵌後備（一定有，確保離線/CDN延遲也能用）
+  if(window._ISO_MAP_EMBEDDED){ window._isoMap = window._ISO_MAP_EMBEDDED; window._isoMapSource = 'embedded'; console.log('[iso_map] 用內嵌後備版'); return window._isoMap; }
+  window._isoMap = {__error: 'iso_map 三種來源都失敗'};
+  return window._isoMap;
 }
 
 // 把 iso_map 攤平成可引用的標準清單（依編號去重）
