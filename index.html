@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b10 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b11 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -12,7 +12,7 @@
   --navy:#0F2044;--navy2:#1D3B8A;--navy3:#2E5FCF;
   --teal:#0E6E6B;--teal2:#1A9E9A;
   --gold:#B8860B;--gold2:#DAA520;
-  --bg:#000000;--card:#fff;--border:#DDE2EC;
+  --bg:#1c2433;--card:#fff;--border:#DDE2EC;
   --text:#1a1a2e;--muted:#6B7280;--faint:#9CA3AF;
   --D:#2563EB;--M:#0891B2;--A:#059669;--I:#D97706;--C:#7C3AED;
   --Dl:#EFF6FF;--Ml:#ECFEFF;--Al:#ECFDF5;--Il:#FFFBEB;--Cl:#F5F3FF;
@@ -35,7 +35,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
 .page{display:none}.page.active{display:block}
 
 /* ══ HOME 母頁面 ══ */
-.home-hero{background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,#1a4ba0 100%);color:#fff;padding:3rem 2rem 2.5rem;text-align:center}
+.home-hero{background:linear-gradient(135deg,#1e2839 0%,#243046 55%,#28344a 100%);color:#fff;padding:3rem 2rem 2.5rem;text-align:center}
 .home-hero h2{font-size:28px;font-weight:700;letter-spacing:.01em;margin-bottom:.5rem}
 .home-hero p{font-size:14px;color:rgba(255,255,255,.65);max-width:520px;margin:0 auto}
 .home-main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
@@ -472,8 +472,8 @@ tr:hover td{background:#F9FAFB}
 (function(){
   // ★版本號（每次交付遞增 + 寫死建置時間，一眼分辨有沒有改成功）★
   // 注意：BUILD_TIME 是「交付當下寫死的時間」，不是 new Date()（那是開啟時間，分不出新舊）
-  var VERSION = 'v5.3-b10';
-  var BUILD_TIME = '06/14 00:05';   // 台灣時間，每次交付更新
+  var VERSION = 'v5.3-b11';
+  var BUILD_TIME = '06/14 00:25';   // 台灣時間，每次交付更新
   var VERSION_FULL = VERSION + ' · ' + BUILD_TIME;
   window._appVersion = VERSION_FULL;
   window._buildTime = BUILD_TIME;
@@ -498,7 +498,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b10 · 06/14 00:05</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b11 · 06/14 00:25</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
