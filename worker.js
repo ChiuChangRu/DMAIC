@@ -1,5 +1,5 @@
-// MedQA Worker v5.3-b01 — 因子判斷通則 + ISO配對防呆(10993/13485/11607) + MAUDE + 510k萃取
-// 部署辨識：Ctrl+F 搜「v5.3-b01」或「PACKAGE_RE」搜得到 = 已是最新版
+// MedQA Worker v5.3-b04 — 因子判斷通則 + ISO配對防呆(10993/13485/11607) + MAUDE + 510k萃取
+// 部署辨識：Ctrl+F 搜「v5.3-b04」或「PACKAGE_RE」搜得到 = 已是最新版
 // WORKER_V53
 // 既有：verification_plan + fishbone_to_doe + summarize_factors + identify_device + iso_crosscheck
 // 部署：Cloudflare Workers，ANTHROPIC_API_KEY 存於 Secret
@@ -184,7 +184,7 @@ export default {
 
       // ══ version：回傳 Worker 版本 ══
       if (mode === 'version') {
-        return json({ mode: 'version', version: 'v5.3-b01', features: ['因子判斷通則','ISO配對防呆(10993/13485/11607)','MAUDE','510k萃取','510k標紅中英'] }, origin);
+        return json({ mode: 'version', version: 'v5.3-b04', features: ['因子判斷通則','ISO配對防呆(10993/13485/11607)','MAUDE','510k萃取','510k標紅中英'] }, origin);
       }
 
       // ══ fishbone_to_doe：魚骨圖因子轉換為 DOE 實驗設計格式 ══
@@ -835,13 +835,22 @@ ${planLines || '（無）'}
 
         let kList = [];
         try {
+          // 多個 product_code 要用 OR。openFDA 同欄位 OR 正確語法：product_code:(A+B) 或 A+OR+B
+          // 不能用 product_code:A+product_code:B（那是 AND，不可能同時成立 → 查無）
           const q = productCodes.length
-            ? '(' + productCodes.map(c=>`product_code:${encodeURIComponent(c)}`).join('+') + ')'
+            ? `product_code:(${productCodes.map(c=>encodeURIComponent(c)).join('+')})`
             : `device_name:"${encodeURIComponent(deviceNameEn)}"`;
-          const url = `https://api.fda.gov/device/510k.json?${fdaKey?('api_key='+fdaKey+'&'):''}search=${q}&limit=${maxN}&sort=decision_date:desc`;
-          const r = await fetch(url);
-          const j = await r.json();
+          let url = `https://api.fda.gov/device/510k.json?${fdaKey?('api_key='+fdaKey+'&'):''}search=${q}&limit=${maxN}&sort=decision_date:desc`;
+          let r = await fetch(url);
+          let j = await r.json();
           if (j.results) kList = j.results.map(x => ({ k:x.k_number, name:x.device_name, applicant:x.applicant, date:x.decision_date, pc:x.product_code }));
+          // 後備：若代碼查無，改用器材英文名查
+          if (!kList.length && deviceNameEn) {
+            const q2 = `device_name:${encodeURIComponent(deviceNameEn)}`;
+            const r2 = await fetch(`https://api.fda.gov/device/510k.json?${fdaKey?('api_key='+fdaKey+'&'):''}search=${q2}&limit=${maxN}&sort=decision_date:desc`);
+            const j2 = await r2.json();
+            if (j2.results) kList = j2.results.map(x => ({ k:x.k_number, name:x.device_name, applicant:x.applicant, date:x.decision_date, pc:x.product_code }));
+          }
         } catch(e) {
           return json({ mode:'fda_verification', result:null, error:'openFDA 查詢失敗：'+(e.message||'') }, origin);
         }
