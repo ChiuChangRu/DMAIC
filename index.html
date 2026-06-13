@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b06 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b07 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -470,13 +470,16 @@ tr:hover td{background:#F9FAFB}
 </style>
 <script>
 (function(){
-  // ★版本號（每次交付遞增，方便分辨部署的是哪一版）★
-  var VERSION = 'v5.3-b06';
-  window._appVersion = VERSION;
-  window._buildTime = VERSION;
+  // ★版本號（每次交付遞增 + 寫死建置時間，一眼分辨有沒有改成功）★
+  // 注意：BUILD_TIME 是「交付當下寫死的時間」，不是 new Date()（那是開啟時間，分不出新舊）
+  var VERSION = 'v5.3-b07';
+  var BUILD_TIME = '06/13 22:24';   // 台灣時間，每次交付更新
+  var VERSION_FULL = VERSION + ' · ' + BUILD_TIME;
+  window._appVersion = VERSION_FULL;
+  window._buildTime = BUILD_TIME;
   document.addEventListener('DOMContentLoaded', function(){
     var el = document.getElementById('dmaic-save-status');
-    if(el) el.textContent = VERSION;
+    if(el) el.textContent = VERSION_FULL;
   });
 })();
 </script>
@@ -495,7 +498,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b06</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b07 · 06/13 22:24</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
