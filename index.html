@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b07 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b08 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -472,8 +472,8 @@ tr:hover td{background:#F9FAFB}
 (function(){
   // ★版本號（每次交付遞增 + 寫死建置時間，一眼分辨有沒有改成功）★
   // 注意：BUILD_TIME 是「交付當下寫死的時間」，不是 new Date()（那是開啟時間，分不出新舊）
-  var VERSION = 'v5.3-b07';
-  var BUILD_TIME = '06/13 22:24';   // 台灣時間，每次交付更新
+  var VERSION = 'v5.3-b08';
+  var BUILD_TIME = '06/13 22:55';   // 台灣時間，每次交付更新
   var VERSION_FULL = VERSION + ' · ' + BUILD_TIME;
   window._appVersion = VERSION_FULL;
   window._buildTime = BUILD_TIME;
@@ -498,7 +498,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b07 · 06/13 22:24</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b08 · 06/13 22:55</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -2973,7 +2973,7 @@ window.downloadPlanDocx=downloadPlanDocx;
 // 結果存 window._fda510kResult，可納入計畫書
 // ════════════════════════════════════════════════════════
 window._fda510kResult = null;
-async function runFda510kVerification(silent){
+async function runFda510kVerification(silent, forceRefresh){
   var btn=document.getElementById('fda510k-btn');
   var panel=document.getElementById('fda510k-panel');
   if(!panel && !silent) return;
@@ -2986,6 +2986,19 @@ async function runFda510kVerification(silent){
   ['man','machine','material','method','measure','env'].forEach(function(c){
     (conf[c]||[]).forEach(function(f){ facTxt.push(f.name); });
   });
+
+  // ★快取：同一組 product code 查過就不重讀 PDF（510k 不會變，省最大宗的輸入 token）★
+  // 換器材(product code 變)或按「重查」(forceRefresh) 才重新查。
+  var cacheKey = pcs.slice().sort().join('+') || nameEn;
+  if(!forceRefresh && window._fda510kCache && window._fda510kCache.key===cacheKey && window._fda510kCache.data){
+    console.log('[510k] 用快取，跳過重讀 PDF（省 token）:', cacheKey);
+    var cd = window._fda510kCache.data;
+    window._fda510kResult = cd;
+    // 重新渲染（用快取資料，不呼叫 API）
+    if(panel && typeof renderFda510kPanel==='function'){ try{ renderFda510kPanel(cd); }catch(e){} }
+    if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
+    return cd;
+  }
 
   if(btn){ btn.disabled=true; btn.dataset.t=btn.textContent; btn.textContent='查詢中…'; }
   if(panel) panel.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.5)">⏳ 查同類 510(k)、抓取 summary、萃取驗證項目中…（約 20–40 秒）</div>';
@@ -3000,6 +3013,7 @@ async function runFda510kVerification(silent){
     if(data.error){ if(panel) panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+data.error+'</div>'; return; }
     var r=data.result||{};
     window._fda510kResult=r;
+    window._fda510kCache = { key: cacheKey, data: r };   // 存快取，同器材重按不重查
     if(panel) renderFda510kPanel(r, data.note);
     if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
   }catch(e){
@@ -3248,7 +3262,7 @@ function fishboneDraw(){
   else if(totalCauses <= 14){ FZ_CAUSE=13; FZ_CAT=15; FZ_HEAD=16; }
   else { FZ_CAUSE=11; FZ_CAT=14; FZ_HEAD=15; }
   // 最小間距：因子少時加大，使中骨沿大骨平均散開
-  const MIN_GAP = totalCauses <= 4 ? 46 : totalCauses <= 8 ? 34 : 22;
+  const MIN_GAP = totalCauses <= 4 ? 56 : totalCauses <= 8 ? 46 : 34;   // 因子間距加大，避免文字太擠
   const T_LO = 0.42, T_HI = 0.94, T_SPAN = T_HI - T_LO;   // 因子集中在大骨偏魚頭段(42%~94%)，魚尾端留白不放因子、避免被畫布邊緣切到
   const BONE_DX = 80;
   const BONE_DY = Math.max(totalCauses<=4?160:130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
