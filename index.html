@@ -3,17 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b14 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b15 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --navy:#0F2044;--navy2:#1D3B8A;--navy3:#2E5FCF;
+  --navy:#004182;--navy2:#0A66C2;--navy3:#378FE9;
   --teal:#0E6E6B;--teal2:#1A9E9A;
   --gold:#B8860B;--gold2:#DAA520;
-  --bg:#1a212e;--card:#fff;--border:#DDE2EC;
-  --text:#1a1a2e;--muted:#6B7280;--faint:#9CA3AF;
+  --bg:#F4F2EE;--card:#fff;--border:#E3E1DC;
+  --text:#1A1A1A;--muted:#666666;--faint:#9CA3AF;
   --D:#2563EB;--M:#0891B2;--A:#059669;--I:#D97706;--C:#7C3AED;
   --Dl:#EFF6FF;--Ml:#ECFEFF;--Al:#ECFDF5;--Il:#FFFBEB;--Cl:#F5F3FF;
 }
@@ -21,10 +21,10 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
 
 /* ── 頂欄 ── */
-.topbar{background:var(--navy);color:#fff;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar{background:#34526B;color:#fff;padding:0 2rem;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .topbar-left{display:flex;align-items:center;gap:14px}
 .logo{display:flex;align-items:center;gap:10px;cursor:pointer}
-.logo-badge{background:var(--gold2);color:var(--navy);font-weight:800;font-size:13px;padding:3px 10px;border-radius:4px;letter-spacing:.05em}
+.logo-badge{background:#fff;color:#0A66C2;font-weight:800;font-size:13px;padding:3px 10px;border-radius:4px;letter-spacing:.05em}
 .logo-title{font-size:16px;font-weight:600;letter-spacing:.02em;color:#fff}
 .breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,.55)}
 .breadcrumb span{color:rgba(255,255,255,.9)}
@@ -35,9 +35,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Microsoft JhengHei
 .page{display:none}.page.active{display:block}
 
 /* ══ HOME 母頁面 ══ */
-.home-hero{background:#1a212e;color:#fff;padding:3rem 2rem 2.5rem;text-align:center}
+.home-hero{background:#34526B;color:#fff;padding:3rem 2rem 2.5rem;text-align:center}
 .home-hero h2{font-size:28px;font-weight:700;letter-spacing:.01em;margin-bottom:.5rem}
-.home-hero p{font-size:14px;color:rgba(255,255,255,.65);max-width:520px;margin:0 auto}
+.home-hero p{font-size:14px;color:rgba(255,255,255,.85);max-width:520px;margin:0 auto}
 .home-main{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
 
 /* DMAIC 流程軸 */
@@ -82,8 +82,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--navy2);box-shadow:0 0
 textarea{resize:vertical;font-family:'Courier New',monospace;font-size:12px;line-height:1.55}
 .btn{border:none;border-radius:8px;padding:9px 20px;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,transform .1s;font-family:inherit}
 .btn:active{transform:scale(.98)}
-.btn-primary{background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35);letter-spacing:.02em}.btn-primary:hover{background:linear-gradient(135deg,#162d4a,#1d4ed8);box-shadow:0 4px 14px rgba(37,99,235,.45);transform:translateY(-1px)}
-.btn-sec{background:#fff;color:#1B3A5C;border:1.5px solid #C7D9F5;font-weight:600}.btn-sec:hover{background:#EFF6FF;border-color:#93C5FD}
+.btn-primary{background:linear-gradient(135deg,#0A66C2,#2563EB);color:#fff;box-shadow:0 2px 8px rgba(37,99,235,.35);letter-spacing:.02em}.btn-primary:hover{background:linear-gradient(135deg,#162d4a,#1d4ed8);box-shadow:0 4px 14px rgba(37,99,235,.45);transform:translateY(-1px)}
+.btn-sec{background:#fff;color:#0A66C2;border:1.5px solid #C7D9F5;font-weight:600}.btn-sec:hover{background:#EFF6FF;border-color:#93C5FD}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:11px}
@@ -257,26 +257,26 @@ tr:hover td{background:#F9FAFB}
 /* ════ Claude AI 對話框 ════ */
 .claude-panel{background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:10px;margin:1rem auto;overflow:hidden;max-width:760px}
 .ca-ask{display:flex;flex-direction:column;align-items:center;padding:.75rem 0;text-align:center}
-.claude-panel-header{background:#1B3A5C;color:#fff;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.claude-panel-header{background:#0A66C2;color:#fff;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .claude-panel-header .ch-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
 .claude-panel-header .ch-toggle{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit}
 .claude-auto{padding:.85rem 1rem;border-bottom:1px solid #E2ECF8}
 .claude-auto .ca-label{font-size:11px;font-weight:600;color:#2A5278;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;display:flex;align-items:center;gap:6px}
 .claude-auto .ca-text{font-size:13px;color:#1a1a2e;line-height:1.75;white-space:pre-wrap}
 .claude-auto .ca-loading{color:#6B7280;font-size:12px;font-style:italic;display:flex;align-items:center;gap:6px}
-.claude-auto .ca-loading::before{content:"";width:12px;height:12px;border:2px solid #C7D9F5;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+.claude-auto .ca-loading::before{content:"";width:12px;height:12px;border:2px solid #C7D9F5;border-top-color:#0A66C2;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
 .claude-chat{padding:.75rem 1rem;display:none}
 .claude-chat.open{display:block}
 .claude-messages{max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:.6rem;margin-bottom:.6rem}
 .claude-msg{padding:.6rem .85rem;border-radius:8px;font-size:13px;line-height:1.65;max-width:90%}
-.claude-msg.user{background:#1B3A5C;color:#fff;align-self:flex-end;border-radius:8px 8px 2px 8px}
+.claude-msg.user{background:#0A66C2;color:#fff;align-self:flex-end;border-radius:8px 8px 2px 8px}
 .claude-msg.assistant{background:#fff;color:#1a1a2e;border:1px solid #E2ECF8;align-self:flex-start;white-space:pre-wrap}
 .claude-msg.error{background:#FFF1F2;color:#9F1239;border:1px solid #FECDD3}
 .claude-input-row{display:flex;gap:6px}
 .claude-input-row textarea{flex:1;border:1px solid #C7D9F5;border-radius:7px;padding:.5rem .75rem;font-size:13px;font-family:inherit;resize:none;outline:none;line-height:1.5}
-.claude-input-row textarea:focus{border-color:#1B3A5C}
-.claude-send{background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.claude-input-row textarea:focus{border-color:#0A66C2}
+.claude-send{background:#0A66C2;color:#fff;border:none;border-radius:7px;padding:.5rem 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .claude-send:disabled{background:#9CA3AF;cursor:not-allowed}
 
 /* ════ 手機版：左右分欄改為上下 ════ */
@@ -380,7 +380,7 @@ tr:hover td{background:#F9FAFB}
 .edu-btn:hover{background:#F3F4F6}
 .edu-panel{display:none;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin-bottom:1rem}
 .edu-panel.open{display:block}
-.edu-hdr{background:#1D3B8A;color:#fff;padding:12px 18px;display:flex;align-items:center;gap:10px}
+.edu-hdr{background:#0A66C2;color:#fff;padding:12px 18px;display:flex;align-items:center;gap:10px}
 .edu-hdr h3{font-size:14px;font-weight:500;margin:0}
 .edu-hdr p{font-size:11px;opacity:.75;margin:2px 0 0}
 .edu-body{padding:1rem 1.25rem;background:#fff}
@@ -396,7 +396,7 @@ tr:hover td{background:#F9FAFB}
 .edu-chip{font-size:12px;padding:3px 10px;border-radius:20px;background:#F3F4F6;border:0.5px solid #E5E7EB;color:#374151}
 .edu-steps{list-style:none;padding:0;display:flex;flex-direction:column;gap:6px}
 .edu-steps li{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:#374151;line-height:1.5}
-.edu-snum{background:#1D3B8A;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px}
+.edu-snum{background:#0A66C2;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0;margin-top:1px}
 .edu-fbox{background:#F5F3FF;border-radius:8px;padding:.8rem 1rem;margin-bottom:.65rem;border-left:3px solid #7C3AED}
 .edu-fname{font-size:12px;font-weight:600;color:#7C3AED;margin-bottom:.3rem}
 .edu-feq{font-size:13px;font-family:'Courier New',monospace;color:#1a1a2e;margin-bottom:.3rem;letter-spacing:.02em}
@@ -417,10 +417,10 @@ tr:hover td{background:#F9FAFB}
 .record-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .record-note{font-family:'Microsoft JhengHei',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;min-height:72px}
 .workflow-box{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.15rem 1.4rem;margin:1.2rem 0 2rem;box-shadow:0 2px 12px rgba(15,32,68,.05)}
-.workflow-title{font-size:17px;font-weight:700;color:#1B3A5C;margin-bottom:.6rem}
+.workflow-title{font-size:17px;font-weight:700;color:#0A66C2;margin-bottom:.6rem}
 .workflow-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;margin-top:.8rem}
 .workflow-step{background:#F8FAFC;border:1px solid #E5E7EB;border-radius:9px;padding:.75rem;font-size:12px;line-height:1.55;color:#374151}
-.workflow-step strong{display:block;color:#1D3B8A;font-size:13px;margin-bottom:2px}
+.workflow-step strong{display:block;color:#0A66C2;font-size:13px;margin-bottom:2px}
 .print-only{display:none}
 @media(max-width:720px){.record-grid,.record-grid-2{grid-template-columns:1fr}.topbar{height:auto;min-height:56px;padding:.6rem 1rem}.topbar-actions{width:100%;justify-content:flex-start}}
 @media print{
@@ -472,8 +472,8 @@ tr:hover td{background:#F9FAFB}
 (function(){
   // ★版本號（每次交付遞增 + 寫死建置時間，一眼分辨有沒有改成功）★
   // 注意：BUILD_TIME 是「交付當下寫死的時間」，不是 new Date()（那是開啟時間，分不出新舊）
-  var VERSION = 'v5.3-b14';
-  var BUILD_TIME = '06/14 09:30';   // 台灣時間，每次交付更新
+  var VERSION = 'v5.3-b15';
+  var BUILD_TIME = '06/14 15:50';   // 台灣時間，每次交付更新
   var VERSION_FULL = VERSION + ' · ' + BUILD_TIME;
   window._appVersion = VERSION_FULL;
   window._buildTime = BUILD_TIME;
@@ -498,7 +498,7 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b14 · 06/14 09:30</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b15 · 06/14 15:50</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
@@ -519,7 +519,7 @@ tr:hover td{background:#F9FAFB}
 
 <!-- 子頁面工具列 -->
 <div id="tool-bar" style="display:none;background:#222d3f;padding:7px 1.5rem;align-items:center;gap:10px;border-bottom:2px solid #7EC8E3">
-  <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1B3A5C;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
+  <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#0A66C2;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
     ← 主目錄
   </button>
   <span id="tool-bar-title" style="font-size:13px;color:#7EC8E3;font-weight:500;flex:1"></span>
@@ -532,7 +532,7 @@ tr:hover td{background:#F9FAFB}
 <div id="page-home" class="page active">
 
 <!-- ══ Hero + 問題輸入對話框 ══ -->
-<div style="background:#1a212e;color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:visible">
+<div style="background:#34526B;color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:visible">
 
   <div style="max-width:1100px;margin:0 auto;padding:0 1.5rem;position:relative;z-index:1">
     <div style="margin-bottom:1.5rem">
@@ -824,7 +824,7 @@ tr:hover td{background:#F9FAFB}
 </div>
 
 <!-- Footer -->
-<div style="background:#1B3A5C;color:rgba(255,255,255,.4);font-size:13px;padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
+<div style="background:#0A66C2;color:rgba(255,255,255,.4);font-size:13px;padding:.75rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:1rem">
   <div>MedQA · AI 輔助醫療器材品質管理平台</div>
   <div>Edit by Chiu Chang Ru / Claude</div>
 </div>
@@ -1117,7 +1117,7 @@ tr:hover td{background:#F9FAFB}
     <div style="font-size:12px;color:#475569;font-weight:700;margin-bottom:.5rem">📚 補充驗證來源（選用，要才查 — 會花 API token）</div>
     <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
       <button id="fb-510k-btn" onclick="fbQuerySources('510k')"
-        style="background:#1D3B8A;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔍 查同類 510(k) 驗證</button>
+        style="background:#0A66C2;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">🔍 查同類 510(k) 驗證</button>
       <button id="fb-iso-btn" onclick="fbQuerySources('iso')"
         style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📐 比對 ISO 對照</button>
       <span id="fb-source-status" style="font-size:10.5px;color:#94A3B8;margin-left:.3rem">尚未查詢（不查也能出報告，但報告無 510k/ISO 對應內容）</span>
@@ -2226,7 +2226,7 @@ function spcDrawCharts(){
     ]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:title,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11},boxWidth:14}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
     chartInst.push(inst);
   }
-  mkChart('spc-c1',mainLabel,mainVals,UCL_main,CL_main,LCL_main,anomSet,'#1D3B8A');
+  mkChart('spc-c1',mainLabel,mainVals,UCL_main,CL_main,LCL_main,anomSet,'#0A66C2');
   if(sub2Vals){const s2=sub2Vals;const aset2=new Set(s2.map((v,i)=>v!=null&&v>UCL2?i:null).filter(i=>i!==null));mkChart('spc-c2',sub2label,s2,UCL2,CL2,LCL2,aset2,'#B45309');document.getElementById('spc-c2').style.display='block';}
   else document.getElementById('spc-c2').style.display='none';
 }
@@ -2241,7 +2241,7 @@ function spcDrawTree(){
   else{act.add('count');act.add('focus');if(['NP','P'].includes(chartType)){act.add('nprate');act.add('fixn');act.add(chartType==='NP'?'np':'p');}else{act.add('defect');act.add('fixu');act.add(chartType==='C'?'c':'u');}}
   const RED='#C0392B',RED_F='#E74C3C',BLUE='var(--navy2)',TEAL_F='#E1F5EE',WHITE='#fff';
   const ns={start:{x:316,y:20,w:88,h:30,lbl:'開始',sh:'rect',color:'gray'},dtype:{x:270,y:74,w:180,h:44,lbl:'資料型態？',sh:'dia',color:'blue'},cont:{x:60,y:152,w:140,h:32,lbl:'連續型量測值',sh:'rect',color:'blue'},subg:{x:64,y:218,w:132,h:44,lbl:'有子組？',sh:'dia',color:'blue'},imr:{x:20,y:306,w:96,h:44,lbl:'I-MR',sh:'leaf',sub:'個別值-移動全距',color:'teal'},nsz:{x:128,y:306,w:132,h:44,lbl:'子組大小 n？',sh:'dia',color:'blue'},xbarr:{x:100,y:400,w:96,h:44,lbl:'Xbar-R',sh:'leaf',sub:'n = 2~10',color:'teal'},xbars:{x:210,y:400,w:96,h:44,lbl:'Xbar-S',sh:'leaf',sub:'n ≥ 11',color:'teal'},count:{x:520,y:152,w:140,h:32,lbl:'計數型/屬性',sh:'rect',color:'blue'},focus:{x:524,y:218,w:132,h:44,lbl:'關心的是？',sh:'dia',color:'blue'},nprate:{x:430,y:306,w:110,h:32,lbl:'不良品/率',sh:'rect',color:'blue'},defect:{x:560,y:306,w:100,h:32,lbl:'缺點數',sh:'rect',color:'blue'},fixn:{x:388,y:382,w:130,h:44,lbl:'樣本數固定？',sh:'dia',color:'blue'},fixu:{x:548,y:382,w:120,h:44,lbl:'單位固定？',sh:'dia',color:'blue'},np:{x:348,y:476,w:84,h:36,lbl:'np Chart',sh:'leaf',sub:'不良品數',color:'coral'},p:{x:446,y:476,w:84,h:36,lbl:'p Chart',sh:'leaf',sub:'不良率',color:'coral'},c:{x:544,y:476,w:84,h:36,lbl:'c Chart',sh:'leaf',sub:'缺點數',color:'coral'},u:{x:642,y:476,w:84,h:36,lbl:'u Chart',sh:'leaf',sub:'單位缺點數',color:'coral'}};
-  const COLS={blue:{f:'#E6F1FB',s:'#185FA5',t:'#0C447C',af:RED_F,as:RED,at:WHITE},teal:{f:'#E1F5EE',s:'#0F6E56',t:'#085041',af:RED_F,as:RED,at:WHITE},coral:{f:'#FAECE7',s:'#993C1D',t:'#712B13',af:RED_F,as:RED,at:WHITE},gray:{f:'#F1EFE8',s:'#5F5E5A',t:'#444441',af:'#1D3B8A',as:'#1D3B8A',at:WHITE}};
+  const COLS={blue:{f:'#E6F1FB',s:'#185FA5',t:'#0C447C',af:RED_F,as:RED,at:WHITE},teal:{f:'#E1F5EE',s:'#0F6E56',t:'#085041',af:RED_F,as:RED,at:WHITE},coral:{f:'#FAECE7',s:'#993C1D',t:'#712B13',af:RED_F,as:RED,at:WHITE},gray:{f:'#F1EFE8',s:'#5F5E5A',t:'#444441',af:'#0A66C2',as:'#0A66C2',at:WHITE}};
   function lArr(x1,y1,x2,y2,lbl,active){
     const c=active?RED:'#185FA5';ctx.save();ctx.strokeStyle=c;ctx.lineWidth=active?2:1;ctx.setLineDash(active?[]:[4,3]);
     ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);
@@ -2306,7 +2306,7 @@ function paretoAnalyze(){
   document.getElementById('pa-info').innerHTML=`<strong>總計：</strong>${total} ${document.getElementById('pa-unit').value} ｜ 前 ${items.filter((_,i)=>cumPcts[i]<=80.1).length} 項佔 ≥80%`;
   const canvas=document.getElementById('pa-canvas');canvas.width=canvas.parentElement.offsetWidth||640;
   destroyCharts();
-  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:items.map(i=>i.label),datasets:[{type:'bar',label:document.getElementById('pa-unit').value,data:items.map(i=>i.value),backgroundColor:items.map((_,i)=>cumPcts[i]<=80?'#1D3B8A':'#93C5FD'),yAxisID:'y'},{type:'line',label:'累積%',data:cumPcts,borderColor:'#DC2626',borderWidth:2,pointRadius:4,pointBackgroundColor:'#DC2626',fill:false,tension:0.1,yAxisID:'y2'}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:document.getElementById('pa-title').value,font:{size:14,weight:'600'},padding:{bottom:8}},legend:{labels:{font:{size:12}}}},scales:{y:{position:'left',grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y2:{position:'right',min:0,max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{display:false}}}}});
+  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:items.map(i=>i.label),datasets:[{type:'bar',label:document.getElementById('pa-unit').value,data:items.map(i=>i.value),backgroundColor:items.map((_,i)=>cumPcts[i]<=80?'#0A66C2':'#93C5FD'),yAxisID:'y'},{type:'line',label:'累積%',data:cumPcts,borderColor:'#DC2626',borderWidth:2,pointRadius:4,pointBackgroundColor:'#DC2626',fill:false,tension:0.1,yAxisID:'y2'}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:document.getElementById('pa-title').value,font:{size:14,weight:'600'},padding:{bottom:8}},legend:{labels:{font:{size:12}}}},scales:{y:{position:'left',grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y2:{position:'right',min:0,max:100,ticks:{callback:v=>v+'%',font:{size:11}},grid:{display:false}}}}});
   chartInst.push(inst);
   document.getElementById('pa-table').innerHTML=`<thead><tr><th>排名</th><th>類別</th><th>數量</th><th>佔比%</th><th>累積%</th><th>狀態</th></tr></thead><tbody>${items.map((it,i)=>`<tr><td>${i+1}</td><td>${it.label}</td><td>${it.value}</td><td>${(it.value/total*100).toFixed(1)}%</td><td>${cumPcts[i]}%</td><td>${cumPcts[i]<=80?'<span class="badge-r blue">關鍵項目</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">次要</span>'}</td></tr>`).join('')}</tbody>`;
   document.getElementById('pa-out').style.display='block';
@@ -2411,11 +2411,11 @@ async function generateCapaPdf(){
     +'<style>'
     +'@page{size:A4;margin:18mm 15mm}'
     +'*{box-sizing:border-box}body{font-family:"Microsoft JhengHei","PingFang TC",sans-serif;color:#1a1a2e;line-height:1.6;font-size:12px;margin:0}'
-    +'h1{font-size:20px;border-bottom:3px solid #1B3A5C;padding-bottom:6px;color:#1B3A5C;margin:0 0 4px}'
-    +'h2{font-size:15px;color:#1B3A5C;border-left:4px solid #2563EB;padding-left:8px;margin:18px 0 8px}'
+    +'h1{font-size:20px;border-bottom:3px solid #0A66C2;padding-bottom:6px;color:#0A66C2;margin:0 0 4px}'
+    +'h2{font-size:15px;color:#0A66C2;border-left:4px solid #2563EB;padding-left:8px;margin:18px 0 8px}'
     +'table{width:100%;border-collapse:collapse;margin:8px 0;font-size:10.5px}'
     +'th,td{border:1px solid #CBD5E1;padding:5px 7px;text-align:left;vertical-align:top}'
-    +'th{background:#1B3A5C;color:#fff;font-weight:600}'
+    +'th{background:#0A66C2;color:#fff;font-weight:600}'
     +'tr:nth-child(even) td{background:#F8FAFF}'
     +'.meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;background:#F1F5F9;padding:10px 14px;border-radius:6px;font-size:11px}'
     +'.box{background:#F8FAFF;border:1px solid #C7D9F5;border-radius:6px;padding:10px 14px;margin:8px 0}'
@@ -3374,7 +3374,7 @@ function fishboneDraw(){
   if(problem.length <= 7){ plines = [problem]; }
   else if(problem.length <= 14){ plines = [problem.slice(0,7), problem.slice(7)]; }
   else { plines = [problem.slice(0,7), problem.slice(7,13)+'…']; }
-  s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="10" fill="#1D3B8A"/>`);
+  s.push(`<rect x="${spineEndX}" y="${spineY-hh/2}" width="${hw}" height="${hh}" rx="10" fill="#0A66C2"/>`);
   plines.forEach((l,i)=>{
     const ty=spineY+(i-(plines.length-1)/2)*22;
     s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="${FZ_HEAD}" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
@@ -3483,7 +3483,7 @@ function histAnalyze(){
   // 常態曲線疊加
   const normX=Array.from({length:50},(_,i)=>mn+(mx-mn)*i/49);
   const normY=normX.map(x=>n*bw*(1/(s*Math.sqrt(2*Math.PI)))*Math.exp(-((x-m)**2)/(2*s**2)));
-  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{type:'bar',label:'次數',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#1D3B8A',borderWidth:1},{type:'line',label:'常態曲線',data:normY.filter((_,i)=>i%(50/bins|0)===0).slice(0,bins),borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false,tension:0.4}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('hi-item').value} 直方圖`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+  const inst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels,datasets:[{type:'bar',label:'次數',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#0A66C2',borderWidth:1},{type:'line',label:'常態曲線',data:normY.filter((_,i)=>i%(50/bins|0)===0).slice(0,bins),borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false,tension:0.4}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('hi-item').value} 直方圖`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10}}},y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
   chartInst.push(inst);
   var adOk=ad.p?ad.p>alpha:true;
   var testHTML='<div class="mt-session">';
@@ -3679,7 +3679,7 @@ function doeAnalyze(){
   // 效應表
   let effHtml=`<div class="stat-grid" style="margin-bottom:.75rem"><div class="sc"><div class="v">${runs}</div><div class="l">實驗次數</div></div><div class="sc"><div class="v">${runs*rep}</div><div class="l">總觀測數</div></div><div class="sc"><div class="v">${r4(grandMean)}</div><div class="l">總平均 ${yname}</div></div></div>`;
   effHtml+=`<div style="overflow-x:auto"><table><thead><tr><th>效應</th><th>效應值</th><th>SS</th><th>貢獻率%</th><th>重要性</th></tr></thead><tbody>`;
-  sortedEff.forEach(([name,val])=>{const ss=val**2*runs*rep/4;const pct=ssTotal>0?(ss/ssTotal*100):0;effHtml+=`<tr><td style="font-weight:600">${name}</td><td style="${Math.abs(val)>1?'color:#1D3B8A;font-weight:700':''}">${r4(val)}</td><td>${r4(ss)}</td><td>${pct.toFixed(1)}%</td><td>${Math.abs(val)>2?'<span class="badge-r blue">顯著</span>':Math.abs(val)>1?'<span class="badge-r amber">中等</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">微弱</span>'}</td></tr>`;});
+  sortedEff.forEach(([name,val])=>{const ss=val**2*runs*rep/4;const pct=ssTotal>0?(ss/ssTotal*100):0;effHtml+=`<tr><td style="font-weight:600">${name}</td><td style="${Math.abs(val)>1?'color:#0A66C2;font-weight:700':''}">${r4(val)}</td><td>${r4(ss)}</td><td>${pct.toFixed(1)}%</td><td>${Math.abs(val)>2?'<span class="badge-r blue">顯著</span>':Math.abs(val)>1?'<span class="badge-r amber">中等</span>':'<span class="badge-r" style="background:#F3F4F6;color:#6B7280">微弱</span>'}</td></tr>`;});
   effHtml+='</tbody></table></div>';
   document.getElementById('doe-effects-content').innerHTML=effHtml;
   // 效應柏拉圖：資料存於 window._doeSortedEff，切到柏拉圖分頁時由 drawDOEPareto() 繪製（避免隱藏 tab offsetWidth=0 畫不出）
@@ -3697,7 +3697,7 @@ function doeAnalyze(){
     window._doeIntData = {f1:f1,f2:f2,lolo:lolo,lohi:lohi,hilo:hilo,hihi:hihi};
     setTimeout(()=>{
       const ic=document.getElementById('doe-int-canvas');if(!ic)return;ic.width=ic.parentElement.offsetWidth||640;
-      const ii=new Chart(ic.getContext('2d'),{type:'line',data:{labels:[`${f2} 低`,`${f2} 高`],datasets:[{label:`${f1} 低`,data:[mean(lolo)||0,mean(lohi)||0],borderColor:'#1D3B8A',borderWidth:2,pointRadius:5,fill:false},{label:`${f1} 高`,data:[mean(hilo)||0,mean(hihi)||0],borderColor:'#DC2626',borderWidth:2,pointRadius:5,fill:false,borderDash:[6,3]}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`交互作用圖：${f1} × ${f2}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:12}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'}},y:{grid:{color:'rgba(0,0,0,.05)'},title:{display:true,text:yname}}}}});
+      const ii=new Chart(ic.getContext('2d'),{type:'line',data:{labels:[`${f2} 低`,`${f2} 高`],datasets:[{label:`${f1} 低`,data:[mean(lolo)||0,mean(lohi)||0],borderColor:'#0A66C2',borderWidth:2,pointRadius:5,fill:false},{label:`${f1} 高`,data:[mean(hilo)||0,mean(hihi)||0],borderColor:'#DC2626',borderWidth:2,pointRadius:5,fill:false,borderDash:[6,3]}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`交互作用圖：${f1} × ${f2}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:12}}}},scales:{x:{grid:{color:'rgba(0,0,0,.05)'}},y:{grid:{color:'rgba(0,0,0,.05)'},title:{display:true,text:yname}}}}});
       chartInst.push(ii);
     },100);
   }
@@ -3801,7 +3801,7 @@ function drawDOEInteractionMatrix(){
     for(var j=0;j<nf;j++){
       if(i===j){
         // 對角線：因子名稱
-        html += '<div style="display:flex;align-items:center;justify-content:center;background:#1B3A5C;color:#fff;border-radius:6px;font-size:13px;font-weight:700;min-height:120px">'+fnames[i]+'</div>';
+        html += '<div style="display:flex;align-items:center;justify-content:center;background:#0A66C2;color:#fff;border-radius:6px;font-size:13px;font-weight:700;min-height:120px">'+fnames[i]+'</div>';
       } else if(j>i){
         // 上三角：交互作用圖（fi 為 X 軸，fj 為線條分組）
         var cid='doe-int-cell-'+cellId;
@@ -3836,7 +3836,7 @@ function drawDOEInteractionMatrix(){
         type:'line',
         data:{ labels:[fnames[fx]+' −', fnames[fx]+' +'],
           datasets:[
-            {label:fnames[fline]+' −', data:[lineLoLo,lineLoHi], borderColor:'#1D3B8A', borderWidth:2, pointRadius:4, fill:false},
+            {label:fnames[fline]+' −', data:[lineLoLo,lineLoHi], borderColor:'#0A66C2', borderWidth:2, pointRadius:4, fill:false},
             {label:fnames[fline]+' +', data:[lineHiLo,lineHiHi], borderColor:'#DC2626', borderWidth:2, pointRadius:4, fill:false}
           ]},
         options:{ responsive:false, animation:false,
@@ -3942,7 +3942,7 @@ function drawPBMainEffects(){
       new Chart(c.getContext('2d'), {
         type:'line',
         data:{ labels:['−1','+1'], datasets:[{ label:e.name, data:[lowMean, highMean],
-          borderColor:'#1D3B8A', borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#1D3B8A', fill:false }] },
+          borderColor:'#0A66C2', borderWidth:2.5, pointRadius:5, pointBackgroundColor:'#0A66C2', fill:false }] },
         options:{ responsive:false, animation:false,
           plugins:{ title:{display:true,text:e.name,font:{size:12,weight:'600'}}, legend:{display:false} },
           scales:{ x:{title:{display:true,text:'水準',font:{size:9}}}, y:{ticks:{font:{size:9}}} } }
@@ -4082,7 +4082,7 @@ function drawDOEMainEffects(){
       if(!c)return;
       c.width=c.parentElement.offsetWidth||180;
       var isSig=Math.abs(e.effect)>0.5;
-      var lineColor=isSig?'#DC2626':'#1D3B8A';
+      var lineColor=isSig?'#DC2626':'#0A66C2';
       chartInst.push(new Chart(c.getContext('2d'),{
         type:'line',
         data:{
@@ -4163,7 +4163,7 @@ function scatterAnalyze(){
   }
   destroyCharts();
   const xMin=Math.min(...X),xMax=Math.max(...X);const regX=[xMin,xMax],regY=[b0+b1*xMin,b0+b1*xMax];
-  const inst=new Chart(canvas.getContext('2d'),{type:'scatter',data:{datasets:[{label:'觀測值',data:X.map((x,i)=>({x,y:Y[i]})),backgroundColor:'#1D3B8A',pointRadius:5},{label:`迴歸線 y=${r4(b0)}+${r4(b1)}x`,data:regX.map((x,i)=>({x,y:regY[i]})),type:'line',borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('sc-xname').value} vs ${document.getElementById('sc-yname').value}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{title:{display:true,text:document.getElementById('sc-xname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{title:{display:true,text:document.getElementById('sc-yname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
+  const inst=new Chart(canvas.getContext('2d'),{type:'scatter',data:{datasets:[{label:'觀測值',data:X.map((x,i)=>({x,y:Y[i]})),backgroundColor:'#0A66C2',pointRadius:5},{label:`迴歸線 y=${r4(b0)}+${r4(b1)}x`,data:regX.map((x,i)=>({x,y:regY[i]})),type:'line',borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false}]},options:{responsive:false,animation:false,plugins:{title:{display:true,text:`${document.getElementById('sc-xname').value} vs ${document.getElementById('sc-yname').value}`,font:{size:13,weight:'600'},padding:{bottom:6}},legend:{labels:{font:{size:11}}}},scales:{x:{title:{display:true,text:document.getElementById('sc-xname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}},y:{title:{display:true,text:document.getElementById('sc-yname').value},grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:11}}}}}});
   chartInst.push(inst);
   const strength=Math.abs(r)>=0.9?'極強':Math.abs(r)>=0.7?'強':Math.abs(r)>=0.5?'中等':Math.abs(r)>=0.3?'弱':'極弱';
   const dir=r>0?'正':'負'; const sig=pVal<alpha;
@@ -4282,7 +4282,7 @@ function boxplotAnalyze(){
   const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
   const W=canvas.width,H=canvas.height,pad={l:55,r:20,t:30,b:40};
   const allVals=groups.flatMap(g=>g.vals);const vMin=Math.min(...allVals)*0.999,vMax=Math.max(...allVals)*1.001;
-  const colors=['#1D3B8A','#059669','#D97706','#7C3AED','#DC2626'];
+  const colors=['#0A66C2','#059669','#D97706','#7C3AED','#DC2626'];
   function vy(v){return pad.t+(vMax-v)/(vMax-vMin)*(H-pad.t-pad.b);}
   // Y 軸
   ctx.strokeStyle='#E5E7EB';ctx.lineWidth=1;ctx.fillStyle='#6B7280';ctx.font='11px -apple-system,sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
@@ -4594,7 +4594,7 @@ function drawGRRSixpack(){
   var g=R.grrResult;
   if(!g)return;
   var ops=g.ops, parts=g.parts, data=g.data;
-  var colors_op=['#1D3B8A','#DC2626','#059669','#D97706'];
+  var colors_op=['#0A66C2','#DC2626','#059669','#D97706'];
 
   function avg(a){return a.reduce(function(s,v){return s+v;},0)/a.length;}
 
@@ -4669,8 +4669,8 @@ function drawGRRSixpack(){
       type:'scatter',
       data:{datasets:[
         {label:'量測值',data:scatterPts,backgroundColor:'rgba(100,149,237,.65)',pointRadius:4,showLine:false},
-        {label:'均值',data:partMeans,type:'line',borderColor:'#1D3B8A',borderWidth:1.5,
-          pointRadius:5,pointBackgroundColor:'#1D3B8A',fill:false,tension:0.3,showLine:true}
+        {label:'均值',data:partMeans,type:'line',borderColor:'#0A66C2',borderWidth:1.5,
+          pointRadius:5,pointBackgroundColor:'#0A66C2',fill:false,tension:0.3,showLine:true}
       ]},
       options:{responsive:false,animation:false,
         plugins:{title:{display:true,text:'Measure by Part',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
@@ -4690,14 +4690,14 @@ function drawGRRSixpack(){
       });
     });
     // 分段顏色
-    var rBgColors=rVals.map(function(v){return v>UCL_r?'#DC2626':'#1D3B8A';});
+    var rBgColors=rVals.map(function(v){return v>UCL_r?'#DC2626':'#0A66C2';});
     chartInst.push(new Chart(c3.getContext('2d'),{
       type:'line',
       data:{labels:rLabels,datasets:[
         {label:'UCL',data:Array(rVals.length).fill(parseFloat(UCL_r.toFixed(6))),borderColor:'#DC2626',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
         {label:'R̄',data:Array(rVals.length).fill(parseFloat(Rbar.toFixed(6))),borderColor:'#16A34A',borderWidth:1.2,pointRadius:0,fill:false,tension:0},
         {label:'LCL',data:Array(rVals.length).fill(0),borderColor:'#2563EB',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
-        {label:'R',data:rVals,borderColor:'#1D3B8A',borderWidth:1.5,
+        {label:'R',data:rVals,borderColor:'#0A66C2',borderWidth:1.5,
           pointRadius:rVals.map(function(v){return v>UCL_r?6:3;}),
           pointBackgroundColor:rBgColors,fill:false,tension:0.1}
       ]},
@@ -4742,7 +4742,7 @@ function drawGRRSixpack(){
       ctx4.beginPath();ctx4.moveTo(padL-3,yp(tv));ctx4.lineTo(W4-padR,yp(tv));ctx4.strokeStyle='#F3F4F6';ctx4.stroke();
       ctx4.fillText(tv.toFixed(3),padL-5,yp(tv)+3);
     }
-    var colors4=['#1D3B8A','#DC2626','#059669','#D97706'];
+    var colors4=['#0A66C2','#DC2626','#059669','#D97706'];
     opBoxData.forEach(function(b,gi){
       var cx=padL+((W4-padL-padR)*(gi+0.5)/ops.length);
       var col=colors4[gi%4];
@@ -4785,9 +4785,9 @@ function drawGRRSixpack(){
         {label:'UCL',data:Array(xbVals.length).fill(parseFloat(UCL_xbar.toFixed(6))),borderColor:'#DC2626',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
         {label:'X̄',data:Array(xbVals.length).fill(parseFloat(grandXbar.toFixed(6))),borderColor:'#16A34A',borderWidth:1.2,pointRadius:0,fill:false,tension:0},
         {label:'LCL',data:Array(xbVals.length).fill(parseFloat(LCL_xbar.toFixed(6))),borderColor:'#2563EB',borderWidth:1.2,borderDash:[5,3],pointRadius:0,fill:false,tension:0},
-        {label:'Xbar',data:xbVals,borderColor:'#1D3B8A',borderWidth:1.5,
+        {label:'Xbar',data:xbVals,borderColor:'#0A66C2',borderWidth:1.5,
           pointRadius:anom5.map(function(a){return a?6:3;}),
-          pointBackgroundColor:anom5.map(function(a){return a?'#DC2626':'#1D3B8A';}),
+          pointBackgroundColor:anom5.map(function(a){return a?'#DC2626':'#0A66C2';}),
           fill:false,tension:0.1}
       ]},
       options:{responsive:false,animation:false,
@@ -4944,7 +4944,7 @@ function linAnalyze(){
     var inst=new Chart(canvas.getContext('2d'),{
       type:'scatter',
       data:{datasets:[
-        {label:'Bias',data:allPoints.map(function(d){return{x:d.ref,y:d.bias};}),backgroundColor:'#1D3B8A',pointRadius:5},
+        {label:'Bias',data:allPoints.map(function(d){return{x:d.ref,y:d.bias};}),backgroundColor:'#0A66C2',pointRadius:5},
         {label:'迴歸線 y='+b0.toFixed(3)+'+'+b1.toFixed(3)+'x',data:[{x:xMin,y:b0+b1*xMin},{x:xMax,y:b0+b1*xMax}],type:'line',borderColor:'#DC2626',borderWidth:2,pointRadius:0,fill:false},
         {label:'Bias=0',data:[{x:xMin,y:0},{x:xMax,y:0}],type:'line',borderColor:'#16A34A',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
       ]},
@@ -4993,7 +4993,7 @@ function stabAnalyze(){
     chartInst.push(inst);
   }
 
-  mkStabChart('stab-xbar-canvas','Xbar Chart（穩定性監控）',xbars,UCL_x,grandXbar,LCL_x,'#1D3B8A');
+  mkStabChart('stab-xbar-canvas','Xbar Chart（穩定性監控）',xbars,UCL_x,grandXbar,LCL_x,'#0A66C2');
   mkStabChart('stab-r-canvas','R Chart（穩定性監控）',ranges,UCL_r,Rbar,0,'#B45309');
 
   var anomCount=xbars.filter(function(v){return v>UCL_x||v<LCL_x;}).length;
@@ -5420,7 +5420,7 @@ function drawHalfNormalPlot(effects, containerId) {
       type:'scatter',
       data:{datasets:[
         {label:'非顯著',data:pts.filter(function(p){return !p.sig;}).map(function(p){return{x:p.x,y:p.y};}),
-          backgroundColor:'#1D3B8A',pointRadius:6,showLine:false},
+          backgroundColor:'#0A66C2',pointRadius:6,showLine:false},
         {label:'顯著',data:pts.filter(function(p){return p.sig;}).map(function(p){return{x:p.x,y:p.y};}),
           backgroundColor:'#DC2626',pointRadius:7,showLine:false},
         {label:'參考線',data:[{x:0,y:0},{x:xMax,y:slope*xMax}],
@@ -5526,7 +5526,7 @@ function renderMarkdown(text) {
   var html = text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   // 標題
-  html = html.replace(/^## (.+)$/gm,'<strong style="display:block;font-size:14px;color:#1B3A5C;margin:.5rem 0 .2rem">$1</strong>');
+  html = html.replace(/^## (.+)$/gm,'<strong style="display:block;font-size:14px;color:#0A66C2;margin:.5rem 0 .2rem">$1</strong>');
   html = html.replace(/^### (.+)$/gm,'<strong style="display:block;margin:.3rem 0 .1rem">$1</strong>');
   // 粗體
   html = html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
@@ -5696,7 +5696,7 @@ window.claudePanelHTML = function(toolId) {
     '<div class="claude-auto">' +
       '<div class="ca-label">📋 AI 判讀</div>' +
       '<div class="ca-ask" id="ca-ask-'+t+'" style="display:flex;flex-direction:column;align-items:center;padding:.75rem 0;text-align:center">' +
-        '<button onclick="claudeStartAnalyze(\''+t+'\')" style="background:#1B3A5C;color:#fff;border:none;border-radius:7px;padding:8px 22px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">🤖 點擊取得 AI 判讀建議</button>' +
+        '<button onclick="claudeStartAnalyze(\''+t+'\')" style="background:#0A66C2;color:#fff;border:none;border-radius:7px;padding:8px 22px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit">🤖 點擊取得 AI 判讀建議</button>' +
         '<div style="font-size:11px;color:#9CA3AF;margin-top:5px">分析結果將傳送給 Claude AI 進行判讀</div>' +
       '</div>' +
       '<div class="ca-loading" style="display:none">AI 分析中，請稍候...</div>' +
@@ -5944,7 +5944,7 @@ function drawDOEResiduals(){
       chartInst.push(new Chart(c1.getContext('2d'),{
         type:'scatter',
         data:{datasets:[
-          {label:'Residuals',data:normPts,backgroundColor:'#1D3B8A',pointRadius:5},
+          {label:'Residuals',data:normPts,backgroundColor:'#0A66C2',pointRadius:5},
           {label:'Reference',data:[{x:sorted[0],y:(sorted[0]-rMean)/rStd},{x:sorted[n-1],y:(sorted[n-1]-rMean)/rStd}],
             type:'line',borderColor:'#DC2626',borderWidth:1.5,pointRadius:0,fill:false}
         ]},
@@ -5962,7 +5962,7 @@ function drawDOEResiduals(){
       chartInst.push(new Chart(c2.getContext('2d'),{
         type:'scatter',
         data:{datasets:[
-          {label:'Residuals',data:pts2,backgroundColor:'#1D3B8A',pointRadius:5},
+          {label:'Residuals',data:pts2,backgroundColor:'#0A66C2',pointRadius:5},
           {label:'Zero',data:[{x:Math.min.apply(null,fitted),y:0},{x:Math.max.apply(null,fitted),y:0}],
             type:'line',borderColor:'#DC2626',borderWidth:1.5,borderDash:[5,3],pointRadius:0,fill:false}
         ]},
@@ -5983,7 +5983,7 @@ function drawDOEResiduals(){
       residuals.forEach(function(v){var b=Math.min(bins-1,Math.floor((v-rMin)/bw));counts[b]++;});
       var labels=counts.map(function(_,i){return (rMin+i*bw).toFixed(3);});
       chartInst.push(new Chart(c3.getContext('2d'),{
-        type:'bar',data:{labels:labels,datasets:[{label:'Count',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#1D3B8A',borderWidth:1}]},
+        type:'bar',data:{labels:labels,datasets:[{label:'Count',data:counts,backgroundColor:'rgba(29,59,138,.65)',borderColor:'#0A66C2',borderWidth:1}]},
         options:{responsive:false,animation:false,
           plugins:{title:{display:true,text:'Histogram of Residuals',font:{size:12,weight:'600'},padding:{bottom:4}},legend:{display:false}},
           scales:{x:{ticks:{font:{size:8}}},y:{ticks:{font:{size:9}}}}}
@@ -5998,7 +5998,7 @@ function drawDOEResiduals(){
         data:{labels:residuals.map(function(_,i){return i+1;}),
           datasets:[
             {label:'Residual',data:residuals.map(function(v){return parseFloat(v.toFixed(4));}),
-              borderColor:'#1D3B8A',borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#1D3B8A',fill:false,tension:0.1},
+              borderColor:'#0A66C2',borderWidth:1.5,pointRadius:4,pointBackgroundColor:'#0A66C2',fill:false,tension:0.1},
             {label:'Zero',data:Array(n).fill(0),borderColor:'#DC2626',borderWidth:1,borderDash:[5,3],pointRadius:0,fill:false}
           ]},
         options:{responsive:false,animation:false,
@@ -6232,7 +6232,7 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
     if(role === 'ai') {
       div.style.cssText = 'background:#fff;border:1px solid #E2ECF8;border-radius:8px 8px 8px 2px;padding:.6rem .9rem;font-size:13px;line-height:1.7;color:#1a1a2e;white-space:pre-wrap';
     } else {
-      div.style.cssText = 'background:#1B3A5C;color:#fff;border-radius:8px 8px 2px 8px;padding:.55rem .85rem;font-size:13px;line-height:1.6;align-self:flex-end;max-width:85%';
+      div.style.cssText = 'background:#0A66C2;color:#fff;border-radius:8px 8px 2px 8px;padding:.55rem .85rem;font-size:13px;line-height:1.6;align-self:flex-end;max-width:85%';
     }
     div.textContent = text;
     hist.appendChild(div);
@@ -7867,7 +7867,7 @@ function renderIsoPanel(r){
             var go = document.createElement('button');
             go.id = 'home-go-factors-btn';
             go.textContent = '🎯 資訊足夠了，讓 AI 整理因子 →';
-            go.style.cssText = 'margin:10px 2px 2px;background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 2px 8px rgba(37,99,235,.35)';
+            go.style.cssText = 'margin:10px 2px 2px;background:linear-gradient(135deg,#0A66C2,#2563EB);color:#fff;border:none;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 2px 8px rgba(37,99,235,.35)';
             go.onclick = function(){ this.disabled=true; this.style.opacity='.6'; this.textContent='AI 整理因子中...'; homeSummarizeFactors(window._pendingTools||tools); };
             hist4.appendChild(go);
             hist4.scrollTop = hist4.scrollHeight;
@@ -7998,7 +7998,7 @@ function renderIsoPanel(r){
         var hint = document.createElement('div');
         hint.className = 'fb-import-hint';
         hint.style.cssText = 'background:#EFF6FF;border:1px solid #BFDBFE;border-radius:7px;padding:.6rem 1rem;font-size:12px;color:#1E40AF;margin-bottom:.5rem;display:flex;align-items:center;gap:8px';
-        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#1B3A5C;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在根據您的問題描述生成 6M 根本原因建議...';
+        hint.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid #BFDBFE;border-top-color:#0A66C2;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span>AI 正在根據您的問題描述生成 6M 根本原因建議...';
         var fbHintWrap = document.getElementById('fb-hint-wrap');
         if(fbHintWrap){ fbHintWrap.innerHTML=''; fbHintWrap.appendChild(hint); }
 
@@ -8446,13 +8446,13 @@ window.fbToExperiment = async function() {
   function buildTable(factors){
     var rows = factors.map(function(f){
       return '<tr><td style="padding:4px 8px;color:#6B7280;font-size:11px">'+(f.original||f.factor)+'</td>'+
-        '<td style="padding:4px 8px;font-weight:600;color:#1B3A5C;font-size:11px">'+f.factor+(f.unit?' ('+f.unit+')':'')+'</td>'+
+        '<td style="padding:4px 8px;font-weight:600;color:#0A66C2;font-size:11px">'+f.factor+(f.unit?' ('+f.unit+')':'')+'</td>'+
         '<td style="padding:4px 8px;text-align:center;font-size:11px">'+f.low+'</td>'+
         '<td style="padding:4px 8px;text-align:center;font-size:11px">'+f.high+'</td></tr>';
     }).join('');
     return '<table style="width:100%;border-collapse:collapse;margin-top:.4rem">'+
       '<thead><tr style="background:#F3F4F6"><th style="padding:4px 8px;font-size:10px;text-align:left;color:#6B7280">魚骨圖原因</th>'+
-      '<th style="padding:4px 8px;font-size:10px;text-align:left;color:#1B3A5C">實驗參數</th>'+
+      '<th style="padding:4px 8px;font-size:10px;text-align:left;color:#0A66C2">實驗參數</th>'+
       '<th style="padding:4px 8px;font-size:10px;text-align:center">低水準</th>'+
       '<th style="padding:4px 8px;font-size:10px;text-align:center">高水準</th></tr></thead>'+
       '<tbody>'+rows+'</tbody></table>'+
@@ -8618,9 +8618,9 @@ window.injectExpSaveBar = function(tool){
   bar.style.cssText = 'display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#F0F7FF;border:1.5px solid #BBD3F0;border-radius:8px;padding:.55rem .8rem;margin-bottom:.85rem';
   var saved = window._savedExperiments[tool];
   bar.innerHTML =
-    '<span style="font-size:12px;color:#1B3A5C;font-weight:700">📋 計畫書整合</span>'+
+    '<span style="font-size:12px;color:#0A66C2;font-weight:700">📋 計畫書整合</span>'+
     '<button onclick="saveExperimentToPlan(\''+tool+'\')" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">💾 儲存設計到計畫書</button>'+
-    '<button onclick="goTool(\'fishbone\')" style="background:#fff;color:#1B3A5C;border:1px solid #BBD3F0;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">↩ 回魚骨圖</button>'+
+    '<button onclick="goTool(\'fishbone\')" style="background:#fff;color:#0A66C2;border:1px solid #BBD3F0;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">↩ 回魚骨圖</button>'+
     '<span id="exp-save-status-'+tool+'" style="font-size:11px;color:'+(saved?'#059669':'#94A3B8')+'">'+
       (saved?('✅ 已儲存（'+saved.savedAt+'）將納入計畫書'):'尚未儲存；儲存後會自動納入計畫書')+'</span>';
   card.insertBefore(bar, card.firstChild);
@@ -8702,7 +8702,7 @@ window.fbRenderClassifiedSelector = function(fbCauses, selectorDiv) {
     if(!window._factorDispo[f.name]){ window._factorDispo[f.name] = { picks:[ _natureDefaultDispo(f) ] }; }
   });
   var html = '<div class="card" style="margin-top:.75rem;background:#F8FAFF;border:1.5px solid #C7D9F5">';
-  html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.4rem">✅ 逐因子處置指派</div>';
+  html += '<div style="font-size:14px;font-weight:700;color:#0A66C2;margin-bottom:.4rem">✅ 逐因子處置指派</div>';
   html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.5rem;line-height:1.6">每個因子<b>至少勾一個處置</b>才能下載計畫書（可複選）。預設已勾在系統判定的方式，請逐一確認、調整。實際要跑統計時，可到首頁的 DOE/SPC/MSA 卡片工具操作。</div>';
   html += '<div id="fb-coverage-bar" style="margin-bottom:.7rem"></div>';
   ['man','machine','material','method','measure','env'].forEach(function(cat){
@@ -8837,7 +8837,7 @@ window.fbRenderOtherPipelines = function(){
   if(!vp.plans.some(function(p){ return ORDER.indexOf(p.pipeline)>=0; })) return '';
 
   var html = '<div class="card" style="margin-top:.75rem;background:#FFFDF5;border:1.5px solid #F0E0B0">';
-  html += '<div style="font-size:14px;font-weight:700;color:#1B3A5C;margin-bottom:.4rem">🗂️ 其他處置（非實驗類）</div>';
+  html += '<div style="font-size:14px;font-weight:700;color:#0A66C2;margin-bottom:.4rem">🗂️ 其他處置（非實驗類）</div>';
   html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.85rem;line-height:1.5">這些因子不靠 DOE/SPC/MSA 解決，而是規範符合性、方法開發、風險、使用端等途徑。<b>勾選「納入」者才會寫入計畫書</b>（有些不一定相關，可取消勾選排除）。</div>';
 
   // 納入狀態：預設全部勾選；以因子名為鍵記憶（切頁不丟）
@@ -9121,20 +9121,20 @@ window.fbSearchFDA = async function() {
 
     // 顯示確認對話框（翻譯前確認）
     var confirmHtml = '<div style="background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:8px;padding:.75rem">';
-    confirmHtml += '<div style="font-size:12px;font-weight:700;color:#1B3A5C;margin-bottom:.5rem">📋 找到 '+reports.length+' 筆 FDA MAUDE 客訴記錄</div>';
+    confirmHtml += '<div style="font-size:12px;font-weight:700;color:#0A66C2;margin-bottom:.5rem">📋 找到 '+reports.length+' 筆 FDA MAUDE 客訴記錄</div>';
     confirmHtml += '<div style="font-size:11px;color:#6B7280;margin-bottom:.75rem">以下為英文原文摘要，請確認是否要翻譯成中文？</div>';
 
     reports.forEach(function(r, i){
       confirmHtml += '<div style="border-top:1px solid #E2ECF8;padding:.4rem 0;font-size:11px">';
       confirmHtml += '<span style="color:#6B7280">'+r.date+'</span> ';
       confirmHtml += '<span style="background:#FEF2F2;color:#991B1B;border-radius:4px;padding:1px 6px;font-weight:600">'+r.event+'</span> ';
-      confirmHtml += '<span style="color:#1B3A5C;font-weight:600">'+r.device+'</span><br>';
+      confirmHtml += '<span style="color:#0A66C2;font-weight:600">'+r.device+'</span><br>';
       confirmHtml += '<span style="color:#374151">'+r.text.slice(0,100)+'...</span>';
       confirmHtml += '</div>';
     });
 
     confirmHtml += '<div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap">';
-    confirmHtml += '<button onclick="fbFDATranslate()" style="background:linear-gradient(135deg,#1B3A5C,#2563EB);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🌐 翻譯成中文</button>';
+    confirmHtml += '<button onclick="fbFDATranslate()" style="background:linear-gradient(135deg,#0A66C2,#2563EB);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🌐 翻譯成中文</button>';
     confirmHtml += '<button onclick="fbFDAShow(false)" style="background:#fff;color:#374151;border:1.5px solid #D1D5DB;border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit">顯示英文原文</button>';
     confirmHtml += '<button onclick="fbFDAtoAI()" style="background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">🤖 直接讓 AI 分析→補充魚骨圖</button>';
     confirmHtml += '</div>';
@@ -9172,7 +9172,7 @@ window.fbFDAShow = function(translated, data) {
   var resultDiv = document.getElementById('fb-fda-result');
 
   var html = '<div style="background:#F8FAFF;border:1.5px solid #C7D9F5;border-radius:8px;padding:.75rem">';
-  html += '<div style="font-size:12px;font-weight:700;color:#1B3A5C;margin-bottom:.5rem">';
+  html += '<div style="font-size:12px;font-weight:700;color:#0A66C2;margin-bottom:.5rem">';
   html += '📋 FDA MAUDE 查詢結果（'+reports.length+' 筆）';
   html += translated ? ' <span style="background:#DBEAFE;color:#1D4ED8;font-size:10px;padding:1px 6px;border-radius:4px">中文翻譯</span>' : ' <span style="background:#F3F4F6;color:#6B7280;font-size:10px;padding:1px 6px;border-radius:4px">英文原文</span>';
   html += '</div>';
@@ -9181,7 +9181,7 @@ window.fbFDAShow = function(translated, data) {
     html += '<div style="border-top:1px solid #E2ECF8;padding:.5rem 0;font-size:11px">';
     html += '<span style="color:#6B7280">'+r.date+'</span> ';
     html += '<span style="background:#FEF2F2;color:#991B1B;border-radius:4px;padding:1px 6px;font-weight:600">'+r.event+'</span> ';
-    html += '<span style="color:#1B3A5C;font-weight:600">'+r.device+'</span><br>';
+    html += '<span style="color:#0A66C2;font-weight:600">'+r.device+'</span><br>';
     html += '<span style="color:#374151;line-height:1.6">'+r.text+'</span>';
     html += '</div>';
   });
@@ -9662,7 +9662,7 @@ function pbGenMatrix(nf) {
   var html = '<div style="overflow-x:auto;margin-top:.5rem">';
   html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.4rem">'+pb.label+' 實驗矩陣（+1=高水準，-1=低水準）</div>';
   html += '<table style="font-size:11px;border-collapse:collapse;width:100%">';
-  html += '<thead><tr style="background:#1B3A5C;color:#fff">';
+  html += '<thead><tr style="background:#0A66C2;color:#fff">';
   html += '<th style="padding:5px 8px;text-align:center">Run</th>';
   factorNames.forEach(function(n){ html += '<th style="padding:5px 8px;text-align:center">'+n+'</th>'; });
   html += '<th style="padding:5px 8px;text-align:center;background:#2A5278">Y（填入）</th>';
@@ -9672,7 +9672,7 @@ function pbGenMatrix(nf) {
     html += '<tr style="background:'+(ri%2===0?'#F8FAFF':'#fff')+'">';
     html += '<td style="padding:4px 8px;text-align:center;color:#6B7280">'+(ri+1)+'</td>';
     row.forEach(function(v){
-      html += '<td style="padding:4px 8px;text-align:center;color:'+(v>0?'#1D3B8A':'#DC2626')+';font-weight:600">'+
+      html += '<td style="padding:4px 8px;text-align:center;color:'+(v>0?'#0A66C2':'#DC2626')+';font-weight:600">'+
         (v>0?'+1':'-1')+'</td>';
     });
     html += '<td style="padding:2px 4px"><input type="number" id="pb-y-'+ri+'" step="any" '+
@@ -9768,7 +9768,7 @@ window.pbAnalyze = function() {
     outHTML += '★ 顯著因子（'+sigFactors.length+'個）：'+sigFactors.map(function(e){return e.name;}).join('、');
     outHTML += '<br>建議將以上因子帶入全因子 DOE 進行深入分析。';
     outHTML += '<button onclick="pbToFullDOE('+JSON.stringify(sigFactors.map(function(e){return e.name;}))+')'+
-      '" style="margin-left:8px;background:#1B3A5C;color:#fff;border:none;border-radius:4px;'+
+      '" style="margin-left:8px;background:#0A66C2;color:#fff;border:none;border-radius:4px;'+
       'padding:3px 10px;font-size:11px;cursor:pointer;font-family:inherit">→ 帶入全因子 DOE</button>';
     outHTML += '</div>';
   }
@@ -10083,7 +10083,7 @@ function renderFracMatrix(matrix, factors, nRuns) {
   var html = '<div style="overflow-x:auto;margin-top:.5rem">';
   html += '<div style="font-size:12px;color:#6B7280;margin-bottom:.4rem">部分因子實驗矩陣（+1=高水準，-1=低水準）</div>';
   html += '<table style="font-size:11px;border-collapse:collapse;width:100%">';
-  html += '<thead><tr style="background:#1B3A5C;color:#fff">';
+  html += '<thead><tr style="background:#0A66C2;color:#fff">';
   html += '<th style="padding:5px 8px;text-align:center">Run</th>';
   factorNames.forEach(function(n,i){
     var isGen = i >= (factors.length - Object.keys(window._fracMatrix[0]).length + Object.keys(FRAC_DESIGNS[window._fracKey]?.gens||{}).length);
@@ -10096,7 +10096,7 @@ function renderFracMatrix(matrix, factors, nRuns) {
     html += '<tr style="background:'+(ri%2===0?'#F8FAFF':'#fff')+'">';
     html += '<td style="padding:4px 8px;text-align:center;color:#6B7280">'+(ri+1)+'</td>';
     row.forEach(function(v) {
-      html += '<td style="padding:4px 8px;text-align:center;color:'+(v>0?'#1D3B8A':'#DC2626')+';font-weight:600">'+(v>0?'+1':'-1')+'</td>';
+      html += '<td style="padding:4px 8px;text-align:center;color:'+(v>0?'#0A66C2':'#DC2626')+';font-weight:600">'+(v>0?'+1':'-1')+'</td>';
     });
     html += '<td style="padding:2px 4px"><input type="number" id="frac-y-'+ri+'" step="any" style="width:80px;border:1px solid #DDE2EC;border-radius:4px;padding:3px 6px;font-size:12px"></td>';
     html += '</tr>';
