@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MedQA v5.3-b12 · AI 輔助統計分析平台</title>
+<title>MedQA v5.3-b13 · AI 輔助統計分析平台</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text><text x='21' y='15' text-anchor='middle' font-size='10' fill='%23BE185D' font-weight='700'>Q</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231B3A5C'/><text x='16' y='22' text-anchor='middle' font-size='18' font-family='system-ui' fill='%237EC8E3' font-weight='700'>M</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -472,8 +472,8 @@ tr:hover td{background:#F9FAFB}
 (function(){
   // ★版本號（每次交付遞增 + 寫死建置時間，一眼分辨有沒有改成功）★
   // 注意：BUILD_TIME 是「交付當下寫死的時間」，不是 new Date()（那是開啟時間，分不出新舊）
-  var VERSION = 'v5.3-b12';
-  var BUILD_TIME = '06/14 00:40';   // 台灣時間，每次交付更新
+  var VERSION = 'v5.3-b13';
+  var BUILD_TIME = '06/14 09:20';   // 台灣時間，每次交付更新
   var VERSION_FULL = VERSION + ' · ' + BUILD_TIME;
   window._appVersion = VERSION_FULL;
   window._buildTime = BUILD_TIME;
@@ -498,13 +498,13 @@ tr:hover td{background:#F9FAFB}
     <div class="breadcrumb" id="breadcrumb"></div>
   </div>
   <div class="topbar-right topbar-actions">
-    <span class="tb-status" id="dmaic-save-status">v5.3-b12 · 06/14 00:40</span>
+    <span class="tb-status" id="dmaic-save-status">v5.3-b13 · 06/14 09:20</span>
     <span id="worker-ver-display" style="font-size:11px;color:rgba(255,255,255,.3);margin-left:6px"></span>
   </div>
 </div>
 
 <!-- ── 案件管理列（主頁顯示） ── -->
-<div id="case-bar" style="background:#0F2044;color:#fff;padding:6px 1.5rem;display:flex;align-items:center;gap:8px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.1)">
+<div id="case-bar" style="background:#222d3f;color:#fff;padding:6px 1.5rem;display:flex;align-items:center;gap:8px;font-size:12px;border-bottom:1px solid rgba(255,255,255,.1)">
   <span style="color:rgba(255,255,255,.5);white-space:nowrap">📁</span>
   <input type="text" id="case-code" placeholder="案件代碼" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:3px 8px;font-size:12px;font-family:inherit;width:100px">
   <input type="text" id="case-name" placeholder="專案名稱" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:3px 8px;font-size:12px;font-family:inherit;width:150px">
@@ -518,7 +518,7 @@ tr:hover td{background:#F9FAFB}
 </div>
 
 <!-- 子頁面工具列 -->
-<div id="tool-bar" style="display:none;background:#1B3A5C;padding:7px 1.5rem;align-items:center;gap:10px;border-bottom:2px solid #7EC8E3">
+<div id="tool-bar" style="display:none;background:#222d3f;padding:7px 1.5rem;align-items:center;gap:10px;border-bottom:2px solid #7EC8E3">
   <button onclick="goHome()" style="display:inline-flex;align-items:center;gap:6px;background:#fff;color:#1B3A5C;border:none;border-radius:6px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0">
     ← 主目錄
   </button>
@@ -532,7 +532,7 @@ tr:hover td{background:#F9FAFB}
 <div id="page-home" class="page active">
 
 <!-- ══ Hero + 問題輸入對話框 ══ -->
-<div style="background:linear-gradient(160deg,#0F2044 0%,#1B3A5C 55%,#1D4E8A 100%);color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:visible">
+<div style="background:linear-gradient(160deg,#1c2533 0%,#222d3f 55%,#283142 100%);color:#fff;padding:1.5rem 2rem 0;position:relative;overflow:visible">
 
   <div style="max-width:1100px;margin:0 auto;padding:0 1.5rem;position:relative;z-index:1">
     <div style="margin-bottom:1.5rem">
