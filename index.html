@@ -1122,7 +1122,7 @@ tr:hover td{background:#F9FAFB}
         style="background:#0F766E;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📐 比對 ISO 對照</button>
       <span id="fb-source-status" style="font-size:10.5px;color:#94A3B8;margin-left:.3rem">尚未查詢（不查也能出報告，但報告無 510k/ISO 對應內容）</span>
     </div>
-    <div id="fda510k-panel" style="display:none;margin-top:.6rem"></div>
+    <div id="fb-fda510k-panel" style="display:none;margin-top:.6rem"></div>
   </div>
   <div id="fb-factor-selector" style="display:none"></div>
   <div id="fb-dl-wrap" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1.5px dashed #D1D5DB">
@@ -2989,9 +2989,11 @@ window.downloadPlanDocx=downloadPlanDocx;
 // 結果存 window._fda510kResult，可納入計畫書
 // ════════════════════════════════════════════════════════
 window._fda510kResult = null;
-async function runFda510kVerification(silent, forceRefresh){
+async function runFda510kVerification(silent, forceRefresh, panelId){
+  var pid = panelId || 'fda510k-panel';          // 預設首頁面板；FB 分頁傳 'fb-fda510k-panel'
+  var light = (pid !== 'fda510k-panel');          // FB 面板為淺底深字
   var btn=document.getElementById('fda510k-btn');
-  var panel=document.getElementById('fda510k-panel');
+  var panel=document.getElementById(pid);
   if(!panel && !silent) return;
   var dev=window._deviceInfo||{};
   var nameEn = dev.name_en || dev.confirmed_name_en || dev.confirmed_name || '';
@@ -3011,13 +3013,13 @@ async function runFda510kVerification(silent, forceRefresh){
     var cd = window._fda510kCache.data;
     window._fda510kResult = cd;
     // 重新渲染（用快取資料，不呼叫 API）
-    if(panel && typeof renderFda510kPanel==='function'){ try{ renderFda510kPanel(cd); }catch(e){} }
+    if(panel && typeof renderFda510kPanel==='function'){ try{ renderFda510kPanel(cd, undefined, pid); }catch(e){} }
     if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
     return cd;
   }
 
   if(btn){ btn.disabled=true; btn.dataset.t=btn.textContent; btn.textContent='查詢中…'; }
-  if(panel) panel.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.5)">⏳ 查同類 510(k)、抓取 summary、萃取驗證項目中…（約 20–40 秒）</div>';
+  if(panel) panel.innerHTML='<div style="font-size:11px;color:'+(light?'#64748B':'rgba(255,255,255,.5)')+'">⏳ 查同類 510(k)、抓取 summary、萃取驗證項目中…（約 20–40 秒）</div>';
   try{
     var ac=new AbortController(); var to=setTimeout(function(){ac.abort();},90000);
     var resp=await fetch(window.CLAUDE_WORKER||'https://muddy-cell-a23a.gogoyankee.workers.dev',{
@@ -3026,47 +3028,63 @@ async function runFda510kVerification(silent, forceRefresh){
     });
     clearTimeout(to);
     var data=await resp.json();
-    if(data.error){ if(panel) panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+data.error+'</div>'; return; }
+    if(data.error){ if(panel) panel.innerHTML='<div style="font-size:11px;color:'+(light?'#DC2626':'#FCA5A5')+'">⚠️ '+data.error+'</div>'; return; }
     var r=data.result||{};
     window._fda510kResult=r;
     window._fda510kCache = { key: cacheKey, data: r };   // 存快取，同器材重按不重查
-    if(panel) renderFda510kPanel(r, data.note);
+    if(panel) renderFda510kPanel(r, data.note, pid);
     if(typeof runIsoFactorMatch==='function') runIsoFactorMatch();
   }catch(e){
-    if(panel) panel.innerHTML='<div style="font-size:11px;color:#FCA5A5">⚠️ '+(e&&e.name==='AbortError'?'查詢逾時，可稍後再試':('查詢失敗：'+(e&&e.message||'')))+'</div>';
+    if(panel) panel.innerHTML='<div style="font-size:11px;color:'+(light?'#DC2626':'#FCA5A5')+'">⚠️ '+(e&&e.name==='AbortError'?'查詢逾時，可稍後再試':('查詢失敗：'+(e&&e.message||'')))+'</div>';
   }finally{
     if(btn){ btn.disabled=false; btn.textContent=btn.dataset.t||'🔍 查同類 510(k) 真實驗證'; }
   }
 }
 window.runFda510kVerification=runFda510kVerification;
 
-function renderFda510kPanel(r, note){
-  var panel=document.getElementById('fda510k-panel');
+function renderFda510kPanel(r, note, panelId){
+  var pid = panelId || 'fda510k-panel';
+  var light = (pid !== 'fda510k-panel');
+  var panel=document.getElementById(pid);
   if(!panel) return;
+  // 配色 token：依面板底色切換（首頁暗底白字 / FB 淺底深字），避免白字落在淺底看不到
+  var t = light ? {
+    boxBg:'#FFFFFF', boxBorder:'#E2E8F0', title:'#1E293B', sub:'#475569', divider:'#E8EDF5',
+    itemTitle:'#334155', std:'#7C3AED', tests:'#64748B', matchHdr:'#059669',
+    matchTxt:'#475569', matchB:'#1E293B', chkTxt:'#475569', foot:'#94A3B8',
+    emptyBg:'#F1F5F9', emptyTxt:'#64748B'
+  } : {
+    boxBg:'rgba(255,255,255,.06)', boxBorder:'rgba(255,255,255,.18)', title:'rgba(255,255,255,.9)',
+    sub:'rgba(255,255,255,.6)', divider:'rgba(255,255,255,.1)', itemTitle:'rgba(255,255,255,.85)',
+    std:'#A78BFA', tests:'rgba(255,255,255,.6)', matchHdr:'#6EE7B7',
+    matchTxt:'rgba(255,255,255,.65)', matchB:'rgba(255,255,255,.85)', chkTxt:'rgba(255,255,255,.7)',
+    foot:'rgba(255,255,255,.35)', emptyBg:'rgba(255,255,255,.05)', emptyTxt:'rgba(255,255,255,.5)'
+  };
+  var chkId = pid + '-include';
   var ext=(r&&r.extracted)||[];
   if(!ext.length){
-    panel.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.05);border-radius:8px;padding:.5rem .7rem">查無可萃取的同類 510(k) 驗證內容'+(note?('：'+note):'')+'。（部分舊案為掃描檔無法解析。）</div>';
+    panel.innerHTML='<div style="font-size:11px;color:'+t.emptyTxt+';background:'+t.emptyBg+';border-radius:8px;padding:.5rem .7rem">查無可萃取的同類 510(k) 驗證內容'+(note?('：'+note):'')+'。（部分舊案為掃描檔無法解析。）</div>';
     return;
   }
-  var html='<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:.7rem .85rem">';
-  html+='<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:.4rem">🔍 同類產品 510(k) 實際驗證（'+ext.length+' 份，真實依據）</div>';
-  if(r.summary) html+='<div style="font-size:11px;color:rgba(255,255,255,.6);margin-bottom:.5rem;line-height:1.55">'+r.summary+'</div>';
+  var html='<div style="background:'+t.boxBg+';border:1px solid '+t.boxBorder+';border-radius:10px;padding:.7rem .85rem">';
+  html+='<div style="font-size:12px;font-weight:700;color:'+t.title+';margin-bottom:.4rem">🔍 同類產品 510(k) 實際驗證（'+ext.length+' 份，真實依據）</div>';
+  if(r.summary) html+='<div style="font-size:11px;color:'+t.sub+';margin-bottom:.5rem;line-height:1.55">'+r.summary+'</div>';
   ext.forEach(function(d){
-    html+='<div style="border-top:1px solid rgba(255,255,255,.1);padding:.45rem 0">';
-    html+='<div style="font-size:11px;color:rgba(255,255,255,.85);font-weight:600">'+(d.k||'')+(d.device?(' · '+d.device):'')+'</div>';
-    if(d.standards&&d.standards.length) html+='<div style="font-size:10.5px;color:#A78BFA;margin-top:2px">標準：'+d.standards.join('、')+'</div>';
-    if(d.tests&&d.tests.length) html+='<div style="font-size:10.5px;color:rgba(255,255,255,.6);margin-top:2px;line-height:1.5">驗證：'+d.tests.join('；')+'</div>';
+    html+='<div style="border-top:1px solid '+t.divider+';padding:.45rem 0">';
+    html+='<div style="font-size:11px;color:'+t.itemTitle+';font-weight:600">'+(d.k||'')+(d.device?(' · '+d.device):'')+'</div>';
+    if(d.standards&&d.standards.length) html+='<div style="font-size:10.5px;color:'+t.std+';margin-top:2px">標準：'+d.standards.join('、')+'</div>';
+    if(d.tests&&d.tests.length) html+='<div style="font-size:10.5px;color:'+t.tests+';margin-top:2px;line-height:1.5">驗證：'+d.tests.join('；')+'</div>';
     html+='</div>';
   });
   if(r.matched_to_factors&&r.matched_to_factors.length){
-    html+='<div style="border-top:1px solid rgba(255,255,255,.1);margin-top:.4rem;padding-top:.4rem"><div style="font-size:11px;font-weight:600;color:#6EE7B7;margin-bottom:.3rem">↔ 與本案因子對應</div>';
+    html+='<div style="border-top:1px solid '+t.divider+';margin-top:.4rem;padding-top:.4rem"><div style="font-size:11px;font-weight:600;color:'+t.matchHdr+';margin-bottom:.3rem">↔ 與本案因子對應</div>';
     r.matched_to_factors.forEach(function(m){
-      html+='<div style="font-size:10.5px;color:rgba(255,255,255,.65);line-height:1.5;margin-bottom:2px"><b style="color:rgba(255,255,255,.85)">'+m.factor+'</b>：'+m.suggestion+'</div>';
+      html+='<div style="font-size:10.5px;color:'+t.matchTxt+';line-height:1.5;margin-bottom:2px"><b style="color:'+t.matchB+'">'+m.factor+'</b>：'+m.suggestion+'</div>';
     });
     html+='</div>';
   }
-  html+='<label style="display:flex;align-items:center;gap:6px;margin-top:.5rem;font-size:11px;color:rgba(255,255,255,.7);cursor:pointer"><input type="checkbox" id="fda510k-include" checked onchange="window._fda510kInclude=this.checked" style="width:14px;height:14px;accent-color:#10B981">納入計畫書（作為「同類產品驗證參考」附錄）</label>';
-  html+='<div style="font-size:9.5px;color:rgba(255,255,255,.35);margin-top:.3rem;line-height:1.5">※ 此為同類產品實際做過、FDA 接受之驗證，僅供參考；你的器材若特性不同（如高壓動力注射），仍須自行判斷適用性。</div>';
+  html+='<label style="display:flex;align-items:center;gap:6px;margin-top:.5rem;font-size:11px;color:'+t.chkTxt+';cursor:pointer"><input type="checkbox" id="'+chkId+'" checked onchange="window._fda510kInclude=this.checked" style="width:14px;height:14px;accent-color:#10B981">納入計畫書（作為「同類產品驗證參考」附錄）</label>';
+  html+='<div style="font-size:9.5px;color:'+t.foot+';margin-top:.3rem;line-height:1.5">※ 此為同類產品實際做過、FDA 接受之驗證，僅供參考；你的器材若特性不同（如高壓動力注射），仍須自行判斷適用性。</div>';
   html+='</div>';
   panel.innerHTML=html;
   window._fda510kInclude=true;
@@ -3159,7 +3177,7 @@ window.fbQuerySources = async function(which){
     if(statusEl) statusEl.textContent='查 510(k) 中…（讀 PDF，約 20–40 秒）';
     try{
       // 確保有 panel 容器
-      if(typeof runFda510kVerification==='function') await runFda510kVerification(false);
+      if(typeof runFda510kVerification==='function') await runFda510kVerification(false, false, 'fb-fda510k-panel');
       if(statusEl) statusEl.textContent='✓ 510(k) 已查詢完成';
     }catch(e){ if(statusEl) statusEl.textContent='510(k) 查詢失敗：'+(e&&e.message||''); }
     finally{ if(btn){ btn.disabled=false; btn.style.opacity=''; btn.textContent='🔍 查同類 510(k) 驗證'; } }
