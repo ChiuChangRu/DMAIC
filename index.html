@@ -3365,8 +3365,24 @@ function fishboneDraw(){
     Math.ceil(maxWrapLines * LINE_H * 0.9)
   );
   const T_LO = 0.42, T_HI = 0.94, T_SPAN = T_HI - T_LO;   // 因子集中在大骨偏魚頭段(42%~94%)，魚尾端留白不放因子、避免被畫布邊緣切到
+
+  // 車道分配：同側（上/下）若有多個大類都有因子，各自必須分配獨立的 t 區段（車道），
+  // 否則不同大類各自獨立算 t 時會落在相同 Y 範圍，因子文字互相疊字（人員/材料同在上方時最常見）。
+  const topCatIdx = [], bottomCatIdx = [];
+  used.forEach(function(cat,i){
+    if(!cat.causes || !cat.causes.length) return;
+    (i%2===0 ? topCatIdx : bottomCatIdx).push(i);
+  });
+  const laneOf = {};
+  topCatIdx.forEach(function(idx,k){ laneOf[idx] = {lane:k, total:topCatIdx.length}; });
+  bottomCatIdx.forEach(function(idx,k){ laneOf[idx] = {lane:k, total:bottomCatIdx.length}; });
+  const maxLanesEither = Math.max(topCatIdx.length, bottomCatIdx.length, 1);
+  // 車道緩衝會吃掉一部分可用範圍（見 renderBone 內的 lanePad），這裡用同樣公式換算「有效」車道範圍，
+  // 確保 BONE_DY 仍足以保證 MIN_GAP 間距（不然緩衝一留，原本算好的間距就不夠了）。
+  const worstLaneSpan = (T_SPAN / maxLanesEither) * (maxLanesEither > 1 ? (1 - 0.32/maxLanesEither) : 1);
+
   const BONE_DX = 80;
-  const BONE_DY = Math.max(totalCauses<=4?160:130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
+  const BONE_DY = Math.max(totalCauses<=4?160:130, Math.ceil(MIN_GAP * (maxN - 1) / worstLaneSpan)); // 因子越多、車道越多，大骨越長
   const CAUSE_LEN = 30;
 
   const spineY = 56 + BONE_DY;                 // 上方留白 + 上骨長
@@ -3418,7 +3434,7 @@ function fishboneDraw(){
     s.push(`<text x="${spineEndX+hw/2}" y="${ty}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="${FZ_HEAD}" font-weight="700" font-family="-apple-system,sans-serif">${l}</text>`);
   });
 
-  function renderBone(jx, isTop, cat){
+  function renderBone(jx, isTop, cat, catIdx){
     const endY = isTop ? spineY - BONE_DY : spineY + BONE_DY;
     const isEmpty = !cat.causes || cat.causes.length===0;
     const boneColor = isEmpty ? '#CBD5E1' : cat.color;       // 空分類灰色
@@ -3445,8 +3461,17 @@ function fishboneDraw(){
     var RANK={high:3,medium:2,low:1};
     var sorted = cat.causes.slice().sort(function(a,b){ return (RANK[a.risk]||2)-(RANK[b.risk]||2); });
     const n=sorted.length;
+    // 用本大類分配到的車道區段（myLo~myHi），而非全域 T_LO~T_HI，避免跟同側其他大類共用 Y 範圍
+    var lane = laneOf[catIdx] || {lane:0, total:1};
+    var laneSpanLocal = T_SPAN / lane.total;
+    var rawLo = T_LO + lane.lane * laneSpanLocal;
+    var rawHi = rawLo + laneSpanLocal;
+    // 車道兩端各留一點緩衝，避免相鄰車道交界處的因子互相貼近（多車道時緩衝按比例縮小，避免可用範圍被吃光）
+    var lanePad = lane.total > 1 ? laneSpanLocal * (0.16 / lane.total) : 0;
+    var myLo = rawLo + lanePad;
+    var myHi = rawHi - lanePad;
     sorted.forEach((cause,ci)=>{
-      const t = n===1 ? 0.72 : T_LO + T_SPAN*ci/(n-1);
+      const t = n===1 ? (myLo+myHi)/2 : myLo + (myHi-myLo)*ci/(n-1);
       const bx=(jx-BONE_DX)+ddx*t;
       const by=endY+ddy*t;
       const riskColor = cause.risk==='high' ? '#DC2626' : cause.risk==='medium' ? '#92400E' : '#9CA3AF';
@@ -3468,7 +3493,7 @@ function fishboneDraw(){
     });
   }
 
-  used.forEach((cat,i)=> renderBone(joints[i], i%2===0, cat));
+  used.forEach((cat,i)=> renderBone(joints[i], i%2===0, cat, i));
 
   const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${VW} ${VH}">\n  ${s.join('\n  ')}\n</svg>`;
   document.getElementById('fb-svg-wrap').innerHTML=svg;
