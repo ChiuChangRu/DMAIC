@@ -3279,6 +3279,31 @@ function renderInterceptionPanel(reviews, note){
 }
 
 
+// 用隱藏 canvas 量測文字實際寬度（中英文混排都準，比用字數估算可靠）
+function _measureTextWidth(text, fontSize, fontFamily){
+  var c = _measureTextWidth._canvas || (_measureTextWidth._canvas = document.createElement('canvas'));
+  var ctx = c.getContext('2d');
+  ctx.font = fontSize + 'px ' + (fontFamily||'-apple-system,sans-serif');
+  return ctx.measureText(text).width;
+}
+// 因子文字超過 maxWidth 就自動換行（逐字累加量測寬度，中文無空白可斷詞，故逐字判斷）
+function wrapCauseLines(text, fontSize, maxWidth){
+  text = String(text||'');
+  if(!text) return [''];
+  if(_measureTextWidth(text, fontSize) <= maxWidth) return [text];
+  var lines = [], cur = '';
+  for(var i=0;i<text.length;i++){
+    var test = cur + text[i];
+    if(_measureTextWidth(test, fontSize) > maxWidth && cur){
+      lines.push(cur); cur = text[i];
+    } else {
+      cur = test;
+    }
+  }
+  if(cur) lines.push(cur);
+  return lines;
+}
+
 function fishboneDraw(){
   const problem = document.getElementById('fb-problem').value || '問題';
   const cats = [
@@ -3324,8 +3349,21 @@ function fishboneDraw(){
   else if(totalCauses <= 8){ FZ_CAUSE=15; FZ_CAT=17; FZ_HEAD=17; }
   else if(totalCauses <= 14){ FZ_CAUSE=13; FZ_CAT=15; FZ_HEAD=16; }
   else { FZ_CAUSE=11; FZ_CAT=14; FZ_HEAD=15; }
-  // 最小間距：因子少時加大，使中骨沿大骨平均散開
-  const MIN_GAP = totalCauses <= 4 ? 56 : totalCauses <= 8 ? 46 : 34;   // 因子間距加大，避免文字太擠
+  // 因子文字過長時自動換行，避免疊字；換行數會影響後面的間距計算，故先量測。
+  const WRAP_MAXW = 132;
+  var maxWrapLines = 1;
+  used.forEach(function(c){
+    (c.causes||[]).forEach(function(cause){
+      var nLines = wrapCauseLines(cause.name, FZ_CAUSE, WRAP_MAXW).length;
+      if(nLines > maxWrapLines) maxWrapLines = nLines;
+    });
+  });
+  const LINE_H = FZ_CAUSE * 1.22;
+  // 最小間距：因子少時加大；換多行時間距也要跟著加大，否則多行文字會疊到下一個因子。
+  const MIN_GAP = Math.max(
+    totalCauses <= 4 ? 56 : totalCauses <= 8 ? 46 : 34,
+    Math.ceil(maxWrapLines * LINE_H * 0.9)
+  );
   const T_LO = 0.42, T_HI = 0.94, T_SPAN = T_HI - T_LO;   // 因子集中在大骨偏魚頭段(42%~94%)，魚尾端留白不放因子、避免被畫布邊緣切到
   const BONE_DX = 80;
   const BONE_DY = Math.max(totalCauses<=4?160:130, Math.ceil(MIN_GAP * (maxN - 1) / T_SPAN)); // 因子越多，大骨越長
@@ -3416,7 +3454,17 @@ function fishboneDraw(){
       const lineColor = cause.risk==='low' ? '#D1D5DB' : cat.color;
       const lineW = cause.risk==='low' ? '0.9' : '1.4';
       s.push(`<line x1="${(bx-CAUSE_LEN).toFixed(1)}" y1="${by.toFixed(1)}" x2="${bx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="${lineColor}" stroke-width="${lineW}" marker-end="url(#fb-ar)"/>`);
-      s.push(`<text x="${(bx-CAUSE_LEN-4).toFixed(1)}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="${FZ_CAUSE}" font-weight="${riskWeight}" font-family="-apple-system,sans-serif" opacity="${cause.risk==='low'?'0.7':'1'}">${cause.name}</text>`);
+      const tx = (bx-CAUSE_LEN-4).toFixed(1);
+      const wrapped = wrapCauseLines(cause.name, FZ_CAUSE, WRAP_MAXW);
+      if(wrapped.length <= 1){
+        s.push(`<text x="${tx}" y="${by.toFixed(1)}" text-anchor="end" dominant-baseline="central" fill="${riskColor}" font-size="${FZ_CAUSE}" font-weight="${riskWeight}" font-family="-apple-system,sans-serif" opacity="${cause.risk==='low'?'0.7':'1'}">${cause.name}</text>`);
+      } else {
+        const firstDy = (-(wrapped.length-1)/2 * LINE_H + FZ_CAUSE*0.32).toFixed(1);
+        const tspans = wrapped.map(function(ln,li){
+          return `<tspan x="${tx}" dy="${li===0?firstDy:LINE_H.toFixed(1)}">${ln}</tspan>`;
+        }).join('');
+        s.push(`<text x="${tx}" y="${by.toFixed(1)}" text-anchor="end" fill="${riskColor}" font-size="${FZ_CAUSE}" font-weight="${riskWeight}" font-family="-apple-system,sans-serif" opacity="${cause.risk==='low'?'0.7':'1'}">${tspans}</text>`);
+      }
     });
   }
 
@@ -6983,19 +7031,26 @@ window.homeAddFactor = function() {
   renderFactorPanel(window._confirmedFactors);
 };
 
-// 確認因子 → 直接進魚骨圖（(6) 簡化：不再強制跑 verification_plan+iso_crosscheck，省 2 次 AI 與等待）
-//   驗證計畫與 ISO 對照改到魚骨圖頁「要才跑」（見 fbRunVerificationPlan）。
+// 確認因子 → 先跑 QA 管道分類（verification_plan + ISO 對照），完成後才進魚骨圖
+//   （還原為跑完才進，因為逐因子處置指派的預設值需要 verification_plan 的 pipeline 結果才能正確分類，
+//    不能再讓 RD 工具選擇（DOE/SPC/MSA）當作預設出發點）
 window.homeConfirmFactors = async function() {
   var factors = window._confirmedFactors;
   if(!factors) return;
-  proceedToFishbone(factors);
+  if(typeof window.fbRunVerificationPlan === 'function') {
+    window.fbRunVerificationPlan({ onComplete: function(){ proceedToFishbone(factors); } });
+  } else {
+    proceedToFishbone(factors);
+  }
 };
 
-// 舊版「確認因子→強制跑驗證計畫」保留為魚骨圖頁的「要才跑」函式
+// QA 管道分類（verification_plan）：判斷每個因子該走哪種處置管道（不可控/使用端/供應商/規範符合性/實驗統計…），
+// 逐因子處置指派的預設值依此分類為主，只有歸類為「實驗統計」才再看技術性質決定 DOE/SPC/MSA。
 window.fbRunVerificationPlan = async function(opts){
   opts = opts || {};
+  var done = function(){ if(typeof opts.onComplete==='function') opts.onComplete(); };
   var factors = window._confirmedFactors;
-  if(!factors){ return; }
+  if(!factors){ done(); return; }
   var allFactors = [];
   ['man','machine','material','method','measure','env'].forEach(function(cat){
     (factors[cat]||[]).forEach(function(f){
@@ -7024,12 +7079,15 @@ window.fbRunVerificationPlan = async function(opts){
         // 重繪其他處置區
         var op=document.getElementById('fb-other-wrap');
         if(op && typeof fbRenderOtherPipelines==='function') op.innerHTML = fbRenderOtherPipelines();
+        done();
       });
     } else {
       if(statusEl){ statusEl.innerHTML='<span style="color:#DC2626;font-size:12px">⚠️ 驗證計畫生成失敗，可直接使用魚骨圖與小工具。</span>'; }
+      done();
     }
   } catch(e){
     if(statusEl){ statusEl.innerHTML='<span style="color:#DC2626;font-size:12px">⚠️ 連線失敗：'+e.message+'</span>'; }
+    done();
   }
 };
 
@@ -8696,9 +8754,32 @@ var DISPO_DEFS = [
   {k:'train',   label:'教育訓練',      color:'#2563EB'},
   {k:'sampling',label:'抽樣加強',      color:'#059669'},
   {k:'design',  label:'設計變更',      color:'#BE185D'},
+  {k:'supplier',label:'供應商稽核',    color:'#FBBF24'},
+  {k:'residual',label:'風險管理/不可控',color:'#78716C'},
   {k:'exclude', label:'排除',          color:'#9CA3AF'}
 ];
+// QA 管道 → 處置按鈕的對應（取自 verification_plan 的 pipeline 分類）
+var PIPELINE_TO_DISPO = {
+  compliance:     'iso',       // 規範符合性 → ISO確認
+  supplier:       'supplier',  // 供應商來料 → 供應商稽核
+  uncontrollable: 'residual',  // 不可控/外部 → 風險管理/不可控
+  risk_evidence:  'residual',  // 風險與證據（測不到/無法消除）→ 同樣走風險管理
+  method_dev:     'msa'        // 方法開發（目前測不到）→ 量測手法(MSA) 最接近
+};
 function _natureDefaultDispo(f){
+  // 優先看 QA 管道分類（verification_plan 的結果）；只有歸類為「實驗統計(experiment)」
+  // 才退回看技術性質（nature/tool）決定該用 DOE 還是 SPC 還是 MSA。
+  var vp = window._verificationPlan;
+  if(vp && vp.plans){
+    var match = null;
+    for(var i=0;i<vp.plans.length;i++){ if(vp.plans[i].factor===f.name){ match=vp.plans[i]; break; } }
+    if(match && match.pipeline && match.pipeline!=='experiment'){
+      if(match.pipeline==='use_side'){
+        return /IFU|標示|62366/.test(match.subtype||'') ? 'sop' : 'train';
+      }
+      if(PIPELINE_TO_DISPO[match.pipeline]) return PIPELINE_TO_DISPO[match.pipeline];
+    }
+  }
   var t = f.tool || f._defTool;
   if(t==='doe'||t==='pb'||t==='taguchi') return 'doe';
   if(t==='spc') return 'spc';
