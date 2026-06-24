@@ -6535,8 +6535,13 @@ window.doeSw=doeSw;window.drawDOEMainEffects=drawDOEMainEffects;window.drawDOERe
           if(step1) step1.appendChild(errDiv);
         }
         var debugInfo = data._debug ? JSON.stringify(data._debug) : '無';
-        errDiv.innerHTML = '⚠️ 無法識別此器材，請試試英文名稱（如 syringe、catheter）<br>'
-          + '<span style="font-size:10px;color:rgba(255,255,255,.3)">debug: '+debugInfo+'</span>';
+        if(data.error){
+          errDiv.innerHTML = '⚠️ AI 服務暫時無法使用：'+data.error
+            + '<br><span style="font-size:10px;color:rgba(255,255,255,.3)">（若持續發生，可能是 API 用量上限或餘額問題，請檢查 Anthropic Console）</span>';
+        } else {
+          errDiv.innerHTML = '⚠️ 無法識別此器材，請試試英文名稱（如 syringe、catheter）<br>'
+            + '<span style="font-size:10px;color:rgba(255,255,255,.3)">debug: '+debugInfo+'</span>';
+        }
       }
     } catch(err) {
       if(loading) loading.style.display='none';
